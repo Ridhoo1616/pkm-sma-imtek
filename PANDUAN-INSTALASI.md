@@ -4,8 +4,8 @@ Panduan memasang dan menjalankan sistem Profil Sekolah & PPDB SMA IMTEK.
 
 Aplikasi terdiri dari dua bagian:
 
-- **backend** — API JSON ditulis dengan Go, berbicara dengan MySQL
-- **frontend** — situs dan panel admin ditulis dengan Next.js
+- **backend**, API JSON ditulis dengan Go, berbicara dengan MySQL
+- **frontend**, situs dan panel admin ditulis dengan Next.js
 
 Keduanya dijalankan terpisah. Frontend memanggil backend lewat HTTP, jadi
 alamat backend harus dapat dijangkau dari peramban pengunjung.
@@ -222,7 +222,7 @@ npm run start      # jalan di porta 3000
 ```
 
 Frontend memerlukan Node.js di server karena halaman publiknya dirakit di sisi
-server — itulah yang membuat judul dan keterangan halaman terbaca oleh mesin
+server. Itulah yang membuat judul dan keterangan halaman terbaca oleh mesin
 pencari dan oleh pratinjau tautan WhatsApp. Tanpa itu, tujuan promosi proyek
 ini justru berkurang.
 
@@ -285,7 +285,7 @@ Dua hal yang harus dicadangkan bersamaan:
 # 1. Basis data
 mysqldump -u ppdb -p sma_imtek > cadangan-$(date +%F).sql
 
-# 2. Folder unggahan — memuat dokumen pribadi pendaftar
+# 2. Folder unggahan, memuat dokumen pribadi pendaftar
 tar czf unggahan-$(date +%F).tar.gz -C /var/lib/ppdb unggahan
 ```
 

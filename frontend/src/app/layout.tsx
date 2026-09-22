@@ -9,8 +9,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      default: `${nama} — Profil Sekolah & PPDB Online`,
-      template: `%s — ${nama}`,
+      default: `${nama} · Profil Sekolah & PPDB Online`,
+      template: `%s · ${nama}`,
     },
     description:
       p.tagline ||
@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "SMA swasta",
     ].filter(Boolean) as string[],
     openGraph: {
-      title: `${nama} — Profil Sekolah & PPDB Online`,
+      title: `${nama} · Profil Sekolah & PPDB Online`,
       description: p.tagline || `Pendaftaran peserta didik baru ${nama}.`,
       type: "website",
       locale: "id_ID",

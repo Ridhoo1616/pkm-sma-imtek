@@ -1,4 +1,4 @@
-# Backend API — Profil Sekolah & PPDB SMA IMTEK
+# Backend API Profil Sekolah & PPDB SMA IMTEK
 
 API JSON yang ditulis dengan **Go** memakai pustaka standar. Tidak memakai
 kerangka kerja web maupun ORM, sehingga hasil kompilasinya satu berkas biner
@@ -24,7 +24,7 @@ go build -o server .
 
 ## Akun awal
 
-`admin` / `admin123` — **wajib diganti** sebelum dipakai sungguhan, karena
+`admin` / `admin123`. **Wajib diganti** sebelum dipakai sungguhan, karena
 hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 `POST /api/saya/sandi` atau menu pengguna di panel admin.
 

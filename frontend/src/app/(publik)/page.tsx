@@ -67,9 +67,10 @@ export default async function Beranda() {
                 </p>
               )}
               <p className="mt-4 max-w-xl leading-relaxed text-white/75">
-                Pendaftaran peserta didik baru dapat dilakukan sepenuhnya secara
-                online — mengisi formulir, mengunggah dokumen, sampai memantau
-                hasil verifikasi, tanpa perlu datang berulang kali ke sekolah.
+                Pendaftaran peserta didik baru dilakukan sepenuhnya secara
+                online. Mengisi formulir, mengunggah dokumen, sampai memantau
+                hasil verifikasi, semuanya tanpa perlu datang berulang kali ke
+                sekolah.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">

@@ -232,8 +232,8 @@ function IsiLaporan() {
             <section className="mt-8">
               <h2 className="mb-1 text-lg">Asal Sekolah Terbanyak</h2>
               <p className="mb-4 text-sm text-samar">
-                Menunjukkan SMP/MTs mana yang paling banyak mengirim pendaftar —
-                berguna untuk menentukan sasaran sosialisasi tahun berikutnya.
+                Menunjukkan SMP/MTs mana yang paling banyak mengirim pendaftar.
+                Berguna untuk menentukan sasaran sosialisasi tahun berikutnya.
               </p>
               <Tabel kepala={["Asal Sekolah", "Pendaftar", "Porsi"]}>
                 {data.per_asal_sekolah.map((s) => (

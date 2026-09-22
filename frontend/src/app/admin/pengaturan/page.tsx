@@ -291,8 +291,8 @@ function IsiPengaturan() {
                           onChange={(e) => setNilai(k, e.target.value)}
                           className="w-full rounded-lg border border-garis bg-white px-3.5 py-2.5 text-[15px] focus:border-biru focus:ring-2 focus:ring-biru/20"
                         >
-                          <option value="buka">buka — formulir dapat diisi</option>
-                          <option value="tutup">tutup — formulir ditutup</option>
+                          <option value="buka">buka (formulir dapat diisi)</option>
+                          <option value="tutup">tutup (formulir ditutup)</option>
                         </select>
                       ) : areaTeks ? (
                         <textarea

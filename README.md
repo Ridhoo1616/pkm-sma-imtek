@@ -1,4 +1,4 @@
-# Digitalisasi Profil Sekolah dan PPDB Berbasis Web — SMA IMTEK
+# Digitalisasi Profil Sekolah dan PPDB Berbasis Web untuk SMA IMTEK
 
 Sistem informasi berbasis web yang menggabungkan **profil sekolah** dan
 **Pendaftaran Peserta Didik Baru (PPDB) online** untuk meningkatkan efektivitas
@@ -10,7 +10,7 @@ bidang *Manajemen Komputer & Sistem*.
 | | |
 |---|---|
 | **Judul** | Digitalisasi Profil Sekolah dan Pendaftaran Peserta Didik Baru (PPDB) Berbasis Web untuk Meningkatkan Efektivitas Promosi pada SMA IMTEK |
-| **Sekolah** | SMA IMTEK (Swasta) — NPSN 20613766, Akreditasi B<br>Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Banten 15339 |
+| **Sekolah** | SMA IMTEK (Swasta), NPSN 20613766, Akreditasi B<br>Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Banten 15339 |
 | **Bidang** | Manajemen Komputer & Sistem |
 | **Backend** | Go 1.27 (pustaka standar, tanpa kerangka kerja web) + MySQL/MariaDB |
 | **Frontend** | Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4 + Framer Motion |
@@ -26,7 +26,7 @@ berhubungan lewat API JSON.
 
 ```
 pkm-sma-imtek/
-├── backend/        API JSON dengan Go — lihat backend/README.md
+├── backend/        API JSON dengan Go, lihat backend/README.md
 │   ├── main.go              daftar alamat API dan penyalaan server
 │   ├── config.go            konfigurasi dari variabel lingkungan
 │   ├── db.go                koneksi dan pelaksana migrasi
@@ -75,7 +75,7 @@ npm run dev                   # jalan di :3000
 
 Buka `http://localhost:3000`. Panel panitia ada di `/admin`.
 
-**Akun bawaan:** `admin` / `admin123` — **wajib segera diganti** lewat menu
+**Akun bawaan:** `admin` / `admin123`. **Wajib segera diganti** lewat menu
 *Ganti Sandi*, karena hash sandinya ada di dalam repositori publik ini.
 
 Langkah lengkap beserta penyiapan untuk server ada di
@@ -149,8 +149,8 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 
 1. **Pertanyaan sumber informasi** pada formulir pendaftaran, dengan dua belas
    pilihan kanal promosi dan satu kolom keterangan bebas.
-2. **Laporan per kanal promosi** beserta porsinya terhadap seluruh pendaftar —
-   menjawab kanal mana yang benar-benar membawa pendaftar, bukan yang hanya
+2. **Laporan per kanal promosi** beserta porsinya terhadap seluruh pendaftar.
+   Menjawab kanal mana yang benar-benar membawa pendaftar, bukan yang hanya
    dianggap ramai.
 3. **Rekap asal sekolah** untuk menentukan SMP/MTs sasaran sosialisasi
    tahun berikutnya.
@@ -205,19 +205,47 @@ ditimpa.
 
 ---
 
-## Demo statis
+## Demo langsung
 
 **[ridhoo1616.github.io/pkm-sma-imtek](https://ridhoo1616.github.io/pkm-sma-imtek/)**
 
-Tautan di atas membuka demo alur PPDB tanpa memasang apa pun: isi formulir,
-cek status, lalu masuk ke panel panitia dengan `admin` / `admin123`.
+Tautan di atas membuka demo yang dapat diklik tanpa memasang apa pun. Alur yang
+berjalan penuh:
 
-Demo ini versi HTML dan JavaScript murni, karena GitHub Pages tidak dapat
-menjalankan program di sisi server. Datanya tersimpan di peramban masing-masing
-pengunjung, bukan di basis data bersama. Demo tersebut dibuat dari versi PHP
-dan **belum diperbarui** mengikuti versi Go + Next.js ini.
+1. Isi formulir pendaftaran lima langkah, termasuk pilih berkas untuk diunggah.
+2. Terima nomor registrasi, lalu pantau statusnya di menu Cek Status.
+3. Masuk panel panitia dengan `admin` / `admin123`, buka menu Pendaftar, ubah
+   status dan tulis catatan verifikasi.
+4. Buka kembali Cek Status memakai nomor registrasi tadi; statusnya sudah
+   berubah beserta catatan panitianya.
 
----
+Menu pengelolaan isi juga berfungsi: menulis berita, mengunggah foto galeri,
+menambah fasilitas dan peminatan, membalas pesan masuk, sampai menutup
+pendaftaran dari menu Pengaturan. Tersedia pula akun operator
+`panitia` / `panitia123` untuk melihat perbedaan hak aksesnya.
+
+**Bagaimana demo ini dibuat.** Tampilannya bukan dibuat ulang: HTML dan kelas
+Tailwind-nya ditangkap langsung dari aplikasi Next.js yang berjalan, lalu
+dirakit menjadi berkas statis. Yang ditulis ulang hanya lapisan datanya, karena
+GitHub Pages tidak dapat menjalankan program di sisi server. Aturan pemeriksaan
+isian disalin dari `backend/validasi.go` agar pesan yang muncul sama dengan
+aplikasi sebenarnya.
+
+Konsekuensinya perlu diketahui sebelum dipakai menilai:
+
+- Data tersimpan di peramban masing-masing pengunjung, bukan di basis data
+  bersama. Pendaftaran yang Anda kirim tidak terlihat oleh orang lain.
+- Berkas yang dipilih tidak benar-benar diunggah ke mana pun; yang tersimpan
+  hanya namanya.
+- Foto sekolah belum tersedia, jadi demo memakai gambar pengganti yang diberi
+  keterangan.
+- Tombol **Mulai ulang demo** di bagian atas mengembalikan seluruh data contoh
+  ke keadaan awal.
+
+Isi folder `docs/` dihasilkan oleh perakit, bukan ditulis tangan. Untuk
+memperbaruinya, aplikasi dijalankan lebih dulu, tampilannya ditangkap dari
+peramban, lalu dirakit ulang menjadi `index.html`, `gaya.css`, `data.js`, dan
+`demo.js`.
 
 ## Versi PHP (arsip)
 
@@ -233,7 +261,7 @@ bahan pembanding pada laporan PkM. Keterangannya ada di
 Diuji pada Go 1.27, Node.js 24, dan MySQL 9.3 (mode `ONLY_FULL_GROUP_BY` dan
 `STRICT_TRANS_TABLES` aktif).
 
-**Backend — 71 pemeriksaan terhadap API yang berjalan:**
+**Backend, 71 pemeriksaan terhadap API yang berjalan:**
 
 - Pendaftaran lengkap dengan unggahan → nomor registrasi terbit, data dan
   berkas tersimpan.
@@ -243,8 +271,8 @@ Diuji pada Go 1.27, Node.js 24, dan MySQL 9.3 (mode `ONLY_FULL_GROUP_BY` dan
   0–100, dan pilihan sumber informasi yang tidak dikenal.
 - Berkas PHP yang diberi nama `.jpg` tertolak karena isinya diperiksa.
 - Unggahan dari kiriman yang gagal dibersihkan otomatis, tidak menumpuk.
-- Token yang diubah — karakter terakhir, tengah tanda tangan, maupun
-  muatannya — ketiganya tertolak.
+- Token yang diubah pada karakter terakhir, tengah tanda tangan, maupun
+  muatannya, ketiganya tertolak.
 - Pembatas percobaan masuk terbukti mengunci setelah lima kegagalan.
 - Dokumen pendaftar tanpa token menghasilkan 401; upaya keluar dari folder
   unggahan menghasilkan 404.
@@ -254,7 +282,7 @@ Diuji pada Go 1.27, Node.js 24, dan MySQL 9.3 (mode `ONLY_FULL_GROUP_BY` dan
 - Migrasi pada basis data yang sudah berisi data terbukti tidak menggandakan
   maupun menimpa isinya.
 
-**Frontend — 46 pemeriksaan di peramban sungguhan (Chrome, protokol DevTools):**
+**Frontend, 62 pemeriksaan di peramban sungguhan (Chrome, protokol DevTools):**
 
 - Sepuluh alamat halaman memuat dengan judul dan data sekolah yang benar.
 - Tidak ada gulir mendatar pada lebar 1440px maupun 390px.

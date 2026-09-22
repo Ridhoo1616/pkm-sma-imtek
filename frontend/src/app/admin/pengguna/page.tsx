@@ -209,8 +209,8 @@ function IsiPengguna() {
             nilai={isi.role}
             ubah={(v) => setIsi((s) => ({ ...s, role: v }))}
             opsi={[
-              { nilai: "admin", label: "Admin — akses penuh" },
-              { nilai: "operator", label: "Operator — kelola pendaftar & isi situs" },
+              { nilai: "admin", label: "Admin (akses penuh)" },
+              { nilai: "operator", label: "Operator (kelola pendaftar & isi situs)" },
             ]}
             galat={galatKolom.role}
             kosong="-- Pilih peran --"

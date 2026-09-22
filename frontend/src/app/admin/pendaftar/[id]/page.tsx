@@ -411,9 +411,9 @@ function IsiDetail() {
               dihapus dari basis data.
             </p>
             <p>
-              Seluruh dokumen yang diunggah — foto, ijazah, Kartu Keluarga, akta
-              kelahiran, rapor, dan sertifikat — juga akan dihapus dari server
-              dan tidak dapat dipulihkan.
+              Seluruh dokumen yang diunggah, yaitu foto, ijazah, Kartu Keluarga,
+              akta kelahiran, rapor, dan sertifikat, juga akan dihapus dari
+              server dan tidak dapat dipulihkan.
             </p>
             <p className="font-semibold">
               Bila hanya ingin menolak pendaftaran, ubah statusnya menjadi
