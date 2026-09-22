@@ -1,0 +1,29 @@
+# Pengaturan dasar keamanan aplikasi
+Options -Indexes
+
+# Cegah akses langsung ke berkas konfigurasi & basis data
+<FilesMatch "\.(sql|md|log|ini|json|lock)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Header keamanan dasar
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Batas ukuran unggahan (2 MB per berkas, 12 MB per pengiriman formulir)
+<IfModule mod_php.c>
+    php_value upload_max_filesize 2M
+    php_value post_max_size 12M
+    php_value max_file_uploads 10
+</IfModule>
+
+DirectoryIndex index.php index.html

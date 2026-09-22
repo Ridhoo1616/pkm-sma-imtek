@@ -1,0 +1,6 @@
+# Folder ini hanya untuk berkas unggahan. Cegah eksekusi skrip apa pun.
+php_flag engine off
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|pl|py|cgi|asp|aspx|jsp|sh|htaccess)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes

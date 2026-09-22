@@ -1,0 +1,41 @@
+# ============================================================
+#  Berkas yang TIDAK boleh masuk repositori
+# ============================================================
+
+# Dokumen pribadi pendaftar (KK, akta, ijazah, foto) dan gambar unggahan.
+# Struktur foldernya tetap ikut lewat .gitkeep dan .htaccess.
+uploads/*/*
+!uploads/*/.gitkeep
+!uploads/.htaccess
+
+# Cadangan basis data — bisa berisi data pribadi calon peserta didik
+*.sql.gz
+*.sql.zip
+backup/
+dump/
+!database/schema.sql
+
+# Berkas sementara sistem operasi
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# Berkas editor
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*~
+
+# Log dan cache
+*.log
+error_log
+.cache/
+
+# Berkas konfigurasi lokal, bila nanti dibuat
+config/database.local.php
+.env
