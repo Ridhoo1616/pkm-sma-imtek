@@ -57,3 +57,6 @@ frontend/.next/
 frontend/out/
 frontend/.env*.local
 frontend/next-env.d.ts
+
+# Pembuka aplikasi khusus komputer sendiri, menunjuk ke path lokal
+jalankan.command
