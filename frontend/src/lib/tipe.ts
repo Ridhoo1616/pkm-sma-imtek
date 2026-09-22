@@ -1,0 +1,226 @@
+/**
+ * Bentuk data yang dikirim backend Go. Nama kolomnya sengaja dibiarkan
+ * sama dengan nama kolom basis data agar mudah dilacak dari sisi mana pun.
+ */
+
+export type Pengaturan = Record<string, string>;
+
+export interface KeadaanPpdb {
+  dibuka: boolean;
+  kuota: number;
+  terisi: number;
+  jalur: string[];
+  sumber: string[];
+}
+
+export interface Profil {
+  pengaturan: Pengaturan;
+  ppdb: KeadaanPpdb;
+}
+
+export interface Jurusan {
+  id: number;
+  kode: string;
+  nama: string;
+  deskripsi: string;
+  kuota: number;
+  ikon: string;
+  aktif: boolean;
+  urutan: number;
+  pendaftar: number;
+}
+
+export interface Fasilitas {
+  id: number;
+  nama: string;
+  deskripsi: string;
+  gambar: string;
+  ikon: string;
+  urutan: number;
+}
+
+export interface Berita {
+  id: number;
+  judul: string;
+  slug: string;
+  kategori: string;
+  ringkasan: string;
+  isi: string;
+  gambar: string;
+  penulis: string;
+  dibaca: number;
+  publish: boolean;
+  dibuat: string;
+  diubah: string;
+}
+
+export interface Galeri {
+  id: number;
+  judul: string;
+  kategori: string;
+  gambar: string;
+  keterangan: string;
+  dibuat: string;
+}
+
+export interface Pesan {
+  id: number;
+  nama: string;
+  email: string;
+  no_hp: string;
+  subjek: string;
+  isi: string;
+  dibaca: boolean;
+  dibuat: string;
+}
+
+export interface Pengguna {
+  id: number;
+  nama: string;
+  username: string;
+  role: "admin" | "operator";
+  masuk_akhir: string | null;
+  dibuat: string;
+}
+
+export interface RingkasPendaftar {
+  id: number;
+  no_registrasi: string;
+  tahun_ajaran: string;
+  jalur: string;
+  jurusan_id: number | null;
+  nama_jurusan: string;
+  nama_lengkap: string;
+  nisn: string;
+  jenis_kelamin: "L" | "P";
+  tanggal_lahir: string;
+  asal_sekolah: string;
+  no_hp: string;
+  email: string;
+  nilai_rata2: number | null;
+  sumber_informasi: string;
+  status: string;
+  dibuat: string;
+}
+
+export interface Pendaftar extends RingkasPendaftar {
+  nik: string;
+  tempat_lahir: string;
+  agama: string;
+  anak_ke: string;
+  jumlah_saudara: string;
+  alamat: string;
+  kelurahan: string;
+  kecamatan: string;
+  kota: string;
+  provinsi: string;
+  kode_pos: string;
+  npsn_sekolah: string;
+  alamat_sekolah: string;
+  tahun_lulus: string;
+  nama_ayah: string;
+  pekerjaan_ayah: string;
+  pendidikan_ayah: string;
+  nama_ibu: string;
+  pekerjaan_ibu: string;
+  pendidikan_ibu: string;
+  penghasilan: string;
+  no_hp_ortu: string;
+  nama_wali: string;
+  file_foto: string;
+  file_ijazah: string;
+  file_kk: string;
+  file_akta: string;
+  file_raport: string;
+  file_prestasi: string;
+  catatan_sumber: string;
+  catatan_admin: string;
+  diverifikasi_oleh: number | null;
+  nama_verifikator: string;
+  ip_pendaftar: string;
+  diubah: string;
+}
+
+export interface Cacah {
+  label: string;
+  jumlah: number;
+  kuota?: number;
+}
+
+export interface Dasbor {
+  tahun_ajaran: string;
+  ppdb_dibuka: boolean;
+  total: number;
+  kuota: number;
+  hari_ini: number;
+  minggu_ini: number;
+  pesan_belum: number;
+  per_status: Cacah[];
+  per_jurusan: Cacah[];
+  per_jalur: Cacah[];
+  per_sumber: Cacah[];
+  tren: Cacah[];
+  terbaru: RingkasPendaftar[];
+}
+
+export interface Laporan {
+  tahun_ajaran: string;
+  total: number;
+  pilihan_tahun: string[];
+  label_sumber: Record<string, string>;
+  per_sumber: Cacah[];
+  per_status: Cacah[];
+  per_jalur: Cacah[];
+  per_jurusan: Cacah[];
+  per_jenis_kelamin: Cacah[];
+  per_asal_sekolah: Cacah[];
+  per_bulan: Cacah[];
+}
+
+export interface StatusPendaftaran {
+  no_registrasi: string;
+  nama_lengkap: string;
+  jalur: string;
+  nama_jurusan: string;
+  status: string;
+  tahun_ajaran: string;
+  catatan_admin: string;
+  dibuat: string;
+  pengumuman: string;
+}
+
+export interface ButirPengaturan {
+  nama_setting: string;
+  nilai: string;
+  keterangan: string;
+}
+
+export interface HalamanBerita {
+  data: Berita[];
+  total: number;
+  halaman: number;
+  per_halaman: number;
+  kategori: string[];
+}
+
+export interface HalamanPendaftar {
+  data: RingkasPendaftar[];
+  total: number;
+  halaman: number;
+  per_halaman: number;
+  tahun_ajaran: string;
+  pilihan: {
+    status: string[];
+    jalur: string[];
+    sumber: string[];
+    tahun_ajaran: string[];
+  };
+}
+
+export interface HalamanPesan {
+  data: Pesan[];
+  total: number;
+  belum_dibaca: number;
+  halaman: number;
+  per_halaman: number;
+}

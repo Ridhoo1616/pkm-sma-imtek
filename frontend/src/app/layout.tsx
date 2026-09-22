@@ -1,0 +1,45 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import { muatProfil } from "@/lib/profil";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { profil } = await muatProfil();
+  const p = profil.pengaturan;
+  const nama = p.nama_sekolah || "SMA IMTEK";
+
+  return {
+    title: {
+      default: `${nama} — Profil Sekolah & PPDB Online`,
+      template: `%s — ${nama}`,
+    },
+    description:
+      p.tagline ||
+      `Profil ${nama} dan pendaftaran peserta didik baru secara online` +
+        (p.kota ? ` di ${p.kota}` : "") +
+        ".",
+    // Tanpa nama domain yang sudah pasti, kata kunci dan judul saja yang
+    // bisa dipastikan benar; alamat kanonis ditambahkan setelah domain
+    // sekolah ditentukan.
+    keywords: [
+      nama,
+      "PPDB online",
+      "pendaftaran peserta didik baru",
+      p.kota,
+      "SMA swasta",
+    ].filter(Boolean) as string[],
+    openGraph: {
+      title: `${nama} — Profil Sekolah & PPDB Online`,
+      description: p.tagline || `Pendaftaran peserta didik baru ${nama}.`,
+      type: "website",
+      locale: "id_ID",
+    },
+  };
+}
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html lang="id" className="h-full antialiased">
+      <body className="flex min-h-full flex-col">{children}</body>
+    </html>
+  );
+}

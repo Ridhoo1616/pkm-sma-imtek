@@ -1,0 +1,161 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, type ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useSesi } from "@/komponen/Sesi";
+import { Memuat } from "@/komponen/Memuat";
+
+/**
+ * Kerangka panel admin: sidebar, kepala halaman, dan penjaga akses.
+ *
+ * Penjagaan di sini hanyalah kenyamanan tampilan. Yang benar-benar
+ * mengamankan data adalah backend, yang menolak setiap permintaan tanpa
+ * token sah — sehingga menyembunyikan menu saja tidak pernah dijadikan
+ * satu-satunya pengaman.
+ */
+
+const MENU = [
+  { jalur: "/admin", label: "Dasbor", khususAdmin: false },
+  { jalur: "/admin/pendaftar", label: "Pendaftar", khususAdmin: false },
+  { jalur: "/admin/laporan", label: "Laporan Promosi", khususAdmin: false },
+  { jalur: "/admin/jurusan", label: "Peminatan", khususAdmin: true },
+  { jalur: "/admin/berita", label: "Berita", khususAdmin: false },
+  { jalur: "/admin/galeri", label: "Galeri", khususAdmin: false },
+  { jalur: "/admin/fasilitas", label: "Fasilitas", khususAdmin: false },
+  { jalur: "/admin/pesan", label: "Pesan Masuk", khususAdmin: false },
+  { jalur: "/admin/pengaturan", label: "Pengaturan", khususAdmin: true },
+  { jalur: "/admin/pengguna", label: "Pengguna", khususAdmin: true },
+];
+
+export default function KerangkaAdmin({ children }: { children: ReactNode }) {
+  const { pengguna, memeriksa, keluar } = useSesi();
+  const jalurSekarang = usePathname();
+  const router = useRouter();
+  const [sidebarTerbuka, setSidebarTerbuka] = useState(false);
+
+  useEffect(() => {
+    if (!memeriksa && !pengguna) router.replace("/admin/masuk");
+  }, [memeriksa, pengguna, router]);
+
+  if (memeriksa) return <Memuat pesan="Memeriksa sesi Anda..." />;
+  if (!pengguna) return <Memuat pesan="Mengalihkan ke halaman masuk..." />;
+
+  const aktif = (jalur: string) =>
+    jalur === "/admin" ? jalurSekarang === "/admin" : jalurSekarang.startsWith(jalur);
+
+  const menuTampil = MENU.filter(
+    (m) => !m.khususAdmin || pengguna.role === "admin",
+  );
+
+  const daftarMenu = (
+    <nav aria-label="Menu panel admin">
+      <ul className="space-y-1">
+        {menuTampil.map((m) => (
+          <li key={m.jalur}>
+            <Link
+              href={m.jalur}
+              // Sidebar layar kecil ditutup saat menunya dipilih.
+              onClick={() => setSidebarTerbuka(false)}
+              className={
+                "block rounded-lg px-4 py-2.5 text-sm font-semibold transition " +
+                (aktif(m.jalur)
+                  ? "bg-biru text-white"
+                  : "text-white/75 hover:bg-white/10 hover:text-white")
+              }
+            >
+              {m.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+
+  return (
+    <div className="flex min-h-screen bg-slate-50">
+      {/* Sidebar tetap untuk layar lebar */}
+      <aside className="tanpa-cetak hidden w-64 shrink-0 flex-col bg-biru-tua lg:flex">
+        <div className="border-b border-white/10 px-6 py-6">
+          <p className="text-xs font-semibold tracking-wider text-white/50 uppercase">
+            Panel Admin
+          </p>
+          <p className="mt-1 leading-tight font-bold text-white">
+            PPDB &amp; Profil Sekolah
+          </p>
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-4">{daftarMenu}</div>
+        <div className="border-t border-white/10 px-4 py-4">
+          <Link
+            href="/"
+            className="block rounded-lg px-4 py-2 text-sm text-white/65 hover:bg-white/10 hover:text-white"
+          >
+            Lihat situs publik →
+          </Link>
+        </div>
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Kepala halaman */}
+        <header className="tanpa-cetak sticky top-0 z-40 border-b border-garis bg-white">
+          <div className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
+            <div className="flex min-w-0 items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSidebarTerbuka((v) => !v)}
+                aria-expanded={sidebarTerbuka}
+                aria-label="Buka menu panel"
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-garis text-biru-tua lg:hidden"
+              >
+                <span className="space-y-1" aria-hidden>
+                  <span className="block h-0.5 w-5 bg-current" />
+                  <span className="block h-0.5 w-5 bg-current" />
+                  <span className="block h-0.5 w-5 bg-current" />
+                </span>
+              </button>
+              <p className="truncate text-sm text-samar">
+                Masuk sebagai{" "}
+                <strong className="text-biru-tua">{pengguna.nama}</strong>
+                <span className="ml-2 rounded-full bg-biru-muda px-2 py-0.5 text-xs font-semibold text-biru">
+                  {pengguna.role === "admin" ? "Admin" : "Operator"}
+                </span>
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Link
+                href="/admin/sandi"
+                className="hidden rounded-lg border border-garis px-3.5 py-2 text-sm font-semibold text-teks hover:border-biru hover:text-biru sm:block"
+              >
+                Ganti Sandi
+              </Link>
+              <button
+                type="button"
+                onClick={keluar}
+                className="rounded-lg bg-slate-100 px-3.5 py-2 text-sm font-semibold text-teks transition hover:bg-slate-200"
+              >
+                Keluar
+              </button>
+            </div>
+          </div>
+
+          <AnimatePresence initial={false}>
+            {sidebarTerbuka && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className="overflow-hidden bg-biru-tua lg:hidden"
+              >
+                <div className="px-3 py-4">{daftarMenu}</div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </header>
+
+        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+      </div>
+    </div>
+  );
+}
