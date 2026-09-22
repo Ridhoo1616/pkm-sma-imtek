@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Demo PPDB Online SMA IMTEK</title>
-<meta name="description" content="Demo interaktif Sistem Informasi Profil Sekolah dan PPDB Online SMA IMTEK, Kabupaten Tangerang. Tampilannya sama dengan aplikasi PHP aslinya.">
+<meta name="description" content="Demo interaktif Sistem Informasi Profil Sekolah dan PPDB Online SMA IMTEK, Kabupaten Tangerang. Sepuluh menu panel admin berfungsi, termasuk Pengaturan yang langsung mengubah isi website.">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SMA IMTEK">
 <meta property="og:title" content="Demo PPDB Online SMA IMTEK">
-<meta property="og:description" content="Coba langsung: profil sekolah, berita, galeri, formulir pendaftaran, cek status, dan panel admin.">
+<meta property="og:description" content="Coba langsung: profil sekolah, berita, galeri, formulir pendaftaran, cek status, dan panel admin lengkap.">
 <style>
   :root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 /* ============================================================
@@ -887,9 +887,9 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
 <div class="topbar">
   <div class="container" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
     <div style="display: flex; gap: 22px; flex-wrap: wrap;">
-      <span>Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Prov. Banten 15339</span>
-      <span>021-55689125</span>
-      <span>smaimtekpagedangan@gmail.com</span>
+      <span data-set="alamat"></span>
+      <span data-set="telepon"></span>
+      <span data-set="email"></span>
     </div>
     <div style="display: flex; gap: 16px; align-items: center;">
       <span style="opacity: .85;">Instagram</span>
@@ -908,8 +908,8 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
     <button type="button" class="navbar-brand" data-ke="beranda" style="background: none; border: 0; display: flex; align-items: center; gap: 10px; cursor: pointer;">
       <span id="logo-merek"></span>
       <span class="brand-text">
-        <strong>SMA IMTEK</strong>
-        <small>Akreditasi B &middot; NPSN 20613766</small>
+        <strong data-set="nama_sekolah"></strong>
+        <small>Akreditasi <span data-set="akreditasi"></span> &middot; NPSN <span data-set="npsn"></span></small>
       </span>
     </button>
     <div style="margin-left: auto; display: flex; align-items: center; gap: 2px; flex-wrap: wrap;" id="menu-navbar"></div>
@@ -928,8 +928,8 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f2b53c" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 11-5.8-1.6"></path></svg>
               PPDB 2027/2028 Telah Dibuka
             </span>
-            <h1>Selamat Datang di<br>SMA IMTEK</h1>
-            <p class="lead" style="margin-top: 14px;">[TAGLINE SEKOLAH]. Daftar menjadi peserta didik baru sepenuhnya secara online &mdash; tanpa perlu datang ke sekolah untuk mengisi formulir.</p>
+            <h1>Selamat Datang di<br><span data-set="nama_sekolah"></span></h1>
+            <p class="lead" style="margin-top: 14px;"><span data-set="tagline"></span>. Daftar menjadi peserta didik baru sepenuhnya secara online &mdash; tanpa perlu datang ke sekolah untuk mengisi formulir.</p>
             <div class="sejajar" style="margin-top: 24px;">
               <button type="button" class="btn btn-emas" data-ke="formulir">Daftar PPDB Online</button>
               <button type="button" class="btn btn-garis-putih" data-ke="ppdb">Informasi PPDB</button>
@@ -940,12 +940,12 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
             </div>
           </div>
           <div class="kartu-status">
-            <h5 style="font-size: 17px; color: #0c3a69; margin-bottom: 14px;">Status PPDB 2027/2028</h5>
+            <h5 style="font-size: 17px; color: #0c3a69; margin-bottom: 14px;">Status PPDB <span data-set="ppdb_tahun"></span></h5>
             <div class="baris-status"><span>Status pendaftaran</span><strong style="color: #15803d;">DIBUKA</strong></div>
-            <div class="baris-status"><span>Periode</span><strong style="text-align: right;">1 Sep 2026 &ndash;<br>30 Jun 2027</strong></div>
-            <div class="baris-status"><span>Kuota</span><strong>180 kursi</strong></div>
+            <div class="baris-status"><span>Periode</span><strong style="text-align: right;" data-set="periode"></strong></div>
+            <div class="baris-status"><span>Kuota</span><strong><span data-set="ppdb_kuota"></span> kursi</strong></div>
             <div class="baris-status"><span>Sudah mendaftar</span><strong id="hero-jml">0 orang</strong></div>
-            <div class="baris-status" style="padding-bottom: 12px;"><span>Pengumuman hasil</span><strong>5 Juli 2027</strong></div>
+            <div class="baris-status" style="padding-bottom: 12px;"><span>Pengumuman hasil</span><strong data-set="ppdb_pengumuman"></strong></div>
             <div class="progress" role="progressbar" aria-label="Keterisian kuota" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hero-meter"><div style="width: 0%"></div></div>
             <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: #6b7280; margin: 6px 0 16px;">
               <span id="hero-persen">Kuota terisi 0%</span><span id="hero-rasio">0/180</span>
@@ -966,17 +966,17 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
           <div style="position: relative;">
             <div class="gambar-tiruan" style="aspect-ratio: 4/3; border-radius: 16px; background: linear-gradient(140deg, #46617f, #26394d);">[FOTO KEPALA SEKOLAH]</div>
             <div style="position: absolute; left: 18px; bottom: 18px; background: #12508f; color: #fff; border-radius: 12px; padding: 12px 16px; box-shadow: 0 8px 20px rgba(6,26,48,.3);">
-              <strong style="display: block; font-size: 13.5px;">[NAMA KEPALA SEKOLAH]</strong>
+              <strong style="display: block; font-size: 13.5px;" data-set="kepala_sekolah"></strong>
               <small style="opacity: .8;">Kepala Sekolah</small>
             </div>
           </div>
           <div>
             <span class="kicker">Sambutan</span>
             <h2 style="font-size: clamp(1.4rem, 3vw, 2rem); color: #0c3a69; margin: 9px 0 14px;">Kata Sambutan Kepala Sekolah</h2>
-            <p class="lirih" style="font-size: 15.5px; line-height: 1.75;">[NASKAH SAMBUTAN KEPALA SEKOLAH] &mdash; dua sampai empat paragraf, ditulis atau disetujui langsung oleh kepala sekolah. Teks ini diubah dari menu Pengaturan di panel admin, tanpa menyentuh kode.</p>
+            <p class="lirih" style="font-size: 15.5px; line-height: 1.75;" data-set="sambutan"></p>
             <div class="baris baris-2" style="gap: 24px; margin: 22px 0;">
-              <div><strong style="display: block; color: #0c3a69;">Visi</strong><span class="lirih">[VISI RESMI SEKOLAH]</span></div>
-              <div><strong style="display: block; color: #0c3a69;">Misi</strong><span class="lirih">5 butir misi sekolah</span></div>
+              <div><strong style="display: block; color: #0c3a69;">Visi</strong><span class="lirih" data-set="visi"></span></div>
+              <div><strong style="display: block; color: #0c3a69;">Misi</strong><span class="lirih" data-set="jumlah_misi"></span></div>
             </div>
             <button type="button" class="btn btn-daftar" data-ke="profil">Selengkapnya tentang Sekolah</button>
           </div>
@@ -1078,25 +1078,22 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
         <div class="baris" style="grid-template-columns: 2fr 1fr; gap: 46px; align-items: start;">
           <div>
             <h2 class="h4" style="color: #0c3a69; font-size: 21px; margin-bottom: 14px;">Sejarah Singkat</h2>
-            <p class="lirih" style="font-size: 15px; line-height: 1.75;">[SEJARAH SINGKAT SEKOLAH] &mdash; satu sampai tiga paragraf yang memuat tahun berdiri, latar belakang pendirian, dan perkembangannya sampai sekarang.</p>
+            <p class="lirih" style="font-size: 15px; line-height: 1.75;" data-set="sejarah"></p>
 
             <h2 style="color: #0c3a69; font-size: 21px; margin: 36px 0 14px;">Sambutan Kepala Sekolah</h2>
             <blockquote style="border-left: 4px solid #12508f; padding-left: 16px; margin: 0; color: #6b7280; font-style: italic; font-size: 15.5px; line-height: 1.75;">
-              [NASKAH SAMBUTAN KEPALA SEKOLAH]
+              <span data-set="sambutan"></span>
             </blockquote>
-            <p style="font-weight: 700; margin-top: 14px;">[NAMA KEPALA SEKOLAH]</p>
-            <p class="lirih" style="font-size: 13px;">Kepala SMA IMTEK</p>
+            <p style="font-weight: 700; margin-top: 14px;" data-set="kepala_sekolah"></p>
+            <p class="lirih" style="font-size: 13px;">Kepala <span data-set="nama_sekolah"></span></p>
 
             <h2 style="color: #0c3a69; font-size: 21px; margin: 36px 0 14px;">Visi</h2>
             <div class="kartu" style="background: #f7f9fc; border: 0;">
-              <p style="font-size: 17px; font-style: italic; margin: 0;">&ldquo;[VISI RESMI SEKOLAH] &mdash; satu kalimat, sebaiknya dikutip apa adanya dari dokumen kurikulum sekolah.&rdquo;</p>
+              <p style="font-size: 17px; font-style: italic; margin: 0;">&ldquo;<span data-set="visi"></span>&rdquo;</p>
             </div>
 
             <h2 style="color: #0c3a69; font-size: 21px; margin: 36px 0 14px;">Misi</h2>
-            <ol class="poin" style="font-size: 15px;">
-              <li>[BUTIR MISI 1]</li><li>[BUTIR MISI 2]</li><li>[BUTIR MISI 3]</li>
-              <li>[BUTIR MISI 4]</li><li>[BUTIR MISI 5]</li>
-            </ol>
+            <ol class="poin" style="font-size: 15px;" id="daftar-misi"></ol>
             <p class="lirih" style="font-size: 12.5px; margin-top: 12px;">Pada sistem asli, misi ditulis satu baris satu poin di menu Pengaturan, dan jumlah butirnya bebas.</p>
 
             <h2 style="color: #0c3a69; font-size: 21px; margin: 36px 0 14px;">Peminatan</h2>
@@ -1105,19 +1102,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
 
           <aside class="kartu-form">
             <h5 style="font-size: 17px; color: #0c3a69; margin-bottom: 14px;">Identitas Sekolah</h5>
-            <table class="table" style="font-size: 13.5px;">
-              <tbody>
-                <tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">Nama</th><td style="font-weight: 600; padding: 7px 0;">SMA IMTEK</td></tr>
-                <tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">NPSN</th><td style="font-weight: 600; padding: 7px 0;">20613766</td></tr>
-                <tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">Akreditasi</th><td style="font-weight: 600; padding: 7px 0;">B</td></tr>
-                <tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">Status</th><td style="font-weight: 600; padding: 7px 0;">Swasta</td></tr>
-                <tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">Kepala Sekolah</th><td style="font-weight: 600; padding: 7px 0;">[NAMA KEPALA SEKOLAH]</td></tr>
-                <tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">Alamat</th><td style="font-weight: 600; padding: 7px 0;">Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Prov. Banten 15339</td></tr>
-                <tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">Telepon</th><td style="font-weight: 600; padding: 7px 0;">021-55689125</td></tr>
-                <tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">Email</th><td style="font-weight: 600; padding: 7px 0;">smaimtekpagedangan@gmail.com</td></tr>
-                <tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">Jam Layanan</th><td style="font-weight: 600; padding: 7px 0;">[JAM LAYANAN]</td></tr>
-              </tbody>
-            </table>
+            <table class="table" style="font-size: 13.5px;"><tbody id="tabel-identitas"></tbody></table>
             <button type="button" class="btn btn-daftar" style="width: 100%; margin-top: 8px;" data-ke="formulir">Daftar PPDB Online</button>
           </aside>
         </div>
@@ -1252,7 +1237,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
   <section class="panel-hal" id="panel-ppdb" hidden>
     <div class="header-halaman">
       <div class="container">
-        <h1>Penerimaan Peserta Didik Baru 2027/2028</h1>
+        <h1>Penerimaan Peserta Didik Baru <span data-set="ppdb_tahun"></span></h1>
         <div class="breadcrumb-demo">Beranda / PPDB / <b>Informasi PPDB</b></div>
       </div>
     </div>
@@ -1311,7 +1296,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
   <section class="panel-hal" id="panel-formulir" hidden>
     <div class="header-halaman">
       <div class="container">
-        <h1>Formulir Pendaftaran PPDB 2027/2028</h1>
+        <h1>Formulir Pendaftaran PPDB <span data-set="ppdb_tahun"></span></h1>
         <div class="breadcrumb-demo">Beranda / PPDB / <b>Formulir Pendaftaran</b></div>
       </div>
     </div>
@@ -1532,30 +1517,30 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
             <span id="logo-kaki"></span>
             <div>
-              <strong style="display: block;">SMA IMTEK</strong>
-              <small style="opacity: .75;">NPSN 20613766 &middot; Akreditasi B &middot; Swasta</small>
+              <strong style="display: block;" data-set="nama_sekolah"></strong>
+              <small style="opacity: .75;">NPSN <span data-set="npsn"></span> &middot; Akreditasi <span data-set="akreditasi"></span> &middot; <span data-set="status_sekolah"></span></small>
             </div>
           </div>
-          <p style="font-size: 13.5px; opacity: .75;">[TAGLINE SEKOLAH]</p>
+          <p style="font-size: 13.5px; opacity: .75;" data-set="tagline"></p>
         </div>
         <div>
           <h6 class="footer-judul">Tautan</h6>
           <ul style="list-style: none; padding: 0; margin: 0; font-size: 13.5px;" id="tautan-kaki"></ul>
         </div>
         <div>
-          <h6 class="footer-judul">PPDB 2027/2028</h6>
+          <h6 class="footer-judul">PPDB <span data-set="ppdb_tahun"></span></h6>
           <ul style="list-style: none; padding: 0; margin: 0; font-size: 13.5px;" id="tautan-ppdb-kaki"></ul>
           <span class="badge bg-hijau" style="margin-top: 10px;">Pendaftaran Dibuka</span>
         </div>
         <div>
           <h6 class="footer-judul">Hubungi Kami</h6>
           <ul style="list-style: none; padding: 0; margin: 0; font-size: 13.5px; display: grid; gap: 8px; opacity: .8;">
-            <li>Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Prov. Banten 15339</li><li>021-55689125</li><li>smaimtekpagedangan@gmail.com</li><li>[JAM LAYANAN]</li>
+            <li data-set="alamat"></li><li data-set="telepon"></li><li data-set="email"></li><li data-set="jam_operasional"></li>
           </ul>
         </div>
       </div>
       <div style="border-top: 1px solid rgba(255,255,255,.1); padding: 18px 0; display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; font-size: 12.5px; opacity: .75;">
-        <span>&copy; 2026 SMA IMTEK. Seluruh hak cipta dilindungi.</span>
+        <span>&copy; 2026 <span data-set="nama_sekolah"></span>. Seluruh hak cipta dilindungi.</span>
         <span>Dikembangkan melalui Program Kreativitas Mahasiswa (PkM)</span>
       </div>
     </div>
@@ -1634,6 +1619,16 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
 
         <section class="apanel" id="apanel-laporan" hidden></section>
 
+        <section class="apanel" id="apanel-jurusan" hidden></section>
+
+        <section class="apanel" id="apanel-galeri" hidden></section>
+
+        <section class="apanel" id="apanel-fasilitas" hidden></section>
+
+        <section class="apanel" id="apanel-pengaturan" hidden></section>
+
+        <section class="apanel" id="apanel-pengguna" hidden></section>
+
         <section class="apanel" id="apanel-lain" hidden></section>
 
         <section class="apanel" id="apanel-pendaftar" hidden>
@@ -1693,7 +1688,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
         <section class="apanel" id="apanel-berita" hidden>
           <div class="baris" style="grid-template-columns: 1fr 1.2fr; gap: 20px; align-items: start;">
             <form class="panel" id="form-berita" novalidate>
-              <div class="panel-kepala"><h2>Tulis Berita Baru</h2></div>
+              <div class="panel-kepala"><h2 id="judul-form-berita">Tulis Berita Baru</h2><button type="button" class="btn btn-kecil btn-netral kanan" id="batal-berita" hidden>Batal</button></div>
               <div class="panel-isi tumpuk">
                 <div id="kabar-berita" hidden></div>
                 <div class="ladang" data-untuk="bJudul">
@@ -1713,7 +1708,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
                   <textarea id="b-isi" class="form-control" rows="6" placeholder="Minimal 20 karakter. Pisahkan paragraf dengan baris kosong."></textarea>
                 </div>
                 <div class="centang"><input type="checkbox" id="b-publish" checked><label for="b-publish">Langsung terbitkan di website</label></div>
-                <button type="submit" class="btn btn-daftar">Simpan Berita</button>
+                <button type="submit" class="btn btn-daftar" id="tombol-berita">Simpan Berita</button>
                 <p class="lirih" style="font-size: 12.5px;">Berita yang disimpan langsung tampil di halaman Berita pada sisi website sekolah.</p>
               </div>
             </form>
@@ -1759,15 +1754,15 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
 (function () {
   'use strict';
 
-  var KUNCI = 'ppdb-imtek-demo-v3';
-  var TAHUN = '2027/2028';
-  var KUOTA_TOTAL = 180;
+  var KUNCI = 'ppdb-imtek-demo-v4';
 
-  var PEMINATAN = [
-    { nama: 'Peminatan MIPA', kuota: 90, ik: 'kalkulator', ket: '[DESKRIPSI DARI SEKOLAH] — fokus pada Matematika, Fisika, Kimia, dan Biologi untuk peserta didik yang ingin melanjutkan ke bidang sains, teknologi, dan kesehatan.' },
-    { nama: 'Peminatan IPS', kuota: 60, ik: 'globe', ket: '[DESKRIPSI DARI SEKOLAH] — fokus pada Ekonomi, Sosiologi, Geografi, dan Sejarah untuk peserta didik yang tertarik pada bidang sosial, hukum, dan bisnis.' },
-    { nama: 'Peminatan Bahasa', kuota: 30, ik: 'bahasa', ket: '[DESKRIPSI DARI SEKOLAH] — fokus pada Bahasa dan Sastra Indonesia, Inggris, serta bahasa asing lainnya.' }
-  ];
+  function kuota() { return Math.max(1, parseInt(SET.ppdb_kuota, 10) || 180); }
+
+  function benihPeminatan() { return [
+    { nama: 'Peminatan MIPA', kuota: 90, ik: 'kalkulator', aktif: 1, kode: 'MIPA', ket: '[DESKRIPSI DARI SEKOLAH] — fokus pada Matematika, Fisika, Kimia, dan Biologi untuk peserta didik yang ingin melanjutkan ke bidang sains, teknologi, dan kesehatan.' },
+    { nama: 'Peminatan IPS', kuota: 60, ik: 'globe', aktif: 1, kode: 'IPS', ket: '[DESKRIPSI DARI SEKOLAH] — fokus pada Ekonomi, Sosiologi, Geografi, dan Sejarah untuk peserta didik yang tertarik pada bidang sosial, hukum, dan bisnis.' },
+    { nama: 'Peminatan Bahasa', kuota: 30, ik: 'bahasa', aktif: 1, kode: 'BHS', ket: '[DESKRIPSI DARI SEKOLAH] — fokus pada Bahasa dan Sastra Indonesia, Inggris, serta bahasa asing lainnya.' }
+  ]; }
 
   var STATUS = ['Menunggu Verifikasi', 'Terverifikasi', 'Diterima', 'Cadangan', 'Ditolak'];
   var WARNA_STATUS = {
@@ -1841,7 +1836,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
     '<path d="M42 60v13c0 6 8 10 18 10s18-4 18-10V60l-18 8z" fill="#fff" opacity=".92"/>' +
     '<text x="60" y="101" font-family="Segoe UI,Arial,sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="1">IMTEK</text></svg>';
 
-  var FASILITAS = [
+  function benihFasilitas() { return [
     { nama: 'Laboratorium Komputer', ik: 'komputer', ket: 'Lab komputer dengan koneksi internet untuk pembelajaran informatika dan literasi digital.' },
     { nama: 'Laboratorium IPA', ik: 'labu', ket: 'Laboratorium Fisika, Kimia, dan Biologi dengan peralatan praktikum yang memadai.' },
     { nama: 'Perpustakaan', ik: 'buku', ket: 'Koleksi buku pelajaran, referensi, dan bacaan umum dengan ruang baca yang nyaman.' },
@@ -1850,7 +1845,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
     { nama: 'Ruang Kelas Nyaman', ik: 'kelas', ket: 'Ruang kelas berventilasi baik yang dilengkapi proyektor untuk pembelajaran interaktif.' },
     { nama: 'Ruang UKS', ik: 'uks', ket: 'Unit Kesehatan Sekolah untuk pertolongan pertama dan layanan kesehatan siswa.' },
     { nama: 'Koperasi & Kantin', ik: 'kantin', ket: 'Kantin sehat dan koperasi sekolah yang menyediakan kebutuhan siswa.' }
-  ];
+  ]; }
 
   var STAT_SEKOLAH = [
     { n: 540, k: 'Peserta Didik Aktif', ik: 'orang' },
@@ -1909,16 +1904,65 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
     ];
   }
 
-  var db = { pendaftar: benihPendaftar(), berita: benihBerita(), galeri: benihGaleri(), pesan: benihPesan() };
+  function benihPengaturan() {
+    return {
+      nama_sekolah: 'SMA IMTEK',
+      npsn: '20613766',
+      akreditasi: 'B',
+      status_sekolah: 'Swasta',
+      kepala_sekolah: '[NAMA KEPALA SEKOLAH]',
+      tagline: '[TAGLINE SEKOLAH]',
+      sambutan: '[NASKAH SAMBUTAN KEPALA SEKOLAH] — dua sampai empat paragraf, ditulis atau disetujui langsung oleh kepala sekolah.',
+      sejarah: '[SEJARAH SINGKAT SEKOLAH] — satu sampai tiga paragraf yang memuat tahun berdiri, latar belakang pendirian, dan perkembangannya sampai sekarang.',
+      visi: '[VISI RESMI SEKOLAH] — satu kalimat, sebaiknya dikutip apa adanya dari dokumen kurikulum sekolah.',
+      misi: '[BUTIR MISI 1]\n[BUTIR MISI 2]\n[BUTIR MISI 3]\n[BUTIR MISI 4]\n[BUTIR MISI 5]',
+      alamat: 'Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Prov. Banten 15339',
+      kota: 'Kabupaten Tangerang',
+      telepon: '021-55689125',
+      email: 'smaimtekpagedangan@gmail.com',
+      whatsapp: '',
+      jam_operasional: '[JAM LAYANAN]',
+      ppdb_tahun: '2027/2028',
+      ppdb_mulai: '2026-09-01',
+      ppdb_selesai: '2027-06-30',
+      ppdb_pengumuman: '2027-07-05',
+      ppdb_kuota: '180',
+      ppdb_biaya: 'Pendaftaran tidak dipungut biaya.',
+      jml_siswa: '540',
+      jml_guru: '32',
+      jml_prestasi: '45',
+      jml_alumni: '1200'
+    };
+  }
+
+  function benihPengguna() {
+    return [
+      { id: 'u1', nama: 'Administrator', username: 'admin', role: 'admin', masuk: new Date().toISOString() },
+      { id: 'u2', nama: 'Panitia PPDB Satu', username: 'panitia1', role: 'operator', masuk: null }
+    ];
+  }
+
+  var db = {
+    pendaftar: benihPendaftar(), berita: benihBerita(), galeri: benihGaleri(), pesan: benihPesan(),
+    peminatan: benihPeminatan(), fasilitas: benihFasilitas(),
+    pengaturan: benihPengaturan(), pengguna: benihPengguna()
+  };
+  var PEMINATAN, FASILITAS, SET;
+  function segarkanRujukan() { PEMINATAN = db.peminatan; FASILITAS = db.fasilitas; SET = db.pengaturan; }
 
   function muat() {
     try {
       var mentah = window.localStorage.getItem(KUNCI);
       if (!mentah) { return; }
       var isi = JSON.parse(mentah);
-      ['pendaftar', 'berita', 'galeri', 'pesan'].forEach(function (k) {
+      ['pendaftar', 'berita', 'galeri', 'pesan', 'peminatan', 'fasilitas', 'pengguna'].forEach(function (k) {
         if (Array.isArray(isi[k])) { db[k] = isi[k]; }
       });
+      if (isi.pengaturan && typeof isi.pengaturan === 'object') {
+        Object.keys(db.pengaturan).forEach(function (k) {
+          if (typeof isi.pengaturan[k] === 'string') { db.pengaturan[k] = isi.pengaturan[k]; }
+        });
+      }
     } catch (e) { /* penyimpanan ditolak peramban: pakai data contoh */ }
   }
   function simpan() {
@@ -2043,6 +2087,10 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
 
   /* ================= bagian publik ================= */
   function gambarStat() {
+    STAT_SEKOLAH[0].n = parseInt(SET.jml_siswa, 10) || 0;
+    STAT_SEKOLAH[1].n = parseInt(SET.jml_guru, 10) || 0;
+    STAT_SEKOLAH[2].n = parseInt(SET.jml_prestasi, 10) || 0;
+    STAT_SEKOLAH[3].n = parseInt(SET.jml_alumni, 10) || 0;
     el('stat-sekolah').innerHTML = STAT_SEKOLAH.map(function (s) {
       return '<div class="kartu-statistik"><span style="color: #12508f;">' + ik(s.ik, 28) + '</span>' +
         '<div class="angka">' + angka(s.n) + (s.n >= 100 ? '+' : '') + '</div>' +
@@ -2059,7 +2107,8 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
   }
 
   function gambarMinat() {
-    el('beranda-minat').innerHTML = PEMINATAN.map(kartuMinat).join('');
+    var aktif = PEMINATAN.filter(function (m) { return m.aktif; });
+    el('beranda-minat').innerHTML = aktif.length ? aktif.map(kartuMinat).join('') : '<p class="lirih">Sekolah tidak menjuruskan peserta didik sejak pendaftaran.</p>';
     el('profil-minat').innerHTML = PEMINATAN.map(function (m) {
       return '<div class="kartu"><div class="kartu-ikon">' + ik(m.ik, 23) + '</div>' +
         '<h5>' + esc(m.nama) + '</h5><p>' + esc(m.ket) + '</p></div>';
@@ -2090,7 +2139,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
     var total = db.pendaftar.length;
     el('ringkas-ppdb').innerHTML = [
       { ik: 'kalender', l: 'Periode Pendaftaran', v: '1 Sep 2026 s.d. 30 Jun 2027' },
-      { ik: 'orang', l: 'Kuota Penerimaan', v: KUOTA_TOTAL + ' peserta didik' },
+      { ik: 'orang', l: 'Kuota Penerimaan', v: kuota() + ' peserta didik' },
       { ik: 'orangCek', l: 'Sudah Mendaftar', v: total + ' pendaftar' },
       { ik: 'megafon', l: 'Pengumuman Hasil', v: '5 Juli 2027' }
     ].map(function (k) {
@@ -2267,10 +2316,10 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
 
   function gambarKuota() {
     var jml = db.pendaftar.length;
-    var persen = Math.min(100, Math.round(jml / KUOTA_TOTAL * 100));
+    var persen = Math.min(100, Math.round(jml / kuota() * 100));
     el('hero-jml').textContent = angka(jml) + ' orang';
     el('hero-persen').textContent = 'Kuota terisi ' + persen + '%';
-    el('hero-rasio').textContent = jml + '/' + KUOTA_TOTAL;
+    el('hero-rasio').textContent = jml + '/' + kuota();
     var m = el('hero-meter');
     m.setAttribute('aria-valuenow', String(persen));
     m.firstElementChild.style.width = persen + '%';
@@ -2488,7 +2537,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
         '<div class="alert ' + PESAN[0] + '">' + ik('info', 18, 2.2) + '<div>' + esc(PESAN[1]) + '</div></div>' +
         (p.catatan ? '<div class="alert alert-terang" style="margin-top: 14px;"><div><strong style="font-size: 13px;">Catatan dari Panitia:</strong><br><span style="font-size: 13.5px;">' + esc(p.catatan) + '</span></div></div>' : '') +
         '<table class="table" style="margin-top: 20px; font-size: 13.5px;"><tbody>' +
-          [['Nama Lengkap', p.nama], ['Tahun Ajaran', TAHUN], ['Jalur', p.jalur], ['Peminatan', p.minat],
+          [['Nama Lengkap', p.nama], ['Tahun Ajaran', SET.ppdb_tahun], ['Jalur', p.jalur], ['Peminatan', p.minat],
            ['Asal Sekolah', p.asal], ['Tanggal Mendaftar', tglIndo(p.waktu, true)]].map(function (r) {
             return '<tr><th style="text-align: left; font-weight: 400; color: var(--teks-samar); padding: 8px 0; width: 40%;">' + esc(r[0]) +
               '</th><td style="font-weight: 600; padding: 8px 0;">' + esc(r[1]) + '</td></tr>';
@@ -2501,7 +2550,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
               '<div style="font-size: 22px; font-weight: 700;">SMA IMTEK</div>' +
               '<div style="font-size: 12px;">Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Prov. Banten 15339 &bull; NPSN 20613766</div></div>' +
             '<h3 style="text-align: center; margin: 20px 0 4px; text-decoration: underline;">BUKTI PENDAFTARAN PESERTA DIDIK BARU</h3>' +
-            '<p style="text-align: center;">Tahun Ajaran ' + TAHUN + '</p>' +
+            '<p style="text-align: center;">Tahun Ajaran ' + SET.ppdb_tahun + '</p>' +
             '<p style="text-align: center; margin: 16px 0;"><span style="display: inline-block; border: 2px solid #000; padding: 7px 22px; font-family: monospace; font-weight: 700; letter-spacing: 3px;">' + esc(p.noReg) + '</span></p>' +
             '<table style="width: 100%; font-size: 13px;"><tbody>' +
               [['Nama Lengkap', p.nama], ['NISN', p.nisn || '-'],
@@ -2580,15 +2629,15 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
     { grup: 'PPDB' },
     { id: 'pendaftar', label: 'Data Pendaftar', ik: 'orang', ada: 1, lonceng: 'tunggu' },
     { id: 'laporan', label: 'Laporan & Statistik', ik: 'bagan', ada: 1 },
-    { id: 'jurusan', label: 'Peminatan', ik: 'topi' },
+    { id: 'jurusan', label: 'Peminatan', ik: 'topi', ada: 1 },
     { grup: 'Konten Website' },
     { id: 'berita', label: 'Berita', ik: 'berita', ada: 1 },
-    { id: 'galeri', label: 'Galeri', ik: 'galeri' },
-    { id: 'fasilitas', label: 'Fasilitas', ik: 'gedung' },
+    { id: 'galeri', label: 'Galeri', ik: 'galeri', ada: 1 },
+    { id: 'fasilitas', label: 'Fasilitas', ik: 'gedung', ada: 1 },
     { id: 'pesan', label: 'Pesan Masuk', ik: 'surat', ada: 1, lonceng: 'pesan' },
     { grup: 'Sistem' },
-    { id: 'pengaturan', label: 'Pengaturan', ik: 'gir' },
-    { id: 'pengguna', label: 'Akun Pengguna', ik: 'kartuOrang' }
+    { id: 'pengaturan', label: 'Pengaturan', ik: 'gir', ada: 1 },
+    { id: 'pengguna', label: 'Akun Pengguna', ik: 'kartuOrang', ada: 1 }
   ];
   var masuk = false;
   var menuAktif = 'dash';
@@ -2632,7 +2681,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
     el('judul-admin').textContent = m.label || 'Dashboard';
     bangunSidebar();
 
-    var adaPanel = ['dash', 'laporan', 'pendaftar', 'berita', 'pesan'];
+    var adaPanel = ['dash', 'laporan', 'pendaftar', 'berita', 'pesan', 'jurusan', 'galeri', 'fasilitas', 'pengaturan', 'pengguna'];
     document.querySelectorAll('.apanel').forEach(function (p) { p.hidden = true; });
 
     if (adaPanel.indexOf(id) !== -1) {
@@ -2642,6 +2691,11 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
       if (id === 'pendaftar') { gambarTabelPendaftar(); }
       if (id === 'berita') { gambarAdminBerita(); }
       if (id === 'pesan') { gambarPesan(); }
+      if (id === 'jurusan') { gambarPeminatan(); }
+      if (id === 'galeri') { gambarAdminGaleri(); }
+      if (id === 'fasilitas') { gambarAdminFasilitas(); }
+      if (id === 'pengaturan') { gambarPengaturan(); }
+      if (id === 'pengguna') { gambarPengguna(); }
     } else {
       var w = el('apanel-lain');
       w.hidden = false;
@@ -2718,7 +2772,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
     var hariIni = db.pendaftar.filter(function (p) {
       return String(p.waktu).slice(0, 10) === new Date().toISOString().slice(0, 10);
     }).length;
-    var persen = Math.min(100, Math.round(total / KUOTA_TOTAL * 100));
+    var persen = Math.min(100, Math.round(total / kuota() * 100));
 
     var PETAK = [
       ['Total Pendaftar', total, '#12508f', 'orang'],
@@ -2744,8 +2798,8 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
 
     el('apanel-dash').innerHTML =
       '<div class="alert alert-sukses" style="margin-bottom: 20px;">' + ik('kunci', 20, 2.2) +
-        '<div style="flex: 1;"><strong>PPDB ' + TAHUN + ' &mdash; DIBUKA</strong><br>' +
-        '<span style="font-size: 13px;">Periode 1 September 2026 s.d. 30 Juni 2027 &bull; Kuota ' + KUOTA_TOTAL + ' peserta didik</span></div></div>' +
+        '<div style="flex: 1;"><strong>PPDB ' + SET.ppdb_tahun + ' &mdash; DIBUKA</strong><br>' +
+        '<span style="font-size: 13px;">Periode 1 September 2026 s.d. 30 Juni 2027 &bull; Kuota ' + kuota() + ' peserta didik</span></div></div>' +
 
       '<div class="baris baris-4 baris-rapat" style="margin-bottom: 20px;">' +
         PETAK.map(function (p) {
@@ -2779,7 +2833,7 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
         '<div>' +
           '<div class="panel"><div class="panel-kepala"><h2>Keterisian Kuota</h2></div><div class="panel-isi">' +
             '<div class="tengah" style="margin-bottom: 14px;"><div style="font-size: 40px; font-weight: 800; color: #12508f; line-height: 1;">' + persen + '%</div>' +
-            '<div class="lirih" style="font-size: 12.5px;">' + total + ' dari ' + KUOTA_TOTAL + ' kursi</div></div>' +
+            '<div class="lirih" style="font-size: 12.5px;">' + total + ' dari ' + kuota() + ' kursi</div></div>' +
             '<div class="progress" style="margin-bottom: 22px;"><div style="width: ' + persen + '%"></div></div>' +
             '<div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--teks-samar); margin-bottom: 14px;">Per Peminatan</div>' +
             PEMINATAN.map(function (m) {
@@ -2835,8 +2889,8 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
 
     el('apanel-laporan').innerHTML =
       '<div class="alert alert-terang" style="margin-bottom: 20px; font-size: 13.5px;">' +
-        '<div><strong>Laporan PPDB Tahun Ajaran ' + TAHUN + '</strong> &mdash; SMA IMTEK. Total <strong>' + total +
-        ' pendaftar</strong> dari kuota ' + KUOTA_TOTAL + ' kursi.</div></div>' +
+        '<div><strong>Laporan PPDB Tahun Ajaran ' + SET.ppdb_tahun + '</strong> &mdash; SMA IMTEK. Total <strong>' + total +
+        ' pendaftar</strong> dari kuota ' + kuota() + ' kursi.</div></div>' +
 
       '<div class="baris" style="grid-template-columns: 1.4fr 1fr; gap: 20px; align-items: start;">' +
         '<div class="panel"><div class="panel-kepala"><h2>Efektivitas Kanal Promosi</h2></div><div class="panel-isi">' +
@@ -3024,6 +3078,18 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
 
   /* ---- kelola berita ---- */
   var formBerita = el('form-berita');
+  var ubahBerita = null;
+
+  function batalUbahBerita() {
+    ubahBerita = null;
+    formBerita.reset();
+    el('b-publish').checked = true;
+    el('judul-form-berita').textContent = 'Tulis Berita Baru';
+    el('tombol-berita').textContent = 'Simpan Berita';
+    el('batal-berita').hidden = true;
+  }
+
+  el('batal-berita').addEventListener('click', batalUbahBerita);
   formBerita.addEventListener('submit', function (ev) {
     ev.preventDefault();
     bersihkanGalat(formBerita);
@@ -3041,18 +3107,30 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
       kabar.hidden = false;
       return;
     }
-    db.berita.unshift({
-      id: 'b' + Date.now(), judul: judul, kategori: el('b-kat').value,
-      ringkasan: bersih(el('b-ringkas').value).trim(), isi: isi,
-      penulis: 'Administrator', tanggal: new Date().toISOString().slice(0, 10),
-      publish: el('b-publish').checked ? 1 : 0, dibaca: 0,
-      g: Math.floor(Math.random() * GRADIEN.length)
-    });
+    if (ubahBerita) {
+      var t = db.berita.filter(function (x) { return x.id === ubahBerita; })[0];
+      if (t) {
+        t.judul = judul;
+        t.kategori = el('b-kat').value;
+        t.ringkasan = bersih(el('b-ringkas').value).trim();
+        t.isi = isi;
+        t.publish = el('b-publish').checked ? 1 : 0;
+      }
+      batalUbahBerita();
+    } else {
+      db.berita.unshift({
+        id: 'b' + Date.now(), judul: judul, kategori: el('b-kat').value,
+        ringkasan: bersih(el('b-ringkas').value).trim(), isi: isi,
+        penulis: 'Administrator', tanggal: new Date().toISOString().slice(0, 10),
+        publish: el('b-publish').checked ? 1 : 0, dibaca: 0,
+        g: Math.floor(Math.random() * GRADIEN.length)
+      });
+      formBerita.reset();
+      el('b-publish').checked = true;
+    }
     simpan();
-    formBerita.reset();
-    el('b-publish').checked = true;
     kabar.className = 'alert alert-sukses';
-    kabar.innerHTML = ik('ceklis', 18, 2.4) + '<div><strong>Berita baru berhasil ditambahkan.</strong> Buka halaman Berita di sisi website untuk melihat hasilnya.</div>';
+    kabar.innerHTML = ik('ceklis', 18, 2.4) + '<div><strong>Berita berhasil disimpan.</strong> Buka halaman Berita di sisi website untuk melihat hasilnya.</div>';
     kabar.hidden = false;
     gambarAdminBerita();
     gambarBerandaBerita();
@@ -3071,12 +3149,29 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
         '<td class="angka">' + angka(b.dibaca) + '</td>' +
         '<td><button type="button" class="badge ' + (b.publish ? 'bg-hijau' : 'bg-abu') + '" style="border: 0; cursor: pointer;" data-terbit="' + esc(b.id) + '">' +
           (b.publish ? 'Terbit' : 'Draf') + '</button></td>' +
-        '<td><button type="button" class="btn btn-kecil btn-merah-garis" data-hapus="' + esc(b.id) + '">Hapus</button></td></tr>';
+        '<td style="white-space: nowrap;"><button type="button" class="btn btn-kecil btn-garis" data-ubah="' + esc(b.id) + '">Ubah</button> ' +
+        '<button type="button" class="btn btn-kecil btn-merah-garis" data-hapus="' + esc(b.id) + '">Hapus</button></td></tr>';
     }).join('');
     tbody.querySelectorAll('[data-terbit]').forEach(function (b) {
       b.addEventListener('click', function () {
         var t = db.berita.filter(function (x) { return x.id === b.dataset.terbit; })[0];
         if (t) { t.publish = t.publish ? 0 : 1; simpan(); gambarAdminBerita(); gambarBerandaBerita(); }
+      });
+    });
+    tbody.querySelectorAll('[data-ubah]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = db.berita.filter(function (x) { return x.id === b.dataset.ubah; })[0];
+        if (!t) { return; }
+        ubahBerita = t.id;
+        el('b-judul').value = t.judul;
+        el('b-kat').value = t.kategori;
+        el('b-ringkas').value = t.ringkasan || '';
+        el('b-isi').value = t.isi;
+        el('b-publish').checked = !!t.publish;
+        el('judul-form-berita').textContent = 'Ubah Berita';
+        el('tombol-berita').textContent = 'Simpan Perubahan';
+        el('batal-berita').hidden = false;
+        el('form-berita').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
     tbody.querySelectorAll('[data-hapus]').forEach(function (b) {
@@ -3148,12 +3243,471 @@ button.item-galeri { border: 0; padding: 0; width: 100%; background: none; curso
     });
   }
 
+  /* ================= menerapkan pengaturan ke sisi website ================= */
+  function daftarMisi() {
+    return bersih(SET.misi).split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+
+  function terapkanPengaturan() {
+    var turunan = {
+      periode: tglIndo(SET.ppdb_mulai) + ' –<br>' + tglIndo(SET.ppdb_selesai),
+      periode_panjang: tglIndo(SET.ppdb_mulai) + ' sampai ' + tglIndo(SET.ppdb_selesai),
+      ppdb_pengumuman: tglIndo(SET.ppdb_pengumuman),
+      jumlah_misi: daftarMisi().length + ' butir misi sekolah'
+    };
+    document.querySelectorAll('[data-set]').forEach(function (n) {
+      var k = n.dataset.set;
+      if (turunan[k] != null) {
+        if (k === 'periode') { n.innerHTML = turunan[k]; } else { n.textContent = turunan[k]; }
+      } else {
+        n.textContent = bersih(SET[k]);
+      }
+    });
+
+    var m = el('daftar-misi');
+    if (m) {
+      var poin = daftarMisi();
+      m.innerHTML = poin.length ? poin.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('')
+        : '<li class="lirih">Belum diisi.</li>';
+    }
+
+    var ti = el('tabel-identitas');
+    if (ti) {
+      ti.innerHTML = [
+        ['Nama', SET.nama_sekolah], ['NPSN', SET.npsn], ['Akreditasi', SET.akreditasi],
+        ['Status', SET.status_sekolah], ['Kepala Sekolah', SET.kepala_sekolah],
+        ['Alamat', SET.alamat], ['Telepon', SET.telepon], ['Email', SET.email],
+        ['Jam Layanan', SET.jam_operasional]
+      ].map(function (r) {
+        return '<tr><th style="text-align: left; font-weight: 400; color: #6b7280; padding: 7px 0;">' + esc(r[0]) +
+          '</th><td style="font-weight: 600; padding: 7px 0;">' + esc(r[1] || '-') + '</td></tr>';
+      }).join('');
+    }
+
+    /* tombol WhatsApp hanya muncul bila nomornya diisi, seperti aplikasi asli */
+    var wa = el('tombol-wa');
+    if (wa) { wa.hidden = !bersih(SET.whatsapp).trim(); }
+
+    document.title = 'Demo PPDB Online ' + SET.nama_sekolah;
+  }
+
+  /* ================= kelola peminatan ================= */
+  var ubahMinat = -1;
+
+  function gambarPeminatan() {
+    var f = ubahMinat >= 0 ? db.peminatan[ubahMinat] : { kode: '', nama: '', ket: '', kuota: 0, ik: 'topi', aktif: 1 };
+    el('apanel-jurusan').innerHTML =
+      '<div class="baris" style="grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: start;">' +
+        '<div class="panel"><div class="panel-kepala"><h2>' + (ubahMinat >= 0 ? 'Ubah Peminatan' : 'Tambah Peminatan') + '</h2>' +
+          (ubahMinat >= 0 ? '<button type="button" class="btn btn-kecil btn-netral kanan" id="mn-batal">Batal</button>' : '') + '</div>' +
+          '<div class="panel-isi tumpuk">' +
+            '<div class="baris baris-2 baris-rapat">' +
+              '<div class="ladang"><label class="form-label" for="mn-kode">Kode <span class="wajib">*</span></label>' +
+                '<input type="text" id="mn-kode" class="form-control" value="' + esc(f.kode) + '" placeholder="MIPA"></div>' +
+              '<div class="ladang"><label class="form-label" for="mn-kuota">Kuota</label>' +
+                '<input type="number" id="mn-kuota" class="form-control" min="0" value="' + (f.kuota || 0) + '"></div>' +
+            '</div>' +
+            '<div class="ladang"><label class="form-label" for="mn-nama">Nama Peminatan <span class="wajib">*</span></label>' +
+              '<input type="text" id="mn-nama" class="form-control" value="' + esc(f.nama) + '"></div>' +
+            '<div class="ladang"><label class="form-label" for="mn-ket">Deskripsi</label>' +
+              '<textarea id="mn-ket" class="form-control" rows="3">' + esc(f.ket) + '</textarea></div>' +
+            '<div class="ladang"><label class="form-label" for="mn-ik">Ikon</label>' +
+              '<select id="mn-ik" class="form-select">' +
+                [['topi', 'Umum'], ['kalkulator', 'MIPA / Eksakta'], ['globe', 'IPS / Sosial'], ['bahasa', 'Bahasa'], ['komputer', 'Teknologi']]
+                  .map(function (o) { return '<option value="' + o[0] + '"' + (f.ik === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
+              '</select></div>' +
+            '<div class="centang"><input type="checkbox" id="mn-aktif"' + (f.aktif ? ' checked' : '') + '>' +
+              '<label for="mn-aktif">Aktif (tampil pada formulir pendaftaran)</label></div>' +
+            '<button type="button" class="btn btn-daftar" id="mn-simpan">' + (ubahMinat >= 0 ? 'Simpan Perubahan' : 'Tambah Peminatan') + '</button>' +
+            '<div id="mn-kabar" hidden></div>' +
+          '</div></div>' +
+        '<div class="panel"><div class="panel-kepala"><h2>Daftar Peminatan</h2>' +
+          '<span class="badge bg-terang kanan">Tahun ajaran ' + esc(SET.ppdb_tahun) + '</span></div>' +
+          '<div class="tabel-bungkus"><table class="table tabel-admin">' +
+            '<thead><tr><th>Kode</th><th>Nama</th><th class="angka">Kuota</th><th class="angka">Pendaftar</th><th>Status</th><th>Aksi</th></tr></thead><tbody>' +
+            (db.peminatan.length ? db.peminatan.map(function (m, i) {
+              var isi = db.pendaftar.filter(function (p) { return p.minat === m.nama; }).length;
+              return '<tr><td>' + kode(m.kode) + '</td><td><strong>' + esc(m.nama) + '</strong></td>' +
+                '<td class="angka">' + m.kuota + '</td><td class="angka">' + isi + '</td>' +
+                '<td><button type="button" class="badge ' + (m.aktif ? 'bg-hijau' : 'bg-abu') + '" style="border: 0; cursor: pointer;" data-mn-aktif="' + i + '">' +
+                  (m.aktif ? 'Aktif' : 'Nonaktif') + '</button></td>' +
+                '<td style="white-space: nowrap;"><button type="button" class="btn btn-kecil btn-garis" data-mn-ubah="' + i + '">Ubah</button> ' +
+                  '<button type="button" class="btn btn-kecil btn-merah-garis" data-mn-hapus="' + i + '">Hapus</button></td></tr>';
+            }).join('') : '<tr><td colspan="6" class="isian-kosong">Belum ada peminatan.</td></tr>') +
+          '</tbody></table></div></div>' +
+      '</div>';
+
+    var b = el('mn-batal');
+    if (b) { b.addEventListener('click', function () { ubahMinat = -1; gambarPeminatan(); }); }
+
+    el('mn-simpan').addEventListener('click', function () {
+      var kd = bersih(el('mn-kode').value).trim().toUpperCase();
+      var nm = bersih(el('mn-nama').value).trim();
+      var kabar = el('mn-kabar');
+      if (!kd || !nm) {
+        kabar.className = 'alert alert-galat';
+        kabar.innerHTML = ik('silang', 18, 2.2) + '<div>Kode dan nama peminatan wajib diisi.</div>';
+        kabar.hidden = false;
+        return;
+      }
+      var kembar = db.peminatan.filter(function (m, i) { return m.kode === kd && i !== ubahMinat; })[0];
+      if (kembar) {
+        kabar.className = 'alert alert-galat';
+        kabar.innerHTML = ik('silang', 18, 2.2) + '<div>Kode <strong>' + esc(kd) + '</strong> sudah digunakan.</div>';
+        kabar.hidden = false;
+        return;
+      }
+      var isi = {
+        kode: kd, nama: nm, ket: bersih(el('mn-ket').value).trim(),
+        kuota: Math.max(0, parseInt(el('mn-kuota').value, 10) || 0),
+        ik: el('mn-ik').value, aktif: el('mn-aktif').checked ? 1 : 0
+      };
+      if (ubahMinat >= 0) { db.peminatan[ubahMinat] = isi; ubahMinat = -1; }
+      else { db.peminatan.push(isi); }
+      simpan();
+      gambarPeminatan();
+      gambarPublik();
+    });
+
+    el('apanel-jurusan').querySelectorAll('[data-mn-ubah]').forEach(function (b2) {
+      b2.addEventListener('click', function () { ubahMinat = Number(b2.dataset.mnUbah); gambarPeminatan(); });
+    });
+    el('apanel-jurusan').querySelectorAll('[data-mn-aktif]').forEach(function (b2) {
+      b2.addEventListener('click', function () {
+        var m = db.peminatan[Number(b2.dataset.mnAktif)];
+        m.aktif = m.aktif ? 0 : 1;
+        simpan(); gambarPeminatan(); gambarPublik();
+      });
+    });
+    el('apanel-jurusan').querySelectorAll('[data-mn-hapus]').forEach(function (b2) {
+      b2.addEventListener('click', function () {
+        var i = Number(b2.dataset.mnHapus);
+        var m = db.peminatan[i];
+        var pakai = db.pendaftar.filter(function (p) { return p.minat === m.nama; }).length;
+        if (pakai) {
+          alert('Peminatan "' + m.nama + '" tidak dapat dihapus karena sudah memiliki ' + pakai +
+            ' pendaftar. Nonaktifkan saja agar tidak muncul pada formulir pendaftaran.');
+          return;
+        }
+        db.peminatan.splice(i, 1);
+        if (ubahMinat === i) { ubahMinat = -1; }
+        simpan(); gambarPeminatan(); gambarPublik();
+      });
+    });
+  }
+
+  /* ================= kelola galeri ================= */
+  function gambarAdminGaleri() {
+    el('apanel-galeri').innerHTML =
+      '<div class="baris" style="grid-template-columns: 1fr 1.4fr; gap: 20px; align-items: start;">' +
+        '<div class="panel"><div class="panel-kepala"><h2>Tambah Foto</h2></div><div class="panel-isi tumpuk">' +
+          '<div class="alert alert-info" style="font-size: 12.5px;">' + ik('info', 17, 2.2) +
+            '<div>Pada aplikasi asli, di sini ada pemilih berkas foto berukuran maksimal 2 MB. Demo tanpa server ' +
+            'menggantinya dengan pilihan warna.</div></div>' +
+          '<div class="ladang"><label class="form-label" for="gl-judul">Judul Foto <span class="wajib">*</span></label>' +
+            '<input type="text" id="gl-judul" class="form-control" placeholder="Contoh: Kegiatan Pramuka 2026"></div>' +
+          '<div class="ladang"><label class="form-label" for="gl-kat">Kategori</label>' +
+            '<input type="text" id="gl-kat" class="form-control" list="kat-galeri-ada" placeholder="Contoh: Ekstrakurikuler">' +
+            '<datalist id="kat-galeri-ada">' +
+              db.galeri.reduce(function (a, g) { if (g.kategori && a.indexOf(g.kategori) === -1) { a.push(g.kategori); } return a; }, [])
+                .map(function (k) { return '<option value="' + esc(k) + '">'; }).join('') +
+            '</datalist></div>' +
+          '<div class="ladang"><label class="form-label" for="gl-warna">Warna pengganti foto</label>' +
+            '<select id="gl-warna" class="form-select">' +
+              GRADIEN.map(function (g, i) { return '<option value="' + i + '">Warna ' + (i + 1) + '</option>'; }).join('') +
+            '</select></div>' +
+          '<button type="button" class="btn btn-daftar" id="gl-simpan">Tambah ke Galeri</button>' +
+          '<div id="gl-kabar" hidden></div>' +
+        '</div></div>' +
+        '<div class="panel"><div class="panel-kepala"><h2>Daftar Foto</h2>' +
+          '<span class="badge bg-terang kanan">' + db.galeri.length + ' foto</span></div>' +
+          '<div class="panel-isi">' + (db.galeri.length
+            ? '<div class="baris baris-3 baris-rapat">' + db.galeri.map(function (g, i) {
+                return '<div style="border: 1px solid var(--garis); border-radius: 12px; overflow: hidden;">' +
+                  '<div class="gambar-tiruan" style="background: ' + grad(g.g) + '; aspect-ratio: 4/3;">[FOTO]</div>' +
+                  '<div style="padding: 10px;"><div style="font-weight: 600; font-size: 13px;">' + esc(g.judul) + '</div>' +
+                  (g.kategori ? '<span class="badge bg-terang" style="font-size: 10.5px;">' + esc(g.kategori) + '</span>' : '') +
+                  '<button type="button" class="btn btn-kecil btn-merah-garis" style="width: 100%; margin-top: 8px;" data-gl-hapus="' + i + '">Hapus</button>' +
+                  '</div></div>';
+              }).join('') + '</div>'
+            : '<div class="isian-kosong">Galeri masih kosong.</div>') +
+        '</div></div>' +
+      '</div>';
+
+    el('gl-simpan').addEventListener('click', function () {
+      var j = bersih(el('gl-judul').value).trim();
+      var kabar = el('gl-kabar');
+      if (!j) {
+        kabar.className = 'alert alert-galat';
+        kabar.innerHTML = ik('silang', 18, 2.2) + '<div>Judul foto wajib diisi.</div>';
+        kabar.hidden = false;
+        return;
+      }
+      db.galeri.unshift({ judul: j, kategori: bersih(el('gl-kat').value).trim(), g: Number(el('gl-warna').value) || 0 });
+      simpan();
+      gambarAdminGaleri();
+      gambarGaleri();
+      var k2 = el('gl-kabar');
+      k2.className = 'alert alert-sukses';
+      k2.innerHTML = ik('ceklis', 18, 2.4) + '<div><strong>Foto ditambahkan.</strong> Buka halaman Galeri di sisi website untuk melihatnya.</div>';
+      k2.hidden = false;
+    });
+
+    el('apanel-galeri').querySelectorAll('[data-gl-hapus]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        db.galeri.splice(Number(b.dataset.glHapus), 1);
+        simpan(); gambarAdminGaleri(); gambarGaleri();
+      });
+    });
+  }
+
+  /* ================= kelola fasilitas ================= */
+  var ubahFas = -1;
+
+  function gambarAdminFasilitas() {
+    var f = ubahFas >= 0 ? db.fasilitas[ubahFas] : { nama: '', ket: '', ik: 'gedung' };
+    var PILIH_IK = [['gedung', 'Gedung'], ['komputer', 'Lab Komputer'], ['labu', 'Laboratorium'], ['buku', 'Perpustakaan'],
+      ['bola', 'Olahraga'], ['bulan', 'Ibadah'], ['kelas', 'Ruang Kelas'], ['uks', 'Kesehatan / UKS'], ['kantin', 'Kantin / Koperasi']];
+    el('apanel-fasilitas').innerHTML =
+      '<div class="baris" style="grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: start;">' +
+        '<div class="panel"><div class="panel-kepala"><h2>' + (ubahFas >= 0 ? 'Ubah Fasilitas' : 'Tambah Fasilitas') + '</h2>' +
+          (ubahFas >= 0 ? '<button type="button" class="btn btn-kecil btn-netral kanan" id="fs-batal">Batal</button>' : '') + '</div>' +
+          '<div class="panel-isi tumpuk">' +
+            '<div class="ladang"><label class="form-label" for="fs-nama">Nama Fasilitas <span class="wajib">*</span></label>' +
+              '<input type="text" id="fs-nama" class="form-control" value="' + esc(f.nama) + '"></div>' +
+            '<div class="ladang"><label class="form-label" for="fs-ket">Deskripsi</label>' +
+              '<textarea id="fs-ket" class="form-control" rows="4">' + esc(f.ket) + '</textarea></div>' +
+            '<div class="ladang"><label class="form-label" for="fs-ik">Ikon</label>' +
+              '<select id="fs-ik" class="form-select">' + PILIH_IK.map(function (o) {
+                return '<option value="' + o[0] + '"' + (f.ik === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+              }).join('') + '</select></div>' +
+            '<button type="button" class="btn btn-daftar" id="fs-simpan">' + (ubahFas >= 0 ? 'Simpan Perubahan' : 'Tambah Fasilitas') + '</button>' +
+            '<div id="fs-kabar" hidden></div>' +
+          '</div></div>' +
+        '<div class="panel"><div class="panel-kepala"><h2>Daftar Fasilitas</h2>' +
+          '<span class="badge bg-terang kanan">' + db.fasilitas.length + ' data</span></div>' +
+          '<div class="tabel-bungkus"><table class="table tabel-admin">' +
+            '<thead><tr><th>Fasilitas</th><th>Deskripsi</th><th>Aksi</th></tr></thead><tbody>' +
+            (db.fasilitas.length ? db.fasilitas.map(function (x, i) {
+              return '<tr><td><span style="color: #12508f;">' + ik(x.ik, 16) + '</span> <strong>' + esc(x.nama) + '</strong></td>' +
+                '<td style="font-size: 12.5px; color: var(--teks-samar);">' + esc(x.ket.length > 70 ? x.ket.slice(0, 69) + '…' : x.ket) + '</td>' +
+                '<td style="white-space: nowrap;"><button type="button" class="btn btn-kecil btn-garis" data-fs-ubah="' + i + '">Ubah</button> ' +
+                '<button type="button" class="btn btn-kecil btn-merah-garis" data-fs-hapus="' + i + '">Hapus</button></td></tr>';
+            }).join('') : '<tr><td colspan="3" class="isian-kosong">Belum ada fasilitas.</td></tr>') +
+          '</tbody></table></div></div>' +
+      '</div>';
+
+    var b = el('fs-batal');
+    if (b) { b.addEventListener('click', function () { ubahFas = -1; gambarAdminFasilitas(); }); }
+
+    el('fs-simpan').addEventListener('click', function () {
+      var nm = bersih(el('fs-nama').value).trim();
+      var kabar = el('fs-kabar');
+      if (!nm) {
+        kabar.className = 'alert alert-galat';
+        kabar.innerHTML = ik('silang', 18, 2.2) + '<div>Nama fasilitas wajib diisi.</div>';
+        kabar.hidden = false;
+        return;
+      }
+      var isi = { nama: nm, ket: bersih(el('fs-ket').value).trim(), ik: el('fs-ik').value };
+      if (ubahFas >= 0) { db.fasilitas[ubahFas] = isi; ubahFas = -1; } else { db.fasilitas.push(isi); }
+      simpan();
+      gambarAdminFasilitas();
+      gambarFasilitas();
+    });
+
+    el('apanel-fasilitas').querySelectorAll('[data-fs-ubah]').forEach(function (b2) {
+      b2.addEventListener('click', function () { ubahFas = Number(b2.dataset.fsUbah); gambarAdminFasilitas(); });
+    });
+    el('apanel-fasilitas').querySelectorAll('[data-fs-hapus]').forEach(function (b2) {
+      b2.addEventListener('click', function () {
+        db.fasilitas.splice(Number(b2.dataset.fsHapus), 1);
+        if (ubahFas === Number(b2.dataset.fsHapus)) { ubahFas = -1; }
+        simpan(); gambarAdminFasilitas(); gambarFasilitas();
+      });
+    });
+  }
+
+  /* ================= pengaturan ================= */
+  var SET_GRUP = [
+    ['Profil Sekolah', [
+      ['nama_sekolah', 'Nama Sekolah', 'text'], ['tagline', 'Tagline / Slogan', 'text'],
+      ['npsn', 'NPSN', 'text'], ['akreditasi', 'Akreditasi', 'text'],
+      ['status_sekolah', 'Status Sekolah', 'pilih:Negeri|Swasta'],
+      ['kepala_sekolah', 'Nama Kepala Sekolah', 'text'],
+      ['sambutan', 'Sambutan Kepala Sekolah', 'area'], ['sejarah', 'Sejarah Singkat', 'area'],
+      ['visi', 'Visi', 'area'], ['misi', 'Misi (satu baris = satu poin)', 'area']
+    ]],
+    ['Kontak', [
+      ['alamat', 'Alamat Lengkap', 'area'], ['kota', 'Kota / Kabupaten', 'text'],
+      ['telepon', 'Telepon', 'text'], ['whatsapp', 'Nomor WhatsApp panitia (format 62xxx)', 'text'],
+      ['email', 'Email', 'text'], ['jam_operasional', 'Jam Layanan', 'text']
+    ]],
+    ['Pengaturan PPDB', [
+      ['ppdb_tahun', 'Tahun Ajaran Aktif', 'text'], ['ppdb_kuota', 'Total Kuota Penerimaan', 'number'],
+      ['ppdb_mulai', 'Tanggal Mulai', 'date'], ['ppdb_selesai', 'Tanggal Akhir', 'date'],
+      ['ppdb_pengumuman', 'Tanggal Pengumuman Hasil', 'date'], ['ppdb_biaya', 'Informasi Biaya', 'text']
+    ]],
+    ['Angka Statistik Beranda', [
+      ['jml_siswa', 'Jumlah Peserta Didik', 'number'], ['jml_guru', 'Jumlah Guru', 'number'],
+      ['jml_prestasi', 'Jumlah Prestasi', 'number'], ['jml_alumni', 'Jumlah Alumni', 'number']
+    ]]
+  ];
+
+  function gambarPengaturan() {
+    el('apanel-pengaturan').innerHTML =
+      '<div class="panel"><div class="panel-kepala"><h2>Pengaturan Website &amp; PPDB</h2>' +
+        '<button type="button" class="btn btn-kecil btn-daftar kanan" id="st-simpan-atas">Simpan Semua Perubahan</button></div>' +
+        '<div class="panel-isi">' +
+          '<div class="alert alert-info" style="margin-bottom: 20px; font-size: 13px;">' + ik('info', 17, 2.2) +
+            '<div>Inilah menu yang membuat sekolah dapat mengelola websitenya sendiri. Ubah nilai di bawah, ' +
+            'tekan Simpan, lalu buka sisi Website Sekolah &mdash; perubahannya langsung terlihat tanpa menyentuh kode.</div></div>' +
+          '<div id="st-kabar" hidden style="margin-bottom: 18px;"></div>' +
+          SET_GRUP.map(function (g, gi) {
+            return '<div class="judul-seksi"><span class="nomor">' + (gi + 1) + '</span>' + esc(g[0]) + '</div>' +
+              '<div class="baris baris-2 baris-rapat" style="margin-bottom: 26px;">' +
+                g[1].map(function (f) {
+                  var kunci = f[0], label = f[1], tipe = f[2];
+                  var nilai = esc(SET[kunci]);
+                  var kolom;
+                  if (tipe === 'area') {
+                    kolom = '<textarea id="st-' + kunci + '" class="form-control" rows="' +
+                      (kunci === 'misi' || kunci === 'sambutan' || kunci === 'sejarah' ? 5 : 3) + '">' + nilai + '</textarea>';
+                  } else if (tipe.indexOf('pilih:') === 0) {
+                    kolom = '<select id="st-' + kunci + '" class="form-select">' +
+                      tipe.slice(6).split('|').map(function (o) {
+                        return '<option' + (SET[kunci] === o ? ' selected' : '') + '>' + esc(o) + '</option>';
+                      }).join('') + '</select>';
+                  } else {
+                    kolom = '<input type="' + tipe + '" id="st-' + kunci + '" class="form-control" value="' + nilai + '">';
+                  }
+                  return '<div class="ladang' + (tipe === 'area' ? ' span2' : '') + '">' +
+                    '<label class="form-label" for="st-' + kunci + '">' + esc(label) + '</label>' + kolom +
+                    (kunci === 'whatsapp' ? '<div class="form-text">Kosongkan bila belum ada. Tombol WhatsApp mengapung otomatis tersembunyi saat kosong.</div>' : '') +
+                    (kunci === 'misi' ? '<div class="form-text">Tekan Enter untuk memisahkan poin. Jumlah butirnya bebas.</div>' : '') +
+                    '</div>';
+                }).join('') +
+              '</div>';
+          }).join('') +
+          '<div class="sejajar"><button type="button" class="btn btn-daftar" id="st-simpan">Simpan Semua Perubahan</button>' +
+          '<button type="button" class="btn btn-netral" id="st-kembalikan">Kembalikan ke Nilai Awal</button></div>' +
+        '</div></div>';
+
+    function simpanSet() {
+      var jml = 0;
+      SET_GRUP.forEach(function (g) {
+        g[1].forEach(function (f) {
+          var n = el('st-' + f[0]);
+          if (!n) { return; }
+          var v = bersih(n.value).trim();
+          if (f[0] === 'whatsapp' && v) {
+            v = v.replace(/\D/g, '');
+            if (v.indexOf('0') === 0) { v = '62' + v.slice(1); }
+          }
+          if (SET[f[0]] !== v) { jml++; }
+          SET[f[0]] = v;
+        });
+      });
+      simpan();
+      terapkanPengaturan();
+      gambarPublik();
+      bangunSidebar();
+      var kabar = el('st-kabar');
+      kabar.className = 'alert alert-sukses';
+      kabar.innerHTML = ik('ceklis', 18, 2.4) + '<div><strong>' + jml + ' pengaturan disimpan.</strong> ' +
+        'Buka sisi Website Sekolah untuk melihat hasilnya.</div>';
+      kabar.hidden = false;
+      kabar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    el('st-simpan').addEventListener('click', simpanSet);
+    el('st-simpan-atas').addEventListener('click', simpanSet);
+    el('st-kembalikan').addEventListener('click', function () {
+      db.pengaturan = benihPengaturan();
+      segarkanRujukan();
+      simpan();
+      terapkanPengaturan();
+      gambarPublik();
+      gambarPengaturan();
+    });
+  }
+
+  /* ================= akun pengguna ================= */
+  function gambarPengguna() {
+    el('apanel-pengguna').innerHTML =
+      '<div class="baris" style="grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: start;">' +
+        '<div class="panel"><div class="panel-kepala"><h2>Tambah Pengguna</h2></div><div class="panel-isi tumpuk">' +
+          '<div class="ladang"><label class="form-label" for="pg-nama">Nama Lengkap <span class="wajib">*</span></label>' +
+            '<input type="text" id="pg-nama" class="form-control"></div>' +
+          '<div class="ladang"><label class="form-label" for="pg-user">Nama Pengguna <span class="wajib">*</span></label>' +
+            '<input type="text" id="pg-user" class="form-control" autocapitalize="none">' +
+            '<div class="form-text">Minimal 4 karakter: huruf, angka, titik, atau garis bawah.</div></div>' +
+          '<div class="ladang"><label class="form-label" for="pg-role">Peran</label>' +
+            '<select id="pg-role" class="form-select"><option value="operator">Operator (panitia PPDB)</option>' +
+            '<option value="admin">Administrator (akses penuh)</option></select>' +
+            '<div class="form-text">Operator tidak dapat menghapus data pendaftar dan tidak dapat mengubah pengaturan.</div></div>' +
+          '<button type="button" class="btn btn-daftar" id="pg-simpan">Buat Akun</button>' +
+          '<div id="pg-kabar" hidden></div>' +
+          '<div class="alert alert-hati" style="font-size: 12.5px;">' + ik('info', 17, 2.2) +
+            '<div>Pada aplikasi asli, kata sandi diisi di sini lalu disimpan sebagai hash bcrypt. Demo tidak ' +
+            'menyimpan kata sandi sama sekali.</div></div>' +
+        '</div></div>' +
+        '<div class="panel"><div class="panel-kepala"><h2>Daftar Pengguna</h2>' +
+          '<span class="badge bg-terang kanan">' + db.pengguna.length + ' akun</span></div>' +
+          '<div class="tabel-bungkus"><table class="table tabel-admin">' +
+            '<thead><tr><th>Nama</th><th>Nama Pengguna</th><th>Peran</th><th>Masuk Terakhir</th><th>Aksi</th></tr></thead><tbody>' +
+            db.pengguna.map(function (u, i) {
+              return '<tr><td><strong>' + esc(u.nama) + '</strong>' +
+                (u.username === 'admin' ? ' <span class="badge bg-info">Anda</span>' : '') + '</td>' +
+                '<td>' + kode(u.username) + '</td>' +
+                '<td><span class="badge ' + (u.role === 'admin' ? 'bg-abu' : 'bg-terang') + '" style="text-transform: capitalize;">' + esc(u.role) + '</span></td>' +
+                '<td style="font-size: 12.5px; color: var(--teks-samar);">' + (u.masuk ? esc(tglIndo(u.masuk, true)) : 'Belum pernah') + '</td>' +
+                '<td style="white-space: nowrap;">' +
+                  (u.username === 'admin' ? '<span class="lirih" style="font-size: 12px;">akun sendiri</span>'
+                    : '<button type="button" class="btn btn-kecil btn-merah-garis" data-pg-hapus="' + i + '">Hapus</button>') +
+                '</td></tr>';
+            }).join('') +
+          '</tbody></table></div></div>' +
+      '</div>';
+
+    el('pg-simpan').addEventListener('click', function () {
+      var nm = bersih(el('pg-nama').value).trim();
+      var us = bersih(el('pg-user').value).trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+      var kabar = el('pg-kabar');
+      if (!nm || us.length < 4) {
+        kabar.className = 'alert alert-galat';
+        kabar.innerHTML = ik('silang', 18, 2.2) + '<div>Nama wajib diisi dan nama pengguna minimal 4 karakter.</div>';
+        kabar.hidden = false;
+        return;
+      }
+      if (db.pengguna.filter(function (u) { return u.username === us; })[0]) {
+        kabar.className = 'alert alert-galat';
+        kabar.innerHTML = ik('silang', 18, 2.2) + '<div>Nama pengguna <strong>' + esc(us) + '</strong> sudah digunakan.</div>';
+        kabar.hidden = false;
+        return;
+      }
+      db.pengguna.push({ id: 'u' + Date.now(), nama: nm, username: us, role: el('pg-role').value, masuk: null });
+      simpan();
+      gambarPengguna();
+    });
+
+    el('apanel-pengguna').querySelectorAll('[data-pg-hapus]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        db.pengguna.splice(Number(b.dataset.pgHapus), 1);
+        simpan(); gambarPengguna();
+      });
+    });
+  }
+
   /* ================= mulai ================= */
   ['logo-merek', 'logo-kaki', 'logo-masuk', 'logo-sidebar'].forEach(function (id) {
     var n = el(id);
     if (n) { n.innerHTML = LOGO; }
   });
+  segarkanRujukan();
   muat();
+  segarkanRujukan();
+  terapkanPengaturan();
   bangunNavbar();
   bangunSidebar();
   gambarPublik();
