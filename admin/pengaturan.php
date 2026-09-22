@@ -12,6 +12,7 @@ $kelompok = [
         'tagline'        => ['Tagline / Slogan', 'text'],
         'npsn'           => ['NPSN', 'text'],
         'akreditasi'     => ['Akreditasi', 'text'],
+        'status_sekolah' => ['Status Sekolah', 'pilih:Negeri=Negeri|Swasta=Swasta'],
         'kepala_sekolah' => ['Nama Kepala Sekolah', 'text'],
         'sambutan'       => ['Sambutan Kepala Sekolah', 'textarea'],
         'sejarah'        => ['Sejarah Singkat', 'textarea'],

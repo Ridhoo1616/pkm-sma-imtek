@@ -9,6 +9,7 @@ bidang *Manajemen Komputer & Sistem*.
 | | |
 |---|---|
 | **Judul** | Digitalisasi Profil Sekolah dan Pendaftaran Peserta Didik Baru (PPDB) Berbasis Web untuk Meningkatkan Efektivitas Promosi pada SMA IMTEK |
+| **Sekolah** | SMA IMTEK (Swasta) — NPSN 20613766, Akreditasi B<br>Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Banten 15339 |
 | **Bidang** | Manajemen Komputer & Sistem |
 | **Teknologi** | PHP 7.4+ (native, tanpa framework), MySQL/MariaDB, Bootstrap 5 |
 | **Dosen Pendamping** | Nurhayati, S.Kom., M.Kom. |

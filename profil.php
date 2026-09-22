@@ -68,6 +68,7 @@ include __DIR__ . '/includes/header.php';
               <tr><th class="text-muted fw-normal">Nama</th><td class="fw-semibold"><?= e(setting('nama_sekolah')) ?></td></tr>
               <tr><th class="text-muted fw-normal">NPSN</th><td class="fw-semibold"><?= e(setting('npsn')) ?></td></tr>
               <tr><th class="text-muted fw-normal">Akreditasi</th><td class="fw-semibold"><?= e(setting('akreditasi')) ?></td></tr>
+              <tr><th class="text-muted fw-normal">Status</th><td class="fw-semibold"><?= e(setting('status_sekolah', '-')) ?></td></tr>
               <tr><th class="text-muted fw-normal">Kepala Sekolah</th><td class="fw-semibold"><?= e(setting('kepala_sekolah')) ?></td></tr>
               <tr><th class="text-muted fw-normal">Alamat</th><td class="fw-semibold"><?= e(setting('alamat')) ?></td></tr>
               <tr><th class="text-muted fw-normal">Telepon</th><td class="fw-semibold"><?= e(setting('telepon')) ?></td></tr>
