@@ -190,3 +190,10 @@ dan `STRICT_TRANS_TABLES` aktif):
 - Peran `operator` terbukti tidak dapat membuka Pengaturan dan tidak dapat menghapus pendaftar.
 - Ekspor CSV data pendaftar dan rekap promosi menghasilkan berkas yang benar.
 - Aplikasi berjalan benar baik di akar domain maupun di **subfolder** `htdocs`.
+
+---
+
+## Lisensi
+
+Kode sumber ini dirilis di bawah [MIT License](LICENSE). Bebas dipakai,
+diubah, dan disebarkan, dengan syarat pemberitahuan hak cipta tetap disertakan.
