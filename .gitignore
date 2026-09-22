@@ -4,16 +4,19 @@
 
 # Dokumen pribadi pendaftar (KK, akta, ijazah, foto) dan gambar unggahan.
 # Struktur foldernya tetap ikut lewat .gitkeep dan .htaccess.
-uploads/*/*
-!uploads/*/.gitkeep
-!uploads/.htaccess
+legacy-php/uploads/*/*
+!legacy-php/uploads/*/.gitkeep
+!legacy-php/uploads/.htaccess
+
+# Folder unggahan backend Go (isinya sama-sama data pribadi)
+backend/data/
 
 # Cadangan basis data — bisa berisi data pribadi calon peserta didik
 *.sql.gz
 *.sql.zip
 backup/
 dump/
-!database/schema.sql
+!backend/migrations/*.sql
 
 # Berkas sementara sistem operasi
 .DS_Store
@@ -36,6 +39,21 @@ desktop.ini
 error_log
 .cache/
 
-# Berkas konfigurasi lokal, bila nanti dibuat
-config/database.local.php
+# Berkas konfigurasi lokal — memuat kredensial sungguhan
+legacy-php/config/database.local.php
 .env
+.env.local
+backend/.env
+
+# Hasil kompilasi backend Go
+/backend/backend
+/backend/server
+/backend/server-codespace
+*.test
+
+# Frontend Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+frontend/next-env.d.ts

@@ -4,14 +4,15 @@
 --  Bidang: Manajemen Komputer & Sistem
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS `sma_imtek`
-  DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `sma_imtek`;
+-- Nama basis data TIDAK ditentukan di sini. Berkas ini dijalankan oleh
+-- pelaksana migrasi backend Go pada basis data yang ditunjuk variabel
+-- lingkungan DB_NAME, sehingga satu skema yang sama bisa dipakai untuk
+-- basis data produksi maupun basis data uji tanpa mengubah berkas ini.
 
 -- ------------------------------------------------------------
 -- 1. Pengguna (admin / operator PPDB)
 -- ------------------------------------------------------------
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id`         INT AUTO_INCREMENT PRIMARY KEY,
   `nama`       VARCHAR(100)  NOT NULL,
   `username`   VARCHAR(50)   NOT NULL UNIQUE,
@@ -24,7 +25,7 @@ CREATE TABLE `users` (
 -- ------------------------------------------------------------
 -- 2. Pengaturan situs & PPDB (key-value)
 -- ------------------------------------------------------------
-CREATE TABLE `pengaturan` (
+CREATE TABLE IF NOT EXISTS `pengaturan` (
   `nama_setting` VARCHAR(60) NOT NULL PRIMARY KEY,
   `nilai`        TEXT        NULL,
   `keterangan`   VARCHAR(160) NULL
@@ -33,7 +34,7 @@ CREATE TABLE `pengaturan` (
 -- ------------------------------------------------------------
 -- 3. Peminatan / program studi
 -- ------------------------------------------------------------
-CREATE TABLE `jurusan` (
+CREATE TABLE IF NOT EXISTS `jurusan` (
   `id`        INT AUTO_INCREMENT PRIMARY KEY,
   `kode`      VARCHAR(20)  NOT NULL UNIQUE,
   `nama`      VARCHAR(100) NOT NULL,
@@ -47,7 +48,7 @@ CREATE TABLE `jurusan` (
 -- ------------------------------------------------------------
 -- 4. Pendaftar PPDB
 -- ------------------------------------------------------------
-CREATE TABLE `pendaftar` (
+CREATE TABLE IF NOT EXISTS `pendaftar` (
   `id`              INT AUTO_INCREMENT PRIMARY KEY,
   `no_registrasi`   VARCHAR(25)  NOT NULL UNIQUE,
   `tahun_ajaran`    VARCHAR(12)  NOT NULL,
@@ -120,7 +121,7 @@ CREATE TABLE `pendaftar` (
 -- ------------------------------------------------------------
 -- 5. Berita / pengumuman
 -- ------------------------------------------------------------
-CREATE TABLE `berita` (
+CREATE TABLE IF NOT EXISTS `berita` (
   `id`         INT AUTO_INCREMENT PRIMARY KEY,
   `judul`      VARCHAR(200) NOT NULL,
   `slug`       VARCHAR(220) NOT NULL UNIQUE,
@@ -139,7 +140,7 @@ CREATE TABLE `berita` (
 -- ------------------------------------------------------------
 -- 6. Galeri kegiatan
 -- ------------------------------------------------------------
-CREATE TABLE `galeri` (
+CREATE TABLE IF NOT EXISTS `galeri` (
   `id`         INT AUTO_INCREMENT PRIMARY KEY,
   `judul`      VARCHAR(160) NOT NULL,
   `kategori`   VARCHAR(60)  NULL,
@@ -151,7 +152,7 @@ CREATE TABLE `galeri` (
 -- ------------------------------------------------------------
 -- 7. Fasilitas sekolah
 -- ------------------------------------------------------------
-CREATE TABLE `fasilitas` (
+CREATE TABLE IF NOT EXISTS `fasilitas` (
   `id`        INT AUTO_INCREMENT PRIMARY KEY,
   `nama`      VARCHAR(120) NOT NULL,
   `deskripsi` TEXT         NULL,
@@ -163,7 +164,7 @@ CREATE TABLE `fasilitas` (
 -- ------------------------------------------------------------
 -- 8. Pesan dari form kontak
 -- ------------------------------------------------------------
-CREATE TABLE `pesan` (
+CREATE TABLE IF NOT EXISTS `pesan` (
   `id`         INT AUTO_INCREMENT PRIMARY KEY,
   `nama`       VARCHAR(100) NOT NULL,
   `email`      VARCHAR(120) NULL,
@@ -177,7 +178,7 @@ CREATE TABLE `pesan` (
 -- ------------------------------------------------------------
 -- 9. Statistik kunjungan (pengukuran jangkauan promosi)
 -- ------------------------------------------------------------
-CREATE TABLE `statistik_kunjungan` (
+CREATE TABLE IF NOT EXISTS `statistik_kunjungan` (
   `id`        INT AUTO_INCREMENT PRIMARY KEY,
   `tanggal`   DATE         NOT NULL,
   `halaman`   VARCHAR(120) NOT NULL,
@@ -193,10 +194,10 @@ CREATE TABLE `statistik_kunjungan` (
 -- ============================================================
 
 -- Akun admin default -> username: admin | password: admin123
-INSERT INTO `users` (`nama`, `username`, `password`, `role`) VALUES
+INSERT IGNORE INTO `users` (`nama`, `username`, `password`, `role`) VALUES
 ('Administrator', 'admin', '$2y$10$fIk0V.BZhSYKfA.dhO1NjeaJ.Pnwxixga89t20/hKxzSq8vNPVq8e', 'admin');
 
-INSERT INTO `pengaturan` (`nama_setting`, `nilai`, `keterangan`) VALUES
+INSERT IGNORE INTO `pengaturan` (`nama_setting`, `nilai`, `keterangan`) VALUES
 ('nama_sekolah',    'SMA IMTEK',                                            'Nama sekolah'),
 ('tagline',         'Unggul dalam Prestasi, Berkarakter, dan Siap Teknologi','Tagline sekolah'),
 ('npsn',            '20613766',                                             'NPSN sekolah'),
@@ -231,12 +232,12 @@ INSERT INTO `pengaturan` (`nama_setting`, `nilai`, `keterangan`) VALUES
 ('jml_alumni',      '1200',                                                  'Jumlah alumni'),
 ('jml_prestasi',    '45',                                                    'Jumlah prestasi');
 
-INSERT INTO `jurusan` (`kode`, `nama`, `deskripsi`, `kuota`, `icon`, `urutan`) VALUES
+INSERT IGNORE INTO `jurusan` (`kode`, `nama`, `deskripsi`, `kuota`, `icon`, `urutan`) VALUES
 ('MIPA', 'Peminatan MIPA', 'Fokus pada Matematika, Fisika, Kimia, dan Biologi untuk peserta didik yang ingin melanjutkan ke bidang sains, teknologi, dan kesehatan.', 90, 'bi-calculator', 1),
 ('IPS',  'Peminatan IPS',  'Fokus pada Ekonomi, Sosiologi, Geografi, dan Sejarah untuk peserta didik yang tertarik pada bidang sosial, hukum, dan bisnis.', 60, 'bi-globe-americas', 2),
 ('BHS',  'Peminatan Bahasa', 'Fokus pada Bahasa dan Sastra Indonesia, Inggris, serta bahasa asing lainnya.', 30, 'bi-translate', 3);
 
-INSERT INTO `fasilitas` (`nama`, `deskripsi`, `icon`, `urutan`) VALUES
+INSERT IGNORE INTO `fasilitas` (`nama`, `deskripsi`, `icon`, `urutan`) VALUES
 ('Laboratorium Komputer', 'Lab komputer dengan koneksi internet untuk pembelajaran informatika dan literasi digital.', 'bi-pc-display', 1),
 ('Laboratorium IPA',      'Laboratorium Fisika, Kimia, dan Biologi dengan peralatan praktikum yang memadai.', 'bi-eyedropper', 2),
 ('Perpustakaan',          'Koleksi buku pelajaran, referensi, dan bacaan umum dengan ruang baca yang nyaman.', 'bi-book', 3),
@@ -246,7 +247,7 @@ INSERT INTO `fasilitas` (`nama`, `deskripsi`, `icon`, `urutan`) VALUES
 ('Ruang UKS',             'Unit Kesehatan Sekolah untuk pertolongan pertama dan layanan kesehatan siswa.', 'bi-heart-pulse', 7),
 ('Koperasi & Kantin',     'Kantin sehat dan koperasi sekolah yang menyediakan kebutuhan siswa.', 'bi-shop', 8);
 
-INSERT INTO `berita` (`judul`, `slug`, `kategori`, `ringkasan`, `isi`, `penulis`, `publish`) VALUES
+INSERT IGNORE INTO `berita` (`judul`, `slug`, `kategori`, `ringkasan`, `isi`, `penulis`, `publish`) VALUES
 ('PPDB SMA IMTEK Tahun Ajaran 2027/2028 Resmi Dibuka',
  'ppdb-sma-imtek-tahun-ajaran-2027-2028-resmi-dibuka',
  'Pengumuman',
