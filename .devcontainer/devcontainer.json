@@ -1,0 +1,22 @@
+{
+  "name": "PPDB SMA IMTEK (PHP + MariaDB)",
+  "build": { "dockerfile": "Dockerfile" },
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Website PPDB SMA IMTEK",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "bash .devcontainer/start.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "mtxr.sqltools"
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}

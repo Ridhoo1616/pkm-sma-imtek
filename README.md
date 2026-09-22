@@ -155,7 +155,31 @@ pkm-sma-imtek/
 
 ---
 
-## Pemasangan
+## Mencoba langsung dari browser, tanpa memasang apa pun
+
+Repositori ini sudah dilengkapi konfigurasi **GitHub Codespaces**, sehingga
+aplikasi dapat dijalankan langsung dari browser tanpa memasang XAMPP.
+
+1. Pada halaman repositori, klik tombol hijau **Code**
+2. Pilih tab **Codespaces**, lalu **Create codespace on main**
+3. Tunggu penyiapan selesai (sekitar 2&ndash;3 menit pada pembuatan pertama).
+   PHP dan MariaDB dipasang otomatis, `database/schema.sql` diimpor, dan
+   server dijalankan di port 8080.
+4. Buka tab **PORTS** di bagian bawah, lalu klik alamat pada port **8080**
+
+| Bagian | Alamat |
+|---|---|
+| Website sekolah | alamat port 8080 |
+| Panel admin | alamat port 8080 + `/admin/login.php` |
+
+Akun bawaan: `admin` / `admin123`.
+
+Agar tautannya dapat dibuka orang lain, klik kanan port 8080 pada tab PORTS
+lalu pilih **Port Visibility &rarr; Public**. Perlu dicatat: tautan itu hanya
+aktif selama Codespace berjalan, dan Codespace otomatis berhenti setelah
+menganggur. Untuk pemakaian sungguhan oleh sekolah, tetap diperlukan hosting.
+
+## Pemasangan di komputer sendiri
 
 Lihat **[PANDUAN-INSTALASI.md](PANDUAN-INSTALASI.md)** untuk langkah lengkap.
 
