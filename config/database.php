@@ -21,18 +21,28 @@
  * ------------------------------------------------------------------
  */
 
-define('DB_HOST', 'localhost');
-define('DB_PORT', '3306');       // ubah bila MySQL memakai port lain
-define('DB_NAME', 'sma_imtek');
-define('DB_USER', 'root');
-define('DB_PASS', '');            // XAMPP default: kosong
-define('DB_CHARSET', 'utf8mb4');
+/*
+ | Bila berkas config/database.local.php ada, nilai di dalamnya dipakai
+ | lebih dulu dan nilai bawaan di bawah diabaikan. Berkas itu sudah masuk
+ | .gitignore, jadi kredensial hosting tidak akan ikut ter-commit.
+ | Contoh isinya ada di config/database.local.example.php.
+ */
+if (is_file(__DIR__ . '/database.local.php')) {
+    require_once __DIR__ . '/database.local.php';
+}
+
+if (!defined('DB_HOST'))    define('DB_HOST', 'localhost');
+if (!defined('DB_PORT'))    define('DB_PORT', '3306');      // ubah bila MySQL memakai port lain
+if (!defined('DB_NAME'))    define('DB_NAME', 'sma_imtek');
+if (!defined('DB_USER'))    define('DB_USER', 'root');
+if (!defined('DB_PASS'))    define('DB_PASS', '');           // XAMPP bawaan: kosong
+if (!defined('DB_CHARSET')) define('DB_CHARSET', 'utf8mb4');
 
 // Zona waktu aplikasi
 date_default_timezone_set('Asia/Jakarta');
 
 // Tampilkan error saat pengembangan, matikan saat sudah dipakai sekolah
-define('MODE_PENGEMBANGAN', true);
+if (!defined('MODE_PENGEMBANGAN')) define('MODE_PENGEMBANGAN', true);
 if (MODE_PENGEMBANGAN) {
     error_reporting(E_ALL);
     ini_set('display_errors', '1');

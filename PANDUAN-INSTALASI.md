@@ -107,6 +107,38 @@ define('DB_PASS', '');        // XAMPP bawaan: kosong
 
 Ubah hanya bila MySQL Anda memakai kata sandi atau port lain.
 
+#### Mengganti pengaturan database tanpa mengubah berkas ini
+
+Untuk hosting atau komputer lain yang pengaturannya berbeda, jangan ubah
+`config/database.php`. Buat berkas baru `config/database.local.php`, dan tulis
+hanya nilai yang berbeda:
+
+```php
+<?php
+define('DB_NAME', 'u1234567_smaimtek');
+define('DB_USER', 'u1234567_admin');
+define('DB_PASS', 'kata-sandi-dari-cpanel');
+define('MODE_PENGEMBANGAN', false);
+```
+
+Nilai yang tidak Anda tulis otomatis memakai bawaan. Berkas ini sudah tercantum
+di `.gitignore`, sehingga kredensial asli tidak akan ikut ter-commit ke
+repositori. Contoh siap pakai ada di `config/database.local.example.php`.
+
+#### Mengimpor ke hosting bersama (shared hosting)
+
+Di hosting bersama, Anda tidak diizinkan menjalankan `CREATE DATABASE`, dan nama
+database biasanya sudah ditentukan oleh panel (misalnya `u1234567_smaimtek`).
+Karena itu:
+
+1. Buat database dan penggunanya lebih dulu dari **cPanel → MySQL Databases**.
+2. Saat mengimpor `database/schema.sql` lewat phpMyAdmin, **pilih dulu database
+   yang sudah dibuat** di panel kiri, lalu hapus tiga baris pertama berkas SQL
+   yang berisi `CREATE DATABASE` dan `USE`, atau abaikan pesan galat pada dua
+   perintah itu — tabelnya tetap terbentuk.
+3. Tulis nama database, pengguna, dan kata sandinya di
+   `config/database.local.php` seperti contoh di atas.
+
 ### Langkah 4: izin menulis folder unggahan
 
 Folder `uploads/` harus dapat ditulis oleh web server.
