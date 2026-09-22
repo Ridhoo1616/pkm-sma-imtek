@@ -1,268 +1,339 @@
 -- ============================================================
---  DATABASE SISTEM INFORMASI PROFIL SEKOLAH & PPDB SMA IMTEK
+--  BASIS DATA SISTEM INFORMASI PROFIL SEKOLAH & PPDB SMA IMTEK
 --  Program Kreativitas Mahasiswa (PkM)
 --  Bidang: Manajemen Komputer & Sistem
+--
+--  PostgreSQL 14 atau lebih baru.
+--
+--  Nama basis data TIDAK ditentukan di sini. Berkas ini dijalankan
+--  oleh pelaksana migrasi backend Go pada basis data yang ditunjuk
+--  variabel lingkungan DB_NAME, sehingga satu skema yang sama bisa
+--  dipakai untuk basis data produksi maupun basis data uji.
+--
+--  Pilihan bentuk yang perlu diketahui:
+--  - Kolom berpilihan tetap memakai VARCHAR + CHECK, bukan tipe ENUM
+--    Postgres. Menambah satu pilihan pada tipe ENUM perlu ALTER TYPE,
+--    sedangkan pada CHECK cukup mengganti batasannya.
+--  - Kolom updated_at diurus trigger, karena Postgres tidak punya
+--    padanan ON UPDATE CURRENT_TIMESTAMP milik MySQL.
+--  - Seluruh nama tabel dan kolom huruf kecil, jadi tidak pernah
+--    perlu tanda kutip ganda saat dipanggil.
 -- ============================================================
 
--- Nama basis data TIDAK ditentukan di sini. Berkas ini dijalankan oleh
--- pelaksana migrasi backend Go pada basis data yang ditunjuk variabel
--- lingkungan DB_NAME, sehingga satu skema yang sama bisa dipakai untuk
--- basis data produksi maupun basis data uji tanpa mengubah berkas ini.
+-- ------------------------------------------------------------
+--  Fungsi pembantu untuk kolom updated_at
+-- ------------------------------------------------------------
+CREATE OR REPLACE FUNCTION set_updated_at() RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
 -- ------------------------------------------------------------
 -- 1. Pengguna (admin / operator PPDB)
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `users` (
-  `id`         INT AUTO_INCREMENT PRIMARY KEY,
-  `nama`       VARCHAR(100)  NOT NULL,
-  `username`   VARCHAR(50)   NOT NULL UNIQUE,
-  `password`   VARCHAR(255)  NOT NULL,
-  `role`       ENUM('admin','operator') NOT NULL DEFAULT 'operator',
-  `last_login` DATETIME      NULL,
-  `created_at` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS users (
+  id         integer      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nama       varchar(100) NOT NULL,
+  username   varchar(50)  NOT NULL UNIQUE,
+  password   varchar(255) NOT NULL,
+  role       varchar(20)  NOT NULL DEFAULT 'operator'
+               CHECK (role IN ('admin', 'operator')),
+  last_login timestamptz  NULL,
+  created_at timestamptz  NOT NULL DEFAULT now()
+);
 
 -- ------------------------------------------------------------
--- 2. Pengaturan situs & PPDB (key-value)
+-- 2. Pengaturan situs dan PPDB (pasangan nama dan nilai)
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `pengaturan` (
-  `nama_setting` VARCHAR(60) NOT NULL PRIMARY KEY,
-  `nilai`        TEXT        NULL,
-  `keterangan`   VARCHAR(160) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS pengaturan (
+  nama_setting varchar(60)  NOT NULL PRIMARY KEY,
+  nilai        text         NULL,
+  keterangan   varchar(160) NULL
+);
 
 -- ------------------------------------------------------------
--- 3. Peminatan / program studi
+-- 3. Peminatan
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `jurusan` (
-  `id`        INT AUTO_INCREMENT PRIMARY KEY,
-  `kode`      VARCHAR(20)  NOT NULL UNIQUE,
-  `nama`      VARCHAR(100) NOT NULL,
-  `deskripsi` TEXT         NULL,
-  `kuota`     INT          NOT NULL DEFAULT 0,
-  `icon`      VARCHAR(50)  NULL,
-  `aktif`     TINYINT(1)   NOT NULL DEFAULT 1,
-  `urutan`    INT          NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS jurusan (
+  id        integer      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  kode      varchar(20)  NOT NULL UNIQUE,
+  nama      varchar(100) NOT NULL,
+  deskripsi text         NULL,
+  kuota     integer      NOT NULL DEFAULT 0,
+  icon      varchar(50)  NULL,
+  aktif     boolean      NOT NULL DEFAULT true,
+  urutan    integer      NOT NULL DEFAULT 0
+);
 
 -- ------------------------------------------------------------
 -- 4. Pendaftar PPDB
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `pendaftar` (
-  `id`              INT AUTO_INCREMENT PRIMARY KEY,
-  `no_registrasi`   VARCHAR(25)  NOT NULL UNIQUE,
-  `tahun_ajaran`    VARCHAR(12)  NOT NULL,
-  `jalur`           ENUM('Reguler','Prestasi','Afirmasi','Perpindahan Tugas Orang Tua') NOT NULL DEFAULT 'Reguler',
-  `jurusan_id`      INT          NULL,
+CREATE TABLE IF NOT EXISTS pendaftar (
+  id                integer      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  no_registrasi     varchar(25)  NOT NULL UNIQUE,
+  tahun_ajaran      varchar(12)  NOT NULL,
+  jalur             varchar(40)  NOT NULL DEFAULT 'Reguler'
+                      CHECK (jalur IN ('Reguler', 'Prestasi', 'Afirmasi',
+                                       'Perpindahan Tugas Orang Tua')),
+  jurusan_id        integer      NULL REFERENCES jurusan(id) ON DELETE SET NULL,
 
-  -- Data calon peserta didik
-  `nama_lengkap`    VARCHAR(120) NOT NULL,
-  `nisn`            VARCHAR(20)  NULL,
-  `nik`             VARCHAR(20)  NULL,
-  `jenis_kelamin`   ENUM('L','P') NOT NULL,
-  `tempat_lahir`    VARCHAR(80)  NOT NULL,
-  `tanggal_lahir`   DATE         NOT NULL,
-  `agama`           VARCHAR(30)  NOT NULL,
-  `anak_ke`         VARCHAR(10)  NULL,
-  `jumlah_saudara`  VARCHAR(10)  NULL,
-  `alamat`          TEXT         NOT NULL,
-  `kelurahan`       VARCHAR(80)  NULL,
-  `kecamatan`       VARCHAR(80)  NULL,
-  `kota`            VARCHAR(80)  NULL,
-  `provinsi`        VARCHAR(80)  NULL,
-  `kode_pos`        VARCHAR(10)  NULL,
-  `no_hp`           VARCHAR(25)  NOT NULL,
-  `email`           VARCHAR(120) NULL,
+  nama_lengkap      varchar(120) NOT NULL,
+  nisn              varchar(20)  NULL,
+  nik               varchar(20)  NULL,
+  jenis_kelamin     varchar(1)   NOT NULL CHECK (jenis_kelamin IN ('L', 'P')),
+  tempat_lahir      varchar(80)  NOT NULL,
+  tanggal_lahir     date         NOT NULL,
+  agama             varchar(30)  NOT NULL,
+  anak_ke           varchar(10)  NULL,
+  jumlah_saudara    varchar(10)  NULL,
 
-  -- Asal sekolah
-  `asal_sekolah`    VARCHAR(140) NOT NULL,
-  `npsn_sekolah`    VARCHAR(20)  NULL,
-  `alamat_sekolah`  VARCHAR(200) NULL,
-  `tahun_lulus`     VARCHAR(8)   NULL,
-  `nilai_rata2`     DECIMAL(5,2) NULL,
+  alamat            text         NOT NULL,
+  kelurahan         varchar(80)  NULL,
+  kecamatan         varchar(80)  NULL,
+  kota              varchar(80)  NULL,
+  provinsi          varchar(80)  NULL,
+  kode_pos          varchar(10)  NULL,
+  no_hp             varchar(25)  NOT NULL,
+  email             varchar(120) NULL,
 
-  -- Data orang tua / wali
-  `nama_ayah`       VARCHAR(120) NOT NULL,
-  `pekerjaan_ayah`  VARCHAR(80)  NULL,
-  `pendidikan_ayah` VARCHAR(40)  NULL,
-  `nama_ibu`        VARCHAR(120) NOT NULL,
-  `pekerjaan_ibu`   VARCHAR(80)  NULL,
-  `pendidikan_ibu`  VARCHAR(40)  NULL,
-  `penghasilan`     VARCHAR(60)  NULL,
-  `no_hp_ortu`      VARCHAR(25)  NULL,
-  `nama_wali`       VARCHAR(120) NULL,
+  asal_sekolah      varchar(140) NOT NULL,
+  npsn_sekolah      varchar(20)  NULL,
+  alamat_sekolah    varchar(200) NULL,
+  tahun_lulus       varchar(8)   NULL,
+  nilai_rata2       numeric(5,2) NULL,
 
-  -- Dokumen unggahan (nama file)
-  `file_foto`       VARCHAR(160) NULL,
-  `file_ijazah`     VARCHAR(160) NULL,
-  `file_kk`         VARCHAR(160) NULL,
-  `file_akta`       VARCHAR(160) NULL,
-  `file_raport`     VARCHAR(160) NULL,
-  `file_prestasi`   VARCHAR(160) NULL,
+  nama_ayah         varchar(120) NOT NULL,
+  pekerjaan_ayah    varchar(80)  NULL,
+  pendidikan_ayah   varchar(40)  NULL,
+  nama_ibu          varchar(120) NOT NULL,
+  pekerjaan_ibu     varchar(80)  NULL,
+  pendidikan_ibu    varchar(40)  NULL,
+  penghasilan       varchar(60)  NULL,
+  no_hp_ortu        varchar(25)  NULL,
+  nama_wali         varchar(120) NULL,
 
-  -- Evaluasi efektivitas promosi
-  `sumber_informasi` VARCHAR(60) NULL COMMENT 'Kanal promosi yang membawa pendaftar',
-  `catatan_sumber`   VARCHAR(160) NULL,
+  file_foto         varchar(160) NULL,
+  file_ijazah       varchar(160) NULL,
+  file_kk           varchar(160) NULL,
+  file_akta         varchar(160) NULL,
+  file_raport       varchar(160) NULL,
+  file_prestasi     varchar(160) NULL,
 
-  -- Status seleksi
-  `status`          ENUM('Menunggu Verifikasi','Terverifikasi','Diterima','Cadangan','Ditolak') NOT NULL DEFAULT 'Menunggu Verifikasi',
-  `catatan_admin`   TEXT         NULL,
-  `diverifikasi_oleh` INT        NULL,
-  `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `ip_pendaftar`    VARCHAR(45)  NULL,
+  -- Kanal promosi yang membawa pendaftar. Kolom inilah yang menjawab
+  -- tujuan program: mengukur efektivitas promosi.
+  sumber_informasi  varchar(60)  NULL,
+  catatan_sumber    varchar(160) NULL,
 
-  INDEX `idx_status` (`status`),
-  INDEX `idx_tahun`  (`tahun_ajaran`),
-  INDEX `idx_sumber` (`sumber_informasi`),
-  CONSTRAINT `fk_pendaftar_jurusan` FOREIGN KEY (`jurusan_id`) REFERENCES `jurusan`(`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  status            varchar(30)  NOT NULL DEFAULT 'Menunggu Verifikasi'
+                      CHECK (status IN ('Menunggu Verifikasi', 'Terverifikasi',
+                                        'Diterima', 'Cadangan', 'Ditolak')),
+  catatan_admin     text         NULL,
+  diverifikasi_oleh integer      NULL REFERENCES users(id) ON DELETE SET NULL,
+  created_at        timestamptz  NOT NULL DEFAULT now(),
+  updated_at        timestamptz  NOT NULL DEFAULT now(),
+  ip_pendaftar      varchar(45)  NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_pendaftar_status ON pendaftar (status);
+CREATE INDEX IF NOT EXISTS idx_pendaftar_tahun  ON pendaftar (tahun_ajaran);
+CREATE INDEX IF NOT EXISTS idx_pendaftar_sumber ON pendaftar (sumber_informasi);
+
+-- Pendaftaran ganda ditolak basis data, bukan hanya oleh aplikasi.
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_pendaftar_orang
+  ON pendaftar (lower(nama_lengkap), tanggal_lahir, tahun_ajaran);
+
+DROP TRIGGER IF EXISTS pendaftar_updated_at ON pendaftar;
+CREATE TRIGGER pendaftar_updated_at BEFORE UPDATE ON pendaftar
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ------------------------------------------------------------
--- 5. Berita / pengumuman
+-- 5. Berita dan pengumuman
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `berita` (
-  `id`         INT AUTO_INCREMENT PRIMARY KEY,
-  `judul`      VARCHAR(200) NOT NULL,
-  `slug`       VARCHAR(220) NOT NULL UNIQUE,
-  `kategori`   ENUM('Berita','Pengumuman','Prestasi','Kegiatan') NOT NULL DEFAULT 'Berita',
-  `ringkasan`  VARCHAR(300) NULL,
-  `isi`        LONGTEXT     NOT NULL,
-  `gambar`     VARCHAR(160) NULL,
-  `penulis`    VARCHAR(100) NULL,
-  `dibaca`     INT          NOT NULL DEFAULT 0,
-  `publish`    TINYINT(1)   NOT NULL DEFAULT 1,
-  `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX `idx_publish` (`publish`, `created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS berita (
+  id         integer      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  judul      varchar(200) NOT NULL,
+  slug       varchar(220) NOT NULL UNIQUE,
+  kategori   varchar(20)  NOT NULL DEFAULT 'Berita'
+               CHECK (kategori IN ('Berita', 'Pengumuman', 'Prestasi', 'Kegiatan')),
+  ringkasan  varchar(300) NULL,
+  isi        text         NOT NULL,
+  gambar     varchar(160) NULL,
+  penulis    varchar(100) NULL,
+  dibaca     integer      NOT NULL DEFAULT 0,
+  publish    boolean      NOT NULL DEFAULT true,
+  created_at timestamptz  NOT NULL DEFAULT now(),
+  updated_at timestamptz  NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_berita_publish ON berita (publish, created_at);
+
+DROP TRIGGER IF EXISTS berita_updated_at ON berita;
+CREATE TRIGGER berita_updated_at BEFORE UPDATE ON berita
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ------------------------------------------------------------
 -- 6. Galeri kegiatan
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `galeri` (
-  `id`         INT AUTO_INCREMENT PRIMARY KEY,
-  `judul`      VARCHAR(160) NOT NULL,
-  `kategori`   VARCHAR(60)  NULL,
-  `gambar`     VARCHAR(160) NOT NULL,
-  `keterangan` VARCHAR(300) NULL,
-  `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS galeri (
+  id         integer      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  judul      varchar(160) NOT NULL,
+  kategori   varchar(60)  NULL,
+  gambar     varchar(160) NOT NULL,
+  keterangan varchar(300) NULL,
+  created_at timestamptz  NOT NULL DEFAULT now()
+);
 
 -- ------------------------------------------------------------
 -- 7. Fasilitas sekolah
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `fasilitas` (
-  `id`        INT AUTO_INCREMENT PRIMARY KEY,
-  `nama`      VARCHAR(120) NOT NULL,
-  `deskripsi` TEXT         NULL,
-  `gambar`    VARCHAR(160) NULL,
-  `icon`      VARCHAR(50)  NULL,
-  `urutan`    INT          NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS fasilitas (
+  id        integer      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nama      varchar(120) NOT NULL,
+  deskripsi text         NULL,
+  gambar    varchar(160) NULL,
+  icon      varchar(50)  NULL,
+  urutan    integer      NOT NULL DEFAULT 0
+);
 
 -- ------------------------------------------------------------
--- 8. Pesan dari form kontak
+-- 8. Pesan dari formulir kontak
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `pesan` (
-  `id`         INT AUTO_INCREMENT PRIMARY KEY,
-  `nama`       VARCHAR(100) NOT NULL,
-  `email`      VARCHAR(120) NULL,
-  `no_hp`      VARCHAR(25)  NULL,
-  `subjek`     VARCHAR(160) NULL,
-  `isi`        TEXT         NOT NULL,
-  `dibaca`     TINYINT(1)   NOT NULL DEFAULT 0,
-  `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS pesan (
+  id         integer      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nama       varchar(100) NOT NULL,
+  email      varchar(120) NULL,
+  no_hp      varchar(25)  NULL,
+  subjek     varchar(160) NULL,
+  isi        text         NOT NULL,
+  dibaca     boolean      NOT NULL DEFAULT false,
+  created_at timestamptz  NOT NULL DEFAULT now()
+);
 
 -- ------------------------------------------------------------
--- 9. Statistik kunjungan (pengukuran jangkauan promosi)
+-- 9. Statistik kunjungan halaman
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `statistik_kunjungan` (
-  `id`        INT AUTO_INCREMENT PRIMARY KEY,
-  `tanggal`   DATE         NOT NULL,
-  `halaman`   VARCHAR(120) NOT NULL,
-  `referer`   VARCHAR(255) NULL,
-  `ip`        VARCHAR(45)  NULL,
-  `jumlah`    INT          NOT NULL DEFAULT 1,
-  UNIQUE KEY `uniq_kunjungan` (`tanggal`, `halaman`, `ip`),
-  INDEX `idx_tanggal` (`tanggal`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS statistik_kunjungan (
+  id      integer      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  tanggal date         NOT NULL,
+  halaman varchar(120) NOT NULL,
+  referer varchar(255) NULL,
+  ip      varchar(45)  NULL,
+  jumlah  integer      NOT NULL DEFAULT 1,
+  UNIQUE (tanggal, halaman, ip)
+);
+
+CREATE INDEX IF NOT EXISTS idx_kunjungan_tanggal ON statistik_kunjungan (tanggal);
 
 -- ============================================================
 --  DATA AWAL
 -- ============================================================
 
--- Akun admin default -> username: admin | password: admin123
-INSERT IGNORE INTO `users` (`nama`, `username`, `password`, `role`) VALUES
-('Administrator', 'admin', '$2y$10$fIk0V.BZhSYKfA.dhO1NjeaJ.Pnwxixga89t20/hKxzSq8vNPVq8e', 'admin');
+-- Akun admin bawaan: username admin, kata sandi admin123.
+-- WAJIB diganti sebelum dipakai sungguhan, karena hash ini ada di
+-- dalam repositori publik.
+INSERT INTO users (nama, username, password, role) VALUES
+('Administrator', 'admin', '$2y$10$fIk0V.BZhSYKfA.dhO1NjeaJ.Pnwxixga89t20/hKxzSq8vNPVq8e', 'admin')
+ON CONFLICT (username) DO NOTHING;
 
-INSERT IGNORE INTO `pengaturan` (`nama_setting`, `nilai`, `keterangan`) VALUES
-('nama_sekolah',    'SMA IMTEK',                                            'Nama sekolah'),
-('tagline',         'Unggul dalam Prestasi, Berkarakter, dan Siap Teknologi','Tagline sekolah'),
-('npsn',            '20613766',                                             'NPSN sekolah'),
-('akreditasi',      'B',                                                    'Peringkat akreditasi'),
-('status_sekolah',  'Swasta',                                               'Status sekolah: Negeri atau Swasta'),
-('kepala_sekolah',  'Nama Kepala Sekolah, S.Pd., M.Pd.',                    'Nama kepala sekolah'),
-('sambutan',        'Selamat datang di website resmi SMA IMTEK. Kami berkomitmen menyelenggarakan pendidikan yang unggul, berkarakter, dan adaptif terhadap perkembangan teknologi.', 'Sambutan kepala sekolah'),
-('sejarah',         'SMA IMTEK didirikan sebagai wujud komitmen dalam menyediakan layanan pendidikan menengah atas yang berkualitas bagi masyarakat sekitar.', 'Sejarah singkat'),
-('visi',            'Menjadi sekolah menengah atas unggulan yang menghasilkan lulusan berprestasi, berakhlak mulia, dan menguasai teknologi.', 'Visi sekolah'),
-('misi',            "Menyelenggarakan pembelajaran aktif, kreatif, dan menyenangkan\nMenanamkan nilai keimanan, ketakwaan, dan akhlak mulia\nMengembangkan potensi akademik dan non-akademik peserta didik\nMembekali peserta didik dengan literasi digital dan teknologi\nMembangun budaya sekolah yang disiplin, peduli, dan berwawasan lingkungan", 'Misi sekolah (satu baris satu poin)'),
-('alamat',          'Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Prov. Banten 15339', 'Alamat sekolah'),
-('kota',            'Kabupaten Tangerang',                                  'Kota untuk kop bukti pendaftaran'),
-('telepon',         '021-55689125',                                         'Telepon sekolah'),
-('whatsapp',        '',                                                      'Nomor WhatsApp panitia (format 62xxx). Kosong = tombol WhatsApp disembunyikan'),
-('email',           'smaimtekpagedangan@gmail.com',                          'Email sekolah'),
-('instagram',       '',                                                      'Link Instagram'),
-('facebook',        '',                                                      'Link Facebook'),
-('youtube',         '',                                                      'Link YouTube'),
-('tiktok',          '',                                                      'Link TikTok'),
-('maps_embed',      '',                                                      'Kode src iframe Google Maps'),
-('jam_operasional', 'Senin - Jumat, 07.00 - 15.00 WIB',                      'Jam layanan'),
-('ppdb_status',     'buka',                                                  'buka / tutup'),
-('ppdb_tahun',      '2027/2028',                                             'Tahun ajaran PPDB aktif'),
-('ppdb_mulai',      '2026-09-01',                                            'Tanggal mulai pendaftaran'),
-('ppdb_selesai',    '2027-06-30',                                            'Tanggal akhir pendaftaran'),
-('ppdb_kuota',      '180',                                                   'Total kuota penerimaan'),
-('ppdb_biaya',      'Pendaftaran GRATIS (tanpa biaya)',                       'Informasi biaya pendaftaran'),
-('ppdb_syarat',     "Fotokopi ijazah/SKL SMP/MTs\nFotokopi rapor semester 1-5\nFotokopi Kartu Keluarga\nFotokopi Akta Kelahiran\nFoto berwarna ukuran 3x4\nSertifikat prestasi (bila ada, untuk jalur prestasi)", 'Syarat pendaftaran (satu baris satu poin)'),
-('ppdb_pengumuman', '2027-07-05',                                            'Tanggal pengumuman hasil'),
-('jml_siswa',       '540',                                                   'Jumlah siswa'),
-('jml_guru',        '32',                                                    'Jumlah guru'),
-('jml_alumni',      '1200',                                                  'Jumlah alumni'),
-('jml_prestasi',    '45',                                                    'Jumlah prestasi');
+-- Nilai di dalam [kurung siku] berarti masih menunggu data dari pihak
+-- sekolah. Aplikasi mengenali pola itu dan menandainya "belum terisi"
+-- pada halaman Pengaturan, serta tidak menampilkannya ke pengunjung.
+INSERT INTO pengaturan (nama_setting, nilai, keterangan) VALUES
+('nama_sekolah',     'SMA IMTEK',            'Nama sekolah'),
+('nama_singkat',     'SI',                   'Singkatan untuk lambang di navigasi'),
+('tagline',          '[Tagline atau semboyan sekolah]', 'Kalimat singkat di halaman depan'),
+('npsn',             '20613766',             'NPSN sekolah'),
+('akreditasi',       'B',                    'Peringkat akreditasi'),
+('status_sekolah',   'Swasta',               'Status sekolah: Negeri atau Swasta'),
+('yayasan',          '[Nama yayasan penyelenggara]', 'Yayasan penyelenggara'),
+('kepala_sekolah',   '[Nama kepala sekolah]', 'Nama dan gelar kepala sekolah'),
+('sambutan_kepsek',  '[Naskah sambutan kepala sekolah]', 'Sambutan di halaman Profil'),
+('visi',             '[Rumusan visi sekolah]', 'Visi sekolah'),
+('misi',             '[Rumusan misi sekolah, satu baris satu poin]', 'Misi sekolah (satu baris satu poin)'),
+('sejarah',          '[Sejarah singkat sekolah]', 'Sejarah singkat'),
 
-INSERT IGNORE INTO `jurusan` (`kode`, `nama`, `deskripsi`, `kuota`, `icon`, `urutan`) VALUES
-('MIPA', 'Peminatan MIPA', 'Fokus pada Matematika, Fisika, Kimia, dan Biologi untuk peserta didik yang ingin melanjutkan ke bidang sains, teknologi, dan kesehatan.', 90, 'bi-calculator', 1),
-('IPS',  'Peminatan IPS',  'Fokus pada Ekonomi, Sosiologi, Geografi, dan Sejarah untuk peserta didik yang tertarik pada bidang sosial, hukum, dan bisnis.', 60, 'bi-globe-americas', 2),
-('BHS',  'Peminatan Bahasa', 'Fokus pada Bahasa dan Sastra Indonesia, Inggris, serta bahasa asing lainnya.', 30, 'bi-translate', 3);
+('alamat',           'Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Prov. Banten 15339', 'Alamat lengkap sekolah'),
+('kelurahan',        'Cicalengka',           'Kelurahan atau desa'),
+('kecamatan',        'Pagedangan',           'Kecamatan'),
+('kota',             'Kabupaten Tangerang',  'Kabupaten atau kota'),
+('provinsi',         'Banten',               'Provinsi'),
+('kode_pos',         '15339',                'Kode pos'),
+('telepon',          '021-55689125',         'Telepon sekolah'),
+('email',            'smaimtekpagedangan@gmail.com', 'Surel sekolah'),
+('whatsapp',         '',                     'Nomor WhatsApp panitia. Kosong berarti tombol WhatsApp disembunyikan'),
+('jam_layanan',      '[Jam layanan sekolah]', 'Jam layanan, contoh: Senin sampai Jumat, 07.00 sampai 15.00 WIB'),
+('peta_embed',       '',                     'Kode sematan iframe Google Maps'),
 
-INSERT IGNORE INTO `fasilitas` (`nama`, `deskripsi`, `icon`, `urutan`) VALUES
-('Laboratorium Komputer', 'Lab komputer dengan koneksi internet untuk pembelajaran informatika dan literasi digital.', 'bi-pc-display', 1),
-('Laboratorium IPA',      'Laboratorium Fisika, Kimia, dan Biologi dengan peralatan praktikum yang memadai.', 'bi-eyedropper', 2),
-('Perpustakaan',          'Koleksi buku pelajaran, referensi, dan bacaan umum dengan ruang baca yang nyaman.', 'bi-book', 3),
-('Lapangan Olahraga',     'Lapangan serbaguna untuk basket, futsal, voli, dan kegiatan upacara.', 'bi-dribbble', 4),
-('Musala',                'Sarana ibadah untuk kegiatan keagamaan dan pembinaan karakter.', 'bi-moon-stars', 5),
-('Ruang Kelas Nyaman',    'Ruang kelas ber-ventilasi baik yang dilengkapi proyektor untuk pembelajaran interaktif.', 'bi-easel', 6),
-('Ruang UKS',             'Unit Kesehatan Sekolah untuk pertolongan pertama dan layanan kesehatan siswa.', 'bi-heart-pulse', 7),
-('Koperasi & Kantin',     'Kantin sehat dan koperasi sekolah yang menyediakan kebutuhan siswa.', 'bi-shop', 8);
+('instagram',        '',                     'Alamat lengkap Instagram'),
+('facebook',         '',                     'Alamat lengkap Facebook'),
+('youtube',          '',                     'Alamat lengkap YouTube'),
+('tiktok',           '',                     'Alamat lengkap TikTok'),
 
-INSERT IGNORE INTO `berita` (`judul`, `slug`, `kategori`, `ringkasan`, `isi`, `penulis`, `publish`) VALUES
-('PPDB SMA IMTEK Tahun Ajaran 2027/2028 Resmi Dibuka',
- 'ppdb-sma-imtek-tahun-ajaran-2027-2028-resmi-dibuka',
- 'Pengumuman',
- 'Pendaftaran Peserta Didik Baru SMA IMTEK tahun ajaran 2027/2028 dibuka secara online melalui website resmi sekolah.',
- 'SMA IMTEK resmi membuka Penerimaan Peserta Didik Baru (PPDB) untuk tahun ajaran 2027/2028. Tahun ini pendaftaran dapat dilakukan sepenuhnya secara online melalui website resmi sekolah, sehingga calon peserta didik tidak perlu datang ke sekolah untuk mengisi formulir.\n\nPendaftaran dibuka untuk tiga peminatan yaitu MIPA, IPS, dan Bahasa dengan total kuota 180 peserta didik. Tersedia empat jalur pendaftaran: Reguler, Prestasi, Afirmasi, dan Perpindahan Tugas Orang Tua.\n\nCalon peserta didik cukup mengisi formulir online, mengunggah dokumen persyaratan, lalu mencetak bukti pendaftaran. Status pendaftaran dapat dipantau kapan saja melalui menu Cek Status dengan memasukkan nomor registrasi dan tanggal lahir.',
- 'Admin PPDB', 1),
-('Alur Pendaftaran Online PPDB: Panduan Lengkap untuk Calon Siswa',
- 'alur-pendaftaran-online-ppdb-panduan-lengkap',
- 'Berita',
- 'Panduan langkah demi langkah mendaftar PPDB SMA IMTEK secara online, mulai dari mengisi formulir hingga mencetak bukti pendaftaran.',
- 'Proses pendaftaran online PPDB SMA IMTEK dirancang sederhana dan dapat diselesaikan dalam waktu kurang dari 15 menit.\n\nLangkah pertama, siapkan dokumen dalam bentuk hasil pindai atau foto: ijazah/SKL, rapor, Kartu Keluarga, akta kelahiran, dan foto 3x4. Pastikan setiap berkas berukuran maksimal 2 MB.\n\nLangkah kedua, buka menu PPDB Online lalu isi formulir pendaftaran yang terdiri dari data calon peserta didik, data asal sekolah, data orang tua, dan unggahan dokumen.\n\nLangkah ketiga, setelah formulir dikirim sistem akan menerbitkan nomor registrasi. Simpan nomor tersebut dan cetak bukti pendaftaran. Verifikasi oleh panitia dilakukan maksimal 3 hari kerja dan hasilnya dapat dilihat melalui menu Cek Status.',
- 'Admin PPDB', 1),
-('Siswa SMA IMTEK Raih Juara dalam Lomba Kompetensi Tingkat Kota',
- 'siswa-sma-imtek-raih-juara-lomba-kompetensi-tingkat-kota',
- 'Prestasi',
- 'Peserta didik SMA IMTEK kembali menorehkan prestasi pada ajang lomba kompetensi tingkat kota tahun ini.',
- 'Peserta didik SMA IMTEK berhasil meraih prestasi pada lomba kompetensi tingkat kota. Keberhasilan ini merupakan hasil pembinaan rutin melalui kegiatan ekstrakurikuler dan program pendampingan olimpiade yang dilaksanakan sekolah.\n\nKepala sekolah menyampaikan apresiasi kepada seluruh peserta didik dan guru pembina. Sekolah akan terus memperkuat program pembinaan prestasi agar semakin banyak peserta didik yang berkompetisi di tingkat yang lebih tinggi.',
- 'Humas Sekolah', 1);
+('logo',             '',                     'Nama berkas logo sekolah'),
+('foto_depan',       '',                     'Nama berkas foto halaman depan'),
+
+('ppdb_status',      'buka',                 'buka atau tutup'),
+('ppdb_tahun',       '2027/2028',            'Tahun ajaran PPDB yang aktif'),
+('ppdb_mulai',       '2026-09-01',           'Tanggal mulai pendaftaran'),
+('ppdb_selesai',     '2027-06-30',           'Tanggal tutup pendaftaran'),
+('ppdb_pengumuman',  '2027-07-05',           'Tanggal pengumuman hasil'),
+('ppdb_kuota',       '180',                  'Kuota penerimaan keseluruhan'),
+('ppdb_biaya',       'Pendaftaran GRATIS (tanpa biaya)', 'Keterangan biaya pendaftaran'),
+('ppdb_syarat',      '[Persyaratan tambahan dari sekolah, satu baris satu poin]', 'Persyaratan tambahan (satu baris satu poin)'),
+('ppdb_alur',        '',                     'Alur pendaftaran versi sekolah. Kosong berarti memakai alur bawaan sistem')
+ON CONFLICT (nama_setting) DO NOTHING;
+
+INSERT INTO jurusan (kode, nama, deskripsi, kuota, icon, urutan) VALUES
+('MIPA', 'Peminatan MIPA', '[Deskripsi peminatan MIPA dari sekolah]', 90, 'bi-calculator', 1),
+('IPS',  'Peminatan IPS',  '[Deskripsi peminatan IPS dari sekolah]', 60, 'bi-globe-americas', 2),
+('BHS',  'Peminatan Bahasa', '[Deskripsi peminatan Bahasa dari sekolah]', 30, 'bi-translate', 3)
+ON CONFLICT (kode) DO NOTHING;
+
+-- Fasilitas di bawah adalah daftar yang lazim ada di SMA. Sekolah dapat
+-- menghapus yang tidak dimiliki dan menambah yang belum tercantum lewat
+-- menu Fasilitas.
+INSERT INTO fasilitas (nama, deskripsi, icon, urutan)
+SELECT * FROM (VALUES
+  ('Laboratorium Komputer', 'Lab komputer dengan koneksi internet untuk pembelajaran informatika dan literasi digital.', 'bi-pc-display', 1),
+  ('Laboratorium IPA',      'Laboratorium Fisika, Kimia, dan Biologi dengan peralatan praktikum.', 'bi-eyedropper', 2),
+  ('Perpustakaan',          'Koleksi buku pelajaran, referensi, dan bacaan umum dengan ruang baca.', 'bi-book', 3),
+  ('Lapangan Olahraga',     'Lapangan serbaguna untuk basket, futsal, voli, dan kegiatan upacara.', 'bi-dribbble', 4),
+  ('Musala',                'Sarana ibadah untuk kegiatan keagamaan dan pembinaan karakter.', 'bi-moon-stars', 5),
+  ('Ruang Kelas',           'Ruang kelas berventilasi baik yang dilengkapi proyektor.', 'bi-easel', 6),
+  ('Ruang UKS',             'Unit Kesehatan Sekolah untuk pertolongan pertama.', 'bi-heart-pulse', 7),
+  ('Koperasi dan Kantin',   'Kantin sekolah dan koperasi yang menyediakan kebutuhan peserta didik.', 'bi-shop', 8)
+) AS baru(nama, deskripsi, icon, urutan)
+WHERE NOT EXISTS (SELECT 1 FROM fasilitas);
+
+-- Dua berita awal di bawah menerangkan cara kerja sistem ini, bukan
+-- kegiatan sekolah. Berita tentang kegiatan dan prestasi sengaja tidak
+-- diisi, karena harus berasal dari sekolah sendiri.
+INSERT INTO berita (judul, slug, kategori, ringkasan, isi, penulis, publish)
+SELECT * FROM (VALUES
+  ('Pendaftaran Peserta Didik Baru Tahun Ajaran 2027/2028 Resmi Dibuka',
+   'pendaftaran-peserta-didik-baru-tahun-ajaran-2027-2028-resmi-dibuka',
+   'Pengumuman',
+   'Pendaftaran dibuka 1 September 2026 sampai 30 Juni 2027 dan seluruhnya dilakukan secara online.',
+   'SMA IMTEK membuka Penerimaan Peserta Didik Baru untuk Tahun Ajaran 2027/2028. Seluruh tahapan dilakukan secara online, sehingga calon peserta didik tidak perlu datang ke sekolah untuk mengisi formulir.
+
+Kuota keseluruhan tahun ini 180 kursi, terbagi menjadi 90 kursi Peminatan MIPA, 60 kursi Peminatan IPS, dan 30 kursi Peminatan Bahasa. Tersedia empat jalur pendaftaran: Reguler, Prestasi, Afirmasi, dan Perpindahan Tugas Orang Tua. Pendaftar jalur Prestasi wajib mengunggah sertifikat prestasinya.
+
+Pendaftaran tidak dipungut biaya. Pengumuman hasil seleksi dijadwalkan pada 5 Juli 2027.',
+   'Panitia PPDB', true),
+
+  ('Cara Mendaftar PPDB Secara Online',
+   'cara-mendaftar-ppdb-secara-online',
+   'Berita',
+   'Panduan langkah demi langkah mengisi formulir, mengunggah dokumen, dan memantau hasil verifikasi.',
+   'Pendaftaran online dapat diselesaikan dalam waktu kurang dari lima belas menit, asalkan dokumennya sudah disiapkan lebih dulu.
+
+Siapkan hasil pindai atau foto dari tiga dokumen wajib, yaitu foto 3x4, ijazah atau surat keterangan lulus, dan Kartu Keluarga. Akta kelahiran, rapor, dan sertifikat prestasi bersifat opsional. Setiap berkas dibatasi 2 MB.
+
+Buka menu Daftar PPDB, lalu isi formulir yang terbagi menjadi lima langkah. Anda dapat berpindah antar langkah kapan saja sebelum mengirim.
+
+Setelah formulir terkirim, sistem menerbitkan nomor registrasi. Simpan nomor tersebut. Nomor itu beserta tanggal lahir adalah kunci untuk memantau hasil verifikasi lewat menu Cek Status.',
+   'Panitia PPDB', true)
+) AS baru(judul, slug, kategori, ringkasan, isi, penulis, publish)
+WHERE NOT EXISTS (SELECT 1 FROM berita);

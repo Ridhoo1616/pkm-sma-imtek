@@ -85,9 +85,14 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 	v.email("email", email)
 
 	nilaiRata2 := v.desimalRentang("nilai_rata2", "Nilai rata-rata", isi("nilai_rata2"), 0, 100)
-	anakKe := v.bulatRentang("anak_ke", "Anak ke-", isi("anak_ke"), 1, 20)
-	jumlahSaudara := v.bulatRentang("jumlah_saudara", "Jumlah saudara", isi("jumlah_saudara"), 0, 20)
-	tahunLulus := v.bulatRentang("tahun_lulus", "Tahun lulus", isi("tahun_lulus"), 2000, 2100)
+
+	// Tiga kolom di bawah bertipe teks di basis data, mengikuti bentuk isian
+	// Dapodik yang kadang ditulis bebas. Pemeriksa rentang tetap dijalankan
+	// untuk pesan galatnya, tetapi yang disimpan tetap teksnya, karena
+	// PostgreSQL tidak mengubah angka menjadi teks dengan sendirinya.
+	v.bulatRentang("anak_ke", "Anak ke-", isi("anak_ke"), 1, 20)
+	v.bulatRentang("jumlah_saudara", "Jumlah saudara", isi("jumlah_saudara"), 0, 20)
+	v.bulatRentang("tahun_lulus", "Tahun lulus", isi("tahun_lulus"), 2000, 2100)
 
 	sumberInfo := isi("sumber_informasi")
 	if sumberInfo != "" && !sumberSah(sumberInfo) {
@@ -128,7 +133,7 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		var noLama string
 		err := a.db.QueryRow(
 			`SELECT no_registrasi FROM pendaftar
-			  WHERE nama_lengkap = ? AND tanggal_lahir = ? AND tahun_ajaran = ?`,
+			  WHERE nama_lengkap = $1 AND tanggal_lahir = $2 AND tahun_ajaran = $3`,
 			namaLengkap, tanggalLahir, a.atur("ppdb_tahun")).Scan(&noLama)
 		switch {
 		case err == nil:
@@ -203,17 +208,17 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		penghasilan, no_hp_ortu, nama_wali,
 		file_foto, file_ijazah, file_kk, file_akta, file_raport, file_prestasi,
 		sumber_informasi, catatan_sumber, ip_pendaftar
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-	          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26,
+	          $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44)`,
 		noReg, tahunAjaran, jalur, jurusanID,
 		namaLengkap, kosongJadiNil(nisn), kosongJadiNil(nik), jenisKelamin,
 		tempatLahir, tanggalLahir, agama,
-		anakKe, jumlahSaudara, alamat,
+		kosongJadiNil(isi("anak_ke")), kosongJadiNil(isi("jumlah_saudara")), alamat,
 		kosongJadiNil(isi("kelurahan")), kosongJadiNil(isi("kecamatan")),
 		kosongJadiNil(isi("kota")), kosongJadiNil(isi("provinsi")), kosongJadiNil(isi("kode_pos")),
 		noHP, kosongJadiNil(email),
 		asalSekolah, kosongJadiNil(isi("npsn_sekolah")), kosongJadiNil(isi("alamat_sekolah")),
-		tahunLulus, nilaiRata2,
+		kosongJadiNil(isi("tahun_lulus")), nilaiRata2,
 		namaAyah, kosongJadiNil(isi("pekerjaan_ayah")), kosongJadiNil(isi("pendidikan_ayah")),
 		namaIbu, kosongJadiNil(isi("pekerjaan_ibu")), kosongJadiNil(isi("pendidikan_ibu")),
 		kosongJadiNil(isi("penghasilan")), kosongJadiNil(isi("no_hp_ortu")), kosongJadiNil(isi("nama_wali")),
@@ -223,6 +228,15 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		kosongJadiNil(sumberInfo), kosongJadiNil(isi("catatan_sumber")), alamatPemanggil(r))
 	if err != nil {
 		bereskan()
+		// Basis data punya batasan unik nama dengan tanggal lahir dan tahun
+		// ajaran. Batasan itu menjaring pendaftaran ganda yang lolos dari
+		// pemeriksaan di atas, misalnya dua kiriman yang tepat bersamaan.
+		if kodeGanda(err) {
+			kirimGalat(w, http.StatusConflict,
+				"Data dengan nama dan tanggal lahir yang sama sudah terdaftar "+
+					"pada tahun ajaran ini. Gunakan menu Cek Status untuk memantaunya.")
+			return
+		}
 		a.galatServer(w, "menyimpan pendaftaran", err)
 		return
 	}
@@ -263,9 +277,18 @@ func buatNoRegistrasi(t *sql.Tx, tahunAjaran string) (string, error) {
 		kode = kode[2:4] + kode[6:8]
 	}
 
+	// Nomor urut dihitung dari data yang sudah ada, jadi dua pendaftaran
+	// yang masuk bersamaan bisa memperoleh nomor yang sama. PostgreSQL tidak
+	// mengizinkan FOR UPDATE pada kueri beragregat, jadi yang dipakai adalah
+	// kunci penasihat bertingkat transaksi. Kunci itu dilepas sendiri saat
+	// transaksinya selesai, baik berhasil maupun dibatalkan.
+	if _, err := t.Exec("SELECT pg_advisory_xact_lock(hashtext($1))", tahunAjaran); err != nil {
+		return "", err
+	}
+
 	var urut int
 	if err := t.QueryRow(
-		"SELECT COUNT(*) FROM pendaftar WHERE tahun_ajaran = ? FOR UPDATE", tahunAjaran,
+		"SELECT COUNT(*) FROM pendaftar WHERE tahun_ajaran = $1", tahunAjaran,
 	).Scan(&urut); err != nil {
 		return "", err
 	}
@@ -276,7 +299,7 @@ func buatNoRegistrasi(t *sql.Tx, tahunAjaran string) (string, error) {
 		urut++
 		no := fmt.Sprintf("PPDB-%s-%04d", kode, urut)
 		var ada int
-		err := t.QueryRow("SELECT id FROM pendaftar WHERE no_registrasi = ?", no).Scan(&ada)
+		err := t.QueryRow("SELECT id FROM pendaftar WHERE no_registrasi = $1", no).Scan(&ada)
 		if err == sql.ErrNoRows {
 			return no, nil
 		}
@@ -317,10 +340,10 @@ func (a *Aplikasi) tanganiCekStatus(w http.ResponseWriter, r *http.Request) {
 	err := a.db.QueryRow(`
 		SELECT p.no_registrasi, p.nama_lengkap, p.jalur, p.status, p.tahun_ajaran,
 		       COALESCE(j.nama, ''), COALESCE(p.catatan_admin, ''),
-		       DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i')
+		       to_char(p.created_at, 'YYYY-MM-DD HH24:MI')
 		  FROM pendaftar p
 		  LEFT JOIN jurusan j ON j.id = p.jurusan_id
-		 WHERE p.no_registrasi = ? AND p.tanggal_lahir = ?`,
+		 WHERE p.no_registrasi = $1 AND p.tanggal_lahir = $2`,
 		strings.ToUpper(p.NoRegistrasi), strings.TrimSpace(p.TanggalLahir),
 	).Scan(&noReg, &nama, &jalur, &status, &tahun, &namaJurusan, &catatan, &dibuat)
 

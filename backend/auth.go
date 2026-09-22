@@ -133,7 +133,7 @@ func (a *Aplikasi) tanganiMasuk(w http.ResponseWriter, r *http.Request) {
 		role   string
 	)
 	err := a.db.QueryRow(
-		"SELECT id, nama, password, role FROM users WHERE username = ?", p.Username,
+		"SELECT id, nama, password, role FROM users WHERE username = $1", p.Username,
 	).Scan(&id, &nama, &sandiT, &role)
 
 	gagal := func() {
@@ -167,7 +167,7 @@ func (a *Aplikasi) tanganiMasuk(w http.ResponseWriter, r *http.Request) {
 	a.pembatas.bersihkan(ip)
 	a.kunciPembatas.Unlock()
 
-	if _, err := a.db.Exec("UPDATE users SET last_login = NOW() WHERE id = ?", id); err != nil {
+	if _, err := a.db.Exec("UPDATE users SET last_login = now() WHERE id = $1", id); err != nil {
 		a.log.Printf("gagal mencatat waktu masuk: %v", err)
 	}
 
@@ -208,7 +208,7 @@ func (a *Aplikasi) tanganiGantiSandi(w http.ResponseWriter, r *http.Request) {
 	saya := penggunaDari(r)
 
 	var hash string
-	if err := a.db.QueryRow("SELECT password FROM users WHERE id = ?", saya.ID).Scan(&hash); err != nil {
+	if err := a.db.QueryRow("SELECT password FROM users WHERE id = $1", saya.ID).Scan(&hash); err != nil {
 		a.galatServer(w, "mengambil kata sandi", err)
 		return
 	}
@@ -225,7 +225,7 @@ func (a *Aplikasi) tanganiGantiSandi(w http.ResponseWriter, r *http.Request) {
 		a.galatServer(w, "membuat hash kata sandi", err)
 		return
 	}
-	if _, err := a.db.Exec("UPDATE users SET password = ? WHERE id = ?", string(baru), saya.ID); err != nil {
+	if _, err := a.db.Exec("UPDATE users SET password = $1 WHERE id = $2", string(baru), saya.ID); err != nil {
 		a.galatServer(w, "menyimpan kata sandi", err)
 		return
 	}

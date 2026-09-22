@@ -99,6 +99,7 @@ func (a *Aplikasi) rute() http.Handler {
 	/* ---- PPDB ---- */
 	m.HandleFunc("POST /api/ppdb/daftar", a.tanganiDaftar)
 	m.HandleFunc("POST /api/ppdb/cek", a.tanganiCekStatus)
+	m.HandleFunc("POST /api/ppdb/bukti", a.tanganiBuktiPendaftar)
 
 	/* ---- autentikasi ---- */
 	m.HandleFunc("POST /api/masuk", a.tanganiMasuk)
@@ -111,6 +112,7 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/admin/pendaftar/ekspor", a.wajibMasuk(a.tanganiEksporPendaftar))
 	m.HandleFunc("GET /api/admin/pendaftar/{id}", a.wajibMasuk(a.tanganiDetailPendaftar))
 	m.HandleFunc("PATCH /api/admin/pendaftar/{id}/status", a.wajibMasuk(a.tanganiUbahStatus))
+	m.HandleFunc("GET /api/admin/pendaftar/{id}/bukti", a.wajibMasuk(a.tanganiBuktiAdmin))
 	// Menghapus data pendaftar berarti menghapus dokumen pribadinya juga,
 	// jadi hanya admin penuh yang boleh.
 	m.HandleFunc("DELETE /api/admin/pendaftar/{id}", a.wajibAdmin(a.tanganiHapusPendaftar))

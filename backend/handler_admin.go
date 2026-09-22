@@ -45,9 +45,9 @@ func (a *Aplikasi) cacahKan(sqlStr string, arg ...any) ([]Cacah, error) {
 // kuota yang benar — bukan terhadap nilai peminatan terbanyak.
 func (a *Aplikasi) cacahJurusan(tahunAjaran string, hanyaAktif bool) ([]Cacah, error) {
 	sqlStr := `SELECT j.nama, COUNT(p.id), j.kuota FROM jurusan j
-	             LEFT JOIN pendaftar p ON p.jurusan_id = j.id AND p.tahun_ajaran = ?`
+	             LEFT JOIN pendaftar p ON p.jurusan_id = j.id AND p.tahun_ajaran = $1`
 	if hanyaAktif {
-		sqlStr += " WHERE j.aktif = 1"
+		sqlStr += " WHERE j.aktif = true"
 	}
 	sqlStr += " GROUP BY j.id ORDER BY j.urutan, j.id"
 
@@ -72,7 +72,7 @@ func (a *Aplikasi) tanganiDasbor(w http.ResponseWriter, r *http.Request) {
 	ta := a.atur("ppdb_tahun")
 
 	perStatus, err := a.cacahKan(
-		"SELECT status, COUNT(*) FROM pendaftar WHERE tahun_ajaran = ? GROUP BY status", ta)
+		"SELECT status, COUNT(*) FROM pendaftar WHERE tahun_ajaran = $1 GROUP BY status", ta)
 	if err != nil {
 		a.galatServer(w, "menghitung status pendaftar", err)
 		return
@@ -97,9 +97,9 @@ func (a *Aplikasi) tanganiDasbor(w http.ResponseWriter, r *http.Request) {
 		tuju *int
 		saat string
 	}{
-		{"SELECT COUNT(*) FROM pendaftar WHERE DATE(created_at) = CURDATE()", nil, &hariIni, "menghitung pendaftar hari ini"},
-		{"SELECT COUNT(*) FROM pendaftar WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)", nil, &mingguIni, "menghitung pendaftar minggu ini"},
-		{"SELECT COUNT(*) FROM pesan WHERE dibaca = 0", nil, &pesanBelum, "menghitung pesan belum dibaca"},
+		{"SELECT COUNT(*) FROM pendaftar WHERE created_at::date = current_date", nil, &hariIni, "menghitung pendaftar hari ini"},
+		{"SELECT COUNT(*) FROM pendaftar WHERE created_at >= current_date - interval '7 days'", nil, &mingguIni, "menghitung pendaftar minggu ini"},
+		{"SELECT COUNT(*) FROM pesan WHERE dibaca = false", nil, &pesanBelum, "menghitung pesan belum dibaca"},
 	}
 	for _, k := range kueriTunggal {
 		if err := a.db.QueryRow(k.sql, k.arg...).Scan(k.tuju); err != nil {
@@ -115,21 +115,21 @@ func (a *Aplikasi) tanganiDasbor(w http.ResponseWriter, r *http.Request) {
 	}
 
 	perJalur, err := a.cacahKan(
-		"SELECT jalur, COUNT(*) FROM pendaftar WHERE tahun_ajaran = ? GROUP BY jalur ORDER BY COUNT(*) DESC", ta)
+		"SELECT jalur, COUNT(*) FROM pendaftar WHERE tahun_ajaran = $1 GROUP BY jalur ORDER BY COUNT(*) DESC", ta)
 	if err != nil {
 		a.galatServer(w, "menghitung pendaftar per jalur", err)
 		return
 	}
 
 	perSumber, err := a.cacahKan(`SELECT COALESCE(NULLIF(sumber_informasi, ''), 'Tidak diisi'), COUNT(*)
-	     FROM pendaftar WHERE tahun_ajaran = ? GROUP BY 1 ORDER BY 2 DESC LIMIT 8`, ta)
+	     FROM pendaftar WHERE tahun_ajaran = $1 GROUP BY 1 ORDER BY 2 DESC LIMIT 8`, ta)
 	if err != nil {
 		a.galatServer(w, "menghitung sumber informasi", err)
 		return
 	}
 
-	tren, err := a.cacahKan(`SELECT DATE_FORMAT(created_at, '%Y-%m-%d'), COUNT(*) FROM pendaftar
-	     WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 29 DAY) GROUP BY 1 ORDER BY 1`)
+	tren, err := a.cacahKan(`SELECT to_char(created_at, 'YYYY-MM-DD'), COUNT(*) FROM pendaftar
+	     WHERE created_at >= current_date - interval '29 days' GROUP BY 1 ORDER BY 1`)
 	if err != nil {
 		a.galatServer(w, "menghitung tren pendaftaran", err)
 		return
@@ -165,10 +165,10 @@ func (a *Aplikasi) tanganiDasbor(w http.ResponseWriter, r *http.Request) {
 // agar daftar tetap ringan; rincian lengkap diambil pada halaman detail.
 const kolomRingkas = `p.id, p.no_registrasi, p.tahun_ajaran, p.jalur, p.jurusan_id,
 	COALESCE(j.nama, '') AS nama_jurusan, p.nama_lengkap, COALESCE(p.nisn, ''),
-	p.jenis_kelamin, DATE_FORMAT(p.tanggal_lahir, '%Y-%m-%d'), p.asal_sekolah,
+	p.jenis_kelamin, to_char(p.tanggal_lahir, 'YYYY-MM-DD'), p.asal_sekolah,
 	p.no_hp, COALESCE(p.email, ''), p.nilai_rata2,
 	COALESCE(p.sumber_informasi, ''), p.status,
-	DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i') AS dibuat`
+	to_char(p.created_at, 'YYYY-MM-DD HH24:MI') AS dibuat`
 
 type RingkasPendaftar struct {
 	ID           int      `json:"id"`
@@ -220,32 +220,35 @@ var urutanDiizinkan = map[string]string{
 }
 
 func (a *Aplikasi) ambilPendaftar(f penyaringPendaftar, semuaTahun bool) (hasilPendaftar, error) {
+	n := &penomoran{}
 	syarat := []string{"1 = 1"}
 	arg := []any{}
 
 	if !semuaTahun && f.TahunAjaran != "" {
-		syarat = append(syarat, "p.tahun_ajaran = ?")
+		syarat = append(syarat, "p.tahun_ajaran = "+n.berikut())
 		arg = append(arg, f.TahunAjaran)
 	}
 	if statusSah(f.Status) {
-		syarat = append(syarat, "p.status = ?")
+		syarat = append(syarat, "p.status = "+n.berikut())
 		arg = append(arg, f.Status)
 	}
 	if jalurSah(f.Jalur) {
-		syarat = append(syarat, "p.jalur = ?")
+		syarat = append(syarat, "p.jalur = "+n.berikut())
 		arg = append(arg, f.Jalur)
 	}
 	if id, err := strconv.Atoi(f.JurusanID); err == nil && id > 0 {
-		syarat = append(syarat, "p.jurusan_id = ?")
+		syarat = append(syarat, "p.jurusan_id = "+n.berikut())
 		arg = append(arg, id)
 	}
 	if sumberSah(f.Sumber) {
-		syarat = append(syarat, "p.sumber_informasi = ?")
+		syarat = append(syarat, "p.sumber_informasi = "+n.berikut())
 		arg = append(arg, f.Sumber)
 	}
 	if cari := strings.TrimSpace(f.Cari); cari != "" {
-		syarat = append(syarat,
-			"(p.nama_lengkap LIKE ? OR p.no_registrasi LIKE ? OR p.nisn LIKE ? OR p.asal_sekolah LIKE ?)")
+		syarat = append(syarat, fmt.Sprintf(
+			"(p.nama_lengkap ILIKE %s OR p.no_registrasi ILIKE %s OR "+
+				"p.nisn ILIKE %s OR p.asal_sekolah ILIKE %s)",
+			n.berikut(), n.berikut(), n.berikut(), n.berikut()))
 		pola := "%" + cari + "%"
 		arg = append(arg, pola, pola, pola, pola)
 	}
@@ -265,7 +268,7 @@ func (a *Aplikasi) ambilPendaftar(f penyaringPendaftar, semuaTahun bool) (hasilP
 	argHal := append(append([]any{}, arg...), f.PerHalaman, (f.Halaman-1)*f.PerHalaman)
 	baris, err := a.db.Query("SELECT "+kolomRingkas+
 		" FROM pendaftar p LEFT JOIN jurusan j ON j.id = p.jurusan_id"+dimana+
-		" ORDER BY "+urut+" LIMIT ? OFFSET ?", argHal...)
+		" ORDER BY "+urut+" LIMIT "+n.berikut()+" OFFSET "+n.berikut(), argHal...)
 	if err != nil {
 		return hasil, err
 	}
@@ -364,7 +367,7 @@ func (a *Aplikasi) tanganiDetailPendaftar(w http.ResponseWriter, r *http.Request
 	err = a.db.QueryRow(`
 		SELECT p.id, p.no_registrasi, p.tahun_ajaran, p.jalur, p.jurusan_id, COALESCE(j.nama, ''),
 		       p.nama_lengkap, COALESCE(p.nisn, ''), COALESCE(p.nik, ''), p.jenis_kelamin,
-		       p.tempat_lahir, DATE_FORMAT(p.tanggal_lahir, '%Y-%m-%d'), p.agama,
+		       p.tempat_lahir, to_char(p.tanggal_lahir, 'YYYY-MM-DD'), p.agama,
 		       COALESCE(p.anak_ke, ''), COALESCE(p.jumlah_saudara, ''), p.alamat,
 		       COALESCE(p.kelurahan, ''), COALESCE(p.kecamatan, ''), COALESCE(p.kota, ''),
 		       COALESCE(p.provinsi, ''), COALESCE(p.kode_pos, ''), p.no_hp, COALESCE(p.email, ''),
@@ -378,11 +381,11 @@ func (a *Aplikasi) tanganiDetailPendaftar(w http.ResponseWriter, r *http.Request
 		       COALESCE(p.sumber_informasi, ''), COALESCE(p.catatan_sumber, ''),
 		       p.status, COALESCE(p.catatan_admin, ''), p.diverifikasi_oleh, COALESCE(u.nama, ''),
 		       COALESCE(p.ip_pendaftar, ''),
-		       DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i'), DATE_FORMAT(p.updated_at, '%Y-%m-%d %H:%i')
+		       to_char(p.created_at, 'YYYY-MM-DD HH24:MI'), to_char(p.updated_at, 'YYYY-MM-DD HH24:MI')
 		  FROM pendaftar p
 		  LEFT JOIN jurusan j ON j.id = p.jurusan_id
 		  LEFT JOIN users u ON u.id = p.diverifikasi_oleh
-		 WHERE p.id = ?`, id).Scan(
+		 WHERE p.id = $1`, id).Scan(
 		&p.ID, &p.NoRegistrasi, &p.TahunAjaran, &p.Jalur, &p.JurusanID, &p.NamaJurusan,
 		&p.NamaLengkap, &p.NISN, &p.NIK, &p.JenisKelamin,
 		&p.TempatLahir, &p.TanggalLahir, &p.Agama,
@@ -441,7 +444,7 @@ func (a *Aplikasi) tanganiUbahStatus(w http.ResponseWriter, r *http.Request) {
 
 	saya := penggunaDari(r)
 	hasil, err := a.db.Exec(
-		`UPDATE pendaftar SET status = ?, catatan_admin = ?, diverifikasi_oleh = ? WHERE id = ?`,
+		`UPDATE pendaftar SET status = $1, catatan_admin = $2, diverifikasi_oleh = $3 WHERE id = $4`,
 		p.Status, kosongJadiNil(p.CatatanAdmin), saya.ID, id)
 	if err != nil {
 		a.galatServer(w, "memperbarui status pendaftar", err)
@@ -451,7 +454,7 @@ func (a *Aplikasi) tanganiUbahStatus(w http.ResponseWriter, r *http.Request) {
 		// Nol baris juga terjadi bila nilainya memang sudah sama, jadi
 		// keberadaan datanya diperiksa dulu sebelum melaporkan tidak ada.
 		var ada int
-		if a.db.QueryRow("SELECT id FROM pendaftar WHERE id = ?", id).Scan(&ada) == sql.ErrNoRows {
+		if a.db.QueryRow("SELECT id FROM pendaftar WHERE id = $1", id).Scan(&ada) == sql.ErrNoRows {
 			kirimGalat(w, http.StatusNotFound, "Data pendaftar tidak ditemukan.")
 			return
 		}
@@ -475,7 +478,7 @@ func (a *Aplikasi) tanganiHapusPendaftar(w http.ResponseWriter, r *http.Request)
 	// terhapus dari server, tidak hanya barisnya di basis data.
 	var berkas [6]sql.NullString
 	err = a.db.QueryRow(`SELECT file_foto, file_ijazah, file_kk, file_akta, file_raport, file_prestasi
-	                       FROM pendaftar WHERE id = ?`, id).
+	                       FROM pendaftar WHERE id = $1`, id).
 		Scan(&berkas[0], &berkas[1], &berkas[2], &berkas[3], &berkas[4], &berkas[5])
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Data pendaftar tidak ditemukan.")
@@ -486,7 +489,7 @@ func (a *Aplikasi) tanganiHapusPendaftar(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if _, err := a.db.Exec("DELETE FROM pendaftar WHERE id = ?", id); err != nil {
+	if _, err := a.db.Exec("DELETE FROM pendaftar WHERE id = $1", id); err != nil {
 		a.galatServer(w, "menghapus pendaftar", err)
 		return
 	}
@@ -557,23 +560,23 @@ func (a *Aplikasi) tanganiLaporan(w http.ResponseWriter, r *http.Request) {
 
 	var total int
 	if err := a.db.QueryRow(
-		"SELECT COUNT(*) FROM pendaftar WHERE tahun_ajaran = ?", ta).Scan(&total); err != nil {
+		"SELECT COUNT(*) FROM pendaftar WHERE tahun_ajaran = $1", ta).Scan(&total); err != nil {
 		a.galatServer(w, "menghitung total pendaftar", err)
 		return
 	}
 
 	bagian := map[string]string{
 		"per_sumber": `SELECT COALESCE(NULLIF(sumber_informasi, ''), 'Tidak diisi'), COUNT(*)
-		                 FROM pendaftar WHERE tahun_ajaran = ? GROUP BY 1 ORDER BY 2 DESC`,
-		"per_status": `SELECT status, COUNT(*) FROM pendaftar WHERE tahun_ajaran = ? GROUP BY status`,
-		"per_jalur": `SELECT jalur, COUNT(*) FROM pendaftar WHERE tahun_ajaran = ?
+		                 FROM pendaftar WHERE tahun_ajaran = $1 GROUP BY 1 ORDER BY 2 DESC`,
+		"per_status": `SELECT status, COUNT(*) FROM pendaftar WHERE tahun_ajaran = $1 GROUP BY status`,
+		"per_jalur": `SELECT jalur, COUNT(*) FROM pendaftar WHERE tahun_ajaran = $1
 		                GROUP BY jalur ORDER BY 2 DESC`,
-		"per_jenis_kelamin": `SELECT IF(jenis_kelamin = 'L', 'Laki-laki', 'Perempuan'), COUNT(*)
-		                        FROM pendaftar WHERE tahun_ajaran = ? GROUP BY jenis_kelamin`,
-		"per_asal_sekolah": `SELECT asal_sekolah, COUNT(*) FROM pendaftar WHERE tahun_ajaran = ?
+		"per_jenis_kelamin": `SELECT CASE WHEN jenis_kelamin = 'L' THEN 'Laki-laki' ELSE 'Perempuan' END, COUNT(*)
+		                        FROM pendaftar WHERE tahun_ajaran = $1 GROUP BY jenis_kelamin`,
+		"per_asal_sekolah": `SELECT asal_sekolah, COUNT(*) FROM pendaftar WHERE tahun_ajaran = $1
 		                       GROUP BY asal_sekolah ORDER BY 2 DESC LIMIT 12`,
-		"per_bulan": `SELECT DATE_FORMAT(created_at, '%Y-%m'), COUNT(*) FROM pendaftar
-		                WHERE tahun_ajaran = ? GROUP BY 1 ORDER BY 1`,
+		"per_bulan": `SELECT to_char(created_at, 'YYYY-MM'), COUNT(*) FROM pendaftar
+		                WHERE tahun_ajaran = $1 GROUP BY 1 ORDER BY 1`,
 	}
 
 	laporan := map[string]any{}

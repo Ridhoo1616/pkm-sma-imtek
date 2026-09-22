@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -48,15 +49,16 @@ func (a *Aplikasi) tanganiProfil(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Aplikasi) hitungPendaftar(status string) (int, error) {
-	sqlStr := "SELECT COUNT(*) FROM pendaftar WHERE tahun_ajaran = ?"
+	n := &penomoran{}
+	sqlStr := "SELECT COUNT(*) FROM pendaftar WHERE tahun_ajaran = " + n.berikut()
 	arg := []any{a.atur("ppdb_tahun")}
 	if status != "" {
-		sqlStr += " AND status = ?"
+		sqlStr += " AND status = " + n.berikut()
 		arg = append(arg, status)
 	}
-	var n int
-	err := a.db.QueryRow(sqlStr, arg...).Scan(&n)
-	return n, err
+	var jumlah int
+	err := a.db.QueryRow(sqlStr, arg...).Scan(&jumlah)
+	return jumlah, err
 }
 
 /* ---------------- jurusan ---------------- */
@@ -67,10 +69,10 @@ func (a *Aplikasi) ambilJurusan(hanyaAktif bool) ([]Jurusan, error) {
 	sqlStr := `SELECT j.id, j.kode, j.nama, COALESCE(j.deskripsi, ''), j.kuota,
 	                  COALESCE(j.icon, ''), j.aktif, j.urutan,
 	                  (SELECT COUNT(*) FROM pendaftar p
-	                    WHERE p.jurusan_id = j.id AND p.tahun_ajaran = ?) AS pendaftar
+	                    WHERE p.jurusan_id = j.id AND p.tahun_ajaran = $1) AS pendaftar
 	             FROM jurusan j`
 	if hanyaAktif {
-		sqlStr += " WHERE j.aktif = 1"
+		sqlStr += " WHERE j.aktif = true"
 	}
 	sqlStr += " ORDER BY j.urutan, j.id"
 
@@ -157,14 +159,19 @@ func (a *Aplikasi) tanganiBeritaPublik(w http.ResponseWriter, r *http.Request) {
 	kategori := q.Get("kategori")
 	cari := strings.TrimSpace(q.Get("cari"))
 
-	syarat := []string{"publish = 1"}
+	n := &penomoran{}
+	syarat := []string{"publish = true"}
 	arg := []any{}
 	if kategoriSah(kategori) {
-		syarat = append(syarat, "kategori = ?")
+		syarat = append(syarat, "kategori = "+n.berikut())
 		arg = append(arg, kategori)
 	}
 	if cari != "" {
-		syarat = append(syarat, "(judul LIKE ? OR ringkasan LIKE ? OR isi LIKE ?)")
+		// ILIKE dipakai supaya pencarian tidak membedakan huruf besar kecil;
+		// LIKE pada PostgreSQL bersifat peka huruf, berbeda dari MySQL.
+		syarat = append(syarat, fmt.Sprintf(
+			"(judul ILIKE %s OR ringkasan ILIKE %s OR isi ILIKE %s)",
+			n.berikut(), n.berikut(), n.berikut()))
 		pola := "%" + cari + "%"
 		arg = append(arg, pola, pola, pola)
 	}
@@ -178,7 +185,7 @@ func (a *Aplikasi) tanganiBeritaPublik(w http.ResponseWriter, r *http.Request) {
 
 	argHal := append(append([]any{}, arg...), perHalaman, (halaman-1)*perHalaman)
 	baris, err := a.db.Query("SELECT "+kolomBerita+" FROM berita"+dimana+
-		" ORDER BY created_at DESC LIMIT ? OFFSET ?", argHal...)
+		" ORDER BY created_at DESC LIMIT "+n.berikut()+" OFFSET "+n.berikut(), argHal...)
 	if err != nil {
 		a.galatServer(w, "mengambil berita", err)
 		return
@@ -205,7 +212,7 @@ func (a *Aplikasi) tanganiBeritaDetail(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 
 	var b Berita
-	err := a.db.QueryRow("SELECT "+kolomBerita+" FROM berita WHERE slug = ? AND publish = 1", slug).
+	err := a.db.QueryRow("SELECT "+kolomBerita+" FROM berita WHERE slug = $1 AND publish = true", slug).
 		Scan(&b.ID, &b.Judul, &b.Slug, &b.Kategori, &b.Ringkasan, &b.Isi,
 			&b.Gambar, &b.Penulis, &b.Dibaca, &b.Publish, &b.Dibuat, &b.Diubah)
 	if err == sql.ErrNoRows {
@@ -217,14 +224,14 @@ func (a *Aplikasi) tanganiBeritaDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := a.db.Exec("UPDATE berita SET dibaca = dibaca + 1 WHERE id = ?", b.ID); err != nil {
+	if _, err := a.db.Exec("UPDATE berita SET dibaca = dibaca + 1 WHERE id = $1", b.ID); err != nil {
 		a.log.Printf("gagal menaikkan pencacah dibaca: %v", err)
 	}
 	b.Dibaca++
 
 	// Berita lain pada kategori yang sama, untuk tautan "baca juga".
 	baris, err := a.db.Query("SELECT "+kolomBerita+
-		" FROM berita WHERE publish = 1 AND kategori = ? AND id <> ? ORDER BY created_at DESC LIMIT 3",
+		" FROM berita WHERE publish = true AND kategori = $1 AND id <> $2 ORDER BY created_at DESC LIMIT 3",
 		b.Kategori, b.ID)
 	if err != nil {
 		a.galatServer(w, "mengambil berita terkait", err)
@@ -249,7 +256,7 @@ func (a *Aplikasi) tanganiGaleriPublik(w http.ResponseWriter, r *http.Request) {
 	                  COALESCE(keterangan, ''), created_at FROM galeri`
 	arg := []any{}
 	if kategori != "" {
-		sqlStr += " WHERE kategori = ?"
+		sqlStr += " WHERE kategori = $1"
 		arg = append(arg, kategori)
 	}
 	sqlStr += " ORDER BY created_at DESC, id DESC"
@@ -343,7 +350,7 @@ func (a *Aplikasi) tanganiKirimPesan(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err := a.db.Exec(
-		`INSERT INTO pesan (nama, email, no_hp, subjek, isi) VALUES (?, ?, ?, ?, ?)`,
+		`INSERT INTO pesan (nama, email, no_hp, subjek, isi) VALUES ($1, $2, $3, $4, $5)`,
 		p.Nama, kosongJadiNil(p.Email), kosongJadiNil(p.NoHP), p.Subjek, p.Isi)
 	if err != nil {
 		a.galatServer(w, "menyimpan pesan", err)

@@ -84,10 +84,13 @@ func (a *Aplikasi) tanganiSimpanJurusan(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	hasil, err := a.db.Exec(
+	// PostgreSQL tidak punya LastInsertId; nomornya diminta lewat RETURNING.
+	var id int
+	err := a.db.QueryRow(
 		`INSERT INTO jurusan (kode, nama, deskripsi, kuota, icon, aktif, urutan)
-		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		p.Kode, p.Nama, kosongJadiNil(p.Deskripsi), p.Kuota, kosongJadiNil(p.Ikon), p.Aktif, p.Urutan)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+		p.Kode, p.Nama, kosongJadiNil(p.Deskripsi), p.Kuota, kosongJadiNil(p.Ikon),
+		p.Aktif, p.Urutan).Scan(&id)
 	if err != nil {
 		if kodeGanda(err) {
 			kirimGalat(w, http.StatusConflict, "Kode peminatan "+p.Kode+" sudah dipakai.")
@@ -97,7 +100,6 @@ func (a *Aplikasi) tanganiSimpanJurusan(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	id, _ := hasil.LastInsertId()
 	kirimJSON(w, http.StatusCreated, map[string]any{
 		"pesan": "Peminatan berhasil ditambahkan.", "id": id,
 	})
@@ -118,8 +120,8 @@ func (a *Aplikasi) tanganiUbahJurusan(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err := a.db.Exec(
-		`UPDATE jurusan SET kode = ?, nama = ?, deskripsi = ?, kuota = ?, icon = ?, aktif = ?, urutan = ?
-		  WHERE id = ?`,
+		`UPDATE jurusan SET kode = $1, nama = $2, deskripsi = $3, kuota = $4, icon = $5, aktif = $6, urutan = $7
+		  WHERE id = $8`,
 		p.Kode, p.Nama, kosongJadiNil(p.Deskripsi), p.Kuota, kosongJadiNil(p.Ikon), p.Aktif, p.Urutan, id)
 	if err != nil {
 		if kodeGanda(err) {
@@ -143,7 +145,7 @@ func (a *Aplikasi) tanganiHapusJurusan(w http.ResponseWriter, r *http.Request) {
 	// menonaktifkannya saja.
 	var dipakai int
 	if err := a.db.QueryRow(
-		"SELECT COUNT(*) FROM pendaftar WHERE jurusan_id = ?", id).Scan(&dipakai); err != nil {
+		"SELECT COUNT(*) FROM pendaftar WHERE jurusan_id = $1", id).Scan(&dipakai); err != nil {
 		a.galatServer(w, "memeriksa pemakaian jurusan", err)
 		return
 	}
@@ -154,7 +156,7 @@ func (a *Aplikasi) tanganiHapusJurusan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := a.db.Exec("DELETE FROM jurusan WHERE id = ?", id); err != nil {
+	if _, err := a.db.Exec("DELETE FROM jurusan WHERE id = $1", id); err != nil {
 		a.galatServer(w, "menghapus jurusan", err)
 		return
 	}
@@ -187,7 +189,7 @@ func (a *Aplikasi) slugUnik(dasar string, kecualiID int) (string, error) {
 			calon = fmt.Sprintf("%s-%d", dasar, i+1)
 		}
 		var id int
-		err := a.db.QueryRow("SELECT id FROM berita WHERE slug = ?", calon).Scan(&id)
+		err := a.db.QueryRow("SELECT id FROM berita WHERE slug = $1", calon).Scan(&id)
 		if err == sql.ErrNoRows || (err == nil && id == kecualiID) {
 			return calon, nil
 		}
@@ -203,21 +205,23 @@ func (a *Aplikasi) tanganiBeritaAdmin(w http.ResponseWriter, r *http.Request) {
 	halaman := bilanganKueri(q.Get("halaman"), 1, 1, 10000)
 	perHalaman := bilanganKueri(q.Get("per_halaman"), 20, 1, 100)
 
+	n := &penomoran{}
 	syarat := []string{"1 = 1"}
 	arg := []any{}
 	if k := q.Get("kategori"); kategoriSah(k) {
-		syarat = append(syarat, "kategori = ?")
+		syarat = append(syarat, "kategori = "+n.berikut())
 		arg = append(arg, k)
 	}
 	// Penyaring publish menerima "1" atau "0"; nilai lain berarti tidak menyaring.
 	switch q.Get("publish") {
 	case "1":
-		syarat = append(syarat, "publish = 1")
+		syarat = append(syarat, "publish = true")
 	case "0":
-		syarat = append(syarat, "publish = 0")
+		syarat = append(syarat, "publish = false")
 	}
 	if cari := strings.TrimSpace(q.Get("cari")); cari != "" {
-		syarat = append(syarat, "(judul LIKE ? OR ringkasan LIKE ?)")
+		syarat = append(syarat, fmt.Sprintf("(judul ILIKE %s OR ringkasan ILIKE %s)",
+			n.berikut(), n.berikut()))
 		pola := "%" + cari + "%"
 		arg = append(arg, pola, pola)
 	}
@@ -231,7 +235,7 @@ func (a *Aplikasi) tanganiBeritaAdmin(w http.ResponseWriter, r *http.Request) {
 
 	argHal := append(append([]any{}, arg...), perHalaman, (halaman-1)*perHalaman)
 	baris, err := a.db.Query("SELECT "+kolomBerita+" FROM berita"+dimana+
-		" ORDER BY created_at DESC LIMIT ? OFFSET ?", argHal...)
+		" ORDER BY created_at DESC LIMIT "+n.berikut()+" OFFSET "+n.berikut(), argHal...)
 	if err != nil {
 		a.galatServer(w, "mengambil berita", err)
 		return
@@ -290,18 +294,18 @@ func (a *Aplikasi) tanganiSimpanBerita(w http.ResponseWriter, r *http.Request) {
 		penulis = penggunaDari(r).Nama
 	}
 
-	hasil, err := a.db.Exec(
+	var id int
+	err = a.db.QueryRow(
 		`INSERT INTO berita (judul, slug, kategori, ringkasan, isi, gambar, penulis, publish)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
 		judul, slug, kategori, kosongJadiNil(isi("ringkasan")), teks,
-		kosongJadiNil(gambar), penulis, bolean(r, "publish"))
+		kosongJadiNil(gambar), penulis, bolean(r, "publish")).Scan(&id)
 	if err != nil {
 		a.hapusUnggahan("berita", gambar)
 		a.galatServer(w, "menyimpan berita", err)
 		return
 	}
 
-	id, _ := hasil.LastInsertId()
 	kirimJSON(w, http.StatusCreated, map[string]any{
 		"pesan": "Berita berhasil disimpan.", "id": id, "slug": slug,
 	})
@@ -319,7 +323,7 @@ func (a *Aplikasi) tanganiUbahBerita(w http.ResponseWriter, r *http.Request) {
 
 	var gambarLama string
 	var judulLama string
-	err := a.db.QueryRow("SELECT COALESCE(gambar, ''), judul FROM berita WHERE id = ?", id).
+	err := a.db.QueryRow("SELECT COALESCE(gambar, ''), judul FROM berita WHERE id = $1", id).
 		Scan(&gambarLama, &judulLama)
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Berita tidak ditemukan.")
@@ -371,15 +375,18 @@ func (a *Aplikasi) tanganiUbahBerita(w http.ResponseWriter, r *http.Request) {
 		gambarDipakai = ""
 	}
 
-	sqlStr := `UPDATE berita SET judul = ?, kategori = ?, ringkasan = ?, isi = ?,
-	                  gambar = ?, penulis = ?, publish = ?`
+	n2 := &penomoran{}
+	sqlStr := fmt.Sprintf(`UPDATE berita SET judul = %s, kategori = %s, ringkasan = %s,
+	                  isi = %s, gambar = %s, penulis = %s, publish = %s`,
+		n2.berikut(), n2.berikut(), n2.berikut(), n2.berikut(),
+		n2.berikut(), n2.berikut(), n2.berikut())
 	arg := []any{judul, kategori, kosongJadiNil(isi("ringkasan")), teks,
 		kosongJadiNil(gambarDipakai), kosongJadiNil(isi("penulis")), bolean(r, "publish")}
 	if slugBaru != "" {
-		sqlStr += ", slug = ?"
+		sqlStr += ", slug = " + n2.berikut()
 		arg = append(arg, slugBaru)
 	}
-	sqlStr += " WHERE id = ?"
+	sqlStr += " WHERE id = " + n2.berikut()
 	arg = append(arg, id)
 
 	if _, err := a.db.Exec(sqlStr, arg...); err != nil {
@@ -404,7 +411,7 @@ func (a *Aplikasi) tanganiHapusBerita(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var gambar string
-	err := a.db.QueryRow("SELECT COALESCE(gambar, '') FROM berita WHERE id = ?", id).Scan(&gambar)
+	err := a.db.QueryRow("SELECT COALESCE(gambar, '') FROM berita WHERE id = $1", id).Scan(&gambar)
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Berita tidak ditemukan.")
 		return
@@ -413,7 +420,7 @@ func (a *Aplikasi) tanganiHapusBerita(w http.ResponseWriter, r *http.Request) {
 		a.galatServer(w, "mengambil berita", err)
 		return
 	}
-	if _, err := a.db.Exec("DELETE FROM berita WHERE id = ?", id); err != nil {
+	if _, err := a.db.Exec("DELETE FROM berita WHERE id = $1", id); err != nil {
 		a.galatServer(w, "menghapus berita", err)
 		return
 	}
@@ -449,16 +456,17 @@ func (a *Aplikasi) tanganiSimpanGaleri(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasil, err := a.db.Exec(
-		"INSERT INTO galeri (judul, kategori, gambar, keterangan) VALUES (?, ?, ?, ?)",
-		judul, kosongJadiNil(isi("kategori")), gambar, kosongJadiNil(isi("keterangan")))
+	var id int
+	err := a.db.QueryRow(
+		"INSERT INTO galeri (judul, kategori, gambar, keterangan) VALUES ($1, $2, $3, $4) RETURNING id",
+		judul, kosongJadiNil(isi("kategori")), gambar,
+		kosongJadiNil(isi("keterangan"))).Scan(&id)
 	if err != nil {
 		a.hapusUnggahan("galeri", gambar)
 		a.galatServer(w, "menyimpan foto galeri", err)
 		return
 	}
 
-	id, _ := hasil.LastInsertId()
 	kirimJSON(w, http.StatusCreated, map[string]any{"pesan": "Foto berhasil ditambahkan.", "id": id})
 }
 
@@ -473,7 +481,7 @@ func (a *Aplikasi) tanganiUbahGaleri(w http.ResponseWriter, r *http.Request) {
 	defer r.MultipartForm.RemoveAll()
 
 	var gambarLama string
-	err := a.db.QueryRow("SELECT gambar FROM galeri WHERE id = ?", id).Scan(&gambarLama)
+	err := a.db.QueryRow("SELECT gambar FROM galeri WHERE id = $1", id).Scan(&gambarLama)
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Foto tidak ditemukan.")
 		return
@@ -508,7 +516,7 @@ func (a *Aplikasi) tanganiUbahGaleri(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := a.db.Exec(
-		"UPDATE galeri SET judul = ?, kategori = ?, gambar = ?, keterangan = ? WHERE id = ?",
+		"UPDATE galeri SET judul = $1, kategori = $2, gambar = $3, keterangan = $4 WHERE id = $5",
 		judul, kosongJadiNil(isi("kategori")), gambarDipakai,
 		kosongJadiNil(isi("keterangan")), id); err != nil {
 		a.hapusUnggahan("galeri", gambarBaru)
@@ -528,7 +536,7 @@ func (a *Aplikasi) tanganiHapusGaleri(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var gambar string
-	err := a.db.QueryRow("SELECT gambar FROM galeri WHERE id = ?", id).Scan(&gambar)
+	err := a.db.QueryRow("SELECT gambar FROM galeri WHERE id = $1", id).Scan(&gambar)
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Foto tidak ditemukan.")
 		return
@@ -537,7 +545,7 @@ func (a *Aplikasi) tanganiHapusGaleri(w http.ResponseWriter, r *http.Request) {
 		a.galatServer(w, "mengambil foto galeri", err)
 		return
 	}
-	if _, err := a.db.Exec("DELETE FROM galeri WHERE id = ?", id); err != nil {
+	if _, err := a.db.Exec("DELETE FROM galeri WHERE id = $1", id); err != nil {
 		a.galatServer(w, "menghapus foto galeri", err)
 		return
 	}
@@ -570,17 +578,17 @@ func (a *Aplikasi) tanganiSimpanFasilitas(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	hasil, err := a.db.Exec(
-		"INSERT INTO fasilitas (nama, deskripsi, gambar, icon, urutan) VALUES (?, ?, ?, ?, ?)",
+	var id int
+	err := a.db.QueryRow(
+		"INSERT INTO fasilitas (nama, deskripsi, gambar, icon, urutan) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		nama, kosongJadiNil(isi("deskripsi")), kosongJadiNil(gambar),
-		kosongJadiNil(isi("ikon")), urutan)
+		kosongJadiNil(isi("ikon")), urutan).Scan(&id)
 	if err != nil {
 		a.hapusUnggahan("fasilitas", gambar)
 		a.galatServer(w, "menyimpan fasilitas", err)
 		return
 	}
 
-	id, _ := hasil.LastInsertId()
 	kirimJSON(w, http.StatusCreated, map[string]any{"pesan": "Fasilitas berhasil ditambahkan.", "id": id})
 }
 
@@ -595,7 +603,7 @@ func (a *Aplikasi) tanganiUbahFasilitas(w http.ResponseWriter, r *http.Request) 
 	defer r.MultipartForm.RemoveAll()
 
 	var gambarLama string
-	err := a.db.QueryRow("SELECT COALESCE(gambar, '') FROM fasilitas WHERE id = ?", id).Scan(&gambarLama)
+	err := a.db.QueryRow("SELECT COALESCE(gambar, '') FROM fasilitas WHERE id = $1", id).Scan(&gambarLama)
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Fasilitas tidak ditemukan.")
 		return
@@ -630,7 +638,7 @@ func (a *Aplikasi) tanganiUbahFasilitas(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if _, err := a.db.Exec(
-		"UPDATE fasilitas SET nama = ?, deskripsi = ?, gambar = ?, icon = ?, urutan = ? WHERE id = ?",
+		"UPDATE fasilitas SET nama = $1, deskripsi = $2, gambar = $3, icon = $4, urutan = $5 WHERE id = $6",
 		nama, kosongJadiNil(isi("deskripsi")), kosongJadiNil(gambarDipakai),
 		kosongJadiNil(isi("ikon")), urutan, id); err != nil {
 		a.hapusUnggahan("fasilitas", gambarBaru)
@@ -650,7 +658,7 @@ func (a *Aplikasi) tanganiHapusFasilitas(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	var gambar string
-	err := a.db.QueryRow("SELECT COALESCE(gambar, '') FROM fasilitas WHERE id = ?", id).Scan(&gambar)
+	err := a.db.QueryRow("SELECT COALESCE(gambar, '') FROM fasilitas WHERE id = $1", id).Scan(&gambar)
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Fasilitas tidak ditemukan.")
 		return
@@ -659,7 +667,7 @@ func (a *Aplikasi) tanganiHapusFasilitas(w http.ResponseWriter, r *http.Request)
 		a.galatServer(w, "mengambil fasilitas", err)
 		return
 	}
-	if _, err := a.db.Exec("DELETE FROM fasilitas WHERE id = ?", id); err != nil {
+	if _, err := a.db.Exec("DELETE FROM fasilitas WHERE id = $1", id); err != nil {
 		a.galatServer(w, "menghapus fasilitas", err)
 		return
 	}
@@ -669,8 +677,17 @@ func (a *Aplikasi) tanganiHapusFasilitas(w http.ResponseWriter, r *http.Request)
 
 /* ================= pembantu ================= */
 
-// kodeGanda mengenali galat MySQL 1062 (nilai unik ganda) tanpa harus
-// bergantung pada tipe galat dari pustaka pengandar.
+// kodeGanda mengenali galat "nilai unik ganda". PostgreSQL memberi kode
+// SQLSTATE 23505 untuk itu. Kodenya dibaca lewat antarmuka kecil, bukan
+// dengan mencocokkan teks galatnya, supaya tidak ikut berubah bila pesannya
+// diterjemahkan.
 func kodeGanda(err error) bool {
-	return err != nil && strings.Contains(err.Error(), "Error 1062")
+	if err == nil {
+		return false
+	}
+	var galatSQL interface{ SQLState() string }
+	if errors.As(err, &galatSQL) {
+		return galatSQL.SQLState() == "23505"
+	}
+	return strings.Contains(err.Error(), "23505")
 }

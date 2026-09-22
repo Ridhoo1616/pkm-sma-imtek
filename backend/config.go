@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -30,18 +31,23 @@ func lingkungan(kunci, bawaan string) string {
 
 func muatKonfigurasi() Konfigurasi {
 	dbHost := lingkungan("DB_HOST", "127.0.0.1")
-	dbPort := lingkungan("DB_PORT", "3306")
+	dbPort := lingkungan("DB_PORT", "5432")
 	dbNama := lingkungan("DB_NAME", "sma_imtek")
-	dbUser := lingkungan("DB_USER", "root")
+	dbUser := lingkungan("DB_USER", "postgres")
 	dbSandi := lingkungan("DB_PASS", "")
 
 	// DSN lengkap boleh diberikan langsung; berguna pada layanan yang
-	// menyediakan satu variabel berisi seluruh kredensial.
+	// menyediakan satu variabel berisi seluruh kredensial, dan itu memang
+	// bentuk yang dipakai hampir semua penyedia PostgreSQL.
 	dsn := lingkungan("DATABASE_URL", "")
 	if dsn == "" {
+		// TimeZone disetel supaya jam pendaftaran yang dibaca kembali dari
+		// basis data sama dengan jam yang dilihat panitia.
+		sslMode := lingkungan("DB_SSLMODE", "disable")
 		dsn = fmt.Sprintf(
-			"%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci&loc=Asia%%2FJakarta",
-			dbUser, dbSandi, dbHost, dbPort, dbNama,
+			"postgres://%s:%s@%s:%s/%s?sslmode=%s&TimeZone=Asia%%2FJakarta",
+			url.QueryEscape(dbUser), url.QueryEscape(dbSandi),
+			dbHost, dbPort, dbNama, sslMode,
 		)
 	}
 

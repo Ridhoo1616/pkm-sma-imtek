@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -16,16 +17,19 @@ func (a *Aplikasi) tanganiDaftarPesan(w http.ResponseWriter, r *http.Request) {
 	halaman := bilanganKueri(q.Get("halaman"), 1, 1, 10000)
 	perHalaman := bilanganKueri(q.Get("per_halaman"), 20, 1, 100)
 
+	n := &penomoran{}
 	syarat := []string{"1 = 1"}
 	arg := []any{}
 	switch q.Get("dibaca") {
 	case "0":
-		syarat = append(syarat, "dibaca = 0")
+		syarat = append(syarat, "dibaca = false")
 	case "1":
-		syarat = append(syarat, "dibaca = 1")
+		syarat = append(syarat, "dibaca = true")
 	}
 	if cari := strings.TrimSpace(q.Get("cari")); cari != "" {
-		syarat = append(syarat, "(nama LIKE ? OR subjek LIKE ? OR isi LIKE ?)")
+		syarat = append(syarat, fmt.Sprintf(
+			"(nama ILIKE %s OR subjek ILIKE %s OR isi ILIKE %s)",
+			n.berikut(), n.berikut(), n.berikut()))
 		pola := "%" + cari + "%"
 		arg = append(arg, pola, pola, pola)
 	}
@@ -36,7 +40,7 @@ func (a *Aplikasi) tanganiDaftarPesan(w http.ResponseWriter, r *http.Request) {
 		a.galatServer(w, "menghitung pesan", err)
 		return
 	}
-	if err := a.db.QueryRow("SELECT COUNT(*) FROM pesan WHERE dibaca = 0").Scan(&belum); err != nil {
+	if err := a.db.QueryRow("SELECT COUNT(*) FROM pesan WHERE dibaca = false").Scan(&belum); err != nil {
 		a.galatServer(w, "menghitung pesan belum dibaca", err)
 		return
 	}
@@ -44,7 +48,7 @@ func (a *Aplikasi) tanganiDaftarPesan(w http.ResponseWriter, r *http.Request) {
 	argHal := append(append([]any{}, arg...), perHalaman, (halaman-1)*perHalaman)
 	baris, err := a.db.Query(`SELECT id, nama, COALESCE(email, ''), COALESCE(no_hp, ''),
 	                                 COALESCE(subjek, ''), isi, dibaca, created_at
-	                            FROM pesan`+dimana+` ORDER BY created_at DESC LIMIT ? OFFSET ?`, argHal...)
+	                            FROM pesan`+dimana+` ORDER BY created_at DESC LIMIT `+n.berikut()+` OFFSET `+n.berikut(), argHal...)
 	if err != nil {
 		a.galatServer(w, "mengambil pesan", err)
 		return
@@ -83,14 +87,14 @@ func (a *Aplikasi) tanganiTandaiPesan(w http.ResponseWriter, r *http.Request) {
 	if !bacaJSON(w, r, &p) {
 		return
 	}
-	hasil, err := a.db.Exec("UPDATE pesan SET dibaca = ? WHERE id = ?", p.Dibaca, id)
+	hasil, err := a.db.Exec("UPDATE pesan SET dibaca = $1 WHERE id = $2", p.Dibaca, id)
 	if err != nil {
 		a.galatServer(w, "menandai pesan", err)
 		return
 	}
 	if n, _ := hasil.RowsAffected(); n == 0 {
 		var ada int
-		if a.db.QueryRow("SELECT id FROM pesan WHERE id = ?", id).Scan(&ada) == sql.ErrNoRows {
+		if a.db.QueryRow("SELECT id FROM pesan WHERE id = $1", id).Scan(&ada) == sql.ErrNoRows {
 			kirimGalat(w, http.StatusNotFound, "Pesan tidak ditemukan.")
 			return
 		}
@@ -103,7 +107,7 @@ func (a *Aplikasi) tanganiHapusPesan(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	hasil, err := a.db.Exec("DELETE FROM pesan WHERE id = ?", id)
+	hasil, err := a.db.Exec("DELETE FROM pesan WHERE id = $1", id)
 	if err != nil {
 		a.galatServer(w, "menghapus pesan", err)
 		return
@@ -206,7 +210,7 @@ func (a *Aplikasi) tanganiSimpanPengaturan(w http.ResponseWriter, r *http.Reques
 	}
 	defer transaksi.Rollback()
 
-	pernyataan, err := transaksi.Prepare("UPDATE pengaturan SET nilai = ? WHERE nama_setting = ?")
+	pernyataan, err := transaksi.Prepare("UPDATE pengaturan SET nilai = $1 WHERE nama_setting = $2")
 	if err != nil {
 		a.galatServer(w, "menyiapkan pembaruan pengaturan", err)
 		return
@@ -321,9 +325,10 @@ func (a *Aplikasi) tanganiSimpanPengguna(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	hasil, err := a.db.Exec(
-		"INSERT INTO users (nama, username, password, role) VALUES (?, ?, ?, ?)",
-		p.Nama, p.Username, string(hash), p.Role)
+	var id int
+	err = a.db.QueryRow(
+		"INSERT INTO users (nama, username, password, role) VALUES ($1, $2, $3, $4) RETURNING id",
+		p.Nama, p.Username, string(hash), p.Role).Scan(&id)
 	if err != nil {
 		if kodeGanda(err) {
 			kirimGalat(w, http.StatusConflict, "Nama pengguna "+p.Username+" sudah dipakai.")
@@ -333,7 +338,6 @@ func (a *Aplikasi) tanganiSimpanPengguna(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	id, _ := hasil.LastInsertId()
 	kirimJSON(w, http.StatusCreated, map[string]any{"pesan": "Pengguna berhasil ditambahkan.", "id": id})
 }
 
@@ -365,7 +369,9 @@ func (a *Aplikasi) tanganiUbahPengguna(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sqlStr := "UPDATE users SET nama = ?, username = ?, role = ?"
+	n := &penomoran{}
+	sqlStr := fmt.Sprintf("UPDATE users SET nama = %s, username = %s, role = %s",
+		n.berikut(), n.berikut(), n.berikut())
 	arg := []any{p.Nama, p.Username, p.Role}
 	if p.Sandi != "" {
 		hash, err := bcrypt.GenerateFromPassword([]byte(p.Sandi), bcrypt.DefaultCost)
@@ -373,10 +379,10 @@ func (a *Aplikasi) tanganiUbahPengguna(w http.ResponseWriter, r *http.Request) {
 			a.galatServer(w, "membuat hash kata sandi", err)
 			return
 		}
-		sqlStr += ", password = ?"
+		sqlStr += ", password = " + n.berikut()
 		arg = append(arg, string(hash))
 	}
-	sqlStr += " WHERE id = ?"
+	sqlStr += " WHERE id = " + n.berikut()
 	arg = append(arg, id)
 
 	hasil, err := a.db.Exec(sqlStr, arg...)
@@ -390,7 +396,7 @@ func (a *Aplikasi) tanganiUbahPengguna(w http.ResponseWriter, r *http.Request) {
 	}
 	if n, _ := hasil.RowsAffected(); n == 0 {
 		var ada int
-		if a.db.QueryRow("SELECT id FROM users WHERE id = ?", id).Scan(&ada) == sql.ErrNoRows {
+		if a.db.QueryRow("SELECT id FROM users WHERE id = $1", id).Scan(&ada) == sql.ErrNoRows {
 			kirimGalat(w, http.StatusNotFound, "Pengguna tidak ditemukan.")
 			return
 		}
@@ -412,7 +418,7 @@ func (a *Aplikasi) tanganiHapusPengguna(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	hasil, err := a.db.Exec("DELETE FROM users WHERE id = ?", id)
+	hasil, err := a.db.Exec("DELETE FROM users WHERE id = $1", id)
 	if err != nil {
 		a.galatServer(w, "menghapus pengguna", err)
 		return
@@ -431,7 +437,7 @@ func (a *Aplikasi) pastikanMasihAdaAdmin(id int, peranBaru string) error {
 		return nil
 	}
 	var peranSekarang string
-	if err := a.db.QueryRow("SELECT role FROM users WHERE id = ?", id).Scan(&peranSekarang); err != nil {
+	if err := a.db.QueryRow("SELECT role FROM users WHERE id = $1", id).Scan(&peranSekarang); err != nil {
 		return nil // keberadaan data diperiksa oleh pemanggil
 	}
 	if peranSekarang != "admin" {

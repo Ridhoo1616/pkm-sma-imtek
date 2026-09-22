@@ -7,14 +7,15 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func bukaBasisData(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("membuka koneksi: %w", err)
 	}
@@ -34,14 +35,25 @@ func bukaBasisData(dsn string) (*sql.DB, error) {
 	return nil, fmt.Errorf("basis data tidak merespons: %w", galatTerakhir)
 }
 
+// penomoran menghitung penanda parameter untuk kueri yang syaratnya
+// dirangkai saat berjalan. PostgreSQL memakai penanda bernomor seperti $1
+// dan $2, bukan tanda tanya, jadi nomornya tidak dapat ditulis tetap pada
+// potongan syarat yang belum tentu terpakai.
+type penomoran struct{ n int }
+
+func (p *penomoran) berikut() string {
+	p.n++
+	return "$" + strconv.Itoa(p.n)
+}
+
 // jalankanMigrasi menerapkan berkas .sql di folder migrations satu per satu
 // dan mencatat yang sudah dijalankan, sehingga aman dipanggil berulang kali.
 func jalankanMigrasi(db *sql.DB, folder string) error {
 	if _, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS migrasi (
-			berkas     VARCHAR(160) NOT NULL PRIMARY KEY,
-			dijalankan DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`); err != nil {
+			berkas     varchar(160) NOT NULL PRIMARY KEY,
+			dijalankan timestamptz  NOT NULL DEFAULT now()
+		)`); err != nil {
 		return fmt.Errorf("menyiapkan tabel migrasi: %w", err)
 	}
 
@@ -60,7 +72,7 @@ func jalankanMigrasi(db *sql.DB, folder string) error {
 		nama := filepath.Base(b)
 
 		var ada string
-		err := db.QueryRow("SELECT berkas FROM migrasi WHERE berkas = ?", nama).Scan(&ada)
+		err := db.QueryRow("SELECT berkas FROM migrasi WHERE berkas = $1", nama).Scan(&ada)
 		if err == nil {
 			continue // sudah pernah dijalankan
 		}
@@ -75,7 +87,7 @@ func jalankanMigrasi(db *sql.DB, folder string) error {
 		// fasilitas serta berita yang tidak punya kunci unik.
 		if dasar {
 			log.Printf("melewati migrasi %s: basis data sudah berisi skema aplikasi", nama)
-			if _, err := db.Exec("INSERT INTO migrasi (berkas) VALUES (?)", nama); err != nil {
+			if _, err := db.Exec("INSERT INTO migrasi (berkas) VALUES ($1)", nama); err != nil {
 				return fmt.Errorf("mencatat migrasi %s: %w", nama, err)
 			}
 			continue
@@ -92,7 +104,7 @@ func jalankanMigrasi(db *sql.DB, folder string) error {
 				return fmt.Errorf("migrasi %s gagal: %w", nama, err)
 			}
 		}
-		if _, err := db.Exec("INSERT INTO migrasi (berkas) VALUES (?)", nama); err != nil {
+		if _, err := db.Exec("INSERT INTO migrasi (berkas) VALUES ($1)", nama); err != nil {
 			return fmt.Errorf("mencatat migrasi %s: %w", nama, err)
 		}
 	}
@@ -112,7 +124,7 @@ func perluDijadikanDasar(db *sql.DB) (bool, error) {
 
 	var adaTabel int
 	if err := db.QueryRow(`SELECT COUNT(*) FROM information_schema.tables
-	                        WHERE table_schema = DATABASE() AND table_name = 'pendaftar'`).
+	                        WHERE table_schema = current_schema() AND table_name = 'pendaftar'`).
 		Scan(&adaTabel); err != nil {
 		return false, fmt.Errorf("memeriksa skema yang sudah ada: %w", err)
 	}
@@ -120,43 +132,92 @@ func perluDijadikanDasar(db *sql.DB) (bool, error) {
 }
 
 // pecahPerintahSQL memisahkan berkas SQL menjadi perintah-perintah tunggal.
-// Titik koma di dalam tanda kutip tidak dianggap pemisah.
+// Titik koma di dalam tanda kutip maupun di dalam blok bertanda dolar tidak
+// dianggap pemisah. Blok bertanda dolar penting untuk PostgreSQL, karena badan
+// fungsi plpgsql ditulis di antara $$ dan berisi titik koma sendiri.
 func pecahPerintahSQL(isi string) []string {
 	var hasil []string
 	var b strings.Builder
 	var kutip rune
+	var tanda string // tanda pembuka blok dolar yang sedang berjalan
 	lolos := false
 
-	for _, r := range isi {
+	r := []rune(isi)
+	for i := 0; i < len(r); i++ {
+		c := r[i]
+
+		// Di dalam blok bertanda dolar, hanya tanda penutup yang sama yang
+		// mengakhirinya. Isinya diambil apa adanya.
+		if tanda != "" {
+			if c == '$' {
+				if t, panjang := bacaTandaDolar(r, i); t == tanda {
+					b.WriteString(tanda)
+					i += panjang - 1
+					tanda = ""
+					continue
+				}
+			}
+			b.WriteRune(c)
+			continue
+		}
+
 		if kutip != 0 {
-			b.WriteRune(r)
+			b.WriteRune(c)
 			switch {
 			case lolos:
 				lolos = false
-			case r == '\\':
+			case c == '\\':
 				lolos = true
-			case r == kutip:
+			case c == kutip:
 				kutip = 0
 			}
 			continue
 		}
-		switch r {
-		case '\'', '"', '`':
-			kutip = r
-			b.WriteRune(r)
+
+		switch c {
+		case '$':
+			if t, panjang := bacaTandaDolar(r, i); t != "" {
+				b.WriteString(t)
+				i += panjang - 1
+				tanda = t
+				continue
+			}
+			b.WriteRune(c)
+		case '\'', '"':
+			kutip = c
+			b.WriteRune(c)
 		case ';':
 			if p := bersihkanPerintah(b.String()); p != "" {
 				hasil = append(hasil, p)
 			}
 			b.Reset()
 		default:
-			b.WriteRune(r)
+			b.WriteRune(c)
 		}
 	}
 	if p := bersihkanPerintah(b.String()); p != "" {
 		hasil = append(hasil, p)
 	}
 	return hasil
+}
+
+// bacaTandaDolar mengenali tanda pembuka blok seperti $$ atau $badan$ pada
+// posisi i. Mengembalikan tandanya beserta panjangnya, atau string kosong
+// bila yang ada di sana bukan tanda blok.
+func bacaTandaDolar(r []rune, i int) (string, int) {
+	if r[i] != '$' {
+		return "", 0
+	}
+	j := i + 1
+	for j < len(r) && (r[j] == '_' ||
+		(r[j] >= 'a' && r[j] <= 'z') || (r[j] >= 'A' && r[j] <= 'Z') ||
+		(j > i+1 && r[j] >= '0' && r[j] <= '9')) {
+		j++
+	}
+	if j < len(r) && r[j] == '$' {
+		return string(r[i : j+1]), j + 1 - i
+	}
+	return "", 0
 }
 
 // bersihkanPerintah membuang baris komentar dan spasi berlebih. Perintah yang
