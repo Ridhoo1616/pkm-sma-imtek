@@ -1,0 +1,181 @@
+package main
+
+import "time"
+
+type Pengguna struct {
+	ID         int        `json:"id"`
+	Nama       string     `json:"nama"`
+	Username   string     `json:"username"`
+	Role       string     `json:"role"`
+	MasukAkhir *time.Time `json:"masuk_akhir"`
+	Dibuat     time.Time  `json:"dibuat"` // kolom created_at
+}
+
+type Jurusan struct {
+	ID        int    `json:"id"`
+	Kode      string `json:"kode"`
+	Nama      string `json:"nama"`
+	Deskripsi string `json:"deskripsi"`
+	Kuota     int    `json:"kuota"`
+	Ikon      string `json:"ikon"` // kolom icon
+	Aktif     bool   `json:"aktif"`
+	Urutan    int    `json:"urutan"`
+	Pendaftar int    `json:"pendaftar"` // dihitung, bukan kolom
+}
+
+type Fasilitas struct {
+	ID        int    `json:"id"`
+	Nama      string `json:"nama"`
+	Deskripsi string `json:"deskripsi"`
+	Gambar    string `json:"gambar"`
+	Ikon      string `json:"ikon"` // kolom icon
+	Urutan    int    `json:"urutan"`
+}
+
+type Berita struct {
+	ID        int       `json:"id"`
+	Judul     string    `json:"judul"`
+	Slug      string    `json:"slug"`
+	Kategori  string    `json:"kategori"`
+	Ringkasan string    `json:"ringkasan"`
+	Isi       string    `json:"isi"`
+	Gambar    string    `json:"gambar"`
+	Penulis   string    `json:"penulis"`
+	Dibaca    int       `json:"dibaca"`
+	Publish   bool      `json:"publish"`
+	Dibuat    time.Time `json:"dibuat"`
+	Diubah    time.Time `json:"diubah"`
+}
+
+type Galeri struct {
+	ID         int       `json:"id"`
+	Judul      string    `json:"judul"`
+	Kategori   string    `json:"kategori"`
+	Gambar     string    `json:"gambar"`
+	Keterangan string    `json:"keterangan"`
+	Dibuat     time.Time `json:"dibuat"`
+}
+
+type Pesan struct {
+	ID     int       `json:"id"`
+	Nama   string    `json:"nama"`
+	Email  string    `json:"email"`
+	NoHP   string    `json:"no_hp"`
+	Subjek string    `json:"subjek"`
+	Isi    string    `json:"isi"`
+	Dibaca bool      `json:"dibaca"`
+	Dibuat time.Time `json:"dibuat"`
+}
+
+// Pendaftar memuat seluruh kolom formulir PPDB. Nama kolom JSON mengikuti
+// nama kolom basis data supaya mudah dilacak antara frontend dan backend.
+type Pendaftar struct {
+	ID               int      `json:"id"`
+	NoRegistrasi     string   `json:"no_registrasi"`
+	TahunAjaran      string   `json:"tahun_ajaran"`
+	Jalur            string   `json:"jalur"`
+	JurusanID        *int     `json:"jurusan_id"`
+	NamaJurusan      string   `json:"nama_jurusan"`
+	NamaLengkap      string   `json:"nama_lengkap"`
+	NISN             string   `json:"nisn"`
+	NIK              string   `json:"nik"`
+	JenisKelamin     string   `json:"jenis_kelamin"`
+	TempatLahir      string   `json:"tempat_lahir"`
+	TanggalLahir     string   `json:"tanggal_lahir"`
+	Agama            string   `json:"agama"`
+	AnakKe           string   `json:"anak_ke"`
+	JumlahSaudara    string   `json:"jumlah_saudara"`
+	Alamat           string   `json:"alamat"`
+	Kelurahan        string   `json:"kelurahan"`
+	Kecamatan        string   `json:"kecamatan"`
+	Kota             string   `json:"kota"`
+	Provinsi         string   `json:"provinsi"`
+	KodePos          string   `json:"kode_pos"`
+	NoHP             string   `json:"no_hp"`
+	Email            string   `json:"email"`
+	AsalSekolah      string   `json:"asal_sekolah"`
+	NPSNSekolah      string   `json:"npsn_sekolah"`
+	AlamatSekolah    string   `json:"alamat_sekolah"`
+	TahunLulus       string   `json:"tahun_lulus"`
+	NilaiRata2       *float64 `json:"nilai_rata2"`
+	NamaAyah         string   `json:"nama_ayah"`
+	PekerjaanAyah    string   `json:"pekerjaan_ayah"`
+	PendidikanAyah   string   `json:"pendidikan_ayah"`
+	NamaIbu          string   `json:"nama_ibu"`
+	PekerjaanIbu     string   `json:"pekerjaan_ibu"`
+	PendidikanIbu    string   `json:"pendidikan_ibu"`
+	Penghasilan      string   `json:"penghasilan"`
+	NoHPOrtu         string   `json:"no_hp_ortu"`
+	NamaWali         string   `json:"nama_wali"`
+	FileFoto         string   `json:"file_foto"`
+	FileIjazah       string   `json:"file_ijazah"`
+	FileKK           string   `json:"file_kk"`
+	FileAkta         string   `json:"file_akta"`
+	FileRaport       string   `json:"file_raport"`
+	FilePrestasi     string   `json:"file_prestasi"`
+	SumberInfo       string   `json:"sumber_informasi"`
+	CatatanSumber    string   `json:"catatan_sumber"`
+	Status           string   `json:"status"`
+	CatatanAdmin     string   `json:"catatan_admin"`
+	DiverifikasiOleh *int     `json:"diverifikasi_oleh"`
+	NamaVerifikator  string   `json:"nama_verifikator"`
+	IPPendaftar      string   `json:"ip_pendaftar,omitempty"`
+	Dibuat           string   `json:"dibuat"` // created_at, sudah diformat
+	Diubah           string   `json:"diubah"` // updated_at, sudah diformat
+}
+
+var StatusPendaftar = []string{
+	"Menunggu Verifikasi", "Terverifikasi", "Diterima", "Cadangan", "Ditolak",
+}
+
+var JalurPendaftaran = []string{
+	"Reguler", "Prestasi", "Afirmasi", "Perpindahan Tugas Orang Tua",
+}
+
+var KategoriBerita = []string{"Berita", "Pengumuman", "Prestasi", "Kegiatan"}
+
+func statusSah(s string) bool   { return adaDalam(StatusPendaftar, s) }
+func jalurSah(s string) bool    { return adaDalam(JalurPendaftaran, s) }
+func kategoriSah(s string) bool { return adaDalam(KategoriBerita, s) }
+
+// adaDalam menjawab apakah sebuah nilai termasuk dalam daftar yang diizinkan.
+func adaDalam(daftar []string, nilai string) bool {
+	for _, x := range daftar {
+		if x == nilai {
+			return true
+		}
+	}
+	return false
+}
+
+// SumberInformasi mencatat dari mana calon peserta didik mengetahui sekolah.
+// Kolom inilah yang menjawab tujuan PkM: menilai efektivitas promosi. Urutan
+// dipertahankan karena dipakai sebagai urutan pilihan pada formulir.
+var SumberInformasi = []string{
+	"Website Sekolah", "Instagram", "Facebook", "TikTok", "WhatsApp", "Google",
+	"Brosur/Spanduk", "Sosialisasi Sekolah", "Teman/Keluarga", "Alumni",
+	"Guru SMP", "Lainnya",
+}
+
+// LabelSumberInformasi memberi keterangan yang lebih jelas untuk ditampilkan
+// pada formulir dan laporan.
+var LabelSumberInformasi = map[string]string{
+	"Website Sekolah":     "Website resmi sekolah",
+	"Instagram":           "Instagram",
+	"Facebook":            "Facebook",
+	"TikTok":              "TikTok",
+	"WhatsApp":            "Pesan/Grup WhatsApp",
+	"Google":              "Pencarian Google",
+	"Brosur/Spanduk":      "Brosur atau spanduk",
+	"Sosialisasi Sekolah": "Sosialisasi ke SMP/MTs",
+	"Teman/Keluarga":      "Teman atau keluarga",
+	"Alumni":              "Alumni sekolah",
+	"Guru SMP":            "Guru/BK di SMP",
+	"Lainnya":             "Lainnya",
+}
+
+var JenisKelamin = []string{"L", "P"}
+
+var Agama = []string{"Islam", "Kristen Protestan", "Katolik", "Hindu", "Buddha", "Konghucu", "Lainnya"}
+
+func sumberSah(s string) bool { return adaDalam(SumberInformasi, s) }
