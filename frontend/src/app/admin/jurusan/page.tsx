@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { api, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
+import { useKabar } from "@/komponen/Kabar";
 import { angka, persen } from "@/lib/format";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
-import { Memuat, PesanGalat, PesanBerhasil, TanpaData } from "@/komponen/Memuat";
+import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import { Teks, AreaTeks, Centang, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import type { Jurusan } from "@/lib/tipe";
@@ -30,6 +31,7 @@ export default function HalamanJurusan() {
 }
 
 function IsiJurusan() {
+  const kabar = useKabar();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.jurusanAdmin());
 
   const [jendela, setJendela] = useState(false);
@@ -38,7 +40,6 @@ function IsiJurusan() {
   const [galatKolom, setGalatKolom] = useState<Record<string, string>>({});
   const [ringkasan, setRingkasan] = useState<string[]>([]);
   const [menyimpan, setMenyimpan] = useState(false);
-  const [pesan, setPesan] = useState("");
   const [hapusTarget, setHapusTarget] = useState<Jurusan | null>(null);
   const [menghapus, setMenghapus] = useState(false);
   const [galatHapus, setGalatHapus] = useState("");
@@ -75,7 +76,7 @@ function IsiJurusan() {
         ubahId === null
           ? await api.simpanJurusan(isi)
           : await api.ubahJurusan(ubahId, isi);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setJendela(false);
       muatUlang();
       // Halaman publik disegarkan agar perubahannya langsung terlihat.
@@ -98,7 +99,7 @@ function IsiJurusan() {
     setMenghapus(true);
     try {
       const hasil = await api.hapusJurusan(hapusTarget.id);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setHapusTarget(null);
       muatUlang();
       segarkanHalamanPublik();
@@ -119,11 +120,6 @@ function IsiJurusan() {
         aksi={<Tombol onClick={() => buka()}>Tambah Peminatan</Tombol>}
       />
 
-      {pesan && (
-        <div className="mb-5">
-          <PesanBerhasil pesan={pesan} />
-        </div>
-      )}
 
       {memuat ? (
         <Memuat />

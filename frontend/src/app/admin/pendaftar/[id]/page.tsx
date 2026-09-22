@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { api, urlUnggahan, ambilToken, GalatApi } from "@/lib/api";
+import { api, urlUnggahan, ambilToken, unduhBuktiAdmin, GalatApi } from "@/lib/api";
+import { bukaBlob } from "@/lib/berkas";
 import { useMuat } from "@/lib/muat";
 import {
   jenisKelaminPanjang,
@@ -215,6 +216,19 @@ function IsiDetail() {
         aksi={
           <>
             <Lencana warna={warnaStatus(p.status)}>{p.status}</Lencana>
+            <Tombol
+              jenis="kedua"
+              onClick={async () => {
+                try {
+                  const { nama, blob } = await unduhBuktiAdmin(id, p.no_registrasi);
+                  bukaBlob(nama, blob);
+                } catch {
+                  setGalatSimpan("Bukti pendaftaran gagal dibuat.");
+                }
+              }}
+            >
+              Bukti Pendaftaran (PDF)
+            </Tombol>
             <Link
               href="/admin/pendaftar"
               className="rounded-lg border border-garis bg-white px-4 py-2 text-sm font-semibold text-teks hover:border-biru hover:text-biru"

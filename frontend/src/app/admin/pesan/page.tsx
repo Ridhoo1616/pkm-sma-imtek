@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { api, GalatApi } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
+import { useKabar } from "@/komponen/Kabar";
 import { angka, tanggalJam, nomorWa } from "@/lib/format";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, KartuAngka, Konfirmasi } from "@/komponen/Panel";
-import { Memuat, PesanGalat, PesanBerhasil, TanpaData } from "@/komponen/Memuat";
+import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import { Tombol } from "@/komponen/Medan";
 import type { Pesan } from "@/lib/tipe";
@@ -20,6 +21,7 @@ export default function HalamanPesanAdmin() {
 }
 
 function IsiPesan() {
+  const kabar = useKabar();
   const [saring, setSaring] = useState({ dibaca: "", cari: "" });
   const kueri = (() => {
     const u = new URLSearchParams({ per_halaman: "50" });
@@ -33,7 +35,6 @@ function IsiPesan() {
     [kueri],
   );
 
-  const [pesanAksi, setPesanAksi] = useState("");
   const [galatAksi, setGalatAksi] = useState("");
   const [sibuk, setSibuk] = useState<number | null>(null);
   const [hapusTarget, setHapusTarget] = useState<Pesan | null>(null);
@@ -59,7 +60,7 @@ function IsiPesan() {
     setMenghapus(true);
     try {
       const hasil = await api.hapusPesan(hapusTarget.id);
-      setPesanAksi(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setHapusTarget(null);
       muatUlang();
     } catch (e) {
@@ -77,11 +78,6 @@ function IsiPesan() {
         keterangan="Pertanyaan yang dikirim pengunjung lewat halaman Kontak."
       />
 
-      {pesanAksi && (
-        <div className="mb-5">
-          <PesanBerhasil pesan={pesanAksi} />
-        </div>
-      )}
       {galatAksi && (
         <div className="mb-5">
           <PesanGalat pesan={galatAksi} />

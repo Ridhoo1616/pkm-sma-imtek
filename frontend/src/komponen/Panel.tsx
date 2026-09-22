@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import type { ReactNode } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Tombol } from "@/komponen/Medan";
 
 /**
@@ -86,6 +86,18 @@ export function Tabel({
   );
 }
 
+/**
+ * Jendela isian, dibangun di atas Radix Dialog.
+ *
+ * Sebelumnya jendela ini buatan sendiri. Radix dipakai karena membawa hal
+ * yang sulit ditulis benar sendiri: fokus papan tombol terkurung di dalam
+ * jendela selama terbuka, fokus dikembalikan ke tombol pemanggilnya saat
+ * ditutup, tombol Escape dan klik latar tertangani, isi di belakangnya
+ * disembunyikan dari pembaca layar, dan gulir latar dihentikan.
+ *
+ * Kelas tampilannya sengaja dibiarkan sama persis dengan versi sebelumnya,
+ * jadi tata letaknya tidak berubah sedikit pun.
+ */
 export function Jendela({
   judul,
   terbuka,
@@ -99,59 +111,46 @@ export function Jendela({
   children: ReactNode;
   lebar?: string;
 }) {
-  // Tombol Escape menutup jendela, dan gulir latar dihentikan agar
-  // halaman di belakang tidak bergeser saat jendela dibuka.
-  useEffect(() => {
-    if (!terbuka) return;
-    const tekan = (e: KeyboardEvent) => {
-      if (e.key === "Escape") tutup();
-    };
-    window.addEventListener("keydown", tekan);
-    const gulirLama = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", tekan);
-      document.body.style.overflow = gulirLama;
-    };
-  }, [terbuka, tutup]);
-
   return (
-    <AnimatePresence>
-      {terbuka && (
-        <motion.div
-          className="fixed inset-0 z-100 flex items-start justify-center overflow-y-auto bg-black/50 p-4 py-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={tutup}
+    <Dialog.Root open={terbuka} onOpenChange={(buka) => !buka && tutup()}>
+      <Dialog.Portal>
+        {/* Wadah gulir diletakkan pada lapisan latar, bukan pada isinya,
+            supaya jendela yang lebih tinggi dari layar tetap dapat digulir. */}
+        <Dialog.Overlay
+          className="fixed inset-0 z-100 flex items-start justify-center overflow-y-auto bg-black/50 p-4 py-10
+                     data-[state=open]:animate-[munculLatar_0.18s_ease-out]"
         >
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label={judul}
-            className={`w-full ${lebar} rounded-kartu bg-white shadow-kuat`}
-            initial={{ opacity: 0, y: 20, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            onClick={(e) => e.stopPropagation()}
+          <Dialog.Content
+            className={`w-full ${lebar} rounded-kartu bg-white shadow-kuat
+                        data-[state=open]:animate-[munculJendela_0.2s_ease-out]`}
+            // Bawaan Radix memberi fokus ke elemen tabbable pertama, yang di
+            // sini adalah tombol tutup. Untuk jendela berisi formulir, fokus
+            // lebih berguna jatuh ke kolom pertamanya.
+            onOpenAutoFocus={(ev) => {
+              const isi = ev.currentTarget as HTMLElement | null;
+              const pertama = isi?.querySelector<HTMLElement>(
+                "input:not([type=hidden]), select, textarea",
+              );
+              if (pertama) {
+                ev.preventDefault();
+                pertama.focus();
+              }
+            }}
           >
             <div className="flex items-center justify-between gap-4 border-b border-garis px-6 py-4">
-              <h2 className="text-lg">{judul}</h2>
-              <button
-                type="button"
-                onClick={tutup}
+              <Dialog.Title className="text-lg">{judul}</Dialog.Title>
+              <Dialog.Close
                 aria-label="Tutup"
                 className="grid h-8 w-8 place-items-center rounded-lg text-samar hover:bg-slate-100 hover:text-teks"
               >
                 ×
-              </button>
+              </Dialog.Close>
             </div>
             <div className="px-6 py-6">{children}</div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 

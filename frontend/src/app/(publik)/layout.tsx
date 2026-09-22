@@ -1,5 +1,6 @@
 import Navigasi from "@/komponen/Navigasi";
 import Footer from "@/komponen/Footer";
+import GulirHalus from "@/komponen/GulirHalus";
 import { muatProfil } from "@/lib/profil";
 
 export default async function TataLetakPublik({ children }: LayoutProps<"/">) {
@@ -7,6 +8,7 @@ export default async function TataLetakPublik({ children }: LayoutProps<"/">) {
 
   return (
     <>
+      <GulirHalus />
       <Navigasi pengaturan={profil.pengaturan} ppdbDibuka={profil.ppdb.dibuka} />
 
       {gagal && (

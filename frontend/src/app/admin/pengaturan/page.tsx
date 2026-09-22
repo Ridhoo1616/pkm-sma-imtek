@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { api, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
+import { useKabar } from "@/komponen/Kabar";
 import { belumTerisi } from "@/lib/format";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel } from "@/komponen/Panel";
-import { Memuat, PesanGalat, PesanBerhasil } from "@/komponen/Memuat";
+import { Memuat, PesanGalat } from "@/komponen/Memuat";
 import { Tombol, RingkasanGalat } from "@/komponen/Medan";
 import { Lencana } from "@/komponen/Bagian";
 
@@ -130,6 +131,7 @@ export default function HalamanPengaturan() {
 }
 
 function IsiPengaturan() {
+  const kabar = useKabar();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.pengaturan());
 
   // State hanya menyimpan suntingan petugas, bukan salinan seluruh
@@ -139,7 +141,6 @@ function IsiPengaturan() {
   const [galatKolom, setGalatKolom] = useState<Record<string, string>>({});
   const [ringkasan, setRingkasan] = useState<string[]>([]);
   const [menyimpan, setMenyimpan] = useState(false);
-  const [pesan, setPesan] = useState("");
 
   if (memuat) return <Memuat />;
   if (galat) return <PesanGalat pesan={galat} ulangi={muatUlang} />;
@@ -185,7 +186,6 @@ function IsiPengaturan() {
     if (berubah.length === 0) return;
     setGalatKolom({});
     setRingkasan([]);
-    setPesan("");
     setMenyimpan(true);
 
     const kirim: Record<string, string> = {};
@@ -193,7 +193,7 @@ function IsiPengaturan() {
 
     try {
       const hasil = await api.simpanPengaturan(kirim);
-      setPesan(`${hasil.pesan} (${berubah.length} pengaturan diperbarui)`);
+      kabar.beri(`${hasil.pesan} (${berubah.length} pengaturan diperbarui)`);
       setSuntingan({});
       muatUlang();
       // Pengaturan menentukan hampir seluruh isi situs publik.
@@ -233,11 +233,6 @@ function IsiPengaturan() {
         }
       />
 
-      {pesan && (
-        <div className="mb-5">
-          <PesanBerhasil pesan={pesan} />
-        </div>
-      )}
       {ringkasan.length > 0 && (
         <div className="mb-5">
           <RingkasanGalat daftar={ringkasan} />

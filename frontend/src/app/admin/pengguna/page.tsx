@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { api, GalatApi } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
+import { useKabar } from "@/komponen/Kabar";
 import { tanggalJam } from "@/lib/format";
 import { useSesi } from "@/komponen/Sesi";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
-import { Memuat, PesanGalat, PesanBerhasil } from "@/komponen/Memuat";
+import { Memuat, PesanGalat } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import { Teks, Pilihan, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import type { Pengguna } from "@/lib/tipe";
@@ -23,6 +24,7 @@ export default function HalamanPengguna() {
 }
 
 function IsiPengguna() {
+  const kabar = useKabar();
   const { pengguna: saya } = useSesi();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.pengguna());
 
@@ -32,7 +34,6 @@ function IsiPengguna() {
   const [galatKolom, setGalatKolom] = useState<Record<string, string>>({});
   const [ringkasan, setRingkasan] = useState<string[]>([]);
   const [menyimpan, setMenyimpan] = useState(false);
-  const [pesan, setPesan] = useState("");
   const [hapusTarget, setHapusTarget] = useState<Pengguna | null>(null);
   const [menghapus, setMenghapus] = useState(false);
   const [galatHapus, setGalatHapus] = useState("");
@@ -60,7 +61,7 @@ function IsiPengguna() {
         ubahId === null
           ? await api.simpanPengguna(isi)
           : await api.ubahPengguna(ubahId, isi);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setJendela(false);
       muatUlang();
     } catch (e) {
@@ -81,7 +82,7 @@ function IsiPengguna() {
     setMenghapus(true);
     try {
       const hasil = await api.hapusPengguna(hapusTarget.id);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setHapusTarget(null);
       muatUlang();
     } catch (e) {
@@ -101,11 +102,6 @@ function IsiPengguna() {
         aksi={<Tombol onClick={() => buka()}>Tambah Pengguna</Tombol>}
       />
 
-      {pesan && (
-        <div className="mb-5">
-          <PesanBerhasil pesan={pesan} />
-        </div>
-      )}
 
       {memuat ? (
         <Memuat />

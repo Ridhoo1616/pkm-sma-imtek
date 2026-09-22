@@ -1,4 +1,5 @@
 import { PenyediaSesi } from "@/komponen/Sesi";
+import { PenyediaKabar } from "@/komponen/Kabar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function TataLetakAdmin({ children }: LayoutProps<"/admin">) {
-  return <PenyediaSesi>{children}</PenyediaSesi>;
+  return (
+    <PenyediaSesi>
+      <PenyediaKabar>{children}</PenyediaKabar>
+    </PenyediaSesi>
+  );
 }

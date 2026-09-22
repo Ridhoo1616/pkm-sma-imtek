@@ -356,6 +356,53 @@ export const api = {
 };
 
 /**
+ * Mengunduh bukti pendaftaran berbentuk PDF, dari sisi pendaftar.
+ * Dibuka lewat fetch supaya galatnya dapat ditampilkan sebagai pesan,
+ * bukan sebagai halaman putih berisi JSON.
+ */
+export async function unduhBukti(isi: {
+  no_registrasi: string;
+  tanggal_lahir: string;
+}): Promise<{ nama: string; blob: Blob }> {
+  const jawaban = await fetch(`${ALAMAT_API}/api/ppdb/bukti`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(isi),
+    cache: "no-store",
+  });
+  if (!jawaban.ok) {
+    const tipe = jawaban.headers.get("content-type") ?? "";
+    const galat: IsiGalat = tipe.includes("application/json")
+      ? await jawaban.json()
+      : { pesan: "Bukti pendaftaran gagal dibuat." };
+    throw new GalatApi(jawaban.status, galat);
+  }
+  return {
+    nama: `bukti-pendaftaran-${isi.no_registrasi}.pdf`,
+    blob: await jawaban.blob(),
+  };
+}
+
+/** Bukti pendaftaran dari sisi petugas, memakai token. */
+export async function unduhBuktiAdmin(
+  id: number,
+  noRegistrasi: string,
+): Promise<{ nama: string; blob: Blob }> {
+  const t = ambilToken();
+  const jawaban = await fetch(`${ALAMAT_API}/api/admin/pendaftar/${id}/bukti`, {
+    headers: t ? { Authorization: `Bearer ${t}` } : {},
+    cache: "no-store",
+  });
+  if (!jawaban.ok) {
+    throw new GalatApi(jawaban.status, { pesan: "Bukti pendaftaran gagal dibuat." });
+  }
+  return {
+    nama: `bukti-pendaftaran-${noRegistrasi}.pdf`,
+    blob: await jawaban.blob(),
+  };
+}
+
+/**
  * Meminta Next membuang cache halaman publik, dipakai setelah admin mengubah
  * isi situs. Kegagalannya tidak pernah dianggap galat: perubahan tetap
  * tersimpan di basis data dan akan terlihat setelah cache kedaluwarsa

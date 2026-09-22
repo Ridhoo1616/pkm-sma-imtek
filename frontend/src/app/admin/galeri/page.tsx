@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { api, urlUnggahan, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
+import { useKabar } from "@/komponen/Kabar";
 import { tanggalPanjang } from "@/lib/format";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Jendela, Konfirmasi } from "@/komponen/Panel";
-import { Memuat, PesanGalat, PesanBerhasil, TanpaData } from "@/komponen/Memuat";
+import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Teks, AreaTeks, Berkas, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import type { Galeri } from "@/lib/tipe";
 
@@ -21,6 +22,7 @@ export default function HalamanGaleriAdmin() {
 }
 
 function IsiGaleri() {
+  const kabar = useKabar();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.galeri());
 
   const [jendela, setJendela] = useState(false);
@@ -31,7 +33,6 @@ function IsiGaleri() {
   const [galatKolom, setGalatKolom] = useState<Record<string, string>>({});
   const [ringkasan, setRingkasan] = useState<string[]>([]);
   const [menyimpan, setMenyimpan] = useState(false);
-  const [pesan, setPesan] = useState("");
   const [hapusTarget, setHapusTarget] = useState<Galeri | null>(null);
   const [menghapus, setMenghapus] = useState(false);
 
@@ -68,7 +69,7 @@ function IsiGaleri() {
         ubahId === null
           ? await api.simpanGaleri(f)
           : await api.ubahGaleri(ubahId, f);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setJendela(false);
       muatUlang();
       // Halaman publik disegarkan agar perubahannya langsung terlihat.
@@ -90,7 +91,7 @@ function IsiGaleri() {
     setMenghapus(true);
     try {
       const hasil = await api.hapusGaleri(hapusTarget.id);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setHapusTarget(null);
       muatUlang();
       segarkanHalamanPublik();
@@ -110,11 +111,6 @@ function IsiGaleri() {
         aksi={<Tombol onClick={() => buka()}>Unggah Foto</Tombol>}
       />
 
-      {pesan && (
-        <div className="mb-5">
-          <PesanBerhasil pesan={pesan} />
-        </div>
-      )}
 
       {memuat ? (
         <Memuat />

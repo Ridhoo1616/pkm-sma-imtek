@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { api, GalatApi } from "@/lib/api";
+import { api, unduhBukti, GalatApi } from "@/lib/api";
+import { bukaBlob } from "@/lib/berkas";
 import { Teks, Tombol, RingkasanGalat } from "@/komponen/Medan";
+import { PesanGalat } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import { tanggalJam, tanggalPanjang, warnaStatus } from "@/lib/format";
 import type { StatusPendaftaran } from "@/lib/tipe";
@@ -29,6 +31,8 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
   const [ringkasan, setRingkasan] = useState<string[]>([]);
   const [mencari, setMencari] = useState(false);
   const [hasil, setHasil] = useState<StatusPendaftaran | null>(null);
+  const [mengunduh, setMengunduh] = useState(false);
+  const [galatBukti, setGalatBukti] = useState("");
 
   async function cari(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +53,25 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
       }
     } finally {
       setMencari(false);
+    }
+  }
+
+  async function ambilBukti() {
+    if (!hasil) return;
+    setGalatBukti("");
+    setMengunduh(true);
+    try {
+      const { nama, blob } = await unduhBukti({
+        no_registrasi: hasil.no_registrasi,
+        tanggal_lahir: tgl,
+      });
+      bukaBlob(nama, blob);
+    } catch (e) {
+      setGalatBukti(
+        e instanceof GalatApi ? e.message : "Bukti pendaftaran gagal dibuat.",
+      );
+    } finally {
+      setMengunduh(false);
     }
   }
 
@@ -153,10 +176,20 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
               </p>
             )}
 
-            <div className="tanpa-cetak border-t border-garis pt-4">
-              <Tombol jenis="kedua" onClick={() => window.print()}>
-                Cetak halaman ini
-              </Tombol>
+            <div className="tanpa-cetak space-y-3 border-t border-garis pt-4">
+              {galatBukti && <PesanGalat pesan={galatBukti} />}
+              <div className="flex flex-wrap gap-2">
+                <Tombol onClick={ambilBukti} sedangJalan={mengunduh}>
+                  {mengunduh ? "Menyiapkan..." : "Unduh Bukti Pendaftaran (PDF)"}
+                </Tombol>
+                <Tombol jenis="kedua" onClick={() => window.print()}>
+                  Cetak halaman ini
+                </Tombol>
+              </div>
+              <p className="text-xs leading-relaxed text-samar">
+                Bukti pendaftaran dirakit di server, jadi bentuknya sama di semua
+                peramban. Berkasnya memuat data pribadi, simpan di tempat yang aman.
+              </p>
             </div>
           </div>
         </motion.div>

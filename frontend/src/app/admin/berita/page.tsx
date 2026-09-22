@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { api, urlUnggahan, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
+import { useKabar } from "@/komponen/Kabar";
 import { angka, tanggalJam } from "@/lib/format";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
-import { Memuat, PesanGalat, PesanBerhasil, TanpaData } from "@/komponen/Memuat";
+import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import {
   Teks,
@@ -37,6 +38,7 @@ export default function HalamanBeritaAdmin() {
 }
 
 function IsiBerita() {
+  const kabar = useKabar();
   const [saring, setSaring] = useState({ cari: "", kategori: "", publish: "" });
   const kueri = (() => {
     const u = new URLSearchParams({ per_halaman: "50" });
@@ -60,7 +62,6 @@ function IsiBerita() {
   const [galatKolom, setGalatKolom] = useState<Record<string, string>>({});
   const [ringkasan, setRingkasan] = useState<string[]>([]);
   const [menyimpan, setMenyimpan] = useState(false);
-  const [pesan, setPesan] = useState("");
   const [hapusTarget, setHapusTarget] = useState<Berita | null>(null);
   const [menghapus, setMenghapus] = useState(false);
 
@@ -109,7 +110,7 @@ function IsiBerita() {
         ubahId === null
           ? await api.simpanBerita(f)
           : await api.ubahBerita(ubahId, f);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setJendela(false);
       muatUlang();
       // Halaman publik disegarkan agar perubahannya langsung terlihat.
@@ -131,7 +132,7 @@ function IsiBerita() {
     setMenghapus(true);
     try {
       const hasil = await api.hapusBerita(hapusTarget.id);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setHapusTarget(null);
       muatUlang();
       segarkanHalamanPublik();
@@ -153,11 +154,6 @@ function IsiBerita() {
         aksi={<Tombol onClick={() => buka()}>Tulis Berita</Tombol>}
       />
 
-      {pesan && (
-        <div className="mb-5">
-          <PesanBerhasil pesan={pesan} />
-        </div>
-      )}
 
       <div className="kartu mb-6 p-5">
         <div className="grid gap-4 sm:grid-cols-3">

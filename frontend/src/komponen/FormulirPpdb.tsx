@@ -3,7 +3,8 @@
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { api, GalatApi } from "@/lib/api";
+import { api, unduhBukti, GalatApi } from "@/lib/api";
+import { bukaBlob } from "@/lib/berkas";
 import {
   Teks,
   AreaTeks,
@@ -180,6 +181,7 @@ export default function FormulirPpdb({
   const [ringkasan, setRingkasan] = useState<string[]>([]);
   const [mengirim, setMengirim] = useState(false);
   const [sukses, setSukses] = useState<{ no: string; tahun: string } | null>(null);
+  const [mengunduhBukti, setMengunduhBukti] = useState(false);
   const puncak = useRef<HTMLDivElement>(null);
 
   const ubah = (k: keyof Isian) => (v: string) => {
@@ -279,6 +281,23 @@ export default function FormulirPpdb({
             </ol>
           </div>
           <div className="flex flex-wrap gap-3 border-t border-garis pt-6">
+            <Tombol
+              sedangJalan={mengunduhBukti}
+              onClick={async () => {
+                setMengunduhBukti(true);
+                try {
+                  const { nama, blob } = await unduhBukti({
+                    no_registrasi: sukses.no,
+                    tanggal_lahir: isi.tanggal_lahir,
+                  });
+                  bukaBlob(nama, blob);
+                } finally {
+                  setMengunduhBukti(false);
+                }
+              }}
+            >
+              {mengunduhBukti ? "Menyiapkan..." : "Unduh Bukti Pendaftaran (PDF)"}
+            </Tombol>
             <Link
               href={`/ppdb/cek?no=${encodeURIComponent(sukses.no)}`}
               className="rounded-lg bg-biru px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-biru-tua"

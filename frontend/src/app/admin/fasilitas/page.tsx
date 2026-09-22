@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { api, urlUnggahan, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
+import { useKabar } from "@/komponen/Kabar";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
-import { Memuat, PesanGalat, PesanBerhasil, TanpaData } from "@/komponen/Memuat";
+import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import {
   Teks,
   AreaTeks,
@@ -27,6 +28,7 @@ export default function HalamanFasilitasAdmin() {
 }
 
 function IsiFasilitas() {
+  const kabar = useKabar();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.fasilitas());
 
   const [jendela, setJendela] = useState(false);
@@ -38,7 +40,6 @@ function IsiFasilitas() {
   const [galatKolom, setGalatKolom] = useState<Record<string, string>>({});
   const [ringkasan, setRingkasan] = useState<string[]>([]);
   const [menyimpan, setMenyimpan] = useState(false);
-  const [pesan, setPesan] = useState("");
   const [hapusTarget, setHapusTarget] = useState<Fasilitas | null>(null);
   const [menghapus, setMenghapus] = useState(false);
 
@@ -83,7 +84,7 @@ function IsiFasilitas() {
         ubahId === null
           ? await api.simpanFasilitas(fd)
           : await api.ubahFasilitas(ubahId, fd);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setJendela(false);
       muatUlang();
       // Halaman publik disegarkan agar perubahannya langsung terlihat.
@@ -105,7 +106,7 @@ function IsiFasilitas() {
     setMenghapus(true);
     try {
       const hasil = await api.hapusFasilitas(hapusTarget.id);
-      setPesan(hasil.pesan);
+      kabar.beri(hasil.pesan);
       setHapusTarget(null);
       muatUlang();
       segarkanHalamanPublik();
@@ -127,11 +128,6 @@ function IsiFasilitas() {
         aksi={<Tombol onClick={() => buka()}>Tambah Fasilitas</Tombol>}
       />
 
-      {pesan && (
-        <div className="mb-5">
-          <PesanBerhasil pesan={pesan} />
-        </div>
-      )}
 
       {memuat ? (
         <Memuat />
