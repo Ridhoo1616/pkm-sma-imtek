@@ -1,7 +1,10 @@
-# Wadah pengembangan: PHP 8.2 + MariaDB dalam satu kontainer,
-# dipakai oleh GitHub Codespaces agar aplikasi bisa dijalankan
-# langsung dari browser tanpa memasang XAMPP.
-FROM mcr.microsoft.com/devcontainers/php:1-8.2-bookworm
+# Wadah pengembangan: Go, Node.js, dan MariaDB dalam satu kontainer,
+# dipakai oleh GitHub Codespaces agar aplikasi bisa dijalankan langsung
+# dari peramban tanpa memasang apa pun di komputer sendiri.
+FROM mcr.microsoft.com/devcontainers/go:1-1.24-bookworm
+
+# Node.js untuk frontend Next.js, MariaDB sebagai basis data.
+RUN su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install --lts && nvm alias default lts/*"
 
 RUN apt-get update \
  && export DEBIAN_FRONTEND=noninteractive \

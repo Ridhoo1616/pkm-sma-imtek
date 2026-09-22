@@ -1,344 +1,336 @@
-# Panduan Instalasi & Penggunaan
+# Panduan Instalasi
 
-Sistem Informasi Profil Sekolah & PPDB Online **SMA IMTEK**
+Panduan memasang dan menjalankan sistem Profil Sekolah & PPDB SMA IMTEK.
+
+Aplikasi terdiri dari dua bagian:
+
+- **backend** — API JSON ditulis dengan Go, berbicara dengan MySQL
+- **frontend** — situs dan panel admin ditulis dengan Next.js
+
+Keduanya dijalankan terpisah. Frontend memanggil backend lewat HTTP, jadi
+alamat backend harus dapat dijangkau dari peramban pengunjung.
 
 ---
 
-## Bagian 1 — Kebutuhan Sistem
+## 1. Yang perlu dipasang lebih dulu
 
-| Komponen | Versi minimum | Catatan |
+| Perangkat | Versi | Keterangan |
 |---|---|---|
-| PHP | 7.4 (disarankan 8.0+) | Ekstensi wajib: `pdo_mysql`, `mbstring`, `fileinfo` |
-| MySQL / MariaDB | MySQL 5.7 / MariaDB 10.3 | Sudah termasuk dalam XAMPP |
-| Web server | Apache 2.4 | Sudah termasuk dalam XAMPP |
-| Peramban | Chrome, Edge, Firefox, atau Safari versi terbaru | |
+| **Go** | 1.24 atau lebih baru | [go.dev/dl](https://go.dev/dl/) |
+| **Node.js** | 20 atau lebih baru | [nodejs.org](https://nodejs.org/) |
+| **MySQL** atau **MariaDB** | MySQL 8+ / MariaDB 10.4+ | Boleh dari XAMPP, Laragon, atau pemasangan sendiri |
 
-Cara termudah memenuhi semuanya sekaligus: pasang **XAMPP**.
-
----
-
-## Bagian 2 — Memasang XAMPP
-
-### Windows
-
-1. Unduh XAMPP dari <https://www.apachefriends.org/download.html>
-   (pilih versi dengan **PHP 8.x**).
-2. Jalankan pemasang. Bila muncul peringatan UAC atau antivirus, izinkan.
-3. Pada pilihan komponen, pastikan **Apache**, **MySQL**, **PHP**, dan **phpMyAdmin**
-   tercentang.
-4. Pasang ke lokasi bawaan `C:\xampp`.
-5. Buka **XAMPP Control Panel**, klik **Start** pada baris **Apache** dan **MySQL**.
-   Kedua baris akan berwarna hijau bila berhasil.
-
-> **Apache gagal jalan?** Biasanya port 80 dipakai aplikasi lain (sering kali Skype atau
-> IIS). Klik **Config → httpd.conf**, ganti `Listen 80` menjadi `Listen 8080` dan
-> `ServerName localhost:80` menjadi `ServerName localhost:8080`, simpan, lalu Start ulang.
-> Alamat situs menjadi `http://localhost:8080/...`
-
-### macOS
-
-1. Unduh **XAMPP for OS X** dari tautan yang sama.
-2. Buka berkas `.dmg` dan seret XAMPP ke folder Applications.
-3. Buka **XAMPP → Manage Servers**, jalankan **Apache Web Server** dan **MySQL Database**.
-4. Folder web berada di `/Applications/XAMPP/xamppfiles/htdocs`.
-
----
-
-## Bagian 3 — Memasang Aplikasi
-
-### Langkah 1: salin berkas aplikasi
-
-Salin seluruh isi folder proyek ini ke dalam folder `htdocs` XAMPP, di dalam sebuah
-subfolder bernama `sma-imtek`:
-
-- **Windows:** `C:\xampp\htdocs\sma-imtek`
-- **macOS:** `/Applications/XAMPP/xamppfiles/htdocs/sma-imtek`
-
-Struktur akhirnya harus seperti ini:
-
-```
-htdocs/sma-imtek/index.php
-htdocs/sma-imtek/config/
-htdocs/sma-imtek/admin/
-htdocs/sma-imtek/database/schema.sql
-...
-```
-
-> Aplikasi mendeteksi alamatnya sendiri, jadi nama subfolder bebas — boleh juga
-> diletakkan langsung di akar `htdocs`.
-
-### Langkah 2: membuat basis data
-
-**Cara A — melalui phpMyAdmin (disarankan)**
-
-1. Buka <http://localhost/phpmyadmin>
-2. Klik tab **Import** (Impor) di menu atas.
-3. Klik **Choose File**, pilih berkas `database/schema.sql` dari folder aplikasi.
-4. Biarkan pengaturan lain apa adanya, gulir ke bawah, klik **Import**.
-5. Akan muncul pesan sukses dan database **`sma_imtek`** tampil di panel kiri
-   dengan 9 tabel.
-
-> Berkas `schema.sql` sudah berisi perintah `CREATE DATABASE`, jadi Anda **tidak perlu**
-> membuat database terlebih dahulu.
-
-**Cara B — melalui terminal / Command Prompt**
+Memeriksa hasil pemasangan:
 
 ```bash
-# Windows
-C:\xampp\mysql\bin\mysql.exe -u root < C:\xampp\htdocs\sma-imtek\database\schema.sql
-
-# macOS
-/Applications/XAMPP/xamppfiles/bin/mysql -u root < \
-  /Applications/XAMPP/xamppfiles/htdocs/sma-imtek/database/schema.sql
+go version      # contoh: go version go1.27.1
+node -v         # contoh: v20.11.0
+mysql --version
 ```
 
-### Langkah 3: memeriksa konfigurasi
+---
 
-Buka `config/database.php`. Untuk XAMPP bawaan, nilai berikut sudah benar dan
-tidak perlu diubah:
+## 2. Menyiapkan basis data
 
-```php
-define('DB_HOST', 'localhost');
-define('DB_PORT', '3306');
-define('DB_NAME', 'sma_imtek');
-define('DB_USER', 'root');
-define('DB_PASS', '');        // XAMPP bawaan: kosong
+Cukup membuat basis datanya saja. Tabel dan data awalnya dibuat otomatis oleh
+backend saat pertama kali dijalankan.
+
+```sql
+CREATE DATABASE sma_imtek
+  DEFAULT CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
 ```
 
-Ubah hanya bila MySQL Anda memakai kata sandi atau port lain.
+Bila memakai XAMPP, jalankan perintah di atas lewat **phpMyAdmin → SQL**.
 
-#### Mengganti pengaturan database tanpa mengubah berkas ini
+Untuk pemakaian sungguhan, buatkan pengguna basis data tersendiri, jangan
+memakai `root`:
 
-Untuk hosting atau komputer lain yang pengaturannya berbeda, jangan ubah
-`config/database.php`. Buat berkas baru `config/database.local.php`, dan tulis
-hanya nilai yang berbeda:
-
-```php
-<?php
-define('DB_NAME', 'u1234567_smaimtek');
-define('DB_USER', 'u1234567_admin');
-define('DB_PASS', 'kata-sandi-dari-cpanel');
-define('MODE_PENGEMBANGAN', false);
+```sql
+CREATE USER 'ppdb'@'localhost' IDENTIFIED BY 'sandi-yang-panjang-dan-acak';
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER
+  ON sma_imtek.* TO 'ppdb'@'localhost';
+FLUSH PRIVILEGES;
 ```
 
-Nilai yang tidak Anda tulis otomatis memakai bawaan. Berkas ini sudah tercantum
-di `.gitignore`, sehingga kredensial asli tidak akan ikut ter-commit ke
-repositori. Contoh siap pakai ada di `config/database.local.example.php`.
+Hak `CREATE`, `INDEX`, dan `ALTER` diperlukan agar migrasi dapat berjalan.
 
-#### Mengimpor ke hosting bersama (shared hosting)
+---
 
-Di hosting bersama, Anda tidak diizinkan menjalankan `CREATE DATABASE`, dan nama
-database biasanya sudah ditentukan oleh panel (misalnya `u1234567_smaimtek`).
-Karena itu:
+## 3. Menjalankan backend
 
-1. Buat database dan penggunanya lebih dulu dari **cPanel → MySQL Databases**.
-2. Saat mengimpor `database/schema.sql` lewat phpMyAdmin, **pilih dulu database
-   yang sudah dibuat** di panel kiri, lalu hapus tiga baris pertama berkas SQL
-   yang berisi `CREATE DATABASE` dan `USE`, atau abaikan pesan galat pada dua
-   perintah itu — tabelnya tetap terbentuk.
-3. Tulis nama database, pengguna, dan kata sandinya di
-   `config/database.local.php` seperti contoh di atas.
+```bash
+cd backend
+cp .env.example .env
+```
 
-### Langkah 4: izin menulis folder unggahan
+Buka `.env` dan sesuaikan:
 
-Folder `uploads/` harus dapat ditulis oleh web server.
+```ini
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=sma_imtek
+DB_USER=ppdb
+DB_PASS=sandi-yang-panjang-dan-acak
 
-- **Windows:** biasanya sudah otomatis bisa.
-- **macOS / Linux:**
-  ```bash
-  chmod -R 775 uploads
-  ```
+# Kunci penanda tangan token masuk. Buat nilai acak:
+#   openssl rand -base64 48
+JWT_SECRET=
 
-### Langkah 5: membuka aplikasi
+APP_ENV=pengembangan
+PORT=8090
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+UPLOAD_DIR=data/unggahan
+UPLOAD_MAX_BYTES=2097152
+```
+
+Lalu jalankan:
+
+```bash
+go run .
+```
+
+Tampilan yang menandakan berhasil:
+
+```
+menjalankan migrasi 001_skema.sql
+server berjalan di :8090 (lingkungan: pengembangan)
+```
+
+Memastikan hidup: buka `http://localhost:8090/api/sehat`, harus menjawab
+`{"status":"baik"}`.
+
+> **Berkas `.env` tidak ikut ke repositori** karena repositori ini publik.
+> Jangan pernah menulis kredensial sungguhan ke `.env.example`.
+
+---
+
+## 4. Menjalankan frontend
+
+Pada jendela terminal yang berbeda:
+
+```bash
+cd frontend
+npm install
+```
+
+Buat berkas `.env.local`:
+
+```ini
+NEXT_PUBLIC_API_URL=http://localhost:8090
+```
+
+Lalu jalankan:
+
+```bash
+npm run dev
+```
+
+Buka `http://localhost:3000`.
 
 | Bagian | Alamat |
 |---|---|
-| Website sekolah | <http://localhost/sma-imtek/> |
-| Panel admin | <http://localhost/sma-imtek/admin/login.php> |
+| Situs sekolah | `http://localhost:3000` |
+| Panel panitia | `http://localhost:3000/admin` |
 
-**Akun bawaan**
+**Akun bawaan:** `admin` / `admin123`
 
+---
+
+## 5. Hal pertama yang wajib dilakukan
+
+1. **Ganti kata sandi `admin`** lewat menu *Ganti Sandi*. Hash sandi bawaan ada
+   di dalam repositori publik ini, jadi selama belum diganti, siapa pun yang
+   menemukan alamat panel dapat masuk.
+2. **Isi menu Pengaturan.** Seluruh isi situs publik berasal dari sana. Nilai
+   yang masih berupa tulisan dalam `[kurung siku]` adalah data yang belum
+   dikonfirmasi pihak sekolah, dan ditandai jelas pada halaman Pengaturan.
+3. **Atur jadwal PPDB** (`ppdb_mulai`, `ppdb_selesai`, `ppdb_pengumuman`) dan
+   ubah `ppdb_status` menjadi `buka` saat pendaftaran benar-benar dimulai.
+   Status `tutup` menutup jalur API-nya sekaligus, bukan hanya menyembunyikan
+   tombolnya.
+4. **Buat akun operator** untuk panitia lain, supaya akun admin tidak dipakai
+   bersama-sama.
+
+---
+
+## 6. Menyiapkan untuk server (produksi)
+
+### 6a. Backend
+
+Kompilasi menjadi satu berkas biner, lalu pindahkan ke server:
+
+```bash
+cd backend
+go build -o server .
+
+# Untuk server Linux dari komputer Windows atau macOS:
+GOOS=linux GOARCH=amd64 go build -o server .
 ```
-Nama pengguna : admin
-Kata sandi    : admin123
+
+Berkas yang perlu dipindah ke server: `server` dan folder `migrations/`.
+Selain itu tidak ada, karena Go tidak memerlukan penerjemah bahasa di server.
+
+Setel variabel lingkungan untuk produksi:
+
+```ini
+APP_ENV=produksi
+JWT_SECRET=<hasil openssl rand -base64 48>
+CORS_ORIGINS=https://www.smaimtek.sch.id
+DB_PASS=<sandi basis data>
+UPLOAD_DIR=/var/lib/ppdb/unggahan
 ```
 
-> **Penting:** segera ganti kata sandi ini setelah masuk pertama kali, melalui
-> **Akun Pengguna → Akun Saya → Ubah Kata Sandi**. Kata sandi bawaan tidak boleh
-> dipakai saat sistem sudah digunakan sekolah.
+`JWT_SECRET` **wajib** diisi saat `APP_ENV=produksi`; bila kosong, server
+menolak menyala. Ini disengaja agar kunci contoh tidak ikut terpakai.
+
+Agar berjalan terus dan hidup kembali setelah server dimulai ulang, buat
+layanan systemd di `/etc/systemd/system/ppdb.service`:
+
+```ini
+[Unit]
+Description=API PPDB SMA IMTEK
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=ppdb
+WorkingDirectory=/opt/ppdb
+EnvironmentFile=/etc/ppdb.env
+ExecStart=/opt/ppdb/server
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo chmod 600 /etc/ppdb.env        # memuat kredensial
+sudo systemctl enable --now ppdb
+sudo systemctl status ppdb
+```
+
+### 6b. Frontend
+
+```bash
+cd frontend
+echo "NEXT_PUBLIC_API_URL=https://api.smaimtek.sch.id" > .env.production
+npm ci
+npm run build
+npm run start      # jalan di porta 3000
+```
+
+Frontend memerlukan Node.js di server karena halaman publiknya dirakit di sisi
+server — itulah yang membuat judul dan keterangan halaman terbaca oleh mesin
+pencari dan oleh pratinjau tautan WhatsApp. Tanpa itu, tujuan promosi proyek
+ini justru berkurang.
+
+Bila ingin dipasang di layanan yang tidak menyediakan Node.js, frontend dapat
+diubah menjadi berkas statis, tetapi halaman publiknya kehilangan kemampuan
+tersebut.
+
+### 6c. Proksi dan HTTPS
+
+Letakkan keduanya di belakang satu nama domain memakai Nginx:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name www.smaimtek.sch.id;
+
+    # sertifikat dari Let's Encrypt
+    ssl_certificate     /etc/letsencrypt/live/www.smaimtek.sch.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/www.smaimtek.sch.id/privkey.pem;
+
+    # batas ukuran kiriman: enam dokumen × 2 MB, dilebihkan sedikit
+    client_max_body_size 16m;
+
+    # API dan berkas unggahan ke backend Go
+    location /api/ {
+        proxy_pass http://127.0.0.1:8090;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+    location /unggahan/ {
+        proxy_pass http://127.0.0.1:8090;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+
+    # sisanya ke Next.js
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+Dengan susunan ini, `NEXT_PUBLIC_API_URL` cukup diisi
+`https://www.smaimtek.sch.id`, dan `CORS_ORIGINS` diisi nilai yang sama.
+
+`X-Forwarded-For` perlu diteruskan agar pembatas percobaan masuk membaca
+alamat IP pengunjung yang sebenarnya, bukan alamat proksi.
 
 ---
 
-## Bagian 4 — Pengaturan Awal Setelah Terpasang
+## 7. Mencadangkan data
 
-Kerjakan urut agar website langsung tampil sesuai data sekolah yang sebenarnya.
+Dua hal yang harus dicadangkan bersamaan:
 
-### 1. Ganti kata sandi admin
-**Akun Pengguna → Akun Saya → Ubah Kata Sandi.** Minimal 8 karakter.
+```bash
+# 1. Basis data
+mysqldump -u ppdb -p sma_imtek > cadangan-$(date +%F).sql
 
-### 2. Isi identitas sekolah
-**Pengaturan → tab Profil Sekolah.** Isi nama sekolah, NPSN, akreditasi,
-nama kepala sekolah, sambutan, sejarah, visi, dan misi.
+# 2. Folder unggahan — memuat dokumen pribadi pendaftar
+tar czf unggahan-$(date +%F).tar.gz -C /var/lib/ppdb unggahan
+```
 
-> Kolom **Misi** dan **Syarat Pendaftaran** memakai aturan *satu baris = satu poin*.
-> Tekan Enter untuk memisahkan poin, jangan memakai tanda hubung atau nomor manual.
-
-### 3. Isi kontak dan media sosial
-**Pengaturan → tab Kontak & Media Sosial.**
-
-- **Nomor WhatsApp** boleh ditulis `081234567890`; sistem otomatis mengubahnya
-  menjadi format `6281234567890`.
-- **Kode src iframe Google Maps**: buka Google Maps → cari lokasi sekolah →
-  **Bagikan → Sematkan peta → Salin HTML**, lalu ambil **hanya nilai `src="..."`**
-  dari kode tersebut (tanpa tag `<iframe>`).
-
-### 4. Atur periode PPDB
-**Pengaturan → tab Pengaturan PPDB.**
-
-Formulir pendaftaran hanya terbuka bila **dua syarat** terpenuhi:
-1. Status pendaftaran = **Dibuka**, **dan**
-2. Tanggal hari ini berada di antara tanggal mulai dan tanggal akhir.
-
-Isi juga tahun ajaran (format `2027/2028`), total kuota, tanggal pengumuman,
-informasi biaya, dan syarat pendaftaran.
-
-> Tahun ajaran menentukan penomoran registrasi. `2027/2028` menghasilkan nomor
-> berpola `PPDB-2728-0001`.
-
-### 5. Atur peminatan dan kuota
-**Peminatan.** Sesuaikan nama, kode, dan kuota tiap peminatan. Peminatan yang tidak
-dibuka cukup di-**nonaktifkan** (jangan dihapus bila sudah ada pendaftar).
-
-### 6. Isi fasilitas, berita, dan galeri
-- **Fasilitas** — tambahkan sarana sekolah beserta ikon dan foto.
-- **Berita** — terbitkan pengumuman pembukaan PPDB agar tampil di beranda.
-- **Galeri** — unggah foto kegiatan. Inilah materi promosi paling menarik bagi
-  calon peserta didik.
-
-### 7. Buat akun operator untuk panitia
-**Akun Pengguna → Tambah Pengguna**, pilih peran **Operator**. Operator dapat
-memverifikasi pendaftar tetapi tidak dapat menghapus data maupun mengubah pengaturan.
-
-### 8. Ganti logo sekolah (opsional)
-Timpa berkas `assets/img/logo.svg` dengan logo sekolah. Bila logo Anda berupa PNG,
-simpan sebagai `logo.png` lalu ganti kata `logo.svg` menjadi `logo.png` pada
-`includes/header.php`, `includes/footer.php`, `admin/includes/header.php`,
-`admin/login.php`, dan `ppdb-cetak.php`.
+Berkas cadangan memuat NIK, Kartu Keluarga, dan akta kelahiran calon peserta
+didik. Simpan di tempat yang aksesnya terbatas, dan jangan diunggah ke layanan
+penyimpanan bersama tanpa izin sekolah.
 
 ---
 
-## Bagian 5 — Alur Kerja Harian Panitia PPDB
+## 8. Bila ada masalah
 
-1. **Buka Dashboard** — lihat berapa pendaftar yang menunggu verifikasi.
-2. **Data Pendaftar** — saring status *Menunggu Verifikasi*.
-3. Klik **ikon mata** untuk membuka detail pendaftar.
-4. Periksa dokumen unggahan (klik gambar/berkas untuk membukanya).
-5. Ubah **Status Pendaftaran**:
-   - **Terverifikasi** — berkas lengkap dan sah, lanjut ke seleksi.
-   - **Diterima** — lulus seleksi.
-   - **Cadangan** — masuk daftar tunggu.
-   - **Ditolak** — tidak memenuhi syarat.
-6. Tulis **Catatan untuk Pendaftar** bila ada berkas yang perlu diperbaiki.
-   Catatan ini otomatis tampil di halaman *Cek Status* milik pendaftar.
-7. Klik **Simpan Perubahan**.
-8. Bila perlu, klik **Hubungi Pendaftar** untuk menghubungi via WhatsApp.
-
-**Verifikasi banyak sekaligus:** di halaman Data Pendaftar, centang beberapa baris,
-pilih status pada kotak di kanan atas, lalu klik **Terapkan**.
-
----
-
-## Bagian 6 — Menyiapkan Data untuk Laporan PkM
-
-Menu **Laporan & Statistik** menyediakan data yang langsung dapat dipakai pada bab
-Hasil dan Pembahasan:
-
-| Yang dibutuhkan laporan | Tempat mengambilnya |
+| Gejala | Penyebab yang paling sering |
 |---|---|
-| Efektivitas tiap kanal promosi | Tabel *Efektivitas Kanal Promosi* (jumlah, porsi, diterima, konversi) |
-| Data mentah untuk diolah di Excel | Tombol **Ekspor Rekap Promosi** dan **Ekspor Data Pendaftar** (CSV) |
-| Jangkauan promosi digital | Panel *Halaman Terpopuler* dan *Sumber Rujukan Kunjungan* |
-| Sebaran asal sekolah | Panel *Sebaran Asal Sekolah* — menunjukkan jangkauan geografis promosi |
-| Pola waktu pendaftaran | Grafik *Pendaftar per Bulan* dan *Tren 14 Hari* di dashboard |
-| Lampiran laporan | Tombol **Cetak Laporan** (menyembunyikan menu, hanya mencetak isi laporan) |
+| `basis data tidak merespons` saat backend menyala | MySQL belum jalan, atau `DB_USER`/`DB_PASS` salah |
+| `JWT_SECRET wajib diisi saat APP_ENV=produksi` | Isi `JWT_SECRET` dengan nilai acak |
+| Halaman tampil, tetapi semua data kosong dan muncul keterangan "server belum merespons" | Backend mati, atau `NEXT_PUBLIC_API_URL` salah |
+| Formulir gagal terkirim dengan pesan "tidak dapat menghubungi server" | Asal frontend belum tercantum di `CORS_ORIGINS`. Perhatikan bahwa `localhost` dan `127.0.0.1` dihitung sebagai dua asal berbeda |
+| Unggahan gagal dengan pesan ukuran berlebihan | Naikkan `UPLOAD_MAX_BYTES`, dan `client_max_body_size` pada Nginx |
+| Gambar berita atau galeri tidak muncul | `UPLOAD_DIR` berbeda dari saat berkasnya diunggah, atau folder itu tidak dapat dibaca pengguna layanan |
+| Dokumen pendaftar menghasilkan 401 | Wajar: dokumen pribadi hanya dapat dibuka petugas yang sudah masuk |
+| Perubahan dari panel admin belum tampak di situs publik | Tunggu paling lama 30 detik, atau muat ulang. Penyegaran seketika memerlukan frontend dan backend berada pada asal yang tercantum di `CORS_ORIGINS` |
+| Migrasi berhenti dengan `Table ... already exists` | Terjadi pada versi lama. Sekarang basis data yang sudah berisi tabel aplikasi dikenali dan dilewati |
 
-**Membuka berkas CSV di Excel:** berkas memakai pemisah titik koma (`;`) dan sudah
-diberi penanda BOM UTF-8, sehingga huruf beraksen dan rupiah tampil benar. Bila kolom
-menumpuk dalam satu sel, gunakan **Data → Text to Columns → Delimited → Semicolon**.
+Melihat catatan server:
 
----
-
-## Bagian 7 — Mengatasi Masalah
-
-| Gejala | Penyebab & solusi |
-|---|---|
-| **"Koneksi database gagal"** | MySQL belum dijalankan (Start di XAMPP Control Panel), atau `schema.sql` belum diimpor, atau `DB_PASS` di `config/database.php` tidak sesuai |
-| **Halaman tampil sebagai kode PHP** | Berkas dibuka langsung lewat Windows Explorer. Harus diakses lewat `http://localhost/...`, bukan klik ganda berkas |
-| **Tampilan berantakan tanpa warna** | Tidak ada koneksi internet (Bootstrap diambil dari CDN). Lihat catatan mode luring di bawah |
-| **"Formulir pendaftaran ditutup" padahal status Dibuka** | Tanggal hari ini di luar rentang tanggal mulai–akhir. Perbaiki di Pengaturan → tab PPDB |
-| **Gagal mengunggah dokumen** | Ukuran berkas di atas 2 MB, atau folder `uploads/` tidak dapat ditulis. Perkecil berkas atau perbaiki izin folder |
-| **"Sesi Anda telah berakhir"** | Halaman terbuka terlalu lama. Muat ulang halaman lalu kirim kembali |
-| **"Terlalu banyak percobaan masuk"** | Lima kali salah kata sandi. Tunggu 10 menit |
-| **Lupa kata sandi admin** | Lihat bagian *Mereset Kata Sandi Admin* di bawah |
-| **Gambar berita/galeri tidak tampil** | Berkas terhapus dari folder `uploads/`, atau aplikasi dipindah tanpa menyertakan folder `uploads/` |
-
-### Mereset kata sandi admin
-
-1. Buat berkas `reset.php` di folder aplikasi:
-   ```php
-   <?php
-   require 'config/database.php';
-   $baru = 'KataSandiBaruAnda';
-   $pdo->prepare('UPDATE users SET password = ? WHERE username = ?')
-       ->execute([password_hash($baru, PASSWORD_DEFAULT), 'admin']);
-   echo 'Kata sandi admin berhasil direset.';
-   ```
-2. Buka `http://localhost/sma-imtek/reset.php`
-3. **Hapus berkas `reset.php`** segera setelah berhasil.
-
-### Menjalankan tanpa internet (mode luring)
-
-Bootstrap dan Bootstrap Icons diambil dari CDN. Untuk demo di ruangan tanpa internet:
-
-1. Unduh Bootstrap 5.3.3 dan Bootstrap Icons 1.11.3 saat masih ada internet.
-2. Simpan menjadi:
-   - `assets/vendor/bootstrap.min.css`
-   - `assets/vendor/bootstrap.bundle.min.js`
-   - `assets/vendor/bootstrap-icons.min.css` (beserta folder `fonts/`-nya)
-3. Pada `includes/header.php`, `includes/footer.php`, `admin/includes/header.php`,
-   `admin/includes/footer.php`, dan `admin/login.php`, ganti alamat `https://cdn.jsdelivr.net/...`
-   menjadi `<?= e(BASE_URL) ?>assets/vendor/...`
+```bash
+sudo journalctl -u ppdb -f      # backend
+```
 
 ---
 
-## Bagian 8 — Sebelum Diserahkan ke Sekolah
+## 9. Pindah dari versi PHP
 
-Daftar periksa sebelum sistem benar-benar dipakai:
+Basis data versi PHP dapat dipakai langsung tanpa diubah. Backend Go mengenali
+basis data yang sudah berisi tabel aplikasi, mencatat migrasi awalnya sebagai
+sudah diterapkan, dan tidak menyentuh isinya.
 
-- [ ] Kata sandi `admin123` sudah diganti.
-- [ ] Pada `config/database.php`, ubah `MODE_PENGEMBANGAN` menjadi `false`
-      agar pesan galat teknis tidak tampil kepada pengunjung.
-- [ ] Seluruh data contoh (berita, fasilitas, statistik, alamat) sudah diganti data asli.
-- [ ] Berita dan foto galeri dari kegiatan sekolah yang sebenarnya sudah diunggah.
-- [ ] Logo sekolah sudah menggantikan logo bawaan.
-- [ ] Akun operator sudah dibuat untuk tiap anggota panitia.
-- [ ] Periode PPDB sudah sesuai kalender akademik sekolah.
-- [ ] Pendaftaran percobaan sudah diuji dari ponsel, bukan hanya dari komputer.
-- [ ] Rencana pencadangan data sudah disiapkan: **phpMyAdmin → Export** untuk basis data,
-      dan salin folder `uploads/` untuk dokumen pendaftar. Lakukan berkala selama
-      masa pendaftaran.
-- [ ] Bila akan dipasang di hosting berbayar (bukan localhost), pastikan situs memakai
-      **HTTPS** karena sistem menyimpan data pribadi calon peserta didik.
+Yang perlu dipindahkan sendiri hanyalah berkas unggahan:
 
----
+```bash
+cp -r legacy-php/uploads/berita     /var/lib/ppdb/unggahan/berita
+cp -r legacy-php/uploads/galeri     /var/lib/ppdb/unggahan/galeri
+cp -r legacy-php/uploads/pendaftar  /var/lib/ppdb/unggahan/pendaftar
+```
 
-## Bagian 9 — Catatan Pengembangan Lanjutan
-
-Gagasan yang dapat dikerjakan bila PkM dilanjutkan:
-
-- Pemberitahuan otomatis melalui email atau WhatsApp saat status pendaftaran berubah.
-- Pemeringkatan otomatis pendaftar berdasarkan nilai rapor untuk seleksi jalur reguler.
-- Cetak surat pengumuman kelulusan seleksi secara massal.
-- Unggahan ulang dokumen oleh pendaftar sendiri bila berkas ditolak panitia.
-- Integrasi data ke Dapodik.
-- Arsip PPDB antar tahun ajaran dengan pembanding tren pendaftar.
+Nama berkas pada basis data tidak berubah, jadi gambar dan dokumen langsung
+terbaca setelah dipindah. Folder `fasilitas` dibuat otomatis saat gambar
+fasilitas pertama diunggah.

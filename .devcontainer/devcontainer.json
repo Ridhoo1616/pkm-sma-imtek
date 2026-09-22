@@ -1,11 +1,15 @@
 {
-  "name": "PPDB SMA IMTEK (PHP + MariaDB)",
+  "name": "PPDB SMA IMTEK (Go + Next.js + MariaDB)",
   "build": { "dockerfile": "Dockerfile" },
-  "forwardPorts": [8080],
+  "forwardPorts": [3000, 8090],
   "portsAttributes": {
-    "8080": {
-      "label": "Website PPDB SMA IMTEK",
+    "3000": {
+      "label": "Situs & Panel PPDB SMA IMTEK",
       "onAutoForward": "openPreview"
+    },
+    "8090": {
+      "label": "API backend",
+      "onAutoForward": "silent"
     }
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
@@ -13,7 +17,9 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "bmewburn.vscode-intelephense-client",
+        "golang.go",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
         "mtxr.sqltools"
       ]
     }

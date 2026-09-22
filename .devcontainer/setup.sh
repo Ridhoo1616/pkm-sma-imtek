@@ -9,36 +9,42 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
-echo ">> Mengimpor struktur dan data awal dari database/schema.sql..."
-sudo mariadb < database/schema.sql
-
-echo ">> Membuat pengguna database khusus aplikasi..."
+echo ">> Membuat basis data dan penggunanya..."
+# Tabelnya tidak diimpor di sini: backend Go menerapkan berkas migrasi
+# sendiri saat pertama kali dijalankan.
 sudo mariadb -e "
+  CREATE DATABASE IF NOT EXISTS sma_imtek
+    DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
   CREATE USER IF NOT EXISTS 'ppdb'@'127.0.0.1' IDENTIFIED BY 'ppdb';
   CREATE USER IF NOT EXISTS 'ppdb'@'localhost' IDENTIFIED BY 'ppdb';
   GRANT ALL PRIVILEGES ON sma_imtek.* TO 'ppdb'@'127.0.0.1';
   GRANT ALL PRIVILEGES ON sma_imtek.* TO 'ppdb'@'localhost';
   FLUSH PRIVILEGES;"
 
-echo ">> Menulis config/database.local.php (tidak ikut ter-commit)..."
-cat > config/database.local.php <<'PHPEOF'
-<?php
-/**
- * Konfigurasi otomatis untuk GitHub Codespaces.
- * Dibuat oleh .devcontainer/setup.sh — jangan di-commit.
- */
-define('DB_HOST', '127.0.0.1');
-define('DB_USER', 'ppdb');
-define('DB_PASS', 'ppdb');
-PHPEOF
+echo ">> Menulis backend/.env (tidak ikut ter-commit)..."
+cat > backend/.env <<'ENVEOF'
+# Dibuat otomatis oleh .devcontainer/setup.sh — hanya untuk Codespace.
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=sma_imtek
+DB_USER=ppdb
+DB_PASS=ppdb
+JWT_SECRET=kunci-codespace-bukan-untuk-produksi
+APP_ENV=pengembangan
+PORT=8090
+UPLOAD_DIR=data/unggahan
+ENVEOF
 
-echo ">> Memberi izin tulis pada folder unggahan..."
-chmod -R 775 uploads
+echo ">> Mengunduh dependensi Go..."
+(cd backend && go mod download)
+
+echo ">> Memasang dependensi frontend (mungkin beberapa menit)..."
+(cd frontend && npm ci --no-audit --no-fund)
 
 echo ""
 echo "==================================================================="
 echo " Penyiapan selesai."
-echo " Website        : buka tab PORTS, klik alamat pada port 8080"
-echo " Panel admin    : tambahkan /admin/login.php pada alamat tersebut"
-echo " Akun bawaan    : admin / admin123"
+echo " Situs & panel : buka tab PORTS, klik alamat pada port 3000"
+echo " Panel panitia : tambahkan /admin pada alamat tersebut"
+echo " Akun bawaan   : admin / admin123  (segera ganti)"
 echo "==================================================================="
