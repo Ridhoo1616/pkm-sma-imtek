@@ -83,5 +83,16 @@ export function useKabar(): IsiKabar {
   // Halaman yang dipakai di luar penyedia tetap berjalan; pemberitahuannya
   // saja yang tidak tampil. Ini mencegah satu halaman mematikan seluruh
   // panel hanya karena lupa dibungkus.
-  return isi ?? { beri: () => {} };
+  if (!isi) {
+    // Mengembalikan fungsi kosong menjaga halaman tetap hidup, tetapi tanpa
+    // peringatan ini sebuah pemberitahuan yang hilang akan sangat sulit
+    // dilacak: tidak ada galat, pesannya hanya tidak pernah muncul.
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        "useKabar dipanggil di luar PenyediaKabar, jadi pemberitahuannya tidak akan muncul.",
+      );
+    }
+    return { beri: () => {} };
+  }
+  return isi;
 }

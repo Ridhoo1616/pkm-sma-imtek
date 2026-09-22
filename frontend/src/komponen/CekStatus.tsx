@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { api, unduhBukti, GalatApi } from "@/lib/api";
 import { bukaBlob } from "@/lib/berkas";
 import { Teks, Tombol, RingkasanGalat } from "@/komponen/Medan";
@@ -9,6 +8,7 @@ import { PesanGalat } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import { tanggalJam, tanggalPanjang, warnaStatus } from "@/lib/format";
 import type { StatusPendaftaran } from "@/lib/tipe";
+import { MunculLangsung } from "@/komponen/Gerak";
 
 /** Keterangan tiap status, supaya pendaftar paham artinya tanpa bertanya. */
 const ARTI_STATUS: Record<string, string> = {
@@ -111,12 +111,7 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
       </form>
 
       {hasil && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-          className="kartu overflow-hidden"
-        >
+        <MunculLangsung className="kartu overflow-hidden">
           <div className="flex flex-wrap items-start justify-between gap-4 border-b border-garis bg-biru-muda px-6 py-5">
             <div>
               <p className="text-xs font-semibold tracking-wide text-samar uppercase">
@@ -192,7 +187,7 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
               </p>
             </div>
           </div>
-        </motion.div>
+        </MunculLangsung>
       )}
     </div>
   );

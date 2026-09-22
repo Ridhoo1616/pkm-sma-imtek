@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import type { Pengaturan } from "@/lib/tipe";
 import { nomorWa } from "@/lib/format";
+import { IkonSurel, IkonTelepon, IkonWhatsapp } from "./Ikon";
 
 const MENU = [
   { jalur: "/", label: "Beranda" },
@@ -40,12 +40,20 @@ export default function Navigasi({
         <div className="wadah flex flex-wrap items-center justify-between gap-2 py-2 text-[13px]">
           <div className="flex items-center gap-5">
             {pengaturan.telepon && (
-              <a href={`tel:${pengaturan.telepon}`} className="opacity-85 hover:opacity-100 hover:text-emas">
+              <a
+                href={`tel:${pengaturan.telepon}`}
+                className="flex items-center gap-1.5 opacity-85 hover:opacity-100 hover:text-emas"
+              >
+                <IkonTelepon ukuran={14} className="shrink-0" />
                 {pengaturan.telepon}
               </a>
             )}
             {pengaturan.email && (
-              <a href={`mailto:${pengaturan.email}`} className="opacity-85 hover:opacity-100 hover:text-emas">
+              <a
+                href={`mailto:${pengaturan.email}`}
+                className="flex items-center gap-1.5 opacity-85 hover:opacity-100 hover:text-emas"
+              >
+                <IkonSurel ukuran={14} className="shrink-0" />
                 {pengaturan.email}
               </a>
             )}
@@ -56,8 +64,9 @@ export default function Navigasi({
                 href={`https://wa.me/${wa}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="opacity-85 hover:opacity-100 hover:text-emas"
+                className="flex items-center gap-1.5 opacity-85 hover:opacity-100 hover:text-emas"
               >
+                <IkonWhatsapp ukuran={14} className="shrink-0" />
                 WhatsApp Panitia
               </a>
             )}
@@ -140,16 +149,20 @@ export default function Navigasi({
           </div>
         </div>
 
-        <AnimatePresence initial={false}>
-          {terbuka && (
-            <motion.div
-              id="menu-ringkas"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="overflow-hidden border-t border-garis lg:hidden"
-            >
+        {/* Menu layar kecil. Tingginya dianimasikan dengan grid-template-rows
+            dari 0fr ke 1fr, cara CSS untuk membuka sesuatu yang tingginya
+            belum diketahui. Sebelumnya bagian ini memakai Framer Motion.
+            Isinya tetap ada di DOM saat tertutup, jadi diberi inert supaya
+            tidak bisa disorot Tab dan tidak dibaca pembaca layar. */}
+        <div
+          id="menu-ringkas"
+          inert={!terbuka}
+          className={
+            "grid overflow-hidden border-t border-garis transition-[grid-template-rows,opacity] duration-250 ease-out lg:hidden " +
+            (terbuka ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")
+          }
+        >
+          <div className="overflow-hidden">
               <ul className="wadah flex flex-col gap-1 py-3">
                 {MENU.map((m) => (
                   <li key={m.jalur}>
@@ -184,9 +197,8 @@ export default function Navigasi({
                   </Link>
                 </li>
               </ul>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        </div>
       </nav>
     </header>
   );

@@ -1,6 +1,14 @@
 import Link from "next/link";
+import {
+  IkonJam,
+  IkonLokasi,
+  IkonSosial,
+  IkonSurel,
+  IkonTelepon,
+  IkonWhatsapp,
+} from "./Ikon";
 import type { Pengaturan } from "@/lib/tipe";
-import { nomorWa } from "@/lib/format";
+import { alamatLengkap, belumTerisi, nomorWa } from "@/lib/format";
 
 export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
   const tahun = new Date().getFullYear();
@@ -20,7 +28,7 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
           <p className="text-lg font-bold text-white">
             {pengaturan.nama_sekolah || "SMA IMTEK"}
           </p>
-          {pengaturan.tagline && (
+          {pengaturan.tagline && !belumTerisi(pengaturan.tagline) && (
             <p className="mt-2 text-sm leading-relaxed">{pengaturan.tagline}</p>
           )}
           <dl className="mt-4 space-y-1 text-sm">
@@ -47,16 +55,19 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
 
         <div>
           <p className="mb-3 font-semibold text-white">Alamat</p>
-          <address className="text-sm not-italic leading-relaxed">
-            {pengaturan.alamat}
-            {pengaturan.kode_pos && !(pengaturan.alamat ?? "").includes(pengaturan.kode_pos)
-              ? ` ${pengaturan.kode_pos}`
-              : ""}
+          <address className="flex gap-2 text-sm not-italic leading-relaxed">
+            <IkonLokasi className="mt-0.5 shrink-0 text-white/60" />
+            <span>
+            {alamatLengkap(pengaturan.alamat, pengaturan.kode_pos)}
+            </span>
           </address>
-          {pengaturan.jam_layanan && (
-            <p className="mt-3 text-sm">
-              <span className="text-white/60">Jam layanan: </span>
-              {pengaturan.jam_layanan}
+          {pengaturan.jam_layanan && !belumTerisi(pengaturan.jam_layanan) && (
+            <p className="mt-3 flex items-center gap-2 text-sm">
+              <IkonJam className="shrink-0 text-white/60" />
+              <span>
+                <span className="text-white/60">Jam layanan: </span>
+                {pengaturan.jam_layanan}
+              </span>
             </p>
           )}
         </div>
@@ -66,14 +77,22 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
           <ul className="space-y-1.5 text-sm">
             {pengaturan.telepon && (
               <li>
-                <a href={`tel:${pengaturan.telepon}`} className="hover:text-emas">
+                <a
+                  href={`tel:${pengaturan.telepon}`}
+                  className="flex items-center gap-2 hover:text-emas"
+                >
+                  <IkonTelepon className="shrink-0 text-white/60" />
                   {pengaturan.telepon}
                 </a>
               </li>
             )}
             {pengaturan.email && (
               <li>
-                <a href={`mailto:${pengaturan.email}`} className="hover:text-emas">
+                <a
+                  href={`mailto:${pengaturan.email}`}
+                  className="flex items-center gap-2 break-all hover:text-emas"
+                >
+                  <IkonSurel className="shrink-0 text-white/60" />
                   {pengaturan.email}
                 </a>
               </li>
@@ -84,8 +103,9 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
                   href={`https://wa.me/${wa}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-emas"
+                  className="flex items-center gap-2 hover:text-emas"
                 >
+                  <IkonWhatsapp className="shrink-0 text-white/60" />
                   WhatsApp panitia PPDB
                 </a>
               </li>
@@ -99,8 +119,9 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
                     href={s.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-md bg-white/10 px-2.5 py-1 hover:bg-white/20 hover:text-emas"
+                    className="flex items-center gap-1.5 rounded-md bg-white/10 px-2.5 py-1 hover:bg-white/20 hover:text-emas"
                   >
+                    <IkonSosial nama={s.label} className="shrink-0" />
                     {s.label}
                   </a>
                 </li>

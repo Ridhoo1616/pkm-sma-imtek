@@ -17,10 +17,20 @@ export default function GulirHalus() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const lenis = new Lenis({
-      duration: 0.9,
-      // Kurva perlambatan yang berhenti tegas, supaya halaman tidak terasa
-      // meluncur terus setelah gulir dilepas.
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      // Dulu di sini dipakai duration 0.9 detik. Hasilnya, sekali putaran roda
+      // membuat halaman masih bergerak 754 milidetik sesudah jari berhenti,
+      // dan itulah yang membuat situsnya terasa berat.
+      //
+      // lerp mendekatkan posisi sebanyak 55% tiap bingkai, bukan mengejar
+      // jadwal waktu tertentu, sehingga gulirnya mengikuti jari dan berhenti
+      // segera setelah jari berhenti. Dengan nilai ini halaman hanya bergerak
+      // 173 milidetik setelah roda dilepas, turun dari 754 milidetik. Halusnya
+      // masih terasa karena loncatan tiap klik roda tetap diperhalus, tetapi
+      // rasa meluncur yang membuat situsnya terasa berat sudah hilang.
+      lerp: 0.55,
+      // Gulir sentuh dibiarkan bawaan peramban. Mengambil alih gulir di ponsel
+      // hampir selalu terasa lebih buruk daripada gulir asli sistemnya.
+      syncTouch: false,
     });
 
     let jalan = true;

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { useSesi } from "@/komponen/Sesi";
 import { Memuat } from "@/komponen/Memuat";
 
@@ -139,19 +138,19 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          <AnimatePresence initial={false}>
-            {sidebarTerbuka && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
-                className="overflow-hidden bg-biru-tua lg:hidden"
-              >
-                <div className="px-3 py-4">{daftarMenu}</div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Tingginya dibuka dengan grid-template-rows 0fr ke 1fr, cara CSS
+              untuk menganimasikan tinggi yang belum diketahui. */}
+          <div
+            inert={!sidebarTerbuka}
+            className={
+              "grid overflow-hidden bg-biru-tua transition-[grid-template-rows,opacity] duration-200 ease-out lg:hidden " +
+              (sidebarTerbuka ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")
+            }
+          >
+            <div className="overflow-hidden">
+              <div className="px-3 py-4">{daftarMenu}</div>
+            </div>
+          </div>
         </header>
 
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>

@@ -104,3 +104,16 @@ export function belumTerisi(nilai: string): boolean {
   const t = (nilai || "").trim();
   return t === "" || (t.startsWith("[") && t.endsWith("]"));
 }
+
+/**
+ * Menggabungkan alamat dengan kode pos, tanpa menuliskannya dua kali.
+ *
+ * Alamat yang diisi sekolah pada umumnya sudah memuat kode posnya di ujung,
+ * sehingga menambahkannya lagi menghasilkan "Banten 15339 15339".
+ */
+export function alamatLengkap(alamat?: string, kodePos?: string): string {
+  const a = (alamat ?? "").trim();
+  const k = (kodePos ?? "").trim();
+  if (!k || a.includes(k)) return a;
+  return a ? `${a} ${k}` : k;
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { muatProfil } from "@/lib/profil";
+import { belumTerisi } from "@/lib/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { profil } = await muatProfil();
@@ -13,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s · ${nama}`,
     },
     description:
-      p.tagline ||
+      (belumTerisi(p.tagline ?? "") ? "" : p.tagline) ||
       `Profil ${nama} dan pendaftaran peserta didik baru secara online` +
         (p.kota ? ` di ${p.kota}` : "") +
         ".",
@@ -29,7 +30,9 @@ export async function generateMetadata(): Promise<Metadata> {
     ].filter(Boolean) as string[],
     openGraph: {
       title: `${nama} · Profil Sekolah & PPDB Online`,
-      description: p.tagline || `Pendaftaran peserta didik baru ${nama}.`,
+      description:
+        (belumTerisi(p.tagline ?? "") ? "" : p.tagline) ||
+        `Pendaftaran peserta didik baru ${nama}.`,
       type: "website",
       locale: "id_ID",
     },

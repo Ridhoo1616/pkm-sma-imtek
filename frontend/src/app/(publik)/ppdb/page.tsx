@@ -6,6 +6,7 @@ import { KepalaHalaman, JudulBagian, Lencana } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
 import type { Metadata } from "next";
 import type { Jurusan } from "@/lib/tipe";
+import { IkonFasilitas } from "@/komponen/Ikon";
 
 export const metadata: Metadata = {
   title: "Informasi PPDB",
@@ -280,7 +281,10 @@ export default async function HalamanPpdb() {
                     {jurusan.map((j) => (
                       <li key={j.id} className="px-6 py-4">
                         <div className="flex items-baseline justify-between gap-3">
-                          <p className="text-[15px] font-semibold text-teks">{j.nama}</p>
+                          <p className="flex items-center gap-2 text-[15px] font-semibold text-teks">
+                            <IkonFasilitas nama={j.ikon} ukuran={16} className="shrink-0 text-biru" />
+                            {j.nama}
+                          </p>
                           <p className="text-sm text-samar tabular-nums">
                             {angka(j.pendaftar)} / {angka(j.kuota)}
                           </p>

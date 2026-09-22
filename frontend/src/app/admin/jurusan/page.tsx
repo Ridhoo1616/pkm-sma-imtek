@@ -9,8 +9,9 @@ import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
-import { Teks, AreaTeks, Centang, Tombol, RingkasanGalat } from "@/komponen/Medan";
+import { Teks, AreaTeks, Centang, Tombol, RingkasanGalat, Pilihan } from "@/komponen/Medan";
 import type { Jurusan } from "@/lib/tipe";
+import { PILIHAN_IKON } from "@/komponen/Ikon";
 
 const KOSONG = {
   kode: "",
@@ -258,14 +259,14 @@ function IsiJurusan() {
               ubah={(v) => setIsi((s) => ({ ...s, urutan: Number(v) || 0 }))}
               galat={galatKolom.urutan}
             />
-            <Teks
+            <Pilihan
               nama="ikon"
-              label="Nama ikon"
-              maks={50}
+              label="Ikon"
               nilai={isi.ikon}
               ubah={(v) => setIsi((s) => ({ ...s, ikon: v }))}
+              opsi={PILIHAN_IKON}
+              kosong="-- Tanpa ikon --"
               galat={galatKolom.ikon}
-              contoh="bi-flask"
             />
           </div>
 

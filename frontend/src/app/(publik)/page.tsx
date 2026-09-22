@@ -5,6 +5,7 @@ import { angka, persen, tanggalPanjang, belumTerisi } from "@/lib/format";
 import { JudulBagian, GambarKosong, Lencana } from "@/komponen/Bagian";
 import { MunculNaik, MunculLangsung, KartuGerak } from "@/komponen/Gerak";
 import type { Berita, Fasilitas, Jurusan } from "@/lib/tipe";
+import { IkonFasilitas } from "@/komponen/Ikon";
 
 /**
  * Beranda. Seluruh isinya berasal dari basis data lewat API, sehingga
@@ -208,7 +209,8 @@ export default async function Beranda() {
                 <MunculNaik key={j.id} jeda={i * 0.08}>
                   <KartuGerak className="kartu flex h-full flex-col p-6">
                     <div className="mb-4 flex items-center justify-between gap-3">
-                      <span className="rounded-lg bg-biru-muda px-2.5 py-1 text-xs font-bold tracking-wider text-biru">
+                      <span className="flex items-center gap-2 rounded-lg bg-biru-muda px-2.5 py-1 text-xs font-bold tracking-wider text-biru">
+                        <IkonFasilitas nama={j.ikon} ukuran={15} />
                         {j.kode}
                       </span>
                       <span className="text-xs font-semibold text-samar tabular-nums">

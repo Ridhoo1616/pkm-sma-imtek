@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { urlUnggahan } from "@/lib/api";
 import { tanggalPanjang } from "@/lib/format";
 import { MunculNaik } from "@/komponen/Gerak";
@@ -21,6 +20,29 @@ export default function PetakGaleri({
 }) {
   const [pilihKategori, setPilihKategori] = useState("");
   const [terbuka, setTerbuka] = useState<Galeri | null>(null);
+  const tombolTutup = useRef<HTMLButtonElement>(null);
+
+  // Tampilan foto besar berlaku sebagai jendela, jadi perlu tiga hal yang
+  // diharapkan pengguna dari sebuah jendela: tombol Escape menutupnya, gulir
+  // halaman di belakangnya terkunci, dan fokus papan tik berpindah ke
+  // dalamnya supaya Tab tidak menyelinap ke tautan yang tertutup.
+  useEffect(() => {
+    if (!terbuka) return;
+
+    const saatTombol = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") setTerbuka(null);
+    };
+    document.addEventListener("keydown", saatTombol);
+
+    const gulirSemula = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    tombolTutup.current?.focus();
+
+    return () => {
+      document.removeEventListener("keydown", saatTombol);
+      document.body.style.overflow = gulirSemula;
+    };
+  }, [terbuka]);
 
   const tersaring = pilihKategori
     ? foto.filter((f) => f.kategori === pilihKategori)
@@ -93,24 +115,19 @@ export default function PetakGaleri({
         ))}
       </div>
 
-      <AnimatePresence>
-        {terbuka && (
-          <motion.div
+      {/* Tampilan foto besar. Gerakan masuknya memakai keyframes CSS yang sama
+          dengan jendela Radix; gerakan keluarnya ditiadakan supaya menutupnya
+          terasa langsung. */}
+      {terbuka && (
+          <div
             role="dialog"
             aria-modal="true"
             aria-label={terbuka.judul}
-            className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-100 flex animate-[munculLatar_0.15s_ease-out] items-center justify-center bg-black/80 p-4"
             onClick={() => setTerbuka(null)}
           >
-            <motion.figure
-              className="max-h-full w-full max-w-4xl overflow-auto rounded-kartu bg-white"
-              initial={{ scale: 0.94, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.94, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+            <figure
+              className="max-h-full w-full max-w-4xl animate-[munculJendela_0.2s_ease-out] overflow-auto rounded-kartu bg-white"
               onClick={(e) => e.stopPropagation()}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -133,6 +150,7 @@ export default function PetakGaleri({
                   </p>
                 </div>
                 <button
+                  ref={tombolTutup}
                   type="button"
                   onClick={() => setTerbuka(null)}
                   className="shrink-0 rounded-lg border border-garis px-3 py-1.5 text-sm font-semibold hover:bg-biru-muda"
@@ -140,10 +158,9 @@ export default function PetakGaleri({
                   Tutup
                 </button>
               </figcaption>
-            </motion.figure>
-          </motion.div>
+            </figure>
+          </div>
         )}
-      </AnimatePresence>
     </>
   );
 }

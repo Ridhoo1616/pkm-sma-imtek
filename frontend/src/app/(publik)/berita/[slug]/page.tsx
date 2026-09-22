@@ -81,7 +81,9 @@ export default async function HalamanDetailBerita(
           <img
             src={urlUnggahan("berita", b.gambar)}
             alt={b.judul}
-            className="w-full object-cover"
+            loading="lazy"
+            decoding="async"
+            className="aspect-video w-full object-cover"
           />
         </div>
       ) : (

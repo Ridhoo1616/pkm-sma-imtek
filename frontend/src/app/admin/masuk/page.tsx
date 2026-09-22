@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useSesi } from "@/komponen/Sesi";
 import { GalatApi } from "@/lib/api";
 import { Teks, Tombol } from "@/komponen/Medan";
 import { PesanGalat } from "@/komponen/Memuat";
+import { MunculLangsung } from "@/komponen/Gerak";
 
 export default function HalamanMasuk() {
   const { pengguna, masuk } = useSesi();
@@ -42,12 +42,7 @@ export default function HalamanMasuk() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-biru-tua px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="w-full max-w-md"
-      >
+      <MunculLangsung className="w-full max-w-md">
         <div className="mb-7 text-center">
           <h1 className="text-2xl font-bold text-white">Masuk Petugas</h1>
           <p className="mt-2 text-sm text-white/70">
@@ -95,7 +90,7 @@ export default function HalamanMasuk() {
             ← Kembali ke situs publik
           </Link>
         </p>
-      </motion.div>
+      </MunculLangsung>
     </div>
   );
 }

@@ -7,11 +7,13 @@ import { useKabar } from "@/komponen/Kabar";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
+import { IkonFasilitas, PILIHAN_IKON } from "@/komponen/Ikon";
 import {
   Teks,
   AreaTeks,
   Berkas,
   Centang,
+  Pilihan,
   Tombol,
   RingkasanGalat,
 } from "@/komponen/Medan";
@@ -159,7 +161,9 @@ function IsiFasilitas() {
               </td>
               <td className="px-4 py-3 font-medium">{f.nama}</td>
               <td className="max-w-md px-4 py-3 text-samar">{f.deskripsi || "-"}</td>
-              <td className="px-4 py-3 text-xs text-samar">{f.ikon || "-"}</td>
+              <td className="px-4 py-3 text-samar">
+                {f.ikon ? <IkonFasilitas nama={f.ikon} ukuran={18} /> : "-"}
+              </td>
               <td className="px-4 py-3">
                 <div className="flex gap-2 whitespace-nowrap">
                   <button
@@ -220,14 +224,14 @@ function IsiFasilitas() {
               ubah={(v) => setIsi((s) => ({ ...s, urutan: Number(v) || 0 }))}
               galat={galatKolom.urutan}
             />
-            <Teks
+            <Pilihan
               nama="ikon"
-              label="Nama ikon"
-              maks={50}
+              label="Ikon"
               nilai={isi.ikon}
               ubah={(v) => setIsi((s) => ({ ...s, ikon: v }))}
+              opsi={PILIHAN_IKON}
+              kosong="-- Tanpa ikon --"
               galat={galatKolom.ikon}
-              contoh="bi-pc-display"
             />
           </div>
 

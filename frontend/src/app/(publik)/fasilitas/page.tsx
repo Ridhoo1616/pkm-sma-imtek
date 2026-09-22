@@ -4,6 +4,7 @@ import { MunculNaik, KartuGerak } from "@/komponen/Gerak";
 import { TanpaData } from "@/komponen/Memuat";
 import type { Metadata } from "next";
 import type { Fasilitas } from "@/lib/tipe";
+import { IkonFasilitas } from "@/komponen/Ikon";
 
 export const metadata: Metadata = {
   title: "Fasilitas Sekolah",
@@ -46,7 +47,12 @@ export default async function HalamanFasilitas() {
                     <GambarKosong label={f.nama} />
                   )}
                   <div className="p-5">
-                    <h2 className="text-base">{f.nama}</h2>
+                    <h2 className="flex items-center gap-2 text-base">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-biru-muda text-biru">
+                        <IkonFasilitas nama={f.ikon} ukuran={18} />
+                      </span>
+                      {f.nama}
+                    </h2>
                     {f.deskripsi && (
                       <p className="mt-2 text-sm leading-relaxed text-samar">
                         {f.deskripsi}

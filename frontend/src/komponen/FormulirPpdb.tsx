@@ -2,7 +2,6 @@
 
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
 import { api, unduhBukti, GalatApi } from "@/lib/api";
 import { bukaBlob } from "@/lib/berkas";
 import {
@@ -372,14 +371,9 @@ export default function FormulirPpdb({
             {langkah + 1}. {LANGKAH[langkah].judul}
           </h2>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={langkah}
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -24 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-            >
+          {/* key membuat React memasang ulang panelnya tiap ganti langkah,
+              sehingga animasi CSS-nya berjalan dari awal lagi. */}
+          <div key={langkah} className="gerak-langkah">
               {/* ---------- 1. Jalur & data diri ---------- */}
               {langkah === 0 && (
                 <div className="space-y-5">
@@ -823,8 +817,7 @@ export default function FormulirPpdb({
                   </p>
                 </div>
               )}
-            </motion.div>
-          </AnimatePresence>
+          </div>
 
           {/* Navigasi langkah */}
           <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-garis pt-6">

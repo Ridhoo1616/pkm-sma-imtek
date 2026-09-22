@@ -142,6 +142,75 @@
   }
 }
 
+/* Gerak isi halaman.
+   Dulu bagian ini dikerjakan Framer Motion. Empat gerakannya sederhana, jadi
+   ditulis CSS saja dan pustakanya dilepas; sekitar 130 KB JavaScript tidak
+   lagi diunduh pengunjung. Keadaan awalnya dipasang JavaScript, bukan ditulis
+   pada HTML dari server, supaya halaman tetap terbaca bila skripnya gagal. */
+.gerak-awal {
+  opacity: 0;
+  transform: translateY(18px);
+  will-change: opacity, transform;
+}
+
+.gerak-tampil {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Sesudah gerakannya selesai, petunjuk will-change dicabut supaya peramban
+   tidak menahan lapisan gambar untuk elemen yang sudah diam. */
+.gerak-tampil {
+  will-change: auto;
+}
+
+@keyframes gerakLangkah {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Panel langkah formulir PPDB. Animasinya dimulai ulang tiap pergantian
+   langkah karena elemennya diberi key yang berbeda, sehingga React
+   memasangnya sebagai elemen baru. */
+.gerak-langkah {
+  animation: gerakLangkah 0.25s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gerak-langkah {
+    animation: none;
+  }
+}
+
+.gerak-kartu {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .gerak-kartu:hover {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gerak-awal,
+  .gerak-tampil,
+  .gerak-kartu {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Untuk halaman cetak bukti pendaftaran: sembunyikan navigasi. */
 @media print {
   .tanpa-cetak {
