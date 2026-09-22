@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Demo PPDB Online SMA IMTEK</title>
 
-<meta name="description" content="Demo interaktif Sistem Informasi Profil Sekolah dan PPDB Online SMA IMTEK. Isi formulir pendaftaran, cek status, dan masuk panel panitia untuk memverifikasi pendaftar.">
+<meta name="description" content="Demo interaktif Sistem Informasi Profil Sekolah dan PPDB Online SMA IMTEK: profil sekolah, fasilitas, berita, galeri, kontak, formulir pendaftaran, cek status, dan panel panitia.">
 <meta name="author" content="SMA IMTEK">
 <meta name="robots" content="index, follow">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SMA IMTEK">
 <meta property="og:title" content="Demo PPDB Online SMA IMTEK">
-<meta property="og:description" content="Coba langsung alur pendaftaran peserta didik baru: isi formulir, cek status, dan masuk panel panitia.">
+<meta property="og:description" content="Coba langsung: profil sekolah, berita, galeri, formulir pendaftaran, cek status, dan panel panitia.">
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,7 +20,6 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
 
 <style>
-  /* Dasar yang pada versi artifact disediakan pembungkusnya */
   :root {
     color-scheme: light dark;
     padding-top: env(safe-area-inset-top, 0px);
@@ -28,10 +27,6 @@
   }
   img { max-width: 100%; }
   [hidden] { display: none !important; }
-</style>
-</head>
-<body>
-<style>
   :root {
     --biru:        #12508f;
     --biru-tua:    #0c3a69;
@@ -152,21 +147,14 @@
   input, select, textarea { font-family: inherit; font-size: inherit; }
   a { color: var(--biru); }
 
-  :focus-visible {
-    outline: 2px solid var(--biru);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
+  :focus-visible { outline: 2px solid var(--biru); outline-offset: 2px; border-radius: 4px; }
 
   .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 16px; }
 
   /* ---------- bilah demo ---------- */
   .bilah-demo {
-    background: var(--emas);
-    color: var(--emas-tinta);
-    font-size: 13px;
-    font-weight: 600;
-    padding-block: 9px;
+    background: var(--emas); color: var(--emas-tinta);
+    font-size: 13px; font-weight: 600; padding-block: 9px;
   }
   .bilah-demo .wrap { display: flex; gap: 10px; align-items: flex-start; }
   .bilah-demo svg { flex-shrink: 0; margin-top: 1px; }
@@ -174,60 +162,38 @@
 
   /* ---------- kepala ---------- */
   header.app {
-    background: var(--surface);
-    border-bottom: 1px solid var(--garis);
-    position: sticky;
-    top: env(safe-area-inset-top, 0px);
-    z-index: 20;
+    background: var(--surface); border-bottom: 1px solid var(--garis);
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
   }
-  header.app .wrap {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding-block: 12px;
-  }
+  header.app .wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 12px; }
   .merek { display: flex; align-items: center; gap: 11px; margin-right: auto; }
   .lambang {
-    width: 42px; height: 42px; flex-shrink: 0;
-    border-radius: 11px;
+    width: 42px; height: 42px; flex-shrink: 0; border-radius: 11px;
     background: linear-gradient(145deg, #1b6cbd, #0c3a69);
-    display: grid; place-items: center;
-    color: var(--emas);
+    display: grid; place-items: center; color: var(--emas);
     font-weight: 800; font-size: 12px; letter-spacing: .5px;
   }
   .merek b { display: block; font-size: 17px; line-height: 1.15; letter-spacing: -.01em; }
   .merek small { font-size: 11.5px; color: var(--tinta-lirih); font-variant-numeric: tabular-nums; }
 
   .pengalih {
-    display: flex;
-    background: var(--surface-alt);
-    border: 1px solid var(--garis);
-    border-radius: 999px;
-    padding: 3px;
-    gap: 2px;
+    display: flex; background: var(--surface-alt);
+    border: 1px solid var(--garis); border-radius: 999px; padding: 3px; gap: 2px;
   }
   .pengalih button {
     border: 0; background: none; color: var(--tinta-samar);
-    font-weight: 600; font-size: 13.5px;
-    padding: 8px 16px; border-radius: 999px;
-    min-height: 40px;
+    font-weight: 600; font-size: 13.5px; padding: 8px 16px;
+    border-radius: 999px; min-height: 40px;
   }
   .pengalih button[aria-selected="true"] { background: var(--biru); color: #fff; }
 
   /* ---------- tab ---------- */
-  .tabs {
-    display: flex; gap: 4px; flex-wrap: wrap;
-    border-bottom: 1px solid var(--garis);
-    background: var(--surface);
-  }
-  .tabs .wrap { display: flex; gap: 4px; flex-wrap: wrap; padding-block: 0; }
+  .tabs { border-bottom: 1px solid var(--garis); background: var(--surface); }
+  .tabs .wrap { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: thin; }
   .tabs button {
     border: 0; background: none; color: var(--tinta-samar);
-    font-weight: 600; font-size: 14px;
-    padding: 13px 14px;
-    border-bottom: 2.5px solid transparent;
-    min-height: 44px;
+    font-weight: 600; font-size: 14px; padding: 13px 13px;
+    border-bottom: 2.5px solid transparent; min-height: 44px; white-space: nowrap;
   }
   .tabs button[aria-selected="true"] { color: var(--biru); border-bottom-color: var(--biru); }
 
@@ -235,57 +201,46 @@
   .panel[hidden] { display: none !important; }
 
   /* ---------- kartu ---------- */
-  .kartu {
-    background: var(--surface);
-    border: 1px solid var(--garis);
-    border-radius: var(--r-l);
-    padding: 22px;
-  }
+  .kartu { background: var(--surface); border: 1px solid var(--garis); border-radius: var(--r-l); padding: 22px; }
   .kartu-rata { background: var(--surface); border: 1px solid var(--garis); border-radius: var(--r-m); padding: 16px 18px; }
 
   .judul-seksi {
     display: flex; align-items: center; gap: 10px;
-    font-size: 12.5px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: .09em;
-    color: var(--tinta-samar);
-    padding-bottom: 9px;
-    border-bottom: 1.5px solid var(--garis);
-    margin-bottom: 18px;
+    font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--tinta-samar); padding-bottom: 9px;
+    border-bottom: 1.5px solid var(--garis); margin-bottom: 18px;
   }
   .judul-seksi i {
-    width: 24px; height: 24px; flex-shrink: 0;
-    background: var(--biru); color: #fff;
+    width: 24px; height: 24px; flex-shrink: 0; background: var(--biru); color: #fff;
     border-radius: 7px; display: grid; place-items: center;
     font-size: 12px; font-style: normal; font-weight: 700;
   }
 
-  /* ---------- hero informasi ---------- */
+  .kepala-seksi { text-align: center; max-width: 52ch; margin-inline: auto; }
+  .kicker {
+    font-size: 12px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--biru);
+  }
+  .kepala-seksi h2 { font-size: clamp(1.3rem, 3.2vw, 1.75rem); margin-block: 8px 8px; letter-spacing: -.015em; }
+  .kepala-seksi p { color: var(--tinta-samar); font-size: 14.5px; }
+
+  /* ---------- hero ---------- */
   .hero {
     background: linear-gradient(140deg, var(--hero-1), var(--hero-2) 70%, var(--hero-3));
-    border-radius: var(--r-l);
-    padding: 30px;
-    color: #fff;
-    display: grid;
-    grid-template-columns: 1.35fr 1fr;
-    gap: 30px;
-    align-items: start;
+    border-radius: var(--r-l); padding: 30px; color: #fff;
+    display: grid; grid-template-columns: 1.35fr 1fr; gap: 30px; align-items: start;
   }
   .hero h1 { color: #fff; font-size: clamp(1.6rem, 4vw, 2.1rem); letter-spacing: -.02em; }
   .hero p { color: rgba(255,255,255,.92); margin-top: 10px; max-width: 46ch; }
   .lonceng {
     display: inline-flex; align-items: center; gap: 7px;
-    background: rgba(255,255,255,.16);
-    border: 1px solid rgba(255,255,255,.3);
+    background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3);
     padding: 6px 13px; border-radius: 999px;
-    font-size: 12.5px; font-weight: 600;
-    margin-bottom: 14px;
+    font-size: 12.5px; font-weight: 600; margin-bottom: 14px;
   }
   .kartu-status {
-    background: var(--surface);
-    color: var(--tinta);
-    border-radius: var(--r-m);
-    padding: 18px;
-    box-shadow: var(--bayang-kuat);
+    background: var(--surface); color: var(--tinta);
+    border-radius: var(--r-m); padding: 18px; box-shadow: var(--bayang-kuat);
   }
   .baris-status { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; padding-block: 6px; }
   .baris-status span { color: var(--tinta-samar); }
@@ -295,10 +250,8 @@
 
   /* ---------- tombol ---------- */
   .btn {
-    border: 0; border-radius: var(--r-s);
-    font-weight: 600; font-size: 14.5px;
-    padding: 12px 20px;
-    min-height: 44px;
+    border: 0; border-radius: var(--r-s); font-weight: 600; font-size: 14.5px;
+    padding: 12px 20px; min-height: 44px;
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     text-decoration: none;
   }
@@ -307,25 +260,95 @@
   .btn-garis { background: var(--surface); color: var(--biru); border: 1.5px solid var(--garis-kuat); }
   .btn-halus { background: var(--surface-alt); color: var(--tinta-samar); border: 1px solid var(--garis); }
   .btn-kecil { padding: 7px 13px; min-height: 36px; font-size: 13px; }
+  .btn-hijau { background: var(--hijau); color: #fff; }
   .btn:disabled { opacity: .55; cursor: not-allowed; }
 
-  /* ---------- kisi & langkah ---------- */
+  /* ---------- kisi ---------- */
   .kisi { display: grid; gap: 16px; }
+  .kisi-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kisi-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .kisi-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .kisi-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
+  /* ---------- statistik sekolah ---------- */
+  .stat {
+    background: var(--surface); border: 1px solid var(--garis);
+    border-radius: var(--r-m); padding: 22px 16px; text-align: center;
+  }
+  .stat .ik { color: var(--biru); }
+  .stat .n {
+    font-size: 30px; font-weight: 800; color: var(--biru-tua);
+    line-height: 1.1; font-variant-numeric: tabular-nums; margin-top: 8px;
+  }
+  .stat .k { font-size: 12.5px; color: var(--tinta-samar); }
+
+  /* ---------- ikon lingkar ---------- */
+  .ikon-kotak {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--biru-muda); color: var(--biru);
+    display: grid; place-items: center; margin-bottom: 13px;
+  }
+
+  /* ---------- langkah ---------- */
   .langkah { display: flex; gap: 14px; }
   .langkah b { font-size: 15px; display: block; }
   .langkah p { color: var(--tinta-samar); font-size: 13.5px; margin-top: 2px; }
   .nomor {
-    width: 30px; height: 30px; flex-shrink: 0;
-    border-radius: 50%;
+    width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%;
     background: var(--biru-muda); color: var(--biru);
-    display: grid; place-items: center;
-    font-weight: 700; font-size: 13.5px;
+    display: grid; place-items: center; font-weight: 700; font-size: 13.5px;
     font-variant-numeric: tabular-nums;
   }
+
+  /* ---------- berita ---------- */
+  .kartu-berita {
+    background: var(--surface); border: 1px solid var(--garis);
+    border-radius: var(--r-m); overflow: hidden;
+    display: flex; flex-direction: column; text-align: left;
+    padding: 0; width: 100%; cursor: pointer;
+  }
+  .kartu-berita:hover { border-color: var(--garis-kuat); }
+  .gambar-tiruan {
+    aspect-ratio: 16 / 9; width: 100%;
+    display: grid; place-items: center;
+    color: rgba(255,255,255,.92); font-size: 11.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-align: center; padding: 8px;
+  }
+  .kartu-berita .isi { padding: 16px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .kartu-berita h3 { font-size: 15.5px; color: var(--tinta); }
+  .kartu-berita p { font-size: 13.5px; color: var(--tinta-samar); flex: 1; }
+  .kaki-berita {
+    display: flex; justify-content: space-between; gap: 10px;
+    font-size: 12px; color: var(--tinta-lirih);
+    border-top: 1px solid var(--garis); padding-top: 9px;
+  }
+  .label-kat {
+    display: inline-block; align-self: flex-start;
+    background: var(--biru-muda); color: var(--biru);
+    font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 999px;
+  }
+  .isi-artikel { font-size: 15.5px; line-height: 1.75; color: var(--tinta-samar); display: grid; gap: 14px; }
+
+  /* ---------- galeri ---------- */
+  .item-galeri {
+    border: 0; padding: 0; border-radius: var(--r-m); overflow: hidden;
+    position: relative; cursor: pointer; display: block; width: 100%;
+  }
+  .item-galeri .gambar-tiruan { aspect-ratio: 4 / 3; }
+  .item-galeri .tirai {
+    position: absolute; inset: auto 0 0 0;
+    background: linear-gradient(transparent, rgba(6, 22, 40, .9));
+    color: #fff; font-size: 12.5px; font-weight: 600;
+    padding: 20px 12px 10px; text-align: left;
+  }
+  .sorot {
+    position: fixed; inset: 0; z-index: 60;
+    background: rgba(6, 16, 28, .88);
+    display: grid; place-items: center; padding: 20px;
+  }
+  .sorot-isi { max-width: 640px; width: 100%; }
+  .sorot-isi .gambar-tiruan { aspect-ratio: 4 / 3; border-radius: var(--r-m); font-size: 14px; }
+  .sorot-bar { display: flex; gap: 12px; align-items: center; color: #fff; margin-top: 14px; }
 
   /* ---------- formulir ---------- */
   .ladang { display: grid; gap: 5px; }
@@ -333,18 +356,13 @@
   .ladang .wajib { color: var(--merah); }
   .ladang .bantu { font-size: 12px; color: var(--tinta-lirih); }
   .ladang input, .ladang select, .ladang textarea {
-    background: var(--surface);
-    color: var(--tinta);
-    border: 1.5px solid var(--garis);
-    border-radius: var(--r-s);
-    padding: 10px 12px;
-    min-height: 44px;
-    width: 100%;
+    background: var(--surface); color: var(--tinta);
+    border: 1.5px solid var(--garis); border-radius: var(--r-s);
+    padding: 10px 12px; min-height: 44px; width: 100%;
   }
   .ladang textarea { min-height: 72px; resize: vertical; }
   .ladang input:focus, .ladang select:focus, .ladang textarea:focus {
-    border-color: var(--biru);
-    outline: none;
+    border-color: var(--biru); outline: none;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--biru) 18%, transparent);
   }
   .ladang.galat input, .ladang.galat select, .ladang.galat textarea { border-color: var(--merah); }
@@ -357,11 +375,8 @@
 
   /* ---------- notifikasi ---------- */
   .notif {
-    border-radius: var(--r-m);
-    padding: 14px 16px;
-    font-size: 13.5px;
-    display: flex; gap: 11px; align-items: flex-start;
-    line-height: 1.55;
+    border-radius: var(--r-m); padding: 14px 16px; font-size: 13.5px;
+    display: flex; gap: 11px; align-items: flex-start; line-height: 1.55;
   }
   .notif svg { flex-shrink: 0; margin-top: 2px; }
   .notif-info { background: var(--biru-latar); color: var(--biru-info); }
@@ -373,9 +388,8 @@
   /* ---------- lencana ---------- */
   .lencana {
     display: inline-flex; align-items: center; gap: 5px;
-    font-size: 12px; font-weight: 700;
-    padding: 3px 9px; border-radius: 999px;
-    white-space: nowrap;
+    font-size: 12px; font-weight: 700; padding: 3px 9px;
+    border-radius: 999px; white-space: nowrap;
   }
   .l-tunggu { background: var(--surface-alt); color: var(--tinta-samar); box-shadow: inset 0 0 0 1px var(--garis-kuat); }
   .l-verif  { background: var(--biru-latar); color: var(--biru-info); }
@@ -385,31 +399,25 @@
 
   /* ---------- nomor registrasi ---------- */
   .noreg-kotak {
-    text-align: center;
-    background: var(--biru-muda);
-    border: 1.5px dashed var(--biru);
-    border-radius: var(--r-m);
-    padding: 20px;
+    text-align: center; background: var(--biru-muda);
+    border: 1.5px dashed var(--biru); border-radius: var(--r-m); padding: 20px;
   }
-  .noreg-kotak .cap { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-samar); }
+  .noreg-kotak .cap {
+    font-size: 11.5px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--tinta-samar);
+  }
   .noreg-kotak .val {
-    font-family: var(--mono);
-    font-size: clamp(1.4rem, 5vw, 1.9rem);
-    font-weight: 700;
-    color: var(--biru);
-    letter-spacing: .08em;
-    margin-top: 6px;
+    font-family: var(--mono); font-size: clamp(1.4rem, 5vw, 1.9rem);
+    font-weight: 700; color: var(--biru); letter-spacing: .08em; margin-top: 6px;
   }
 
   /* ---------- tahapan ---------- */
   .tahapan { display: flex; text-align: center; margin-block: 8px 18px; }
   .tahapan > div { flex: 1; }
   .tahap-bulat {
-    width: 38px; height: 38px; margin: 0 auto 8px;
-    border-radius: 50%;
+    width: 38px; height: 38px; margin: 0 auto 8px; border-radius: 50%;
     display: grid; place-items: center;
-    background: var(--surface-alt);
-    color: var(--tinta-lirih);
+    background: var(--surface-alt); color: var(--tinta-lirih);
     box-shadow: inset 0 0 0 1.5px var(--garis-kuat);
   }
   .tahap-aktif .tahap-bulat { background: var(--biru); color: #fff; box-shadow: none; }
@@ -422,10 +430,8 @@
   th {
     text-align: left; white-space: nowrap;
     font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-    color: var(--tinta-lirih);
-    background: var(--surface-alt);
-    padding: 11px 14px;
-    border-bottom: 1px solid var(--garis);
+    color: var(--tinta-lirih); background: var(--surface-alt);
+    padding: 11px 14px; border-bottom: 1px solid var(--garis);
   }
   td { padding: 12px 14px; border-bottom: 1px solid var(--garis); vertical-align: middle; }
   tbody tr:last-child td { border-bottom: 0; }
@@ -434,78 +440,81 @@
   td.mono { font-family: var(--mono); font-size: 12.5px; color: var(--biru); white-space: nowrap; }
   td.angka { font-variant-numeric: tabular-nums; text-align: right; }
 
-  /* ---------- petak statistik ---------- */
+  /* ---------- petak & batang ---------- */
   .petak {
-    background: var(--surface);
-    border: 1px solid var(--garis);
+    background: var(--surface); border: 1px solid var(--garis);
     border-left: 3px solid var(--rona, var(--biru));
-    border-radius: var(--r-m);
-    padding: 14px 16px;
+    border-radius: var(--r-m); padding: 14px 16px;
   }
   .petak .n { font-size: 26px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
   .petak .k { font-size: 12.5px; color: var(--tinta-samar); }
 
-  /* ---------- batang kanal ---------- */
   .batang { display: flex; align-items: center; gap: 12px; font-size: 13.5px; margin-bottom: 10px; }
   .batang .nm { width: 140px; flex-shrink: 0; }
-  .batang .jl { flex: 1; display: flex; height: 20px; background: var(--surface-alt); border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--garis); }
-  .batang .is { display: block; height: 100%; background: linear-gradient(90deg, var(--biru-tua), var(--biru)); border-radius: 6px; }
+  .batang .jl {
+    flex: 1; display: flex; height: 20px; background: var(--surface-alt);
+    border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--garis);
+  }
+  .batang .is { display: block; height: 100%; background: linear-gradient(90deg, var(--hero-1), var(--hero-3)); border-radius: 6px; }
   .batang .nl { width: 78px; text-align: right; font-weight: 700; flex-shrink: 0; font-variant-numeric: tabular-nums; }
   .batang .nl small { font-weight: 500; color: var(--tinta-lirih); }
 
-  /* ---------- daftar rincian ---------- */
+  /* ---------- rincian ---------- */
   .rinci { display: grid; grid-template-columns: max-content 1fr; gap: 7px 16px; font-size: 13.5px; }
   .rinci dt { color: var(--tinta-samar); }
   .rinci dd { margin: 0; font-weight: 600; }
 
   /* ---------- bukti cetak ---------- */
   .bukti {
-    font-family: var(--serif);
-    background: var(--surface);
-    border: 1px solid var(--garis);
-    border-radius: var(--r-m);
-    padding: 26px;
+    font-family: var(--serif); background: var(--surface);
+    border: 1px solid var(--garis); border-radius: var(--r-m); padding: 26px;
   }
   .bukti .kop { text-align: center; border-bottom: 3px double var(--tinta); padding-bottom: 12px; }
   .bukti .kop b { font-size: 20px; letter-spacing: .02em; display: block; }
   .bukti .kop small { color: var(--tinta-samar); }
-  .bukti h3 { font-family: var(--serif); text-align: center; margin-block: 18px 4px; text-decoration: underline; letter-spacing: .04em; }
+  .bukti h3 {
+    font-family: var(--serif); text-align: center; margin-block: 18px 4px;
+    text-decoration: underline; letter-spacing: .04em;
+  }
 
   /* ---------- gerbang masuk ---------- */
   .gerbang { max-width: 400px; margin-inline: auto; }
   .kunci-hint {
-    background: var(--surface-alt);
-    border: 1px dashed var(--garis-kuat);
-    border-radius: var(--r-s);
-    padding: 11px 13px;
-    font-size: 12.5px;
-    color: var(--tinta-samar);
+    background: var(--surface-alt); border: 1px dashed var(--garis-kuat);
+    border-radius: var(--r-s); padding: 11px 13px;
+    font-size: 12.5px; color: var(--tinta-samar);
   }
   .kunci-hint code { font-family: var(--mono); color: var(--biru); font-weight: 700; }
 
+  /* ---------- kutipan ---------- */
+  .kutip {
+    border-left: 3px solid var(--biru); padding-left: 16px;
+    font-family: var(--serif); font-size: 16.5px; line-height: 1.7;
+    color: var(--tinta-samar); font-style: italic;
+  }
+
   footer.app {
-    border-top: 1px solid var(--garis);
-    background: var(--surface);
-    padding-block: 20px 28px;
-    font-size: 12.5px;
-    color: var(--tinta-lirih);
+    border-top: 1px solid var(--garis); background: var(--surface);
+    padding-block: 20px 28px; font-size: 12.5px; color: var(--tinta-lirih);
   }
   footer.app .wrap { display: flex; gap: 14px; justify-content: space-between; flex-wrap: wrap; align-items: center; }
 
   .tumpuk { display: grid; gap: 16px; }
+  .tumpuk-l { display: grid; gap: 36px; }
   .tumpuk-s { display: grid; gap: 10px; }
   .antar { display: flex; gap: 10px; flex-wrap: wrap; }
   .kanan { margin-left: auto; }
   .lirih { color: var(--tinta-samar); font-size: 13.5px; }
-  .tabular { font-variant-numeric: tabular-nums; }
+  .isian-kosong { text-align: center; padding: 34px; color: var(--tinta-lirih); font-size: 13.5px; }
+  ul.poin { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--tinta-samar); font-size: 14.5px; }
 
   @media (max-width: 860px) {
     .hero { grid-template-columns: 1fr; padding: 22px; }
     .kisi-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .kisi-3 { grid-template-columns: 1fr; }
+    .kisi-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 560px) {
-    .kisi-2, .kisi-4 { grid-template-columns: 1fr; }
+    .kisi-2, .kisi-3, .kisi-4 { grid-template-columns: 1fr; }
     .span2 { grid-column: span 1; }
     .merek { margin-right: 0; }
     .pengalih { width: 100%; }
@@ -514,17 +523,19 @@
     .batang .nl { width: 64px; font-size: 12.5px; }
     .rinci { grid-template-columns: 1fr; gap: 2px 0; }
     .rinci dt { margin-top: 8px; }
+    .kisi-galeri { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
   }
 </style>
-
+</head>
+<body>
 <div class="bilah-demo">
   <div class="wrap">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01M12 12v4"></path></svg>
-    <span><b>Demo interaktif.</b> Seluruh nama dan angka di sini adalah data contoh, bukan pendaftar sungguhan. Formulir yang Anda isi tersimpan di peramban Anda sendiri dan tidak terlihat oleh orang lain yang membuka tautan ini.</span>
+    <span><b>Demo interaktif.</b> Nama, angka, dan berita di sini adalah data contoh, bukan data sungguhan. Teks dalam [kurung siku] menandai data yang masih menunggu dari pihak sekolah. Formulir yang Anda isi tersimpan di peramban Anda sendiri.</span>
   </div>
 </div>
 
@@ -534,42 +545,38 @@
       <div class="lambang" aria-hidden="true">SMA</div>
       <div>
         <b>SMA IMTEK</b>
-        <small>PPDB Online &middot; Tahun Ajaran 2027/2028</small>
+        <small>Akreditasi [ISI] &middot; NPSN [ISI]</small>
       </div>
     </div>
     <div class="pengalih" role="tablist" aria-label="Pilih sisi tampilan">
-      <button type="button" id="mode-publik" role="tab" aria-selected="true" aria-controls="sisi-publik">Sisi Pendaftar</button>
-      <button type="button" id="mode-admin" role="tab" aria-selected="false" aria-controls="sisi-admin">Panel Panitia</button>
+      <button type="button" id="mode-publik" role="tab" aria-selected="true">Website Sekolah</button>
+      <button type="button" id="mode-admin" role="tab" aria-selected="false">Panel Panitia</button>
     </div>
   </div>
 </header>
 
-<!-- ============================ SISI PENDAFTAR ============================ -->
+<!-- ======================= WEBSITE SEKOLAH ======================= -->
 <div id="sisi-publik">
-  <nav class="tabs" aria-label="Menu pendaftar">
-    <div class="wrap">
-      <button type="button" id="tab-info" role="tab" aria-selected="true">Informasi PPDB</button>
-      <button type="button" id="tab-daftar" role="tab" aria-selected="false">Formulir Pendaftaran</button>
-      <button type="button" id="tab-cek" role="tab" aria-selected="false">Cek Status</button>
-    </div>
+  <nav class="tabs" aria-label="Menu website sekolah">
+    <div class="wrap" id="bar-tab"></div>
   </nav>
 
   <main>
     <div class="wrap">
 
-      <!-- ---------- Informasi ---------- -->
-      <section class="panel tumpuk" id="panel-info" role="tabpanel" aria-labelledby="tab-info">
+      <!-- ---------------- BERANDA ---------------- -->
+      <section class="panel tumpuk-l" id="panel-beranda" role="tabpanel" hidden>
         <div class="hero">
           <div>
             <span class="lonceng">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--emas)" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 11-5.8-1.6"></path></svg>
-              Pendaftaran Dibuka
+              PPDB 2027/2028 Telah Dibuka
             </span>
-            <h1>Digitalisasi profil sekolah dan pendaftaran peserta didik baru</h1>
-            <p>Seluruh proses pendaftaran dilakukan dari rumah melalui ponsel atau komputer. Panitia memverifikasi berkas maksimal tiga hari kerja, dan status pendaftaran dapat dipantau kapan saja.</p>
+            <h1>Selamat datang di SMA IMTEK</h1>
+            <p>[TAGLINE SEKOLAH]. Pendaftaran peserta didik baru dilakukan sepenuhnya secara online &mdash; tanpa perlu datang ke sekolah untuk mengisi formulir.</p>
             <div class="antar" style="margin-top: 20px;">
-              <button type="button" class="btn btn-emas" id="ke-formulir">Mulai Mendaftar</button>
-              <button type="button" class="btn btn-garis" id="ke-cek">Cek Status Saya</button>
+              <button type="button" class="btn btn-emas" data-ke="formulir">Daftar PPDB Online</button>
+              <button type="button" class="btn btn-garis" data-ke="ppdb">Informasi PPDB</button>
             </div>
           </div>
           <div class="kartu-status">
@@ -579,51 +586,346 @@
             <div class="baris-status"><span>Kuota</span><strong>180 kursi</strong></div>
             <div class="baris-status"><span>Sudah mendaftar</span><strong id="hero-jml">0 orang</strong></div>
             <div class="baris-status"><span>Pengumuman hasil</span><strong>5 Juli 2027</strong></div>
-            <div class="meter" role="progressbar" aria-label="Keterisian kuota" aria-valuemin="0" aria-valuemax="100" id="hero-meter" aria-valuenow="0"><div style="width: 0%"></div></div>
-            <p class="lirih tabular" style="font-size: 12px; margin-top: 6px;" id="hero-persen">Kuota terisi 0%</p>
+            <div class="meter" role="progressbar" aria-label="Keterisian kuota" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hero-meter"><div style="width: 0%"></div></div>
+            <p class="lirih" style="font-size: 12px; margin-top: 6px;" id="hero-persen">Kuota terisi 0%</p>
           </div>
         </div>
 
-        <div class="kartu">
-          <div class="judul-seksi"><i>1</i>Empat langkah mendaftar</div>
-          <div class="kisi kisi-2">
+        <div class="kisi kisi-4" id="stat-sekolah"></div>
+
+        <div class="kisi kisi-2" style="align-items: center; gap: 30px;">
+          <div class="gambar-tiruan" style="aspect-ratio: 4/3; border-radius: var(--r-l); background: linear-gradient(140deg, #4a6a8f, #2c4560);">[FOTO KEPALA SEKOLAH]</div>
+          <div class="tumpuk">
+            <div>
+              <div class="kicker">Sambutan</div>
+              <h2 style="font-size: clamp(1.3rem, 3vw, 1.7rem); margin-top: 8px;">Kata sambutan kepala sekolah</h2>
+            </div>
+            <p class="kutip">[NASKAH SAMBUTAN KEPALA SEKOLAH] &mdash; dua sampai empat paragraf, ditulis atau disetujui langsung oleh kepala sekolah. Teks ini diubah dari menu Pengaturan di panel admin, tanpa menyentuh kode.</p>
+            <div>
+              <b style="font-size: 14.5px;">[NAMA KEPALA SEKOLAH]</b>
+              <p class="lirih" style="font-size: 13px;">Kepala SMA IMTEK</p>
+            </div>
+            <div class="antar"><button type="button" class="btn btn-utama" data-ke="profil">Selengkapnya tentang sekolah</button></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="kepala-seksi" style="margin-bottom: 26px;">
+            <div class="kicker">Program</div>
+            <h2>Peminatan yang tersedia</h2>
+            <p>Bagian ini otomatis hilang bila sekolah tidak menjuruskan peserta didik sejak pendaftaran.</p>
+          </div>
+          <div class="kisi kisi-3" id="beranda-minat"></div>
+        </div>
+
+        <div class="kisi kisi-2" style="gap: 30px; align-items: start;">
+          <div class="tumpuk">
+            <div>
+              <div class="kicker">PPDB Online</div>
+              <h2 style="font-size: clamp(1.3rem, 3vw, 1.7rem); margin-top: 8px;">Empat langkah mudah mendaftar</h2>
+            </div>
+            <p class="lirih">Seluruh proses dilakukan dari rumah melalui ponsel atau komputer. Panitia memverifikasi berkas maksimal tiga hari kerja.</p>
+            <div class="antar"><button type="button" class="btn btn-utama" data-ke="formulir">Mulai mendaftar</button></div>
+          </div>
+          <div class="tumpuk">
             <div class="langkah"><div class="nomor">1</div><div><b>Siapkan dokumen</b><p>Pindai atau foto ijazah/SKL, rapor, Kartu Keluarga, akta kelahiran, dan foto 3&times;4. Maksimal 2 MB per berkas.</p></div></div>
-            <div class="langkah"><div class="nomor">2</div><div><b>Isi formulir online</b><p>Lengkapi data calon peserta didik, asal sekolah, dan data orang tua pada formulir pendaftaran.</p></div></div>
-            <div class="langkah"><div class="nomor">3</div><div><b>Simpan nomor registrasi</b><p>Sistem menerbitkan nomor registrasi. Catat dan cetak bukti pendaftaran Anda.</p></div></div>
+            <div class="langkah"><div class="nomor">2</div><div><b>Isi formulir online</b><p>Lengkapi data calon peserta didik, asal sekolah, dan data orang tua.</p></div></div>
+            <div class="langkah"><div class="nomor">3</div><div><b>Simpan nomor registrasi</b><p>Sistem menerbitkan nomor registrasi. Catat dan cetak bukti pendaftaran.</p></div></div>
             <div class="langkah"><div class="nomor">4</div><div><b>Pantau hasil verifikasi</b><p>Cek status kapan saja memakai nomor registrasi dan tanggal lahir.</p></div></div>
           </div>
         </div>
 
-        <div class="kisi kisi-2">
-          <div class="kartu">
-            <div class="judul-seksi"><i>2</i>Jalur pendaftaran</div>
-            <div class="tumpuk-s">
-              <div><b style="font-size: 14.5px;">Reguler</b><p class="lirih">Seleksi administrasi dan nilai rapor.</p></div>
-              <div><b style="font-size: 14.5px;">Prestasi</b><p class="lirih">Wajib melampirkan sertifikat prestasi akademik atau non-akademik.</p></div>
-              <div><b style="font-size: 14.5px;">Afirmasi</b><p class="lirih">Bagi pemegang KIP/PKH atau penyandang disabilitas.</p></div>
-              <div><b style="font-size: 14.5px;">Perpindahan Tugas Orang Tua</b><p class="lirih">Wajib melampirkan surat tugas.</p></div>
+        <div>
+          <div class="kepala-seksi" style="margin-bottom: 26px;">
+            <div class="kicker">Sarana</div>
+            <h2>Fasilitas pendukung pembelajaran</h2>
+          </div>
+          <div class="kisi kisi-3" id="beranda-fasilitas"></div>
+          <div class="antar" style="justify-content: center; margin-top: 20px;">
+            <button type="button" class="btn btn-garis" data-ke="fasilitas">Lihat semua fasilitas</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="antar" style="align-items: flex-end; margin-bottom: 22px;">
+            <div>
+              <div class="kicker">Informasi</div>
+              <h2 style="font-size: clamp(1.3rem, 3vw, 1.7rem); margin-top: 8px;">Berita &amp; pengumuman terbaru</h2>
+            </div>
+            <button type="button" class="btn btn-garis kanan" data-ke="berita">Semua berita</button>
+          </div>
+          <div class="kisi kisi-3" id="beranda-berita"></div>
+        </div>
+
+        <div>
+          <div class="kepala-seksi" style="margin-bottom: 26px;">
+            <div class="kicker">Galeri</div>
+            <h2>Dokumentasi kegiatan sekolah</h2>
+          </div>
+          <div class="kisi kisi-4 kisi-galeri" id="beranda-galeri"></div>
+          <div class="antar" style="justify-content: center; margin-top: 20px;">
+            <button type="button" class="btn btn-garis" data-ke="galeri">Lihat galeri lengkap</button>
+          </div>
+        </div>
+
+        <div class="hero" style="grid-template-columns: 1fr auto; align-items: center;">
+          <div>
+            <h2 style="color: #fff; font-size: clamp(1.25rem, 3vw, 1.6rem);">Siap bergabung dengan SMA IMTEK?</h2>
+            <p>Pendaftaran tahun ajaran 2027/2028 dapat dilakukan sekarang secara online. Pendaftaran tidak dipungut biaya.</p>
+          </div>
+          <button type="button" class="btn btn-emas" data-ke="formulir">Daftar sekarang</button>
+        </div>
+      </section>
+
+      <!-- ---------------- PROFIL ---------------- -->
+      <section class="panel tumpuk-l" id="panel-profil" role="tabpanel" hidden>
+        <div class="kepala-seksi">
+          <div class="kicker">Profil</div>
+          <h2>Profil SMA IMTEK</h2>
+          <p>Seluruh naskah di halaman ini diisi pihak sekolah melalui menu Pengaturan di panel admin.</p>
+        </div>
+
+        <div class="kisi kisi-2" style="gap: 30px; align-items: start;">
+          <div class="tumpuk">
+            <div class="kartu">
+              <div class="judul-seksi"><i>A</i>Sejarah singkat</div>
+              <p class="lirih">[SEJARAH SINGKAT SEKOLAH] &mdash; satu sampai tiga paragraf yang memuat tahun berdiri, latar belakang pendirian, dan perkembangannya sampai sekarang.</p>
+            </div>
+            <div class="kartu">
+              <div class="judul-seksi"><i>B</i>Visi</div>
+              <p class="kutip" style="font-style: normal;">[VISI RESMI SEKOLAH] &mdash; satu kalimat, sebaiknya dikutip apa adanya dari dokumen kurikulum sekolah.</p>
+            </div>
+            <div class="kartu">
+              <div class="judul-seksi"><i>C</i>Misi</div>
+              <ul class="poin">
+                <li>[BUTIR MISI 1]</li>
+                <li>[BUTIR MISI 2]</li>
+                <li>[BUTIR MISI 3]</li>
+                <li>[BUTIR MISI 4]</li>
+                <li>[BUTIR MISI 5]</li>
+              </ul>
+              <p class="lirih" style="font-size: 12.5px; margin-top: 12px;">Pada sistem asli, misi ditulis satu baris satu poin di menu Pengaturan, dan jumlah butirnya bebas.</p>
             </div>
           </div>
-          <div class="kartu">
-            <div class="judul-seksi"><i>3</i>Kuota per peminatan</div>
-            <div class="tabel-bungkus" style="border: 0;">
-              <table>
-                <thead><tr><th>Peminatan</th><th class="angka">Kuota</th><th class="angka">Pendaftar</th><th class="angka">Sisa</th></tr></thead>
-                <tbody id="tabel-kuota"></tbody>
-              </table>
+
+          <div class="tumpuk">
+            <div class="kartu">
+              <div class="judul-seksi"><i>D</i>Identitas sekolah</div>
+              <dl class="rinci">
+                <dt>Nama sekolah</dt><dd>SMA IMTEK</dd>
+                <dt>NPSN</dt><dd>[ISI]</dd>
+                <dt>Akreditasi</dt><dd>[ISI]</dd>
+                <dt>Kepala sekolah</dt><dd>[NAMA KEPALA SEKOLAH]</dd>
+                <dt>Alamat</dt><dd>[ALAMAT LENGKAP SEKOLAH]</dd>
+                <dt>Telepon</dt><dd>[ISI]</dd>
+                <dt>Email</dt><dd>[ISI]</dd>
+                <dt>Jam layanan</dt><dd>[ISI]</dd>
+              </dl>
             </div>
-            <p class="lirih" style="margin-top: 14px; font-size: 12.5px;">Pendaftaran tidak dipungut biaya. Angka pendaftar di atas ikut berubah bila Anda mengisi formulir pada demo ini.</p>
+            <div class="kartu">
+              <div class="judul-seksi"><i>E</i>Peminatan</div>
+              <div class="tumpuk" id="profil-minat"></div>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- ---------- Formulir ---------- -->
-      <section class="panel tumpuk" id="panel-daftar" role="tabpanel" aria-labelledby="tab-daftar" hidden>
+      <!-- ---------------- FASILITAS ---------------- -->
+      <section class="panel tumpuk-l" id="panel-fasilitas" role="tabpanel" hidden>
+        <div class="kepala-seksi">
+          <div class="kicker">Sarana dan prasarana</div>
+          <h2>Fasilitas sekolah</h2>
+          <p>Daftar fasilitas dikelola dari panel admin: dapat ditambah, diubah, dihapus, dan diberi foto.</p>
+        </div>
+        <div class="kisi kisi-3" id="daftar-fasilitas"></div>
+      </section>
+
+      <!-- ---------------- BERITA ---------------- -->
+      <section class="panel tumpuk" id="panel-berita" role="tabpanel" hidden>
+        <div id="daftar-berita-bungkus" class="tumpuk-l">
+          <div class="kepala-seksi">
+            <div class="kicker">Informasi</div>
+            <h2>Berita &amp; pengumuman</h2>
+            <p>Berita ditulis dan diterbitkan sendiri oleh pihak sekolah dari panel admin.</p>
+          </div>
+          <div>
+            <div class="antar" style="margin-bottom: 20px;">
+              <div class="ladang" style="min-width: 220px;">
+                <label for="cari-berita">Cari berita</label>
+                <input type="search" id="cari-berita" placeholder="Kata kunci judul atau isi">
+              </div>
+              <div class="ladang" style="min-width: 190px;">
+                <label for="kat-berita">Kategori</label>
+                <select id="kat-berita">
+                  <option value="">Semua kategori</option>
+                  <option>Pengumuman</option>
+                  <option>Berita</option>
+                  <option>Prestasi</option>
+                  <option>Kegiatan</option>
+                </select>
+              </div>
+            </div>
+            <div class="kisi kisi-3" id="daftar-berita"></div>
+          </div>
+        </div>
+        <div id="detail-berita" hidden></div>
+      </section>
+
+      <!-- ---------------- GALERI ---------------- -->
+      <section class="panel tumpuk-l" id="panel-galeri" role="tabpanel" hidden>
+        <div class="kepala-seksi">
+          <div class="kicker">Galeri</div>
+          <h2>Dokumentasi kegiatan</h2>
+          <p>Foto kegiatan sekolah adalah materi promosi paling berpengaruh bagi calon peserta didik. Pada demo ini fotonya diwakili kotak berwarna.</p>
+        </div>
+        <div>
+          <div class="antar" style="margin-bottom: 18px;" id="saring-galeri"></div>
+          <div class="kisi kisi-4 kisi-galeri" id="kisi-galeri"></div>
+        </div>
+      </section>
+
+      <!-- ---------------- KONTAK ---------------- -->
+      <section class="panel tumpuk-l" id="panel-kontak" role="tabpanel" hidden>
+        <div class="kepala-seksi">
+          <div class="kicker">Hubungi kami</div>
+          <h2>Kontak sekolah</h2>
+          <p>Pesan yang dikirim lewat formulir ini masuk ke menu Pesan Masuk di panel panitia.</p>
+        </div>
+
+        <div class="kisi kisi-4">
+          <div class="kartu" style="text-align: center;">
+            <div class="ikon-kotak" style="margin-inline: auto;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></div>
+            <b style="font-size: 14.5px;">Alamat</b>
+            <p class="lirih" style="font-size: 13px;">[ALAMAT LENGKAP SEKOLAH]</p>
+          </div>
+          <div class="kartu" style="text-align: center;">
+            <div class="ikon-kotak" style="margin-inline: auto;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z"></path></svg></div>
+            <b style="font-size: 14.5px;">Telepon</b>
+            <p class="lirih" style="font-size: 13px;">[NOMOR TELEPON SEKOLAH]</p>
+          </div>
+          <div class="kartu" style="text-align: center;">
+            <div class="ikon-kotak" style="margin-inline: auto;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 8l9 6 9-6"></path></svg></div>
+            <b style="font-size: 14.5px;">Email</b>
+            <p class="lirih" style="font-size: 13px;">[EMAIL RESMI SEKOLAH]</p>
+          </div>
+          <div class="kartu" style="text-align: center;">
+            <div class="ikon-kotak" style="margin-inline: auto;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg></div>
+            <b style="font-size: 14.5px;">Jam layanan</b>
+            <p class="lirih" style="font-size: 13px;">[JAM LAYANAN SEKOLAH]</p>
+          </div>
+        </div>
+
+        <div class="kisi kisi-2" style="gap: 24px; align-items: start;">
+          <form class="kartu tumpuk" id="form-kontak" novalidate>
+            <div>
+              <h3 style="font-size: 17px;">Kirim pertanyaan</h3>
+              <p class="lirih" style="font-size: 13px; margin-top: 4px;">Ada pertanyaan seputar PPDB atau program sekolah?</p>
+            </div>
+            <div id="kabar-kontak" hidden></div>
+            <div class="kisi kisi-2">
+              <div class="ladang" data-untuk="kNama">
+                <label for="k-nama">Nama lengkap <span class="wajib">*</span></label>
+                <input type="text" id="k-nama" autocomplete="name">
+              </div>
+              <div class="ladang" data-untuk="kHp">
+                <label for="k-hp">No. HP / WhatsApp</label>
+                <input type="tel" id="k-hp" autocomplete="tel">
+              </div>
+              <div class="ladang span2" data-untuk="kEmail">
+                <label for="k-email">Email</label>
+                <input type="email" id="k-email" autocomplete="email">
+              </div>
+              <div class="ladang span2" data-untuk="kSubjek">
+                <label for="k-subjek">Subjek</label>
+                <input type="text" id="k-subjek">
+              </div>
+              <div class="ladang span2" data-untuk="kIsi">
+                <label for="k-isi">Pesan <span class="wajib">*</span></label>
+                <textarea id="k-isi" placeholder="Minimal 10 karakter"></textarea>
+              </div>
+            </div>
+            <div class="antar">
+              <button type="submit" class="btn btn-utama">Kirim pesan</button>
+              <button type="button" class="btn btn-hijau" id="tombol-wa">Chat WhatsApp</button>
+            </div>
+          </form>
+
+          <div class="tumpuk">
+            <div class="gambar-tiruan" style="aspect-ratio: 4/3; border-radius: var(--r-m); background: linear-gradient(140deg, #5c7f66, #35513d);">[PETA LOKASI GOOGLE MAPS]</div>
+            <div class="kartu-rata">
+              <b style="font-size: 13px;">Media sosial</b>
+              <p class="lirih" style="font-size: 13px; margin-top: 6px;">[TAUTAN INSTAGRAM, FACEBOOK, TIKTOK, YOUTUBE] &mdash; tautan yang dibiarkan kosong otomatis tidak ditampilkan.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------- INFORMASI PPDB ---------------- -->
+      <section class="panel tumpuk-l" id="panel-ppdb" role="tabpanel" hidden>
+        <div class="kepala-seksi">
+          <div class="kicker">PPDB Online</div>
+          <h2>Informasi PPDB 2027/2028</h2>
+          <p>Pendaftaran dibuka 1 September 2026 sampai 30 Juni 2027. Pengumuman hasil pada 5 Juli 2027.</p>
+        </div>
+
+        <div class="kisi kisi-2" style="gap: 24px; align-items: start;">
+          <div class="tumpuk">
+            <div class="kartu">
+              <div class="judul-seksi"><i>A</i>Empat jalur pendaftaran</div>
+              <div class="tumpuk-s">
+                <div><b style="font-size: 14.5px;">Reguler</b><p class="lirih">Seleksi administrasi dan nilai rapor.</p></div>
+                <div><b style="font-size: 14.5px;">Prestasi</b><p class="lirih">Wajib melampirkan sertifikat prestasi akademik maupun non-akademik.</p></div>
+                <div><b style="font-size: 14.5px;">Afirmasi</b><p class="lirih">Bagi pemegang KIP/PKH atau penyandang disabilitas.</p></div>
+                <div><b style="font-size: 14.5px;">Perpindahan Tugas Orang Tua</b><p class="lirih">Wajib melampirkan surat tugas orang tua.</p></div>
+              </div>
+            </div>
+            <div class="kartu">
+              <div class="judul-seksi"><i>B</i>Kuota per peminatan</div>
+              <div class="tabel-bungkus" style="border: 0;">
+                <table>
+                  <thead><tr><th>Peminatan</th><th class="angka">Kuota</th><th class="angka">Pendaftar</th><th class="angka">Sisa</th></tr></thead>
+                  <tbody id="tabel-kuota"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="tumpuk">
+            <div class="kartu">
+              <div class="judul-seksi"><i>C</i>Syarat pendaftaran</div>
+              <ul class="poin">
+                <li>Fotokopi ijazah atau SKL SMP/MTs</li>
+                <li>Fotokopi rapor semester 1 sampai 5</li>
+                <li>Fotokopi Kartu Keluarga</li>
+                <li>Fotokopi akta kelahiran</li>
+                <li>Foto berwarna ukuran 3&times;4</li>
+                <li>Sertifikat prestasi, khusus jalur Prestasi</li>
+              </ul>
+            </div>
+            <div class="kartu">
+              <div class="judul-seksi"><i>D</i>Biaya</div>
+              <p><b>Pendaftaran tidak dipungut biaya.</b></p>
+              <p class="lirih" style="margin-top: 6px;">Informasi biaya diatur dari panel admin. Bila sekolah memungut biaya, nominal dan cara pembayarannya ditulis di sana.</p>
+            </div>
+            <div class="kartu" style="background: var(--biru-muda); border-color: var(--biru);">
+              <b style="font-size: 15px;">Sudah siap mendaftar?</b>
+              <p class="lirih" style="margin-block: 6px 14px;">Pengisian formulir memerlukan sekitar 15 menit.</p>
+              <div class="antar">
+                <button type="button" class="btn btn-utama" data-ke="formulir">Isi formulir pendaftaran</button>
+                <button type="button" class="btn btn-garis" data-ke="cek">Cek status</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------- FORMULIR ---------------- -->
+      <section class="panel tumpuk" id="panel-formulir" role="tabpanel" hidden>
         <div id="hasil-kirim" hidden></div>
 
         <form id="form-daftar" class="kartu tumpuk" novalidate>
           <div>
-            <h2 style="font-size: 19px;">Formulir Pendaftaran Peserta Didik Baru</h2>
+            <h2 style="font-size: 19px;">Formulir pendaftaran peserta didik baru</h2>
             <p class="lirih" style="margin-top: 5px;">Kolom bertanda <span style="color: var(--merah); font-weight: 700;">*</span> wajib diisi. Pada demo ini unggahan dokumen diwakili kotak centang.</p>
           </div>
 
@@ -635,10 +937,7 @@
               <label for="f-jalur">Jalur pendaftaran <span class="wajib">*</span></label>
               <select id="f-jalur" name="jalur">
                 <option value="">— Pilih jalur —</option>
-                <option>Reguler</option>
-                <option>Prestasi</option>
-                <option>Afirmasi</option>
-                <option>Perpindahan Tugas Orang Tua</option>
+                <option>Reguler</option><option>Prestasi</option><option>Afirmasi</option><option>Perpindahan Tugas Orang Tua</option>
               </select>
               <span class="bantu">Jalur Prestasi wajib melampirkan sertifikat.</span>
             </div>
@@ -646,9 +945,7 @@
               <label for="f-minat">Peminatan <span class="wajib">*</span></label>
               <select id="f-minat" name="minat">
                 <option value="">— Pilih peminatan —</option>
-                <option>Peminatan MIPA</option>
-                <option>Peminatan IPS</option>
-                <option>Peminatan Bahasa</option>
+                <option>Peminatan MIPA</option><option>Peminatan IPS</option><option>Peminatan Bahasa</option>
               </select>
             </div>
           </div>
@@ -744,18 +1041,9 @@
               <label for="f-sumber">Dari mana Anda mengetahui SMA IMTEK?</label>
               <select id="f-sumber" name="sumber">
                 <option value="">— Pilih —</option>
-                <option>Website Sekolah</option>
-                <option>Instagram</option>
-                <option>Facebook</option>
-                <option>TikTok</option>
-                <option>WhatsApp</option>
-                <option>Google</option>
-                <option>Brosur/Spanduk</option>
-                <option>Sosialisasi Sekolah</option>
-                <option>Teman/Keluarga</option>
-                <option>Alumni</option>
-                <option>Guru SMP</option>
-                <option>Lainnya</option>
+                <option>Website Sekolah</option><option>Instagram</option><option>Facebook</option><option>TikTok</option>
+                <option>WhatsApp</option><option>Google</option><option>Brosur/Spanduk</option><option>Sosialisasi Sekolah</option>
+                <option>Teman/Keluarga</option><option>Alumni</option><option>Guru SMP</option><option>Lainnya</option>
               </select>
               <span class="bantu">Jawaban ini yang menjadi data efektivitas promosi di panel panitia.</span>
             </div>
@@ -774,18 +1062,18 @@
           </div>
 
           <div class="antar">
-            <button type="submit" class="btn btn-utama">Kirim Formulir Pendaftaran</button>
+            <button type="submit" class="btn btn-utama">Kirim formulir pendaftaran</button>
             <button type="reset" class="btn btn-halus">Kosongkan</button>
             <button type="button" class="btn btn-garis kanan" id="isi-contoh">Isi otomatis untuk mencoba</button>
           </div>
         </form>
       </section>
 
-      <!-- ---------- Cek status ---------- -->
-      <section class="panel tumpuk" id="panel-cek" role="tabpanel" aria-labelledby="tab-cek" hidden>
+      <!-- ---------------- CEK STATUS ---------------- -->
+      <section class="panel tumpuk" id="panel-cek" role="tabpanel" hidden>
         <form class="kartu tumpuk" id="form-cek" novalidate style="max-width: 620px;">
           <div>
-            <h2 style="font-size: 19px;">Cek Status Pendaftaran</h2>
+            <h2 style="font-size: 19px;">Cek status pendaftaran</h2>
             <p class="lirih" style="margin-top: 5px;">Masukkan nomor registrasi dan tanggal lahir yang Anda daftarkan.</p>
           </div>
           <div class="kisi kisi-2">
@@ -799,7 +1087,7 @@
             </div>
           </div>
           <div class="antar">
-            <button type="submit" class="btn btn-utama">Cek Status</button>
+            <button type="submit" class="btn btn-utama">Cek status</button>
             <button type="button" class="btn btn-garis" id="coba-contoh">Pakai contoh yang ada</button>
           </div>
           <div class="kunci-hint">
@@ -813,16 +1101,19 @@
   </main>
 </div>
 
-<!-- ============================ PANEL PANITIA ============================ -->
+<!-- ======================= PANEL PANITIA ======================= -->
 <div id="sisi-admin" hidden>
+  <nav class="tabs" aria-label="Menu panel panitia" id="tabs-admin" hidden>
+    <div class="wrap" id="bar-tab-admin"></div>
+  </nav>
+
   <main>
     <div class="wrap">
 
-      <!-- gerbang masuk -->
       <form class="kartu tumpuk gerbang" id="form-masuk" novalidate>
         <div style="text-align: center;">
           <div class="lambang" style="margin: 0 auto 12px; width: 52px; height: 52px; font-size: 14px;" aria-hidden="true">SMA</div>
-          <h2 style="font-size: 19px;">Masuk Panel Panitia</h2>
+          <h2 style="font-size: 19px;">Masuk panel panitia</h2>
           <p class="lirih" style="margin-top: 5px;">Hanya panitia PPDB yang berhak mengakses data pendaftar.</p>
         </div>
         <div id="galat-masuk" hidden></div>
@@ -841,86 +1132,122 @@
         </div>
       </form>
 
-      <!-- dasbor -->
-      <div id="dasbor" class="tumpuk" hidden>
-        <div class="kartu-rata" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
-          <div>
-            <b style="font-size: 15px;">Dashboard Panitia PPDB</b>
-            <p class="lirih" style="font-size: 12.5px;">Masuk sebagai Administrator &middot; Tahun ajaran 2027/2028</p>
-          </div>
-          <div class="antar kanan">
-            <button type="button" class="btn btn-halus btn-kecil" id="reset-demo">Kembalikan data contoh</button>
-            <button type="button" class="btn btn-garis btn-kecil" id="keluar">Keluar</button>
+      <div id="dasbor" hidden>
+        <div class="kartu-rata tumpuk" style="margin-bottom: 20px;">
+          <div class="antar" style="align-items: center;">
+            <div>
+              <b style="font-size: 15px;">Masuk sebagai Administrator</b>
+              <p class="lirih" style="font-size: 12.5px;">Tahun ajaran 2027/2028 &middot; akses penuh</p>
+            </div>
+            <div class="antar kanan">
+              <button type="button" class="btn btn-halus btn-kecil" id="reset-demo">Kembalikan data contoh</button>
+              <button type="button" class="btn btn-garis btn-kecil" id="keluar">Keluar</button>
+            </div>
           </div>
         </div>
 
-        <div class="kisi kisi-4" id="petak-ringkas"></div>
+        <!-- dashboard -->
+        <section class="panel tumpuk" id="apanel-dash" role="tabpanel" hidden>
+          <div class="kisi kisi-4" id="petak-ringkas"></div>
+          <div class="kisi kisi-2" style="align-items: start;">
+            <div class="kartu">
+              <div class="judul-seksi"><i>A</i>Efektivitas kanal promosi</div>
+              <p class="lirih" style="margin-bottom: 16px; font-size: 12.5px;">Dari jawaban pendaftar atas pertanyaan &ldquo;dari mana Anda mengetahui sekolah ini?&rdquo;. Kolom konversi menunjukkan berapa yang akhirnya diterima.</p>
+              <div id="batang-kanal"></div>
+              <div class="tabel-bungkus" style="margin-top: 18px;">
+                <table>
+                  <thead><tr><th>Kanal</th><th class="angka">Pendaftar</th><th class="angka">Diterima</th><th class="angka">Konversi</th></tr></thead>
+                  <tbody id="tabel-kanal"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="kartu">
+              <div class="judul-seksi"><i>B</i>Rekap</div>
+              <div class="tumpuk">
+                <div><b style="font-size: 13.5px;">Per peminatan</b><div id="rekap-minat" style="margin-top: 10px;"></div></div>
+                <div><b style="font-size: 13.5px;">Per jalur</b><div id="rekap-jalur" style="margin-top: 10px;"></div></div>
+                <div><b style="font-size: 13.5px;">Asal sekolah teratas</b><div id="rekap-asal" style="margin-top: 10px;"></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <div class="kisi kisi-2">
+        <!-- pendaftar -->
+        <section class="panel tumpuk" id="apanel-pendaftar" role="tabpanel" hidden>
           <div class="kartu">
-            <div class="judul-seksi"><i>A</i>Efektivitas kanal promosi</div>
-            <p class="lirih" style="margin-bottom: 16px; font-size: 12.5px;">Dari jawaban pendaftar atas pertanyaan &ldquo;dari mana Anda mengetahui sekolah ini?&rdquo;. Kolom konversi menunjukkan berapa yang akhirnya diterima.</p>
-            <div id="batang-kanal"></div>
-            <div class="tabel-bungkus" style="margin-top: 18px;">
+            <div class="judul-seksi" style="margin-bottom: 14px;"><i>C</i>Data pendaftar</div>
+            <div class="antar" style="margin-bottom: 14px;">
+              <div class="ladang" style="min-width: 210px;">
+                <label for="cari">Cari nama atau nomor registrasi</label>
+                <input type="search" id="cari" placeholder="Ketik untuk menyaring">
+              </div>
+              <div class="ladang" style="min-width: 180px;">
+                <label for="saring-status">Saring status</label>
+                <select id="saring-status">
+                  <option value="">Semua status</option>
+                  <option>Menunggu Verifikasi</option><option>Terverifikasi</option>
+                  <option>Diterima</option><option>Cadangan</option><option>Ditolak</option>
+                </select>
+              </div>
+            </div>
+            <div class="tabel-bungkus">
               <table>
-                <thead><tr><th>Kanal</th><th class="angka">Pendaftar</th><th class="angka">Diterima</th><th class="angka">Konversi</th></tr></thead>
-                <tbody id="tabel-kanal"></tbody>
+                <thead>
+                  <tr><th>No. Registrasi</th><th>Nama</th><th>Peminatan</th><th>Jalur</th><th>Asal sekolah</th><th class="angka">Nilai</th><th>Sumber</th><th>Status</th></tr>
+                </thead>
+                <tbody id="tabel-pendaftar"></tbody>
               </table>
             </div>
+            <p class="lirih" style="margin-top: 12px; font-size: 12.5px;">Klik salah satu baris untuk membuka rincian dan mengubah statusnya.</p>
           </div>
+          <div class="kartu" id="kartu-rinci" hidden></div>
+        </section>
+
+        <!-- kelola berita -->
+        <section class="panel tumpuk" id="apanel-berita" role="tabpanel" hidden>
+          <div class="kisi kisi-2" style="align-items: start; gap: 20px;">
+            <form class="kartu tumpuk" id="form-berita" novalidate>
+              <div class="judul-seksi" style="margin-bottom: 0;"><i>D</i>Tulis berita baru</div>
+              <div id="kabar-berita" hidden></div>
+              <div class="ladang" data-untuk="bJudul">
+                <label for="b-judul">Judul berita <span class="wajib">*</span></label>
+                <input type="text" id="b-judul">
+              </div>
+              <div class="ladang">
+                <label for="b-kat">Kategori</label>
+                <select id="b-kat"><option>Pengumuman</option><option>Berita</option><option>Prestasi</option><option>Kegiatan</option></select>
+              </div>
+              <div class="ladang" data-untuk="bRingkas">
+                <label for="b-ringkas">Ringkasan</label>
+                <input type="text" id="b-ringkas" placeholder="Satu kalimat yang tampil di daftar berita">
+              </div>
+              <div class="ladang" data-untuk="bIsi">
+                <label for="b-isi">Isi berita <span class="wajib">*</span></label>
+                <textarea id="b-isi" style="min-height: 130px;" placeholder="Minimal 20 karakter. Pisahkan paragraf dengan baris kosong."></textarea>
+              </div>
+              <div class="centang"><input type="checkbox" id="b-publish" checked><label for="b-publish">Langsung terbitkan di website</label></div>
+              <button type="submit" class="btn btn-utama">Simpan berita</button>
+              <p class="lirih" style="font-size: 12.5px;">Berita yang disimpan langsung tampil di tab Berita pada sisi website sekolah.</p>
+            </form>
+            <div class="kartu">
+              <div class="judul-seksi"><i>E</i>Daftar berita</div>
+              <div class="tabel-bungkus">
+                <table>
+                  <thead><tr><th>Judul</th><th>Kategori</th><th class="angka">Dibaca</th><th>Status</th><th></th></tr></thead>
+                  <tbody id="tabel-admin-berita"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- pesan masuk -->
+        <section class="panel tumpuk" id="apanel-pesan" role="tabpanel" hidden>
           <div class="kartu">
-            <div class="judul-seksi"><i>B</i>Rekap</div>
-            <div class="tumpuk">
-              <div>
-                <b style="font-size: 13.5px;">Per peminatan</b>
-                <div id="rekap-minat" style="margin-top: 10px;"></div>
-              </div>
-              <div>
-                <b style="font-size: 13.5px;">Per jalur</b>
-                <div id="rekap-jalur" style="margin-top: 10px;"></div>
-              </div>
-              <div>
-                <b style="font-size: 13.5px;">Asal sekolah teratas</b>
-                <div id="rekap-asal" style="margin-top: 10px;"></div>
-              </div>
-            </div>
+            <div class="judul-seksi"><i>F</i>Pesan masuk dari formulir kontak</div>
+            <div id="daftar-pesan"></div>
           </div>
-        </div>
-
-        <div class="kartu">
-          <div class="judul-seksi" style="margin-bottom: 14px;"><i>C</i>Data pendaftar</div>
-          <div class="antar" style="margin-bottom: 14px;">
-            <div class="ladang" style="min-width: 210px;">
-              <label for="cari">Cari nama atau nomor registrasi</label>
-              <input type="search" id="cari" placeholder="Ketik untuk menyaring">
-            </div>
-            <div class="ladang" style="min-width: 180px;">
-              <label for="saring-status">Saring status</label>
-              <select id="saring-status">
-                <option value="">Semua status</option>
-                <option>Menunggu Verifikasi</option>
-                <option>Terverifikasi</option>
-                <option>Diterima</option>
-                <option>Cadangan</option>
-                <option>Ditolak</option>
-              </select>
-            </div>
-          </div>
-          <div class="tabel-bungkus">
-            <table>
-              <thead>
-                <tr>
-                  <th>No. Registrasi</th><th>Nama</th><th>Peminatan</th><th>Jalur</th>
-                  <th>Asal sekolah</th><th class="angka">Nilai</th><th>Sumber</th><th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="tabel-pendaftar"></tbody>
-            </table>
-          </div>
-          <p class="lirih" style="margin-top: 12px; font-size: 12.5px;">Klik salah satu baris untuk membuka rincian dan mengubah statusnya.</p>
-        </div>
-
-        <div class="kartu" id="kartu-rinci" hidden></div>
+        </section>
       </div>
 
     </div>
@@ -934,60 +1261,135 @@
   </div>
 </footer>
 
+<div class="sorot" id="sorot" hidden>
+  <div class="sorot-isi">
+    <div class="gambar-tiruan" id="sorot-gambar"></div>
+    <div class="sorot-bar">
+      <div><b id="sorot-judul"></b><p style="font-size: 13px; opacity: .8;" id="sorot-ket"></p></div>
+      <button type="button" class="btn btn-garis kanan" id="sorot-tutup">Tutup</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
   'use strict';
 
-  var KUNCI = 'ppdb-imtek-demo-v1';
+  var KUNCI = 'ppdb-imtek-demo-v2';
   var TAHUN = '2027/2028';
   var KUOTA_TOTAL = 180;
+
   var PEMINATAN = [
-    { nama: 'Peminatan MIPA', kuota: 90 },
-    { nama: 'Peminatan IPS', kuota: 60 },
-    { nama: 'Peminatan Bahasa', kuota: 30 }
+    { nama: 'Peminatan MIPA', kuota: 90, ket: '[DESKRIPSI DARI SEKOLAH] — fokus pada Matematika dan IPA untuk yang ingin melanjutkan ke bidang sains, teknologi, atau kesehatan.' },
+    { nama: 'Peminatan IPS', kuota: 60, ket: '[DESKRIPSI DARI SEKOLAH] — fokus pada Ekonomi, Sosiologi, Geografi, dan Sejarah.' },
+    { nama: 'Peminatan Bahasa', kuota: 30, ket: '[DESKRIPSI DARI SEKOLAH] — fokus pada Bahasa dan Sastra Indonesia, Inggris, serta bahasa asing lainnya.' }
   ];
+
   var STATUS = ['Menunggu Verifikasi', 'Terverifikasi', 'Diterima', 'Cadangan', 'Ditolak'];
   var KELAS_STATUS = {
-    'Menunggu Verifikasi': 'l-tunggu',
-    'Terverifikasi': 'l-verif',
-    'Diterima': 'l-terima',
-    'Cadangan': 'l-cadang',
-    'Ditolak': 'l-tolak'
+    'Menunggu Verifikasi': 'l-tunggu', 'Terverifikasi': 'l-verif',
+    'Diterima': 'l-terima', 'Cadangan': 'l-cadang', 'Ditolak': 'l-tolak'
   };
 
-  /* ---------------- data contoh ---------------- */
-  function benih() {
+  /* Pengganti foto: nada redup serumpun agar tidak berbenturan dengan
+     palet halaman, tetap cukup gelap untuk teks putih di atasnya. */
+  var GRADIEN = [
+    'linear-gradient(140deg, #46617f, #26394d)',
+    'linear-gradient(140deg, #6b6a52, #3d3c2c)',
+    'linear-gradient(140deg, #4a6b5e, #27403a)',
+    'linear-gradient(140deg, #6b5560, #3d2f36)',
+    'linear-gradient(140deg, #7a5f4e, #45342a)',
+    'linear-gradient(140deg, #4f6470, #2c3a42)',
+    'linear-gradient(140deg, #5a5f78, #333648)',
+    'linear-gradient(140deg, #6b6459, #3c3830)'
+  ];
+
+  var FASILITAS = [
+    { nama: 'Laboratorium Komputer', ket: 'Lab komputer dengan koneksi internet untuk pembelajaran informatika dan literasi digital.', ik: 'M4 5h16v11H4zM9 20h6M12 16v4' },
+    { nama: 'Laboratorium IPA', ket: 'Laboratorium Fisika, Kimia, dan Biologi dengan peralatan praktikum yang memadai.', ik: 'M9 3h6M10 3v7l-4 8a2 2 0 002 3h8a2 2 0 002-3l-4-8V3' },
+    { nama: 'Perpustakaan', ket: 'Koleksi buku pelajaran, referensi, dan bacaan umum dengan ruang baca yang nyaman.', ik: 'M4 5v14h16V5zM12 5v14M7 9h2M15 9h2' },
+    { nama: 'Lapangan Olahraga', ket: 'Lapangan serbaguna untuk basket, futsal, voli, dan kegiatan upacara.', ik: 'M3 6h18v12H3zM12 6v12M3 12h4M17 12h4' },
+    { nama: 'Musala', ket: 'Sarana ibadah untuk kegiatan keagamaan dan pembinaan karakter peserta didik.', ik: 'M5 20V11l7-6 7 6v9M9 20v-5h6v5' },
+    { nama: 'Ruang Kelas', ket: 'Ruang kelas berventilasi baik yang dilengkapi proyektor untuk pembelajaran interaktif.', ik: 'M4 6h16v9H4zM8 19h8M12 15v4' },
+    { nama: 'Ruang UKS', ket: 'Unit Kesehatan Sekolah untuk pertolongan pertama dan layanan kesehatan peserta didik.', ik: 'M12 7v10M7 12h10M4 5h16v14H4z' },
+    { nama: 'Koperasi & Kantin', ket: 'Kantin sehat dan koperasi sekolah yang menyediakan kebutuhan peserta didik.', ik: 'M4 8h16l-1 11H5zM9 8V5a3 3 0 016 0v3' }
+  ];
+
+  var STAT_SEKOLAH = [
+    { n: 540, k: 'Peserta didik aktif', ik: 'M9 8a3 3 0 106 0 3 3 0 10-6 0M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6' },
+    { n: 32, k: 'Guru & tenaga pendidik', ik: 'M4 6h16v12H4zM9 10h6M9 14h4' },
+    { n: 45, k: 'Prestasi diraih', ik: 'M8 4h8v5a4 4 0 11-8 0zM12 13v4M9 21h6' },
+    { n: 1200, k: 'Alumni tersebar', ik: 'M3 9l9-4 9 4-9 4zM7 11v5c0 1.7 2.2 3 5 3s5-1.3 5-3v-5' }
+  ];
+
+  /* ================= data contoh ================= */
+  function benihPendaftar() {
     return [
       { noReg: 'PPDB-2728-0001', nama: 'Anisa Rahmawati', jk: 'Perempuan', nisn: '0071234501', nik: '3201234567890101', tempat: 'Bogor', tgl: '2011-02-11', agama: 'Islam', alamat: 'Jl. Merdeka No. 12, RT 03 RW 05, Sukamaju, Cibinong', hp: '081200000001', email: '', asal: 'SMP Negeri 1 Cibinong', lulus: '2027', nilai: 88.2, ayah: 'Slamet Widodo', ibu: 'Sri Hartati', jalur: 'Reguler', minat: 'Peminatan MIPA', sumber: 'Instagram', catatanSumber: 'Akun resmi sekolah', status: 'Diterima', catatan: 'Berkas lengkap dan valid. Silakan daftar ulang.', dok: ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga', 'Rapor'], waktu: '2026-09-13T08:15:00' },
       { noReg: 'PPDB-2728-0002', nama: 'Bagas Prakoso', jk: 'Laki-laki', nisn: '0071234502', nik: '3201234567890102', tempat: 'Depok', tgl: '2011-07-03', agama: 'Islam', alamat: 'Jl. Kenanga No. 8, Pabuaran, Cibinong', hp: '081200000002', email: '', asal: 'SMP Negeri 1 Cibinong', lulus: '2027', nilai: 81.5, ayah: 'Hadi Santoso', ibu: 'Wiwin Kurnia', jalur: 'Reguler', minat: 'Peminatan IPS', sumber: 'Sosialisasi Sekolah', catatanSumber: 'Kunjungan panitia ke sekolah', status: 'Diterima', catatan: '', dok: ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga'], waktu: '2026-09-14T09:40:00' },
       { noReg: 'PPDB-2728-0003', nama: 'Citra Maharani', jk: 'Perempuan', nisn: '0071234503', nik: '3201234567890103', tempat: 'Bogor', tgl: '2011-11-25', agama: 'Kristen Protestan', alamat: 'Jl. Flamboyan No. 3, Nanggewer, Cibinong', hp: '081200000003', email: '', asal: 'MTs Al Hikmah', lulus: '2027', nilai: 79.1, ayah: 'Yohanes Tarigan', ibu: 'Marta Simbolon', jalur: 'Afirmasi', minat: 'Peminatan IPS', sumber: 'Teman/Keluarga', catatanSumber: '', status: 'Terverifikasi', catatan: 'Kartu KIP sudah diverifikasi panitia.', dok: ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga', 'Akta Kelahiran'], waktu: '2026-09-16T13:05:00' },
       { noReg: 'PPDB-2728-0004', nama: 'Dimas Aryaputra', jk: 'Laki-laki', nisn: '0071234504', nik: '3201234567890104', tempat: 'Bogor', tgl: '2011-04-18', agama: 'Islam', alamat: 'Jl. Melati No. 21, Karadenan, Cibinong', hp: '081200000004', email: '', asal: 'SMP Negeri 2 Cibinong', lulus: '2027', nilai: 85.75, ayah: 'Bambang Riyanto', ibu: 'Endang Suryani', jalur: 'Reguler', minat: 'Peminatan MIPA', sumber: 'Brosur/Spanduk', catatanSumber: 'Spanduk di depan pasar', status: 'Diterima', catatan: '', dok: ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga', 'Rapor'], waktu: '2026-09-17T10:22:00' },
-      { noReg: 'PPDB-2728-0005', nama: 'Elsa Nurjanah', jk: 'Perempuan', nisn: '0071234505', nik: '3201234567890105', tempat: 'Bogor', tgl: '2011-09-09', agama: 'Islam', alamat: 'Jl. Anggrek No. 17, Harapan Jaya, Cibinong', hp: '081200000005', email: '', asal: 'SMP Islam Terpadu', lulus: '2027', nilai: 91.4, ayah: 'Agus Firmansyah', ibu: 'Nur Aisyah', jalur: 'Prestasi', minat: 'Peminatan MIPA', sumber: 'Instagram', catatanSumber: 'Unggahan juara olimpiade', status: 'Diterima', catatan: 'Juara 2 OSN Matematika tingkat kota.', dok: ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga', 'Sertifikat Prestasi'], waktu: '2026-09-18T15:50:00' },
+      { noReg: 'PPDB-2728-0005', nama: 'Elsa Nurjanah', jk: 'Perempuan', nisn: '0071234505', nik: '3201234567890105', tempat: 'Bogor', tgl: '2011-09-09', agama: 'Islam', alamat: 'Jl. Anggrek No. 17, Harapan Jaya, Cibinong', hp: '081200000005', email: '', asal: 'SMP Islam Terpadu', lulus: '2027', nilai: 91.4, ayah: 'Agus Firmansyah', ibu: 'Nur Aisyah', jalur: 'Prestasi', minat: 'Peminatan MIPA', sumber: 'Instagram', catatanSumber: 'Unggahan juara olimpiade', status: 'Diterima', catatan: 'Juara 2 olimpiade matematika tingkat kota.', dok: ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga', 'Sertifikat Prestasi'], waktu: '2026-09-18T15:50:00' },
       { noReg: 'PPDB-2728-0006', nama: 'Fajar Maulana', jk: 'Laki-laki', nisn: '', nik: '3201234567890106', tempat: 'Depok', tgl: '2011-01-30', agama: 'Islam', alamat: 'Jl. Raya Bojong No. 45, Bojonggede', hp: '081200000006', email: '', asal: 'SMP Negeri 5 Depok', lulus: '2027', nilai: 77.6, ayah: 'Rahmat Hidayat', ibu: 'Lilis Suryani', jalur: 'Reguler', minat: 'Peminatan Bahasa', sumber: 'Google', catatanSumber: '', status: 'Menunggu Verifikasi', catatan: '', dok: ['Foto 3x4', 'Kartu Keluarga'], waktu: '2026-09-20T07:30:00' },
       { noReg: 'PPDB-2728-0007', nama: 'Gita Permatasari', jk: 'Perempuan', nisn: '0071234507', nik: '3201234567890107', tempat: 'Bogor', tgl: '2011-06-14', agama: 'Islam', alamat: 'Jl. Cempaka No. 9, Pondok Rajeg, Cibinong', hp: '081200000007', email: '', asal: 'SMP Negeri 1 Cibinong', lulus: '2027', nilai: 83.3, ayah: 'Dedi Kurniawan', ibu: 'Ratna Dewi', jalur: 'Reguler', minat: 'Peminatan IPS', sumber: 'Sosialisasi Sekolah', catatanSumber: '', status: 'Terverifikasi', catatan: '', dok: ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga', 'Rapor'], waktu: '2026-09-21T11:12:00' },
       { noReg: 'PPDB-2728-0008', nama: 'Hadi Kurniawan', jk: 'Laki-laki', nisn: '0071234508', nik: '3201234567890108', tempat: 'Bogor', tgl: '2011-08-22', agama: 'Islam', alamat: 'Jl. Mawar No. 6, Karadenan, Cibinong', hp: '081200000008', email: '', asal: 'SMP Negeri 2 Cibinong', lulus: '2027', nilai: 86.9, ayah: 'Sugianto', ibu: 'Tuti Herawati', jalur: 'Reguler', minat: 'Peminatan MIPA', sumber: 'WhatsApp', catatanSumber: 'Grup orang tua murid', status: 'Menunggu Verifikasi', catatan: 'Rapor kurang jelas, mohon diunggah ulang.', dok: ['Foto 3x4', 'Ijazah/SKL'], waktu: '2026-09-22T06:45:00' }
     ];
   }
 
-  /* ---------------- penyimpanan ---------------- */
-  var data = benih();
+  function benihBerita() {
+    return [
+      { id: 'b1', judul: 'PPDB SMA IMTEK Tahun Ajaran 2027/2028 Resmi Dibuka', kategori: 'Pengumuman', ringkasan: 'Pendaftaran peserta didik baru dibuka sepenuhnya secara online melalui website resmi sekolah.', isi: 'SMA IMTEK resmi membuka Penerimaan Peserta Didik Baru untuk tahun ajaran 2027/2028. Tahun ini pendaftaran dapat dilakukan sepenuhnya secara online melalui website resmi sekolah, sehingga calon peserta didik tidak perlu datang ke sekolah hanya untuk mengisi formulir.\n\nPendaftaran dibuka untuk tiga peminatan dengan total kuota 180 peserta didik. Tersedia empat jalur pendaftaran: Reguler, Prestasi, Afirmasi, dan Perpindahan Tugas Orang Tua.\n\nCalon peserta didik cukup mengisi formulir online, mengunggah dokumen persyaratan, lalu mencetak bukti pendaftaran. Status pendaftaran dapat dipantau kapan saja melalui menu Cek Status dengan memasukkan nomor registrasi dan tanggal lahir.', penulis: 'Panitia PPDB', tanggal: '2026-09-01', publish: 1, dibaca: 214, g: 0 },
+      { id: 'b2', judul: 'Panduan Lengkap Mendaftar PPDB Secara Online', kategori: 'Berita', ringkasan: 'Langkah demi langkah mendaftar dari rumah, mulai dari menyiapkan dokumen hingga mencetak bukti pendaftaran.', isi: 'Proses pendaftaran online PPDB SMA IMTEK dirancang sederhana dan dapat diselesaikan dalam waktu kurang dari lima belas menit.\n\nLangkah pertama, siapkan dokumen dalam bentuk hasil pindai atau foto: ijazah atau SKL, rapor, Kartu Keluarga, akta kelahiran, dan foto berukuran 3x4. Pastikan setiap berkas berukuran maksimal 2 MB.\n\nLangkah kedua, buka menu PPDB Online lalu isi formulir pendaftaran yang terdiri dari data calon peserta didik, data asal sekolah, data orang tua, dan unggahan dokumen.\n\nLangkah ketiga, setelah formulir dikirim sistem akan menerbitkan nomor registrasi. Simpan nomor tersebut dan cetak bukti pendaftaran. Verifikasi oleh panitia dilakukan maksimal tiga hari kerja.', penulis: 'Panitia PPDB', tanggal: '2026-09-05', publish: 1, dibaca: 132, g: 5 },
+      { id: 'b3', judul: 'Peserta Didik SMA IMTEK Raih Juara Lomba Tingkat Kota', kategori: 'Prestasi', ringkasan: 'Prestasi ini merupakan hasil pembinaan rutin melalui ekstrakurikuler dan program pendampingan olimpiade.', isi: 'Peserta didik SMA IMTEK berhasil meraih prestasi pada lomba kompetensi tingkat kota. Keberhasilan ini merupakan hasil pembinaan rutin melalui kegiatan ekstrakurikuler dan program pendampingan olimpiade yang dilaksanakan sekolah.\n\nKepala sekolah menyampaikan apresiasi kepada seluruh peserta didik dan guru pembina. Sekolah akan terus memperkuat program pembinaan prestasi agar semakin banyak peserta didik yang berkompetisi di tingkat yang lebih tinggi.\n\n[CATATAN: nama peserta didik, jenis lomba, dan peringkat yang diraih diisi pihak sekolah.]', penulis: 'Humas Sekolah', tanggal: '2026-09-12', publish: 1, dibaca: 98, g: 2 },
+      { id: 'b4', judul: 'Sosialisasi PPDB ke SMP dan MTs di Sekitar Sekolah', kategori: 'Kegiatan', ringkasan: 'Tim panitia mengunjungi sekolah menengah pertama di sekitar untuk memperkenalkan program unggulan.', isi: 'Panitia PPDB SMA IMTEK melaksanakan kegiatan sosialisasi ke sejumlah SMP dan MTs di sekitar sekolah.\n\nKegiatan ini bertujuan memperkenalkan program unggulan sekolah serta memandu calon peserta didik menggunakan sistem pendaftaran online yang baru. Panitia juga membagikan brosur dan memasang spanduk di titik-titik strategis.\n\nSesuai catatan sistem, jalur sosialisasi langsung seperti ini menyumbang porsi pendaftar yang cukup besar, sehingga direncanakan dilanjutkan pada periode berikutnya.', penulis: 'Humas Sekolah', tanggal: '2026-09-19', publish: 1, dibaca: 56, g: 3 }
+    ];
+  }
+
+  function benihGaleri() {
+    return [
+      { judul: 'Upacara bendera', kategori: 'Kegiatan Rutin', ket: '[FOTO KEGIATAN SEKOLAH]', g: 0 },
+      { judul: 'Praktikum laboratorium IPA', kategori: 'Akademik', ket: '[FOTO KEGIATAN SEKOLAH]', g: 2 },
+      { judul: 'Lomba kebersihan kelas', kategori: 'Kegiatan Rutin', ket: '[FOTO KEGIATAN SEKOLAH]', g: 7 },
+      { judul: 'Latihan pramuka', kategori: 'Ekstrakurikuler', ket: '[FOTO KEGIATAN SEKOLAH]', g: 3 },
+      { judul: 'Pentas seni akhir tahun', kategori: 'Kesiswaan', ket: '[FOTO KEGIATAN SEKOLAH]', g: 4 },
+      { judul: 'Sosialisasi PPDB ke SMP', kategori: 'Kehumasan', ket: '[FOTO KEGIATAN SEKOLAH]', g: 1 },
+      { judul: 'Pertandingan futsal antarkelas', kategori: 'Ekstrakurikuler', ket: '[FOTO KEGIATAN SEKOLAH]', g: 5 },
+      { judul: 'Peringatan hari besar keagamaan', kategori: 'Kesiswaan', ket: '[FOTO KEGIATAN SEKOLAH]', g: 6 }
+    ];
+  }
+
+  function benihPesan() {
+    return [
+      { id: 'p1', nama: 'Ibu Dewi Lestari', email: 'dewi@contoh.test', hp: '081355667788', subjek: 'Pertanyaan biaya PPDB', isi: 'Selamat pagi, apakah pendaftaran PPDB benar tidak dipungut biaya sama sekali? Terima kasih.', dibaca: 0, waktu: '2026-09-21T09:20:00' },
+      { id: 'p2', nama: 'Bapak Usman Hadi', email: '', hp: '081399887766', subjek: 'Jadwal daftar ulang', isi: 'Anak saya sudah dinyatakan diterima. Kapan jadwal daftar ulangnya dan dokumen apa yang perlu dibawa?', dibaca: 1, waktu: '2026-09-22T07:05:00' }
+    ];
+  }
+
+  /* ================= penyimpanan ================= */
+  var db = {
+    pendaftar: benihPendaftar(),
+    berita: benihBerita(),
+    galeri: benihGaleri(),
+    pesan: benihPesan()
+  };
 
   function muat() {
     try {
       var mentah = window.localStorage.getItem(KUNCI);
-      if (mentah) {
-        var isi = JSON.parse(mentah);
-        if (Array.isArray(isi) && isi.length) { data = isi; }
-      }
+      if (!mentah) { return; }
+      var isi = JSON.parse(mentah);
+      ['pendaftar', 'berita', 'galeri', 'pesan'].forEach(function (k) {
+        if (Array.isArray(isi[k])) { db[k] = isi[k]; }
+      });
     } catch (e) { /* peramban menolak penyimpanan — pakai data contoh saja */ }
   }
 
   function simpan() {
-    try { window.localStorage.setItem(KUNCI, JSON.stringify(data)); }
+    try { window.localStorage.setItem(KUNCI, JSON.stringify(db)); }
     catch (e) { /* tidak apa-apa: data tetap hidup selama halaman terbuka */ }
   }
 
-  /* ---------------- bantu ---------------- */
+  /* ================= bantu ================= */
   function el(id) { return document.getElementById(id); }
   function bersih(s) { return String(s == null ? '' : s); }
 
@@ -1011,14 +1413,32 @@
   }
 
   function angka(n) { return Number(n || 0).toLocaleString('id-ID'); }
+  function grad(i) { return GRADIEN[(i || 0) % GRADIEN.length]; }
 
   function lencana(status) {
     return '<span class="lencana ' + (KELAS_STATUS[status] || 'l-tunggu') + '">' + esc(status) + '</span>';
   }
 
+  function svgIk(d, ukuran) {
+    return '<svg width="' + (ukuran || 22) + '" height="' + (ukuran || 22) + '" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"></path></svg>';
+  }
+
+  function ikonCentang(u) {
+    return '<svg width="' + u + '" height="' + u + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>';
+  }
+
+  function ikonInfo(u) {
+    return '<svg width="' + u + '" height="' + u + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01M12 12v4"></path></svg>';
+  }
+
+  function ikonSilang(u) {
+    return '<svg width="' + u + '" height="' + u + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg>';
+  }
+
   function nomorBaru() {
     var tertinggi = 0;
-    data.forEach(function (p) {
+    db.pendaftar.forEach(function (p) {
       var m = /(\d+)$/.exec(p.noReg || '');
       if (m) { tertinggi = Math.max(tertinggi, parseInt(m[1], 10)); }
     });
@@ -1031,47 +1451,277 @@
     return Math.floor((Date.now() - d.getTime()) / 31556952000);
   }
 
-  /* ---------------- pengalih sisi & tab ---------------- */
+  /* ================= tab ================= */
+  var TAB = [
+    { id: 'beranda', label: 'Beranda' },
+    { id: 'profil', label: 'Profil' },
+    { id: 'fasilitas', label: 'Fasilitas' },
+    { id: 'berita', label: 'Berita' },
+    { id: 'galeri', label: 'Galeri' },
+    { id: 'kontak', label: 'Kontak' },
+    { id: 'ppdb', label: 'Informasi PPDB' },
+    { id: 'formulir', label: 'Formulir Pendaftaran' },
+    { id: 'cek', label: 'Cek Status' }
+  ];
+
+  var TAB_ADMIN = [
+    { id: 'dash', label: 'Dashboard' },
+    { id: 'pendaftar', label: 'Data Pendaftar' },
+    { id: 'berita', label: 'Kelola Berita' },
+    { id: 'pesan', label: 'Pesan Masuk' }
+  ];
+
+  function pasangTab(wadahId, daftar, awalan, saatPilih) {
+    var wadah = el(wadahId);
+    wadah.innerHTML = daftar.map(function (t) {
+      return '<button type="button" role="tab" data-tab="' + t.id + '" aria-selected="false">' + esc(t.label) + '</button>';
+    }).join('');
+    wadah.querySelectorAll('[data-tab]').forEach(function (b) {
+      b.addEventListener('click', function () { saatPilih(b.dataset.tab); });
+    });
+
+    return function (idAktif) {
+      daftar.forEach(function (t) {
+        var tombol = wadah.querySelector('[data-tab="' + t.id + '"]');
+        var panel = el(awalan + t.id);
+        if (tombol) { tombol.setAttribute('aria-selected', String(t.id === idAktif)); }
+        if (panel) { panel.hidden = t.id !== idAktif; }
+      });
+    };
+  }
+
+  var setTab = pasangTab('bar-tab', TAB, 'panel-', function (id) { keTab(id); });
+  var setTabAdmin = pasangTab('bar-tab-admin', TAB_ADMIN, 'apanel-', function (id) { keTabAdmin(id); });
+
+  function keTab(id) {
+    setTab(id);
+    if (id === 'berita') { tampilDaftarBerita(); }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function keTabAdmin(id) {
+    setTabAdmin(id);
+    if (id === 'dash') { gambarDasbor(); }
+    if (id === 'pendaftar') { gambarTabelPendaftar(); }
+    if (id === 'berita') { gambarAdminBerita(); }
+    if (id === 'pesan') { gambarPesan(); }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   var sisiPublik = el('sisi-publik');
   var sisiAdmin = el('sisi-admin');
+  var masuk = false;
 
   function pilihSisi(admin) {
     sisiPublik.hidden = admin;
     sisiAdmin.hidden = !admin;
     el('mode-publik').setAttribute('aria-selected', String(!admin));
     el('mode-admin').setAttribute('aria-selected', String(admin));
-    if (admin) { gambarAdmin(); }
+    el('tabs-admin').hidden = !(admin && masuk);
+    if (admin && masuk) { keTabAdmin('dash'); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   el('mode-publik').addEventListener('click', function () { pilihSisi(false); });
   el('mode-admin').addEventListener('click', function () { pilihSisi(true); });
 
-  var TAB = [
-    { tombol: 'tab-info', panel: 'panel-info' },
-    { tombol: 'tab-daftar', panel: 'panel-daftar' },
-    { tombol: 'tab-cek', panel: 'panel-cek' }
-  ];
+  document.querySelectorAll('[data-ke]').forEach(function (b) {
+    b.addEventListener('click', function () { keTab(b.dataset.ke); });
+  });
 
-  function pilihTab(idTombol) {
-    TAB.forEach(function (t) {
-      var aktif = t.tombol === idTombol;
-      el(t.tombol).setAttribute('aria-selected', String(aktif));
-      el(t.panel).hidden = !aktif;
+  /* ================= beranda & bagian publik ================= */
+  function gambarStatSekolah() {
+    el('stat-sekolah').innerHTML = STAT_SEKOLAH.map(function (s) {
+      return '<div class="stat"><div class="ik">' + svgIk(s.ik, 24) + '</div>' +
+        '<div class="n">' + angka(s.n) + (s.n >= 100 ? '+' : '') + '</div>' +
+        '<div class="k">' + esc(s.k) + '</div></div>';
+    }).join('');
+  }
+
+  function kartuMinat(m) {
+    var isi = db.pendaftar.filter(function (p) { return p.minat === m.nama; }).length;
+    return '<div class="kartu">' +
+      '<div class="ikon-kotak">' + svgIk('M3 9l9-4 9 4-9 4zM7 11v5c0 1.7 2.2 3 5 3s5-1.3 5-3v-5', 22) + '</div>' +
+      '<h3 style="font-size: 16.5px;">' + esc(m.nama) + '</h3>' +
+      '<p class="lirih" style="margin-block: 7px 14px;">' + esc(m.ket) + '</p>' +
+      '<div class="antar" style="border-top: 1px solid var(--garis); padding-top: 12px; font-size: 12.5px; color: var(--tinta-lirih);">' +
+        '<span>Kuota ' + m.kuota + '</span><span class="kanan">Terisi ' + isi + '</span>' +
+      '</div></div>';
+  }
+
+  function gambarMinat() {
+    el('beranda-minat').innerHTML = PEMINATAN.map(kartuMinat).join('');
+    el('profil-minat').innerHTML = PEMINATAN.map(function (m) {
+      return '<div><b style="font-size: 14.5px;">' + esc(m.nama) + '</b>' +
+        '<p class="lirih">' + esc(m.ket) + '</p>' +
+        '<p class="lirih" style="font-size: 12.5px;">Kuota ' + m.kuota + ' kursi</p></div>';
+    }).join('');
+  }
+
+  function kartuFasilitas(f) {
+    return '<div class="kartu">' +
+      '<div class="ikon-kotak">' + svgIk(f.ik, 22) + '</div>' +
+      '<h3 style="font-size: 16px;">' + esc(f.nama) + '</h3>' +
+      '<p class="lirih" style="margin-top: 7px;">' + esc(f.ket) + '</p></div>';
+  }
+
+  function gambarFasilitas() {
+    el('beranda-fasilitas').innerHTML = FASILITAS.slice(0, 6).map(kartuFasilitas).join('');
+    el('daftar-fasilitas').innerHTML = FASILITAS.map(kartuFasilitas).join('');
+  }
+
+  function kartuBerita(b) {
+    return '<button type="button" class="kartu-berita" data-berita="' + esc(b.id) + '">' +
+      '<span class="gambar-tiruan" style="background: ' + grad(b.g) + '">[GAMBAR BERITA]</span>' +
+      '<span class="isi">' +
+        '<span class="label-kat">' + esc(b.kategori) + '</span>' +
+        '<h3>' + esc(b.judul) + '</h3>' +
+        '<p>' + esc(b.ringkasan || b.isi.slice(0, 110)) + '</p>' +
+        '<span class="kaki-berita"><span>' + esc(tglIndo(b.tanggal)) + '</span><span>' + angka(b.dibaca) + ' kali dibaca</span></span>' +
+      '</span></button>';
+  }
+
+  function pasangKlikBerita(cakupan) {
+    cakupan.querySelectorAll('[data-berita]').forEach(function (b) {
+      b.addEventListener('click', function () { bukaBerita(b.dataset.berita); });
     });
+  }
+
+  function beritaTerbit() {
+    return db.berita.filter(function (b) { return b.publish; })
+      .sort(function (a, b) { return String(b.tanggal).localeCompare(String(a.tanggal)); });
+  }
+
+  function gambarBerandaBerita() {
+    var t = beritaTerbit().slice(0, 3);
+    var w = el('beranda-berita');
+    w.innerHTML = t.length ? t.map(kartuBerita).join('') : '<p class="lirih">Belum ada berita yang diterbitkan.</p>';
+    pasangKlikBerita(w);
+  }
+
+  function tampilDaftarBerita() {
+    el('detail-berita').hidden = true;
+    el('daftar-berita-bungkus').hidden = false;
+    var cari = bersih(el('cari-berita').value).trim().toLowerCase();
+    var kat = el('kat-berita').value;
+    var hasil = beritaTerbit().filter(function (b) {
+      if (kat && b.kategori !== kat) { return false; }
+      if (!cari) { return true; }
+      return (b.judul + ' ' + b.isi + ' ' + (b.ringkasan || '')).toLowerCase().indexOf(cari) !== -1;
+    });
+    var w = el('daftar-berita');
+    if (!hasil.length) {
+      w.innerHTML = '<div class="kartu isian-kosong" style="grid-column: 1 / -1;">Tidak ada berita yang sesuai dengan pencarian.</div>';
+      return;
+    }
+    w.innerHTML = hasil.map(kartuBerita).join('');
+    pasangKlikBerita(w);
+  }
+
+  function bukaBerita(id) {
+    var b = db.berita.filter(function (x) { return x.id === id; })[0];
+    if (!b) { return; }
+    b.dibaca = Number(b.dibaca || 0) + 1;
+    simpan();
+
+    keTab('berita');
+    el('daftar-berita-bungkus').hidden = true;
+    var w = el('detail-berita');
+    var lain = beritaTerbit().filter(function (x) { return x.id !== b.id; }).slice(0, 3);
+
+    w.innerHTML =
+      '<button type="button" class="btn btn-halus btn-kecil" id="kembali-berita" style="margin-bottom: 18px;">&larr; Semua berita</button>' +
+      '<article class="kartu tumpuk">' +
+        '<span class="label-kat">' + esc(b.kategori) + '</span>' +
+        '<h1 style="font-size: clamp(1.4rem, 3.6vw, 1.9rem); letter-spacing: -.02em;">' + esc(b.judul) + '</h1>' +
+        '<div class="antar" style="font-size: 12.5px; color: var(--tinta-lirih);">' +
+          '<span>' + esc(tglIndo(b.tanggal)) + '</span><span>&middot;</span>' +
+          '<span>' + esc(b.penulis || 'Humas Sekolah') + '</span><span>&middot;</span>' +
+          '<span>' + angka(b.dibaca) + ' kali dibaca</span>' +
+        '</div>' +
+        '<div class="gambar-tiruan" style="background: ' + grad(b.g) + '; border-radius: var(--r-m); aspect-ratio: 21/9;">[GAMBAR BERITA]</div>' +
+        (b.ringkasan ? '<p style="font-size: 16.5px; font-weight: 500;">' + esc(b.ringkasan) + '</p>' : '') +
+        '<div class="isi-artikel">' + bersih(b.isi).split(/\n\s*\n/).map(function (par) {
+          return '<p>' + esc(par.trim()) + '</p>';
+        }).join('') + '</div>' +
+        '<div class="antar" style="border-top: 1px solid var(--garis); padding-top: 16px;">' +
+          '<span style="font-weight: 600; font-size: 13.5px; align-self: center;">Bagikan:</span>' +
+          '<span class="btn btn-halus btn-kecil">WhatsApp</span>' +
+          '<span class="btn btn-halus btn-kecil">Facebook</span>' +
+          '<span class="btn btn-halus btn-kecil">Telegram</span>' +
+          '<span class="lirih" style="font-size: 12px; align-self: center;">(tombol bagikan aktif pada sistem sebenarnya)</span>' +
+        '</div>' +
+      '</article>' +
+      (lain.length ? '<div style="margin-top: 30px;"><h2 style="font-size: 17px; margin-bottom: 16px;">Berita lainnya</h2>' +
+        '<div class="kisi kisi-3" id="berita-lain">' + lain.map(kartuBerita).join('') + '</div></div>' : '');
+
+    w.hidden = false;
+    el('kembali-berita').addEventListener('click', tampilDaftarBerita);
+    pasangKlikBerita(w);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  TAB.forEach(function (t) {
-    el(t.tombol).addEventListener('click', function () { pilihTab(t.tombol); });
+  function itemGaleri(g, i) {
+    return '<button type="button" class="item-galeri" data-galeri="' + i + '">' +
+      '<span class="gambar-tiruan" style="background: ' + grad(g.g) + '">' + esc(g.ket) + '</span>' +
+      '<span class="tirai">' + esc(g.judul) + '</span></button>';
+  }
+
+  function pasangKlikGaleri(cakupan) {
+    cakupan.querySelectorAll('[data-galeri]').forEach(function (b) {
+      b.addEventListener('click', function () { bukaSorot(Number(b.dataset.galeri)); });
+    });
+  }
+
+  var katGaleri = '';
+
+  function gambarGaleri() {
+    var bw = el('beranda-galeri');
+    bw.innerHTML = db.galeri.slice(0, 8).map(itemGaleri).join('');
+    pasangKlikGaleri(bw);
+
+    var kategori = [];
+    db.galeri.forEach(function (g) { if (g.kategori && kategori.indexOf(g.kategori) === -1) { kategori.push(g.kategori); } });
+    el('saring-galeri').innerHTML =
+      '<button type="button" class="btn ' + (katGaleri ? 'btn-garis' : 'btn-utama') + ' btn-kecil" data-kat="">Semua</button>' +
+      kategori.map(function (k) {
+        return '<button type="button" class="btn ' + (katGaleri === k ? 'btn-utama' : 'btn-garis') + ' btn-kecil" data-kat="' + esc(k) + '">' + esc(k) + '</button>';
+      }).join('');
+    el('saring-galeri').querySelectorAll('[data-kat]').forEach(function (b) {
+      b.addEventListener('click', function () { katGaleri = b.dataset.kat; gambarGaleri(); });
+    });
+
+    var w = el('kisi-galeri');
+    var hasil = db.galeri.map(function (g, i) { return { g: g, i: i }; })
+      .filter(function (x) { return !katGaleri || x.g.kategori === katGaleri; });
+    w.innerHTML = hasil.length
+      ? hasil.map(function (x) { return itemGaleri(x.g, x.i); }).join('')
+      : '<div class="kartu isian-kosong" style="grid-column: 1 / -1;">Belum ada foto pada kategori ini.</div>';
+    pasangKlikGaleri(w);
+  }
+
+  function bukaSorot(i) {
+    var g = db.galeri[i];
+    if (!g) { return; }
+    el('sorot-gambar').style.background = grad(g.g);
+    el('sorot-gambar').textContent = g.ket;
+    el('sorot-judul').textContent = g.judul;
+    el('sorot-ket').textContent = g.kategori || '';
+    el('sorot').hidden = false;
+    el('sorot-tutup').focus();
+  }
+
+  el('sorot-tutup').addEventListener('click', function () { el('sorot').hidden = true; });
+  el('sorot').addEventListener('click', function (ev) { if (ev.target === el('sorot')) { el('sorot').hidden = true; } });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && !el('sorot').hidden) { el('sorot').hidden = true; }
   });
 
-  el('ke-formulir').addEventListener('click', function () { pilihTab('tab-daftar'); });
-  el('ke-cek').addEventListener('click', function () { pilihTab('tab-cek'); });
+  el('cari-berita').addEventListener('input', tampilDaftarBerita);
+  el('kat-berita').addEventListener('change', tampilDaftarBerita);
 
-  /* ---------------- sisi publik: ringkasan ---------------- */
-  function gambarPublik() {
-    var jml = data.length;
+  function gambarKuota() {
+    var jml = db.pendaftar.length;
     var persen = Math.min(100, Math.round(jml / KUOTA_TOTAL * 100));
     el('hero-jml').textContent = angka(jml) + ' orang';
     el('hero-persen').textContent = 'Kuota terisi ' + persen + '%';
@@ -1080,18 +1730,26 @@
     meter.firstElementChild.style.width = persen + '%';
 
     el('tabel-kuota').innerHTML = PEMINATAN.map(function (m) {
-      var isi = data.filter(function (p) { return p.minat === m.nama; }).length;
+      var isi = db.pendaftar.filter(function (p) { return p.minat === m.nama; }).length;
       var sisa = Math.max(0, m.kuota - isi);
       return '<tr><td>' + esc(m.nama.replace('Peminatan ', '')) + '</td>' +
-        '<td class="angka">' + m.kuota + '</td>' +
-        '<td class="angka">' + isi + '</td>' +
+        '<td class="angka">' + m.kuota + '</td><td class="angka">' + isi + '</td>' +
         '<td class="angka">' + (sisa > 0
           ? '<span class="lencana l-terima">' + sisa + ' kursi</span>'
           : '<span class="lencana l-tolak">Penuh</span>') + '</td></tr>';
     }).join('');
   }
 
-  /* ---------------- formulir pendaftaran ---------------- */
+  function gambarPublik() {
+    gambarStatSekolah();
+    gambarMinat();
+    gambarFasilitas();
+    gambarBerandaBerita();
+    gambarGaleri();
+    gambarKuota();
+  }
+
+  /* ================= formulir pendaftaran ================= */
   var form = el('form-daftar');
 
   function tandaiGalat(nama, pesan, cakupan) {
@@ -1109,54 +1767,40 @@
     cakupan.querySelectorAll('.pesan-galat').forEach(function (p) { p.remove(); });
   }
 
-  function validasi(v, dokTerpilih) {
-    var galat = [];
-    function wajib(nama, label) {
-      if (!v[nama]) { galat.push({ nama: nama, pesan: label + ' wajib diisi.' }); }
-    }
-    wajib('jalur', 'Jalur pendaftaran');
-    wajib('minat', 'Peminatan');
-    wajib('nama', 'Nama lengkap');
-    wajib('jk', 'Jenis kelamin');
-    wajib('agama', 'Agama');
-    wajib('tempat', 'Tempat lahir');
-    wajib('tgl', 'Tanggal lahir');
-    wajib('alamat', 'Alamat tempat tinggal');
-    wajib('hp', 'Nomor HP');
-    wajib('asal', 'Nama SMP/MTs asal');
-    wajib('ayah', 'Nama ayah');
-    wajib('ibu', 'Nama ibu');
+  var PETA_DOK = {
+    'd-foto': 'Foto 3x4', 'd-ijazah': 'Ijazah/SKL', 'd-kk': 'Kartu Keluarga',
+    'd-akta': 'Akta Kelahiran', 'd-rapor': 'Rapor', 'd-prestasi': 'Sertifikat Prestasi'
+  };
 
-    if (v.nisn && !/^\d{10}$/.test(v.nisn)) {
-      galat.push({ nama: 'nisn', pesan: 'NISN harus tepat 10 angka.' });
-    }
-    if (v.nik && !/^\d{16}$/.test(v.nik)) {
-      galat.push({ nama: 'nik', pesan: 'NIK harus tepat 16 angka.' });
-    }
-    if (v.hp && !/^[0-9+\-\s()]{9,25}$/.test(v.hp)) {
-      galat.push({ nama: 'hp', pesan: 'Nomor HP tidak valid. Gunakan 9 sampai 15 angka.' });
-    }
-    if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) {
-      galat.push({ nama: 'email', pesan: 'Format email tidak valid.' });
-    }
+  function validasi(v, dok) {
+    var galat = [];
+    function wajib(nama, label) { if (!v[nama]) { galat.push({ nama: nama, pesan: label + ' wajib diisi.' }); } }
+    wajib('jalur', 'Jalur pendaftaran'); wajib('minat', 'Peminatan');
+    wajib('nama', 'Nama lengkap'); wajib('jk', 'Jenis kelamin'); wajib('agama', 'Agama');
+    wajib('tempat', 'Tempat lahir'); wajib('tgl', 'Tanggal lahir');
+    wajib('alamat', 'Alamat tempat tinggal'); wajib('hp', 'Nomor HP');
+    wajib('asal', 'Nama SMP/MTs asal'); wajib('ayah', 'Nama ayah'); wajib('ibu', 'Nama ibu');
+
+    if (v.nisn && !/^\d{10}$/.test(v.nisn)) { galat.push({ nama: 'nisn', pesan: 'NISN harus tepat 10 angka.' }); }
+    if (v.nik && !/^\d{16}$/.test(v.nik)) { galat.push({ nama: 'nik', pesan: 'NIK harus tepat 16 angka.' }); }
+    if (v.hp && !/^[0-9+\-\s()]{9,25}$/.test(v.hp)) { galat.push({ nama: 'hp', pesan: 'Nomor HP tidak valid. Gunakan 9 sampai 15 angka.' }); }
+    if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) { galat.push({ nama: 'email', pesan: 'Format email tidak valid.' }); }
     if (v.tgl) {
       var u = usiaPada(v.tgl);
-      if (u === null) {
-        galat.push({ nama: 'tgl', pesan: 'Tanggal lahir tidak valid.' });
-      } else if (u < 12 || u > 20) {
-        galat.push({ nama: 'tgl', pesan: 'Usia terhitung ' + u + ' tahun, di luar rentang wajar calon peserta didik SMA.' });
-      }
+      if (u === null) { galat.push({ nama: 'tgl', pesan: 'Tanggal lahir tidak valid.' }); }
+      else if (u < 12 || u > 20) { galat.push({ nama: 'tgl', pesan: 'Usia terhitung ' + u + ' tahun, di luar rentang wajar calon peserta didik SMA.' }); }
     }
     if (v.nilai !== '' && v.nilai != null) {
       var n = Number(v.nilai);
-      if (isNaN(n) || n < 0 || n > 100) {
-        galat.push({ nama: 'nilai', pesan: 'Nilai rata-rata harus angka antara 0 dan 100.' });
-      }
+      if (isNaN(n) || n < 0 || n > 100) { galat.push({ nama: 'nilai', pesan: 'Nilai rata-rata harus angka antara 0 dan 100.' }); }
     }
-    if (v.jalur === 'Prestasi' && dokTerpilih.indexOf('Sertifikat Prestasi') === -1) {
+    if (v.jalur === 'Prestasi' && dok.indexOf('Sertifikat Prestasi') === -1) {
       galat.push({ nama: 'jalur', pesan: 'Jalur Prestasi mewajibkan sertifikat prestasi dilampirkan.' });
     }
-    var kembar = data.filter(function (p) {
+    ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga'].forEach(function (d) {
+      if (dok.indexOf(d) === -1) { galat.push({ nama: null, pesan: 'Dokumen wajib belum lengkap: ' + d + '.' }); }
+    });
+    var kembar = db.pendaftar.filter(function (p) {
       return p.nama.toLowerCase() === bersih(v.nama).toLowerCase() && p.tgl === v.tgl;
     })[0];
     if (kembar) {
@@ -1165,15 +1809,6 @@
     return galat;
   }
 
-  var PETA_DOK = {
-    'd-foto': 'Foto 3x4',
-    'd-ijazah': 'Ijazah/SKL',
-    'd-kk': 'Kartu Keluarga',
-    'd-akta': 'Akta Kelahiran',
-    'd-rapor': 'Rapor',
-    'd-prestasi': 'Sertifikat Prestasi'
-  };
-
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     bersihkanGalat(form);
@@ -1181,21 +1816,13 @@
     el('hasil-kirim').hidden = true;
 
     var v = {};
-    ['jalur', 'minat', 'nama', 'jk', 'agama', 'nisn', 'nik', 'tempat', 'tgl', 'alamat', 'hp', 'email', 'asal', 'lulus', 'nilai', 'sumber', 'catatanSumber'].forEach(function (k) {
+    ['jalur', 'minat', 'nama', 'jk', 'agama', 'nisn', 'nik', 'tempat', 'tgl', 'alamat', 'hp', 'email', 'asal', 'lulus', 'nilai', 'sumber', 'catatanSumber', 'ayah', 'ibu'].forEach(function (k) {
       var kolom = form.elements[k];
       v[k] = kolom ? bersih(kolom.value).trim() : '';
     });
-    v.ayah = bersih(form.elements.ayah.value).trim();
-    v.ibu = bersih(form.elements.ibu.value).trim();
 
-    var dokTerpilih = Object.keys(PETA_DOK).filter(function (id) { return el(id).checked; }).map(function (id) { return PETA_DOK[id]; });
-
-    var galat = validasi(v, dokTerpilih);
-    ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga'].forEach(function (d) {
-      if (dokTerpilih.indexOf(d) === -1) {
-        galat.push({ nama: 'jalur', pesan: 'Dokumen wajib belum lengkap: ' + d + '.' });
-      }
-    });
+    var dok = Object.keys(PETA_DOK).filter(function (id) { return el(id).checked; }).map(function (id) { return PETA_DOK[id]; });
+    var galat = validasi(v, dok);
     if (!el('f-pernyataan').checked) {
       galat.push({ nama: null, pesan: 'Pernyataan kebenaran data wajib disetujui.' });
     }
@@ -1203,10 +1830,8 @@
     if (galat.length) {
       var kotak = el('kotak-galat');
       kotak.className = 'notif notif-galat';
-      kotak.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg>' +
-        '<div><b>Pendaftaran belum dapat diproses.</b><ul>' +
-        galat.map(function (g) { return '<li>' + esc(g.pesan) + '</li>'; }).join('') +
-        '</ul></div>';
+      kotak.innerHTML = ikonSilang(17) + '<div><b>Pendaftaran belum dapat diproses.</b><ul>' +
+        galat.map(function (g) { return '<li>' + esc(g.pesan) + '</li>'; }).join('') + '</ul></div>';
       kotak.hidden = false;
       galat.forEach(function (g) { if (g.nama) { tandaiGalat(g.nama, g.pesan); } });
       kotak.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1214,26 +1839,21 @@
     }
 
     var baru = {
-      noReg: nomorBaru(),
-      nama: v.nama, jk: v.jk, nisn: v.nisn, nik: v.nik,
-      tempat: v.tempat, tgl: v.tgl, agama: v.agama,
-      alamat: v.alamat, hp: v.hp, email: v.email,
+      noReg: nomorBaru(), nama: v.nama, jk: v.jk, nisn: v.nisn, nik: v.nik,
+      tempat: v.tempat, tgl: v.tgl, agama: v.agama, alamat: v.alamat, hp: v.hp, email: v.email,
       asal: v.asal, lulus: v.lulus, nilai: v.nilai === '' ? null : Number(v.nilai),
-      ayah: v.ayah, ibu: v.ibu,
-      jalur: v.jalur, minat: v.minat,
+      ayah: v.ayah, ibu: v.ibu, jalur: v.jalur, minat: v.minat,
       sumber: v.sumber || 'Tidak diisi', catatanSumber: v.catatanSumber,
-      status: 'Menunggu Verifikasi', catatan: '',
-      dok: dokTerpilih,
-      waktu: new Date().toISOString()
+      status: 'Menunggu Verifikasi', catatan: '', dok: dok, waktu: new Date().toISOString()
     };
-    data.push(baru);
+    db.pendaftar.push(baru);
     simpan();
     gambarPublik();
 
     var hasil = el('hasil-kirim');
     hasil.innerHTML =
       '<div class="kartu tumpuk">' +
-        '<div class="notif notif-sukses"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>' +
+        '<div class="notif notif-sukses">' + ikonCentang(17) +
         '<div><b>Pendaftaran berhasil dikirim.</b> Data Anda diterima dan akan diverifikasi panitia maksimal tiga hari kerja.</div></div>' +
         '<div class="noreg-kotak"><div class="cap">Nomor registrasi Anda</div><div class="val">' + esc(baru.noReg) + '</div>' +
         '<p class="lirih" style="font-size: 12.5px; margin-top: 8px;">Catat nomor ini. Diperlukan untuk memantau status pendaftaran.</p></div>' +
@@ -1246,8 +1866,8 @@
           '<dt>Status</dt><dd>' + lencana(baru.status) + '</dd>' +
         '</dl>' +
         '<div class="antar">' +
-          '<button type="button" class="btn btn-utama" data-cek="' + esc(baru.noReg) + '" data-tgl="' + esc(baru.tgl) + '">Lihat Status Pendaftaran</button>' +
-          '<button type="button" class="btn btn-garis" id="ke-panel-admin">Lihat dari Panel Panitia</button>' +
+          '<button type="button" class="btn btn-utama" id="ke-cek-hasil">Lihat status pendaftaran</button>' +
+          '<button type="button" class="btn btn-garis" id="ke-panel-admin">Lihat dari panel panitia</button>' +
         '</div>' +
       '</div>';
     hasil.hidden = false;
@@ -1255,11 +1875,11 @@
     el('d-foto').checked = true; el('d-ijazah').checked = true; el('d-kk').checked = true;
     hasil.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    hasil.querySelector('[data-cek]').addEventListener('click', function () {
+    el('ke-cek-hasil').addEventListener('click', function () {
       el('c-no').value = baru.noReg;
       el('c-tgl').value = baru.tgl;
-      pilihTab('tab-cek');
-      el('form-cek').dispatchEvent(new Event('submit'));
+      keTab('cek');
+      formCek.dispatchEvent(new Event('submit'));
     });
     el('ke-panel-admin').addEventListener('click', function () { pilihSisi(true); });
   });
@@ -1277,19 +1897,14 @@
       'f-ayah': 'Hendra Nugraha', 'f-ibu': 'Dewi Lestari',
       'f-sumber': 'TikTok', 'f-catatan-sumber': 'Video profil sekolah'
     };
-    Object.keys(contoh).forEach(function (id) {
-      var kolom = el(id);
-      if (kolom) { kolom.value = contoh[id]; }
-    });
-    el('d-foto').checked = true;
-    el('d-ijazah').checked = true;
-    el('d-kk').checked = true;
-    el('d-prestasi').checked = true;
+    Object.keys(contoh).forEach(function (id) { var k = el(id); if (k) { k.value = contoh[id]; } });
+    el('d-foto').checked = true; el('d-ijazah').checked = true;
+    el('d-kk').checked = true; el('d-prestasi').checked = true;
     el('f-pernyataan').checked = true;
     el('f-nama').focus();
   });
 
-  /* ---------------- cek status ---------------- */
+  /* ================= cek status ================= */
   var formCek = el('form-cek');
 
   formCek.addEventListener('submit', function (ev) {
@@ -1306,11 +1921,9 @@
       return;
     }
 
-    var p = data.filter(function (x) { return x.noReg.toUpperCase() === no && x.tgl === tgl; })[0];
-
+    var p = db.pendaftar.filter(function (x) { return x.noReg.toUpperCase() === no && x.tgl === tgl; })[0];
     if (!p) {
-      wadah.innerHTML = '<div class="notif notif-galat" style="margin-top: 16px;">' +
-        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg>' +
+      wadah.innerHTML = '<div class="notif notif-galat" style="margin-top: 16px;">' + ikonSilang(17) +
         '<div><b>Data pendaftaran tidak ditemukan.</b> Pastikan nomor registrasi dan tanggal lahir sesuai dengan yang Anda daftarkan.</div></div>';
       return;
     }
@@ -1328,22 +1941,18 @@
 
     wadah.innerHTML =
       '<div class="kartu tumpuk" style="margin-top: 16px;">' +
-        '<div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">' +
-          '<div><div class="cap" style="font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-samar);">Nomor registrasi</div>' +
+        '<div class="antar" style="align-items: center;">' +
+          '<div><div style="font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-samar);">Nomor registrasi</div>' +
           '<div style="font-family: var(--mono); font-size: 21px; font-weight: 700; color: var(--biru); letter-spacing: .06em;">' + esc(p.noReg) + '</div></div>' +
           '<div class="kanan">' + lencana(p.status) + '</div>' +
         '</div>' +
-        '<div class="tahapan">' +
-          LABEL.map(function (l, i) {
-            var aktif = (i + 1) <= tahap;
-            return '<div class="' + (aktif ? 'tahap-aktif' : '') + '">' +
-              '<div class="tahap-bulat">' + (aktif
-                ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>'
-                : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>') +
-              '</div><small>' + esc(l) + '</small></div>';
-          }).join('') +
-        '</div>' +
-        '<div class="notif ' + pesan[0] + '"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01M12 12v4"></path></svg><div>' + esc(pesan[1]) + '</div></div>' +
+        '<div class="tahapan">' + LABEL.map(function (l, i) {
+          var aktif = (i + 1) <= tahap;
+          return '<div class="' + (aktif ? 'tahap-aktif' : '') + '"><div class="tahap-bulat">' +
+            (aktif ? ikonCentang(17) : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>') +
+            '</div><small>' + esc(l) + '</small></div>';
+        }).join('') + '</div>' +
+        '<div class="notif ' + pesan[0] + '">' + ikonInfo(17) + '<div>' + esc(pesan[1]) + '</div></div>' +
         (p.catatan ? '<div class="kartu-rata"><b style="font-size: 12.5px;">Catatan dari panitia</b><p class="lirih" style="margin-top: 4px;">' + esc(p.catatan) + '</p></div>' : '') +
         '<dl class="rinci">' +
           '<dt>Nama lengkap</dt><dd>' + esc(p.nama) + '</dd>' +
@@ -1353,22 +1962,22 @@
           '<dt>Asal sekolah</dt><dd>' + esc(p.asal) + '</dd>' +
           '<dt>Tanggal mendaftar</dt><dd>' + esc(tglIndo(p.waktu, true)) + '</dd>' +
         '</dl>' +
-        '<details>' +
-          '<summary style="cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--biru);">Lihat bukti pendaftaran</summary>' +
+        '<details><summary style="cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--biru);">Lihat bukti pendaftaran</summary>' +
           '<div class="bukti" style="margin-top: 14px;">' +
-            '<div class="kop"><small>[NAMA YAYASAN ATAU DINAS PENYELENGGARA]</small><b>SMA IMTEK</b><small>Jl. Pendidikan No. 1, Kota, Provinsi &bull; NPSN [ISI]</small></div>' +
+            '<div class="kop"><small>[NAMA YAYASAN ATAU DINAS PENYELENGGARA]</small><b>SMA IMTEK</b><small>[ALAMAT SEKOLAH] &bull; NPSN [ISI]</small></div>' +
             '<h3>BUKTI PENDAFTARAN PESERTA DIDIK BARU</h3>' +
             '<p style="text-align: center;">Tahun Ajaran ' + TAHUN + '</p>' +
             '<p style="text-align: center; margin-top: 14px;"><span style="display: inline-block; border: 2px solid currentColor; padding: 7px 20px; font-family: var(--mono); font-weight: 700; letter-spacing: .14em;">' + esc(p.noReg) + '</span></p>' +
-            '<dl class="rinci" style="margin-top: 18px; font-family: var(--serif);">' +
+            '<dl class="rinci" style="margin-top: 18px;">' +
               '<dt>Nama</dt><dd>' + esc(p.nama) + '</dd>' +
               '<dt>NISN</dt><dd>' + esc(p.nisn || '—') + '</dd>' +
               '<dt>Tempat, tanggal lahir</dt><dd>' + esc(p.tempat) + ', ' + esc(tglIndo(p.tgl)) + '</dd>' +
               '<dt>Jalur / peminatan</dt><dd>' + esc(p.jalur) + ' / ' + esc(p.minat) + '</dd>' +
+              '<dt>Asal sekolah</dt><dd>' + esc(p.asal) + '</dd>' +
               '<dt>Dokumen</dt><dd>' + esc((p.dok || []).join(', ') || '—') + '</dd>' +
               '<dt>Status</dt><dd>' + esc(p.status.toUpperCase()) + '</dd>' +
             '</dl>' +
-            '<p class="lirih" style="margin-top: 16px; font-size: 12px;">Pada sistem yang sebenarnya, halaman ini dicetak atau disimpan sebagai PDF melalui tombol cetak peramban.</p>' +
+            '<p class="lirih" style="margin-top: 16px; font-size: 12px;">Pada sistem sebenarnya, halaman ini dicetak atau disimpan sebagai PDF melalui tombol cetak peramban.</p>' +
           '</div>' +
         '</details>' +
       '</div>';
@@ -1376,15 +1985,61 @@
   });
 
   el('coba-contoh').addEventListener('click', function () {
-    var p = data[0];
+    var p = db.pendaftar[0];
+    if (!p) { return; }
     el('c-no').value = p.noReg;
     el('c-tgl').value = p.tgl;
     formCek.dispatchEvent(new Event('submit'));
   });
 
-  /* ---------------- panel panitia ---------------- */
-  var masuk = false;
+  /* ================= formulir kontak ================= */
+  var formKontak = el('form-kontak');
 
+  formKontak.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    bersihkanGalat(formKontak);
+    var kabar = el('kabar-kontak');
+    kabar.hidden = true;
+
+    var nama = bersih(el('k-nama').value).trim();
+    var email = bersih(el('k-email').value).trim();
+    var hp = bersih(el('k-hp').value).trim();
+    var isi = bersih(el('k-isi').value).trim();
+    var galat = [];
+
+    if (!nama) { galat.push(['kNama', 'Nama wajib diisi.']); }
+    if (isi.length < 10) { galat.push(['kIsi', 'Pesan minimal 10 karakter.']); }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { galat.push(['kEmail', 'Format email tidak valid.']); }
+    if (!email && !hp) { galat.push(['kHp', 'Isi email atau nomor HP agar kami dapat membalas.']); }
+
+    if (galat.length) {
+      galat.forEach(function (g) { tandaiGalat(g[0], g[1], formKontak); });
+      kabar.className = 'notif notif-galat';
+      kabar.innerHTML = ikonSilang(17) + '<div>Periksa kembali isian Anda.</div>';
+      kabar.hidden = false;
+      return;
+    }
+
+    db.pesan.unshift({
+      id: 'p' + Date.now(), nama: nama, email: email, hp: hp,
+      subjek: bersih(el('k-subjek').value).trim(), isi: isi,
+      dibaca: 0, waktu: new Date().toISOString()
+    });
+    simpan();
+    formKontak.reset();
+    kabar.className = 'notif notif-sukses';
+    kabar.innerHTML = ikonCentang(17) + '<div><b>Pesan terkirim.</b> Pesan Anda masuk ke menu Pesan Masuk di panel panitia. Buka panel itu untuk melihatnya.</div>';
+    kabar.hidden = false;
+  });
+
+  el('tombol-wa').addEventListener('click', function () {
+    var kabar = el('kabar-kontak');
+    kabar.className = 'notif notif-info';
+    kabar.innerHTML = ikonInfo(17) + '<div>Pada sistem sebenarnya, tombol ini membuka WhatsApp panitia dengan pesan yang sudah terisi. Nomornya diatur dari menu Pengaturan.</div>';
+    kabar.hidden = false;
+  });
+
+  /* ================= panel panitia ================= */
   el('form-masuk').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var u = bersih(el('m-user').value).trim().toLowerCase();
@@ -1395,11 +2050,12 @@
       kotak.hidden = true;
       el('form-masuk').hidden = true;
       el('dasbor').hidden = false;
+      el('tabs-admin').hidden = false;
       el('m-sandi').value = '';
-      gambarAdmin();
+      keTabAdmin('dash');
     } else {
       kotak.className = 'notif notif-galat';
-      kotak.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg><div>Nama pengguna atau kata sandi salah. Gunakan <b>admin</b> / <b>admin123</b> untuk demo ini.</div>';
+      kotak.innerHTML = ikonSilang(17) + '<div>Nama pengguna atau kata sandi salah. Gunakan <b>admin</b> / <b>admin123</b> untuk demo ini.</div>';
       kotak.hidden = false;
       el('m-sandi').focus();
     }
@@ -1408,30 +2064,22 @@
   el('keluar').addEventListener('click', function () {
     masuk = false;
     el('dasbor').hidden = true;
+    el('tabs-admin').hidden = true;
     el('form-masuk').hidden = false;
     el('kartu-rinci').hidden = true;
     el('m-user').value = '';
   });
 
   el('reset-demo').addEventListener('click', function () {
-    data = benih();
+    db.pendaftar = benihPendaftar();
+    db.berita = benihBerita();
+    db.galeri = benihGaleri();
+    db.pesan = benihPesan();
     simpan();
     el('kartu-rinci').hidden = true;
     gambarPublik();
-    gambarAdmin();
+    keTabAdmin('dash');
   });
-
-  function hitungKanal() {
-    var peta = {};
-    data.forEach(function (p) {
-      var k = p.sumber || 'Tidak diisi';
-      if (!peta[k]) { peta[k] = { nama: k, jml: 0, diterima: 0 }; }
-      peta[k].jml++;
-      if (p.status === 'Diterima') { peta[k].diterima++; }
-    });
-    return Object.keys(peta).map(function (k) { return peta[k]; })
-      .sort(function (a, b) { return b.jml - a.jml; });
-  }
 
   function batangHTML(daftar, total) {
     if (!daftar.length) { return '<p class="lirih">Belum ada data.</p>'; }
@@ -1445,25 +2093,31 @@
     }).join('');
   }
 
-  function gambarAdmin() {
-    if (!masuk) { return; }
-    var total = data.length;
-
+  function gambarDasbor() {
+    var total = db.pendaftar.length;
     var hitung = {};
     STATUS.forEach(function (s) { hitung[s] = 0; });
-    data.forEach(function (p) { if (hitung[p.status] != null) { hitung[p.status]++; } });
+    db.pendaftar.forEach(function (p) { if (hitung[p.status] != null) { hitung[p.status]++; } });
+    var belumBaca = db.pesan.filter(function (p) { return !p.dibaca; }).length;
 
-    var PETAK = [
+    el('petak-ringkas').innerHTML = [
       { k: 'Total pendaftar', n: total, rona: 'var(--biru)' },
       { k: 'Menunggu verifikasi', n: hitung['Menunggu Verifikasi'], rona: 'var(--kuning)' },
-      { k: 'Terverifikasi', n: hitung['Terverifikasi'], rona: 'var(--biru-info)' },
-      { k: 'Diterima', n: hitung['Diterima'], rona: 'var(--hijau)' }
-    ];
-    el('petak-ringkas').innerHTML = PETAK.map(function (p) {
+      { k: 'Diterima', n: hitung['Diterima'], rona: 'var(--hijau)' },
+      { k: 'Pesan belum dibaca', n: belumBaca, rona: 'var(--merah)' }
+    ].map(function (p) {
       return '<div class="petak" style="--rona: ' + p.rona + '"><div class="n">' + p.n + '</div><div class="k">' + esc(p.k) + '</div></div>';
     }).join('');
 
-    var kanal = hitungKanal();
+    var peta = {};
+    db.pendaftar.forEach(function (p) {
+      var k = p.sumber || 'Tidak diisi';
+      if (!peta[k]) { peta[k] = { nama: k, jml: 0, diterima: 0 }; }
+      peta[k].jml++;
+      if (p.status === 'Diterima') { peta[k].diterima++; }
+    });
+    var kanal = Object.keys(peta).map(function (k) { return peta[k]; }).sort(function (a, b) { return b.jml - a.jml; });
+
     el('batang-kanal').innerHTML = batangHTML(kanal, total);
     el('tabel-kanal').innerHTML = kanal.map(function (d) {
       var konv = d.jml ? Math.round(d.diterima / d.jml * 100) : 0;
@@ -1474,28 +2128,26 @@
     }).join('') + '<tr><td><b>Total</b></td><td class="angka"><b>' + total + '</b></td><td class="angka"><b>' + hitung['Diterima'] + '</b></td><td></td></tr>';
 
     el('rekap-minat').innerHTML = batangHTML(PEMINATAN.map(function (m) {
-      return { nama: m.nama.replace('Peminatan ', ''), jml: data.filter(function (p) { return p.minat === m.nama; }).length };
+      return { nama: m.nama.replace('Peminatan ', ''), jml: db.pendaftar.filter(function (p) { return p.minat === m.nama; }).length };
     }), total);
 
     var jalurPeta = {};
-    data.forEach(function (p) { jalurPeta[p.jalur] = (jalurPeta[p.jalur] || 0) + 1; });
+    db.pendaftar.forEach(function (p) { jalurPeta[p.jalur] = (jalurPeta[p.jalur] || 0) + 1; });
     el('rekap-jalur').innerHTML = batangHTML(Object.keys(jalurPeta).map(function (k) {
       return { nama: k.length > 18 ? k.slice(0, 17) + '…' : k, jml: jalurPeta[k] };
     }).sort(function (a, b) { return b.jml - a.jml; }), total);
 
     var asalPeta = {};
-    data.forEach(function (p) { asalPeta[p.asal] = (asalPeta[p.asal] || 0) + 1; });
+    db.pendaftar.forEach(function (p) { asalPeta[p.asal] = (asalPeta[p.asal] || 0) + 1; });
     el('rekap-asal').innerHTML = batangHTML(Object.keys(asalPeta).map(function (k) {
       return { nama: k.replace('SMP Negeri', 'SMPN'), jml: asalPeta[k] };
     }).sort(function (a, b) { return b.jml - a.jml; }).slice(0, 5), total);
-
-    gambarTabel();
   }
 
-  function gambarTabel() {
+  function gambarTabelPendaftar() {
     var cari = bersih(el('cari').value).trim().toLowerCase();
     var saring = el('saring-status').value;
-    var baris = data.slice().sort(function (a, b) {
+    var baris = db.pendaftar.slice().sort(function (a, b) {
       return String(b.waktu).localeCompare(String(a.waktu));
     }).filter(function (p) {
       if (saring && p.status !== saring) { return false; }
@@ -1505,7 +2157,7 @@
 
     var tbody = el('tabel-pendaftar');
     if (!baris.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--tinta-lirih);">Tidak ada pendaftar yang sesuai dengan saringan.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="isian-kosong">Tidak ada pendaftar yang sesuai dengan saringan.</td></tr>';
       return;
     }
     tbody.innerHTML = baris.map(function (p) {
@@ -1517,8 +2169,7 @@
         '<td style="font-size: 12.5px;">' + esc(p.asal) + '</td>' +
         '<td class="angka">' + (p.nilai == null ? '—' : Number(p.nilai).toFixed(2).replace('.', ',')) + '</td>' +
         '<td style="font-size: 12.5px;">' + esc(p.sumber) + '</td>' +
-        '<td>' + lencana(p.status) + '</td>' +
-      '</tr>';
+        '<td>' + lencana(p.status) + '</td></tr>';
     }).join('');
 
     tbody.querySelectorAll('tr.bisa-klik').forEach(function (tr) {
@@ -1529,11 +2180,11 @@
     });
   }
 
-  el('cari').addEventListener('input', gambarTabel);
-  el('saring-status').addEventListener('change', gambarTabel);
+  el('cari').addEventListener('input', gambarTabelPendaftar);
+  el('saring-status').addEventListener('change', gambarTabelPendaftar);
 
   function bukaRinci(no) {
-    var p = data.filter(function (x) { return x.noReg === no; })[0];
+    var p = db.pendaftar.filter(function (x) { return x.noReg === no; })[0];
     if (!p) { return; }
     var kartu = el('kartu-rinci');
     kartu.innerHTML =
@@ -1560,31 +2211,23 @@
           '</dl>' +
         '</div>' +
         '<div class="tumpuk">' +
-          '<div class="kartu-rata">' +
-            '<b style="font-size: 12.5px;">Dokumen terlampir</b>' +
+          '<div class="kartu-rata"><b style="font-size: 12.5px;">Dokumen terlampir</b>' +
             '<div style="margin-top: 9px; display: flex; flex-wrap: wrap; gap: 6px;">' +
               ['Foto 3x4', 'Ijazah/SKL', 'Kartu Keluarga', 'Akta Kelahiran', 'Rapor', 'Sertifikat Prestasi'].map(function (d) {
                 var ada = (p.dok || []).indexOf(d) !== -1;
                 return '<span class="lencana ' + (ada ? 'l-terima' : 'l-tunggu') + '">' + esc(d) + '</span>';
-              }).join('') +
-            '</div>' +
-          '</div>' +
-          '<div class="ladang">' +
-            '<label for="r-status">Status pendaftaran</label>' +
+              }).join('') + '</div></div>' +
+          '<div class="ladang"><label for="r-status">Status pendaftaran</label>' +
             '<select id="r-status">' + STATUS.map(function (s) {
               return '<option' + (s === p.status ? ' selected' : '') + '>' + esc(s) + '</option>';
-            }).join('') + '</select>' +
-          '</div>' +
-          '<div class="ladang">' +
-            '<label for="r-catatan">Catatan untuk pendaftar</label>' +
+            }).join('') + '</select></div>' +
+          '<div class="ladang"><label for="r-catatan">Catatan untuk pendaftar</label>' +
             '<textarea id="r-catatan" placeholder="Contoh: Berkas rapor kurang jelas, mohon diunggah ulang.">' + esc(p.catatan) + '</textarea>' +
-            '<span class="bantu">Catatan ini tampil pada halaman Cek Status milik pendaftar.</span>' +
-          '</div>' +
+            '<span class="bantu">Catatan ini tampil pada halaman Cek Status milik pendaftar.</span></div>' +
           '<div class="antar">' +
-            '<button type="button" class="btn btn-utama" id="r-simpan">Simpan Perubahan</button>' +
+            '<button type="button" class="btn btn-utama" id="r-simpan">Simpan perubahan</button>' +
             '<button type="button" class="btn btn-halus" id="r-tutup">Tutup</button>' +
-          '</div>' +
-          '<div id="r-kabar" hidden></div>' +
+          '</div><div id="r-kabar" hidden></div>' +
         '</div>' +
       '</div>';
     kartu.hidden = false;
@@ -1596,19 +2239,131 @@
       simpan();
       var kabar = el('r-kabar');
       kabar.className = 'notif notif-sukses';
-      kabar.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg><div>Status disimpan. Pendaftar akan melihatnya di halaman Cek Status.</div>';
+      kabar.innerHTML = ikonCentang(17) + '<div>Status disimpan. Pendaftar akan melihatnya di halaman Cek Status.</div>';
       kabar.hidden = false;
-      gambarAdmin();
+      gambarTabelPendaftar();
       gambarPublik();
     });
     el('r-tutup').addEventListener('click', function () { kartu.hidden = true; });
   }
 
-  /* ---------------- mulai ---------------- */
+  /* ================= kelola berita ================= */
+  var formBerita = el('form-berita');
+
+  formBerita.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    bersihkanGalat(formBerita);
+    var kabar = el('kabar-berita');
+    kabar.hidden = true;
+
+    var judul = bersih(el('b-judul').value).trim();
+    var isi = bersih(el('b-isi').value).trim();
+    var galat = [];
+    if (!judul) { galat.push(['bJudul', 'Judul berita wajib diisi.']); }
+    if (isi.length < 20) { galat.push(['bIsi', 'Isi berita minimal 20 karakter.']); }
+
+    if (galat.length) {
+      galat.forEach(function (g) { tandaiGalat(g[0], g[1], formBerita); });
+      kabar.className = 'notif notif-galat';
+      kabar.innerHTML = ikonSilang(17) + '<div>Periksa kembali isian Anda.</div>';
+      kabar.hidden = false;
+      return;
+    }
+
+    db.berita.unshift({
+      id: 'b' + Date.now(), judul: judul, kategori: el('b-kat').value,
+      ringkasan: bersih(el('b-ringkas').value).trim(), isi: isi,
+      penulis: 'Administrator', tanggal: new Date().toISOString().slice(0, 10),
+      publish: el('b-publish').checked ? 1 : 0, dibaca: 0,
+      g: Math.floor(Math.random() * GRADIEN.length)
+    });
+    simpan();
+    formBerita.reset();
+    el('b-publish').checked = true;
+    kabar.className = 'notif notif-sukses';
+    kabar.innerHTML = ikonCentang(17) + '<div><b>Berita disimpan.</b> Buka tab Berita di sisi website sekolah untuk melihat hasilnya.</div>';
+    kabar.hidden = false;
+    gambarAdminBerita();
+    gambarBerandaBerita();
+  });
+
+  function gambarAdminBerita() {
+    var tbody = el('tabel-admin-berita');
+    if (!db.berita.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="isian-kosong">Belum ada berita.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = db.berita.map(function (b) {
+      return '<tr><td><b>' + esc(b.judul.length > 52 ? b.judul.slice(0, 51) + '…' : b.judul) + '</b>' +
+        '<br><small class="lirih" style="font-size: 12px;">' + esc(tglIndo(b.tanggal)) + ' &middot; ' + esc(b.penulis || '—') + '</small></td>' +
+        '<td><span class="label-kat">' + esc(b.kategori) + '</span></td>' +
+        '<td class="angka">' + angka(b.dibaca) + '</td>' +
+        '<td><button type="button" class="lencana ' + (b.publish ? 'l-terima' : 'l-tunggu') + '" style="border: 0; cursor: pointer;" data-terbit="' + esc(b.id) + '">' +
+          (b.publish ? 'Terbit' : 'Draf') + '</button></td>' +
+        '<td><button type="button" class="btn btn-halus btn-kecil" data-hapus="' + esc(b.id) + '">Hapus</button></td></tr>';
+    }).join('');
+
+    tbody.querySelectorAll('[data-terbit]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = db.berita.filter(function (x) { return x.id === b.dataset.terbit; })[0];
+        if (t) { t.publish = t.publish ? 0 : 1; simpan(); gambarAdminBerita(); gambarBerandaBerita(); }
+      });
+    });
+    tbody.querySelectorAll('[data-hapus]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        db.berita = db.berita.filter(function (x) { return x.id !== b.dataset.hapus; });
+        simpan();
+        gambarAdminBerita();
+        gambarBerandaBerita();
+      });
+    });
+  }
+
+  /* ================= pesan masuk ================= */
+  function gambarPesan() {
+    var w = el('daftar-pesan');
+    if (!db.pesan.length) {
+      w.innerHTML = '<div class="isian-kosong">Belum ada pesan masuk.</div>';
+      return;
+    }
+    w.innerHTML = '<div class="tumpuk">' + db.pesan.map(function (p) {
+      return '<div class="kartu-rata" style="' + (p.dibaca ? '' : 'border-color: var(--biru);') + '">' +
+        '<div class="antar" style="align-items: center;">' +
+          (p.dibaca ? '' : '<span class="lencana l-tolak">Baru</span>') +
+          '<b style="font-size: 14.5px;">' + esc(p.nama) + '</b>' +
+          '<span class="lirih" style="font-size: 12.5px;">' + esc(p.subjek || 'Tanpa subjek') + '</span>' +
+          '<span class="lirih kanan" style="font-size: 12px;">' + esc(tglIndo(p.waktu, true)) + '</span>' +
+        '</div>' +
+        '<p class="lirih" style="margin-block: 10px;">' + esc(p.isi) + '</p>' +
+        '<div class="antar" style="font-size: 12.5px; color: var(--tinta-lirih);">' +
+          '<span>' + esc(p.email || '—') + '</span><span>&middot;</span><span>' + esc(p.hp || '—') + '</span>' +
+          '<button type="button" class="btn btn-halus btn-kecil kanan" data-baca="' + esc(p.id) + '">' +
+            (p.dibaca ? 'Tandai belum dibaca' : 'Tandai sudah dibaca') + '</button>' +
+          '<button type="button" class="btn btn-halus btn-kecil" data-hapus-pesan="' + esc(p.id) + '">Hapus</button>' +
+        '</div></div>';
+    }).join('') + '</div>';
+
+    w.querySelectorAll('[data-baca]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = db.pesan.filter(function (x) { return x.id === b.dataset.baca; })[0];
+        if (t) { t.dibaca = t.dibaca ? 0 : 1; simpan(); gambarPesan(); gambarDasbor(); }
+      });
+    });
+    w.querySelectorAll('[data-hapus-pesan]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        db.pesan = db.pesan.filter(function (x) { return x.id !== b.dataset.hapusPesan; });
+        simpan();
+        gambarPesan();
+        gambarDasbor();
+      });
+    });
+  }
+
+  /* ================= mulai ================= */
   muat();
   gambarPublik();
+  keTab('beranda');
 })();
 </script>
-
 </body>
 </html>
