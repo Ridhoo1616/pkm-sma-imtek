@@ -155,7 +155,21 @@ pkm-sma-imtek/
 
 ---
 
-## Mencoba langsung dari browser, tanpa memasang apa pun
+## Coba demonya sekarang
+
+**[ridhoo1616.github.io/pkm-sma-imtek](https://ridhoo1616.github.io/pkm-sma-imtek/)**
+
+Tautan di atas langsung membuka demo alur PPDB tanpa memasang apa pun: isi
+formulir pendaftaran, cek status, lalu masuk ke panel panitia dengan
+`admin` / `admin123` untuk memverifikasi pendaftar.
+
+Demo ini adalah versi HTML dan JavaScript murni, karena GitHub Pages tidak
+dapat menjalankan PHP. Alur, tampilan, dan aturan validasinya mengikuti
+aplikasi sebenarnya, tetapi datanya tersimpan di peramban masing-masing
+pengunjung, bukan di basis data bersama. Untuk dipakai sekolah secara
+sungguhan, pasang aplikasi PHP-nya sesuai panduan di bawah.
+
+## Mencoba versi lengkap dari browser, tanpa memasang apa pun
 
 Repositori ini sudah dilengkapi konfigurasi **GitHub Codespaces**, sehingga
 aplikasi dapat dijalankan langsung dari browser tanpa memasang XAMPP.
