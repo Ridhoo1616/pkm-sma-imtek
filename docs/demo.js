@@ -1379,8 +1379,9 @@ function halamanBerhasil(no, tahun) {
             statusnya. Hasil perubahan itu akan terlihat di halaman Cek Status.
           </p>
           <div class="flex flex-wrap gap-3 border-t border-garis pt-6">
+            <button class="rounded-lg bg-biru px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-biru-tua">Unduh Bukti Pendaftaran (PDF)</button>
             <a href="/ppdb/cek?no=${encodeURIComponent(no)}"
-               class="rounded-lg bg-biru px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-biru-tua">Cek Status Pendaftaran</a>
+               class="rounded-lg border border-garis px-5 py-2.5 text-sm font-semibold text-teks transition hover:border-biru hover:text-biru">Cek Status Pendaftaran</a>
             <a href="/admin/masuk"
                class="rounded-lg border border-garis px-5 py-2.5 text-sm font-semibold text-teks transition hover:border-biru hover:text-biru">Masuk sebagai Panitia</a>
             <a href="/" class="rounded-lg border border-garis px-5 py-2.5 text-sm font-semibold text-teks transition hover:border-biru hover:text-biru">Kembali ke Beranda</a>
@@ -1491,9 +1492,17 @@ function tampilkanHasilCek(p) {
         ${K.pengaturan.ppdb_pengumuman ? `
           <p class="text-sm text-samar">Pengumuman hasil seleksi dijadwalkan pada
             <strong class="text-biru-tua">${tanggalPanjang(K.pengaturan.ppdb_pengumuman)}</strong>.</p>` : ""}
+        <div class="tanpa-cetak space-y-3 border-t border-garis pt-4">
+          <div class="flex flex-wrap gap-2">
+            <button class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 bg-biru text-white hover:bg-biru-tua">Unduh Bukti Pendaftaran (PDF)</button>
+            <button data-cetak-halaman class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 border border-garis bg-white text-teks hover:bg-biru-muda hover:text-biru">Cetak halaman ini</button>
+          </div>
+          <p class="text-xs leading-relaxed text-samar">Bukti pendaftaran dirakit di server, jadi bentuknya sama di semua peramban. Berkasnya memuat data pribadi, simpan di tempat yang aman.</p>
+        </div>
       </div>
     </div>`;
   wadah.appendChild(el);
+  el.querySelector("[data-cetak-halaman]").addEventListener("click", () => window.print());
   el.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
@@ -3033,3 +3042,25 @@ function siapkanMenuPanel() {
 
 siapkanMenuRingkas();
 siapkanMenuPanel();
+
+/* ---------- tombol bukti pendaftaran PDF ----------
+   Pada aplikasi sebenarnya, bukti pendaftaran dirakit oleh backend Go dengan
+   pustaka Maroto lalu dikirim sebagai berkas PDF. GitHub Pages tidak dapat
+   menjalankan program di sisi server, jadi di demo tombolnya tetap ada supaya
+   tampilannya sama, tetapi menjelaskan keadaannya ketika ditekan. */
+
+const TOMBOL_BUKTI = ["Unduh Bukti Pendaftaran (PDF)", "Bukti Pendaftaran (PDF)"];
+
+document.addEventListener("click", (ev) => {
+  const b = ev.target.closest("button");
+  if (!b) return;
+  const teks = b.textContent.trim();
+  if (!TOMBOL_BUKTI.some((t) => teks.startsWith(t))) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  beriTahu(
+    "Bukti pendaftaran PDF dibuat oleh server pada aplikasi sebenarnya. " +
+      "Demo ini berjalan sepenuhnya di peramban, jadi berkasnya tidak dapat dibuat di sini.",
+    "galat",
+  );
+}, true);

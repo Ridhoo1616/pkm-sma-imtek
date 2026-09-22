@@ -328,6 +328,10 @@ Diuji pada Go 1.27, Node.js 24, dan PostgreSQL 17.4.
   `aria-hidden`, gulir halaman terkunci, dan tombol Escape menutupnya.
 - Gulir halus Lenis aktif di halaman publik dan tidak dipasang di panel.
 
+**Demo statis, 65 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
+pengelolaan isi situs, batas hak akses operator, dan tombol bukti PDF yang
+menjelaskan bahwa berkasnya dibuat oleh server.
+
 Backend bersih dari `go vet` dan `gofmt`; frontend bersih dari `eslint` dan
 `tsc`.
 

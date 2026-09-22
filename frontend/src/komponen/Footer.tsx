@@ -49,7 +49,9 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
           <p className="mb-3 font-semibold text-white">Alamat</p>
           <address className="text-sm not-italic leading-relaxed">
             {pengaturan.alamat}
-            {pengaturan.kode_pos ? ` ${pengaturan.kode_pos}` : ""}
+            {pengaturan.kode_pos && !(pengaturan.alamat ?? "").includes(pengaturan.kode_pos)
+              ? ` ${pengaturan.kode_pos}`
+              : ""}
           </address>
           {pengaturan.jam_layanan && (
             <p className="mt-3 text-sm">
