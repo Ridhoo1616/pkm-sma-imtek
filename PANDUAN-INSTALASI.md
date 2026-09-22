@@ -4,7 +4,7 @@ Panduan memasang dan menjalankan sistem Profil Sekolah & PPDB SMA IMTEK.
 
 Aplikasi terdiri dari dua bagian:
 
-- **backend**, API JSON ditulis dengan Go, berbicara dengan MySQL
+- **backend**, API JSON ditulis dengan Go, berbicara dengan PostgreSQL
 - **frontend**, situs dan panel admin ditulis dengan Next.js
 
 Keduanya dijalankan terpisah. Frontend memanggil backend lewat HTTP, jadi
@@ -18,15 +18,19 @@ alamat backend harus dapat dijangkau dari peramban pengunjung.
 |---|---|---|
 | **Go** | 1.24 atau lebih baru | [go.dev/dl](https://go.dev/dl/) |
 | **Node.js** | 20 atau lebih baru | [nodejs.org](https://nodejs.org/) |
-| **MySQL** atau **MariaDB** | MySQL 8+ / MariaDB 10.4+ | Boleh dari XAMPP, Laragon, atau pemasangan sendiri |
+| **PostgreSQL** | 14 atau lebih baru | [postgresql.org/download](https://www.postgresql.org/download/). Postgres.app dan pemasang resmi keduanya cukup |
 
 Memeriksa hasil pemasangan:
 
 ```bash
 go version      # contoh: go version go1.27.1
 node -v         # contoh: v20.11.0
-mysql --version
+psql --version
 ```
+
+Untuk melihat isi basis datanya, **DBeaver** dapat dipakai sebagai penjelajah
+tabel: buat sambungan PostgreSQL baru, isikan host, porta, nama basis data,
+pengguna, dan sandi yang sama dengan `.env` di bawah.
 
 ---
 
@@ -35,25 +39,24 @@ mysql --version
 Cukup membuat basis datanya saja. Tabel dan data awalnya dibuat otomatis oleh
 backend saat pertama kali dijalankan.
 
-```sql
-CREATE DATABASE sma_imtek
-  DEFAULT CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-```
-
-Bila memakai XAMPP, jalankan perintah di atas lewat **phpMyAdmin → SQL**.
-
 Untuk pemakaian sungguhan, buatkan pengguna basis data tersendiri, jangan
-memakai `root`:
+memakai `postgres`. Jalankan lewat `psql -U postgres`:
 
 ```sql
-CREATE USER 'ppdb'@'localhost' IDENTIFIED BY 'sandi-yang-panjang-dan-acak';
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER
-  ON sma_imtek.* TO 'ppdb'@'localhost';
-FLUSH PRIVILEGES;
+CREATE ROLE ppdb LOGIN PASSWORD 'sandi-yang-panjang-dan-acak';
+CREATE DATABASE sma_imtek OWNER ppdb ENCODING 'UTF8';
 ```
 
-Hak `CREATE`, `INDEX`, dan `ALTER` diperlukan agar migrasi dapat berjalan.
+Pengguna itu perlu menjadi pemilik basis datanya, karena migrasi membuat
+tabel, indeks, fungsi, dan pemicu. Bila basis datanya sudah ada dan pemiliknya
+orang lain, berikan haknya secara terpisah:
+
+```sql
+GRANT ALL ON SCHEMA public TO ppdb;
+```
+
+Sekadar membuat basis data sudah cukup: tabel dan data awalnya dibuat oleh
+backend saat pertama kali dijalankan.
 
 ---
 
@@ -68,10 +71,13 @@ Buka `.env` dan sesuaikan:
 
 ```ini
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=5432
 DB_NAME=sma_imtek
 DB_USER=ppdb
 DB_PASS=sandi-yang-panjang-dan-acak
+
+# disable saat di komputer sendiri, require bila basis datanya terpisah
+DB_SSLMODE=disable
 
 # Kunci penanda tangan token masuk. Buat nilai acak:
 #   openssl rand -base64 48
@@ -190,7 +196,7 @@ layanan systemd di `/etc/systemd/system/ppdb.service`:
 ```ini
 [Unit]
 Description=API PPDB SMA IMTEK
-After=network.target mysql.service
+After=network.target postgresql.service
 
 [Service]
 Type=simple
@@ -283,7 +289,7 @@ Dua hal yang harus dicadangkan bersamaan:
 
 ```bash
 # 1. Basis data
-mysqldump -u ppdb -p sma_imtek > cadangan-$(date +%F).sql
+pg_dump -U ppdb -Fc sma_imtek > cadangan-$(date +%F).dump
 
 # 2. Folder unggahan, memuat dokumen pribadi pendaftar
 tar czf unggahan-$(date +%F).tar.gz -C /var/lib/ppdb unggahan
@@ -299,7 +305,9 @@ penyimpanan bersama tanpa izin sekolah.
 
 | Gejala | Penyebab yang paling sering |
 |---|---|
-| `basis data tidak merespons` saat backend menyala | MySQL belum jalan, atau `DB_USER`/`DB_PASS` salah |
+| `basis data tidak merespons` saat backend menyala | PostgreSQL belum jalan, atau `DB_USER`/`DB_PASS`/`DB_NAME` salah |
+| `SSL is not enabled on the server` | Setel `DB_SSLMODE=disable` bila basis datanya di komputer yang sama |
+| Nilai di `.env` sepertinya diabaikan | Variabel lingkungan yang sudah tersetel mengalahkan isi `.env`. Ini disengaja, agar kredensial dari layanan hosting menang. Periksa dengan `env \| grep DB_` |
 | `JWT_SECRET wajib diisi saat APP_ENV=produksi` | Isi `JWT_SECRET` dengan nilai acak |
 | Halaman tampil, tetapi semua data kosong dan muncul keterangan "server belum merespons" | Backend mati, atau `NEXT_PUBLIC_API_URL` salah |
 | Formulir gagal terkirim dengan pesan "tidak dapat menghubungi server" | Asal frontend belum tercantum di `CORS_ORIGINS`. Perhatikan bahwa `localhost` dan `127.0.0.1` dihitung sebagai dua asal berbeda |
@@ -307,7 +315,7 @@ penyimpanan bersama tanpa izin sekolah.
 | Gambar berita atau galeri tidak muncul | `UPLOAD_DIR` berbeda dari saat berkasnya diunggah, atau folder itu tidak dapat dibaca pengguna layanan |
 | Dokumen pendaftar menghasilkan 401 | Wajar: dokumen pribadi hanya dapat dibuka petugas yang sudah masuk |
 | Perubahan dari panel admin belum tampak di situs publik | Tunggu paling lama 30 detik, atau muat ulang. Penyegaran seketika memerlukan frontend dan backend berada pada asal yang tercantum di `CORS_ORIGINS` |
-| Migrasi berhenti dengan `Table ... already exists` | Terjadi pada versi lama. Sekarang basis data yang sudah berisi tabel aplikasi dikenali dan dilewati |
+| Migrasi berhenti dengan `relation ... already exists` | Terjadi pada versi lama. Sekarang basis data yang sudah berisi tabel aplikasi dikenali dan dilewati |
 
 Melihat catatan server:
 
@@ -319,18 +327,57 @@ sudo journalctl -u ppdb -f      # backend
 
 ## 9. Pindah dari versi PHP
 
-Basis data versi PHP dapat dipakai langsung tanpa diubah. Backend Go mengenali
-basis data yang sudah berisi tabel aplikasi, mencatat migrasi awalnya sebagai
-sudah diterapkan, dan tidak menyentuh isinya.
+Versi PHP memakai MySQL, versi Go memakai PostgreSQL. Datanya **tidak**
+berpindah sendiri, jadi ada satu langkah tambahan.
 
-Yang perlu dipindahkan sendiri hanyalah berkas unggahan:
+Nama tabel dan nama kolom kedua skema sengaja dibuat sama, sehingga yang perlu
+diterjemahkan hanya tiga hal: `tinyint(1)` menjadi `boolean`, `enum` menjadi
+`varchar` beserta `CHECK`, dan `datetime` yang tanpa zona waktu menjadi
+`timestamptz`. Alat di `alat/pindah-mysql/` mengerjakan ketiganya.
+
+Urutannya:
 
 ```bash
-cp -r legacy-php/uploads/berita     /var/lib/ppdb/unggahan/berita
-cp -r legacy-php/uploads/galeri     /var/lib/ppdb/unggahan/galeri
-cp -r legacy-php/uploads/pendaftar  /var/lib/ppdb/unggahan/pendaftar
+# 1. Jalankan backend Go sekali agar skema dan data awalnya terbentuk.
+cd backend && go run .        # tunggu "server berjalan", lalu Ctrl-C
+
+# 2. Pindahkan isi basis data lama.
+cd ../alat/pindah-mysql
+MYSQL_DSN='root:sandi@tcp(127.0.0.1:3306)/sma_imtek' \
+PG_DSN='postgres://ppdb:sandi@127.0.0.1:5432/sma_imtek?sslmode=disable' \
+KOSONGKAN=1 go run .
+
+# 3. Pindahkan berkas unggahannya.
+cp -r ../../legacy-php/uploads/berita     /var/lib/ppdb/unggahan/berita
+cp -r ../../legacy-php/uploads/galeri     /var/lib/ppdb/unggahan/galeri
+cp -r ../../legacy-php/uploads/pendaftar  /var/lib/ppdb/unggahan/pendaftar
 ```
 
 Nama berkas pada basis data tidak berubah, jadi gambar dan dokumen langsung
 terbaca setelah dipindah. Folder `fasilitas` dibuat otomatis saat gambar
 fasilitas pertama diunggah.
+
+Yang perlu diketahui tentang alat itu:
+
+- `KOSONGKAN=1` **menghapus isi** delapan tabel tujuan lebih dulu. Pakai hanya
+  pada basis data PostgreSQL yang baru dibuat. Tanpa pilihan ini alat berhenti
+  dan tidak mengubah apa pun, supaya basis data yang sudah dipakai sekolah
+  tidak tertimpa karena salah ketik.
+- Tabel `pengaturan` dikecualikan: isinya ditimpa per kunci, bukan diganti
+  seluruhnya. Sebabnya versi Go menambah dua belas kunci pengaturan yang belum
+  ada pada versi PHP, misalnya `sambutan_kepsek`, `jam_layanan`, dan
+  `peta_embed`. Bila tabel itu dikosongkan, kunci-kunci tersebut hilang dan
+  sekolah tidak akan bisa mengisinya dari halaman Pengaturan, karena halaman
+  itu hanya menampilkan kunci yang barisnya ada.
+- Nilai `id` lama dipertahankan agar tabel yang saling menunjuk tetap
+  tersambung, dan pencacah `id` disetel ulang ke nilai tertinggi ditambah satu
+  supaya baris berikutnya tidak bertabrakan.
+- Akun dan sandinya ikut berpindah. Hash bcrypt dari versi PHP tetap berlaku,
+  jadi sandi yang sudah dipakai panitia tidak berubah.
+- `PAKSA=1` menambahkan di atas isi yang sudah ada, tanpa mengosongkan. Berguna
+  bila datanya dipindahkan sebagian, tetapi berisiko menggandakan baris.
+
+Perpindahan ini sudah diuji terhadap basis data MySQL yang berisi 68 baris pada
+sembilan tabel: seluruh barisnya masuk, kolom boolean dan enum terbaca benar,
+tanggal tidak bergeser zona waktunya, panitia dapat masuk memakai sandi lama,
+dan bukti pendaftaran PDF terbit dari data hasil pindahan.

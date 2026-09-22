@@ -14,12 +14,51 @@ import (
 // maupun layanan seperti Railway atau Render.
 type Konfigurasi struct {
 	Alamat        string // alamat dan porta yang didengarkan, contoh ":8090"
-	DSN           string // sumber data MySQL
+	DSN           string // sumber data PostgreSQL
 	RahasiaToken  []byte // kunci penanda tangan token masuk
 	AsalDiizinkan []string
 	FolderUnggah  string
 	BatasUnggah   int64
 	Produksi      bool
+}
+
+// muatBerkasEnv membaca berkas .env di sebelah program dan menyetel
+// variabel lingkungan dari isinya. Variabel yang SUDAH ada di lingkungan
+// tidak ditimpa, karena layanan hosting menyuntikkan kredensialnya lewat
+// lingkungan dan nilai itu harus menang atas berkas yang mungkin tertinggal.
+//
+// Berkasnya ditulis sendiri, bukan memakai pustaka luar, karena bentuknya
+// hanya "KUNCI=nilai" per baris. Tanda # mengawali komentar, dan tanda
+// kutip di kedua ujung nilai dibuang.
+func muatBerkasEnv(jalur string) {
+	isi, err := os.ReadFile(jalur)
+	if err != nil {
+		// Tidak adanya berkas .env bukan kesalahan: di produksi seluruh
+		// konfigurasi memang datang dari lingkungan.
+		return
+	}
+	for _, baris := range strings.Split(string(isi), "\n") {
+		baris = strings.TrimSpace(baris)
+		if baris == "" || strings.HasPrefix(baris, "#") {
+			continue
+		}
+		kunci, nilai, ada := strings.Cut(baris, "=")
+		if !ada {
+			continue
+		}
+		kunci = strings.TrimSpace(kunci)
+		nilai = strings.TrimSpace(nilai)
+		if len(nilai) >= 2 && (nilai[0] == '"' || nilai[0] == '\'') && nilai[len(nilai)-1] == nilai[0] {
+			nilai = nilai[1 : len(nilai)-1]
+		}
+		if kunci == "" {
+			continue
+		}
+		if _, sudahAda := os.LookupEnv(kunci); sudahAda {
+			continue
+		}
+		os.Setenv(kunci, nilai)
+	}
 }
 
 func lingkungan(kunci, bawaan string) string {
@@ -30,6 +69,8 @@ func lingkungan(kunci, bawaan string) string {
 }
 
 func muatKonfigurasi() Konfigurasi {
+	muatBerkasEnv(".env")
+
 	dbHost := lingkungan("DB_HOST", "127.0.0.1")
 	dbPort := lingkungan("DB_PORT", "5432")
 	dbNama := lingkungan("DB_NAME", "sma_imtek")

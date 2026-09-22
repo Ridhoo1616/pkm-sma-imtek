@@ -4,6 +4,10 @@ API JSON yang ditulis dengan **Go** memakai pustaka standar. Tidak memakai
 kerangka kerja web maupun ORM, sehingga hasil kompilasinya satu berkas biner
 tunggal yang bisa dijalankan di mana saja.
 
+Basis datanya **PostgreSQL**. Pustaka luar yang dipakai hanya tiga:
+`jackc/pgx/v5` sebagai penggerak basis data, `golang.org/x/crypto` untuk
+bcrypt, dan `johnfercher/maroto/v2` untuk mencetak bukti pendaftaran PDF.
+
 ## Menjalankan
 
 ```bash
@@ -11,10 +15,19 @@ cp .env.example .env     # lalu sesuaikan kredensial basis data
 go run .
 ```
 
+Berkas `.env` di folder ini dibaca saat penyalaan, tetapi variabel lingkungan
+yang sudah tersetel **tidak** ditimpa olehnya. Urutan itu disengaja: layanan
+hosting menyuntikkan kredensialnya lewat lingkungan, dan nilai itu harus
+menang atas berkas yang mungkin tertinggal di server.
+
 Skema basis data diterapkan otomatis saat pertama kali dijalankan. Berkas
 migrasi berada di `migrations/`, dan yang sudah dijalankan dicatat pada tabel
 `migrasi` sehingga aman dipanggil berulang kali. Basis data yang sudah berisi
-tabel dari versi PHP dikenali dan dilewati, bukan ditimpa.
+tabelnya dikenali dan dilewati, bukan ditimpa.
+
+Untuk memindahkan data dari versi PHP yang memakai MySQL, lihat
+`alat/pindah-mysql/` dan bagian 9 pada
+[PANDUAN-INSTALASI.md](../PANDUAN-INSTALASI.md).
 
 Membuat berkas biner untuk diunggah ke server:
 
@@ -39,6 +52,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | `auth.go` | token masuk, pembatas percobaan, ganti sandi |
 | `validasi.go` | pemeriksaan isian formulir |
 | `unggah.go` | penyimpanan berkas dan pemeriksaan tipe aslinya |
+| `cetak.go` | bukti pendaftaran PDF, dirakit dengan Maroto |
 | `model.go` | bentuk data dan daftar pilihan yang sah |
 | `respon.go` | bentuk respons dan galat yang seragam |
 | `handler_publik.go` | halaman publik: profil, jurusan, fasilitas, berita, galeri, kontak |
@@ -63,6 +77,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | POST | `/api/pesan` | kirim pesan dari halaman kontak |
 | POST | `/api/ppdb/daftar` | kirim formulir pendaftaran (multipart) |
 | POST | `/api/ppdb/cek` | cek status dengan nomor registrasi + tanggal lahir |
+| POST | `/api/ppdb/bukti` | unduh bukti pendaftaran PDF, kuncinya sama dengan cek status |
 | POST | `/api/masuk` | masuk sebagai petugas |
 
 ### Perlu token (petugas)
@@ -75,6 +90,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | GET | `/api/admin/pendaftar` | daftar pendaftar, dengan penyaring dan pencarian |
 | GET | `/api/admin/pendaftar/ekspor` | unduh CSV sesuai penyaring yang dipakai |
 | GET | `/api/admin/pendaftar/{id}` | rincian satu pendaftar |
+| GET | `/api/admin/pendaftar/{id}/bukti` | cetak bukti pendaftaran PDF |
 | PATCH | `/api/admin/pendaftar/{id}/status` | verifikasi: ubah status dan catatan |
 | GET | `/api/admin/laporan` | angka efektivitas promosi per kanal |
 | GET | `/api/admin/jurusan` | seluruh peminatan, termasuk yang nonaktif |
@@ -125,3 +141,9 @@ salah, sedangkan `daftar` untuk ringkasan di atas formulir.
 - Dokumen pendaftar hanya dapat diunduh dengan token petugas.
 - Menutup pendaftaran juga menutup jalur API-nya, bukan hanya menyembunyikan
   tombolnya di frontend.
+- Bukti pendaftaran PDF memakai kunci yang sama dengan cek status, yaitu nomor
+  registrasi **beserta** tanggal lahir, dan dikirim dengan
+  `Cache-Control: private, no-store` agar tidak tertinggal di cache proksi.
+- Penomoran nomor registrasi dikunci dengan `pg_advisory_xact_lock` selama
+  transaksi, sehingga pendaftaran yang datang bersamaan tidak memperoleh nomor
+  yang sama.

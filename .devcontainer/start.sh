@@ -4,10 +4,10 @@ set -uo pipefail
 
 AKAR="$(pwd)"
 
-echo ">> Menjalankan MariaDB..."
-sudo service mariadb start >/dev/null 2>&1 || true
+echo ">> Menjalankan PostgreSQL..."
+sudo service postgresql start >/dev/null 2>&1 || true
 for i in $(seq 1 30); do
-  sudo mariadb -e "SELECT 1" >/dev/null 2>&1 && break
+  sudo -u postgres psql -c "SELECT 1" >/dev/null 2>&1 && break
   sleep 1
 done
 

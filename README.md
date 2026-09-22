@@ -12,8 +12,8 @@ bidang *Manajemen Komputer & Sistem*.
 | **Judul** | Digitalisasi Profil Sekolah dan Pendaftaran Peserta Didik Baru (PPDB) Berbasis Web untuk Meningkatkan Efektivitas Promosi pada SMA IMTEK |
 | **Sekolah** | SMA IMTEK (Swasta), NPSN 20613766, Akreditasi B<br>Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Banten 15339 |
 | **Bidang** | Manajemen Komputer & Sistem |
-| **Backend** | Go 1.27 (pustaka standar, tanpa kerangka kerja web) + MySQL/MariaDB |
-| **Frontend** | Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4 + Framer Motion |
+| **Backend** | Go 1.27 (pustaka standar, tanpa kerangka kerja web) + PostgreSQL 17 + Maroto (cetak PDF) |
+| **Frontend** | Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4 + Framer Motion + Lenis + Radix UI |
 | **Dosen Pendamping** | Nurhayati, S.Kom., M.Kom. |
 | **Reviewer** | Raditia Vindua, S.Si., M.Kom. |
 
@@ -34,6 +34,7 @@ pkm-sma-imtek/
 │   ├── auth.go              token masuk, pembatas percobaan
 │   ├── validasi.go          pemeriksaan isian formulir
 │   ├── unggah.go            penyimpanan dan pemeriksaan berkas
+│   ├── cetak.go             bukti pendaftaran PDF dengan Maroto
 │   ├── handler_*.go         penangan tiap kelompok alamat API
 │   └── migrations/          skema basis data (9 tabel + data awal)
 │
@@ -42,8 +43,12 @@ pkm-sma-imtek/
 │       ├── app/(publik)/    beranda, profil, fasilitas, berita, galeri,
 │       │                    kontak, info PPDB, formulir, cek status
 │       ├── app/admin/       11 halaman panel panitia
-│       ├── komponen/        elemen tampilan bersama
+│       ├── komponen/        elemen tampilan bersama, termasuk jendela
+│       │                    dan kabar berbasis Radix serta gulir Lenis
 │       └── lib/             lapisan API, tipe data, pembantu format
+│
+├── alat/
+│   └── pindah-mysql/   Memindahkan data versi PHP (MySQL) ke PostgreSQL
 │
 ├── legacy-php/     Versi PHP pertama, diarsipkan sebagai rujukan perilaku
 ├── docs/           Demo statis untuk GitHub Pages
@@ -58,7 +63,7 @@ frontend-nya dapat dipindah ke layanan lain tanpa menyentuh logika data.
 
 ## Menjalankan
 
-Dibutuhkan **Go 1.24+**, **Node.js 20+**, dan **MySQL/MariaDB**.
+Dibutuhkan **Go 1.24+**, **Node.js 20+**, dan **PostgreSQL 14+**.
 
 ```bash
 # 1. Backend
@@ -78,13 +83,18 @@ Buka `http://localhost:3000`. Panel panitia ada di `/admin`.
 **Akun bawaan:** `admin` / `admin123`. **Wajib segera diganti** lewat menu
 *Ganti Sandi*, karena hash sandinya ada di dalam repositori publik ini.
 
+Berkas `.env` dibaca saat penyalaan, tetapi variabel lingkungan yang sudah
+tersetel tidak ditimpa olehnya, supaya kredensial dari layanan hosting menang
+atas berkas yang mungkin tertinggal di server.
+
 Langkah lengkap beserta penyiapan untuk server ada di
-**[PANDUAN-INSTALASI.md](PANDUAN-INSTALASI.md)**.
+**[PANDUAN-INSTALASI.md](PANDUAN-INSTALASI.md)**. Untuk memindahkan data dari
+versi PHP yang memakai MySQL, lihat bagian 9 pada panduan itu.
 
 ### Menjalankan dari peramban, tanpa memasang apa pun
 
 Repositori ini dilengkapi konfigurasi **GitHub Codespaces**, sehingga Go,
-Node.js, dan MariaDB dipasang otomatis:
+Node.js, dan PostgreSQL dipasang otomatis:
 
 1. Pada halaman repositori, klik tombol hijau **Code**
 2. Pilih tab **Codespaces**, lalu **Create codespace on main**
@@ -117,7 +127,7 @@ dipakai sekolah sungguhan tetap diperlukan hosting.
 |---|---|---|
 | Informasi PPDB | `/ppdb` | Jadwal, empat jalur, alur, dokumen yang diminta, kuota per peminatan |
 | Formulir Pendaftaran | `/ppdb/daftar` | Lima langkah pengisian + unggah enam dokumen + pernyataan kebenaran data |
-| Cek Status | `/ppdb/cek` | Pantau hasil verifikasi dengan nomor registrasi + tanggal lahir |
+| Cek Status | `/ppdb/cek` | Pantau hasil verifikasi dengan nomor registrasi + tanggal lahir, dan unduh bukti pendaftaran PDF |
 
 Formulirnya dibagi lima langkah dan dapat dilompati bebas. Bila server menolak
 isian, halaman otomatis kembali ke langkah yang memuat kesalahan pertama, dan
@@ -129,7 +139,7 @@ setiap keterangan kesalahan menempel di bawah kolomnya masing-masing.
 |---|---|---|
 | Dasbor | `/admin` | Angka ringkas, sebaran status, kanal promosi teratas, keterisian kuota, tren 30 hari |
 | Data Pendaftar | `/admin/pendaftar` | Penyaring lima kriteria, pencarian, pengurutan, halaman, unduh CSV |
-| Detail Pendaftar | `/admin/pendaftar/{id}` | Seluruh isian, dokumen terlindungi token, ubah status, catatan panitia |
+| Detail Pendaftar | `/admin/pendaftar/{id}` | Seluruh isian, dokumen terlindungi token, ubah status, catatan panitia, cetak bukti PDF |
 | Laporan Promosi | `/admin/laporan` | Rekap per kanal, jalur, status, peminatan, jenis kelamin, asal sekolah, bulan |
 | Peminatan | `/admin/jurusan` | Kelola peminatan dan kuotanya |
 | Berita | `/admin/berita` | Tulis, ubah, hapus, terbit/draf, unggah gambar |
@@ -199,9 +209,20 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 | `pesan` | Pesan dari formulir kontak |
 | `statistik_kunjungan` | Kunjungan per halaman per hari + sumber rujukan |
 
+Isinya dapat ditengok dengan **DBeaver**: buat sambungan PostgreSQL baru
+memakai host, porta, nama basis data, pengguna, dan sandi yang sama dengan
+`backend/.env`.
+
 Skema diterapkan otomatis saat backend pertama kali dijalankan. Basis data
-yang sudah berisi tabel dari versi PHP dikenali dan **dilewati**, bukan
-ditimpa.
+yang sudah berisi tabelnya dikenali dan **dilewati**, bukan ditimpa.
+
+Tiga keputusan skema dicatat di kepala `backend/migrations/001_skema.sql`:
+pilihan yang terbatas ditulis sebagai `varchar` beserta `CHECK` dan bukan
+`enum`, karena menambah satu pilihan pada `enum` PostgreSQL memerlukan
+`ALTER TYPE`; kolom `updated_at` diisi oleh satu pemicu `plpgsql` bersama,
+karena PostgreSQL tidak mengenal `ON UPDATE CURRENT_TIMESTAMP`; dan seluruh
+nama ditulis huruf kecil, karena PostgreSQL melipat nama tanpa tanda kutip
+menjadi huruf kecil.
 
 ---
 
@@ -258,10 +279,9 @@ bahan pembanding pada laporan PkM. Keterangannya ada di
 
 ## Status Pengujian
 
-Diuji pada Go 1.27, Node.js 24, dan MySQL 9.3 (mode `ONLY_FULL_GROUP_BY` dan
-`STRICT_TRANS_TABLES` aktif).
+Diuji pada Go 1.27, Node.js 24, dan PostgreSQL 17.4.
 
-**Backend, 71 pemeriksaan terhadap API yang berjalan:**
+**Backend, 151 pemeriksaan terhadap API yang berjalan:**
 
 - Pendaftaran lengkap dengan unggahan → nomor registrasi terbit, data dan
   berkas tersimpan.
@@ -281,8 +301,13 @@ Diuji pada Go 1.27, Node.js 24, dan MySQL 9.3 (mode `ONLY_FULL_GROUP_BY` dan
 - Menutup pendaftaran menutup jalur API-nya sekaligus.
 - Migrasi pada basis data yang sudah berisi data terbukti tidak menggandakan
   maupun menimpa isinya.
+- Bukti pendaftaran PDF terbit untuk pendaftar dan untuk panitia, dan
+  permintaan dengan tanggal lahir yang salah tertolak.
+- Dua belas pendaftaran yang dikirim serentak menghasilkan dua belas nomor
+  registrasi yang berurutan tanpa kembar maupun lompatan, karena penomorannya
+  dikunci dengan `pg_advisory_xact_lock`.
 
-**Frontend, 62 pemeriksaan di peramban sungguhan (Chrome, protokol DevTools):**
+**Frontend, 73 pemeriksaan di peramban sungguhan (Chrome, protokol DevTools):**
 
 - Sepuluh alamat halaman memuat dengan judul dan data sekolah yang benar.
 - Tidak ada gulir mendatar pada lebar 1440px maupun 390px.
@@ -299,6 +324,9 @@ Diuji pada Go 1.27, Node.js 24, dan MySQL 9.3 (mode `ONLY_FULL_GROUP_BY` dan
 - Menutup PPDB dari Pengaturan langsung menutup formulirnya di situs publik.
 - Menu khusus admin hilang bagi operator, dan operator yang memaksa membuka
   alamatnya ditolak server.
+- Jendela Radix: fokus terkurung di dalamnya, latar belakang diberi
+  `aria-hidden`, gulir halaman terkunci, dan tombol Escape menutupnya.
+- Gulir halus Lenis aktif di halaman publik dan tidak dipasang di panel.
 
 Backend bersih dari `go vet` dan `gofmt`; frontend bersih dari `eslint` dan
 `tsc`.
