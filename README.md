@@ -192,7 +192,7 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 | `users` | Akun admin dan operator panitia |
 | `pengaturan` | Pengaturan situs dan PPDB (pasangan nama–nilai) |
 | `jurusan` | Peminatan beserta kuota |
-| `pendaftar` | Data pendaftar PPDB (58 kolom) |
+| `pendaftar` | Data pendaftar PPDB (50 kolom) |
 | `berita` | Berita, pengumuman, prestasi, kegiatan |
 | `galeri` | Foto dokumentasi kegiatan |
 | `fasilitas` | Sarana dan prasarana sekolah |
