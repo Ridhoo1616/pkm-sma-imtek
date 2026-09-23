@@ -9,7 +9,7 @@
    peramban pengunjung masing-masing.
    ================================================================== */
 
-const KUNCI = "demo_pkm_v3";
+const KUNCI = "demo_pkm_v4";
 
 /* ---------- keadaan ---------- */
 
@@ -28,6 +28,8 @@ const bawaan = {
   soal: DATA.soal.map((s) => ({ ...s })),
   paketUjian: DATA.paketUjian.map((p) => ({ ...p })),
   notifikasi: DATA.notifikasi.map((n) => ({ ...n })),
+  faq: DATA.faq.map((f) => ({ ...f })),
+  kategoriFaq: [...DATA.kategoriFaq],
   // Sesi ujian dimulai kosong: pada demo, setiap pengunjung mengerjakan
   // tesnya sendiri, dan hasil peserta contoh sudah ada di hasilUjian.
   sesiUjian: [],
@@ -197,6 +199,7 @@ const RUTE = [
   [/^\/berita\/(.+)$/,          (m) => bukaBeritaDetail(m[1])],
   [/^\/galeri$/,                () => bukaGaleri()],
   [/^\/kontak$/,                () => bukaKontak()],
+  [/^\/faq$/,                  () => bukaFaq()],
   [/^\/ppdb$/,                  () => bukaPpdb()],
   [/^\/ppdb\/daftar$/,          () => bukaFormulir()],
   [/^\/ppdb\/cek$/,             () => bukaCekStatus()],
@@ -245,6 +248,9 @@ function rute() {
     if (m) {
       tangani(m);
       tandaiMenuAktif(jalur);
+      // Penanda pada tombol bantuan bergantung halaman yang sedang dibuka,
+      // jadi dipasang ulang setiap perpindahan.
+      pasangBantuan();
       window.scrollTo({ top: 0, behavior: "instant" });
       return;
     }
@@ -911,6 +917,7 @@ function bukaPpdb() {
   const tombolIsi = [...isiPublik.querySelectorAll("a")].find((a) =>
     a.textContent.trim() === "Isi Formulir Pendaftaran");
   if (tombolIsi && !buka) tombolIsi.remove();
+  pasangPenunjukAlur("ketentuan");
 }
 
 /* ==================================================================
@@ -1050,6 +1057,7 @@ function bukaFormulir() {
   berkasTerpilih = {};
   isiPublik.innerHTML = HALAMAN.daftarKerangka;
   renderLangkah([]);
+  pasangPenunjukAlur("daftar");
 }
 
 function halamanPendaftaranTertutup() {
@@ -1491,6 +1499,7 @@ function bukaCekStatus() {
     }
     tampilkanHasilCek(p);
   };
+  pasangPenunjukAlur("pantau");
 }
 
 function tampilkanHasilCek(p) {
@@ -3184,6 +3193,7 @@ function bukaUjian() {
 
   const paket = paketDemo();
   isiPublik.innerHTML = HALAMAN.ujian;
+  pasangPenunjukAlur("tes");
 
   if (!ujianDibuka()) {
     // Tangkapan halamannya sudah memuat keadaan "belum dibuka", jadi tidak
@@ -3445,4 +3455,256 @@ function tampilkanHasilUjian(sesi, paket) {
         </div>
       </div>
     </div>`;
+}
+
+/* ==================================================================
+   Tombol bantuan melayang, penunjuk alur, dan tanya jawab pada demo
+
+   Markupnya seluruhnya berasal dari tangkapan aplikasi, jadi tampilannya
+   sama persis. Yang ditulis di sini hanya perilakunya: membuka dan menutup
+   panel, menandai posisi pengunjung pada alur, serta menyaring tanya jawab.
+   ================================================================== */
+
+/* ---------- tombol bantuan melayang ---------- */
+
+/** Mencocokkan jalur demo dengan langkah pada alur, sama seperti aplikasi. */
+function langkahAlurDari(jalur) {
+  if (jalur.startsWith("/ppdb/daftar")) return 2;
+  if (jalur.startsWith("/ppdb/ujian")) return 4;
+  if (jalur.startsWith("/ppdb/cek")) return 3;
+  if (jalur.startsWith("/ppdb")) return 1;
+  if (jalur === "/profil" || jalur.startsWith("/fasilitas")) return 0;
+  return -1;
+}
+
+// var, bukan let: berkas ini digabung paling akhir, sedangkan rute() pada
+// 02-rute.js sudah memanggil pasangBantuan() saat halaman pertama dimuat.
+// Dengan let, peubahnya masih berada di temporal dead zone pada saat itu.
+var bantuanTerbuka = false;
+
+function pasangBantuan() {
+  const wadah = document.getElementById("bantuan-melayang");
+  if (!wadah) return;
+  wadah.innerHTML = bantuanTerbuka ? HALAMAN.bantuanBuka : HALAMAN.bantuanTutup;
+
+  if (bantuanTerbuka) {
+    // Penanda "Anda di sini" dan "Langkah berikutnya" dipasang ulang menurut
+    // halaman yang sedang dibuka, karena tangkapannya hanya memuat keadaan
+    // satu halaman saja.
+    perbaruiPenandaBantuan(wadah);
+  }
+
+  const tombol = wadah.querySelector("button");
+  if (tombol) {
+    tombol.addEventListener("click", () => {
+      bantuanTerbuka = !bantuanTerbuka;
+      pasangBantuan();
+    });
+  }
+  wadah.querySelectorAll("a[href^='/']").forEach((a) =>
+    a.addEventListener("click", () => {
+      bantuanTerbuka = false;
+    }),
+  );
+}
+
+function perbaruiPenandaBantuan(wadah) {
+  const butir = [...wadah.querySelectorAll("ol li")];
+  if (!butir.length) return;
+  const kini = langkahAlurDari(jalurSekarang());
+  const dibuka = K.pengaturan.ppdb_status === "buka";
+  const berikut = !dibuka && kini < 1 ? 1 : Math.min(kini + 1, butir.length - 1);
+
+  butir.forEach((li, i) => {
+    const tautan = li.querySelector("a");
+    const nomor = li.querySelector("a > span:first-child");
+    // Penanda dari tangkapan dibuang lebih dulu.
+    li.querySelectorAll("[data-penanda]").forEach((el) => el.remove());
+    li.querySelectorAll("span").forEach((el) => {
+      const t = el.textContent.trim();
+      if (t === "Anda di sini" || t === "Langkah berikutnya") el.remove();
+    });
+
+    const sekarang = i === kini;
+    const disarankan = i === berikut && !sekarang;
+
+    if (tautan) {
+      tautan.className =
+        "flex gap-3 px-5 py-3.5 transition " +
+        (disarankan ? "bg-emas/15 hover:bg-emas/25" : "hover:bg-biru-muda/50");
+    }
+    if (nomor) {
+      nomor.className =
+        "mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold tabular-nums " +
+        (sekarang
+          ? "bg-biru-tua text-white"
+          : disarankan
+            ? "bg-emas text-biru-tua"
+            : "bg-biru-muda text-biru");
+    }
+    if (sekarang || disarankan) {
+      const baris = li.querySelector("a > span:last-child > span:first-child");
+      if (baris) {
+        const tanda = document.createElement("span");
+        tanda.dataset.penanda = "1";
+        tanda.className = sekarang
+          ? "rounded bg-biru-muda px-1.5 py-0.5 text-[11px] font-semibold text-biru"
+          : "rounded bg-emas px-1.5 py-0.5 text-[11px] font-bold text-biru-tua";
+        tanda.textContent = sekarang ? "Anda di sini" : "Langkah berikutnya";
+        baris.appendChild(tanda);
+      }
+    }
+  });
+}
+
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Escape" && bantuanTerbuka) {
+    bantuanTerbuka = false;
+    pasangBantuan();
+  }
+});
+
+/* ---------- penunjuk alur ---------- */
+
+/** Menempelkan bilah penunjuk alur di atas isi halaman PPDB. */
+function pasangPenunjukAlur(tahap) {
+  const isi = HALAMAN[`alur_${tahap}`];
+  if (!isi) return;
+  // Satu halaman kadang digambar ulang, misalnya sesudah data berubah.
+  // Tanpa pemeriksaan ini, bilahnya menumpuk setiap penggambaran.
+  if (isiPublik.querySelector('[aria-label="Alur pendaftaran"]')) return;
+  const el = document.createElement("div");
+  el.innerHTML = isi;
+  const bilah = el.firstElementChild;
+  if (!bilah) return;
+  // Tautannya dijadikan tautan demo, dan tahap aktif tidak diklik.
+  bilah.querySelectorAll("a[href^='/']").forEach((a) => {
+    const tujuan = a.getAttribute("href");
+    a.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      pergi(tujuan);
+    });
+  });
+  isiPublik.prepend(bilah);
+}
+
+/* ---------- tanya jawab ---------- */
+
+function bukaFaq() {
+  situs.hidden = false;
+  panel.hidden = true;
+  wadahMasuk.hidden = true;
+  isiPanel.innerHTML = "";
+  tandaiMenuAktif("/faq");
+  isiPublik.innerHTML = HALAMAN.faq;
+  siapkanFaq();
+}
+
+function siapkanFaq() {
+  const kotakCari = isiPublik.querySelector("#cari-faq");
+  const tombolKategori = [...isiPublik.querySelectorAll("button")].filter((b) =>
+    ["Semua", ...(K.kategoriFaq || [])].includes(b.textContent.trim()),
+  );
+  let kategori = "";
+  let cari = "";
+
+  function gambar() {
+    const kata = cari.trim().toLowerCase();
+    const cocok = (K.faq || []).filter((f) => {
+      if (!f.aktif) return false;
+      if (kategori && f.kategori !== kategori) return false;
+      if (!kata) return true;
+      return (
+        f.pertanyaan.toLowerCase().includes(kata) ||
+        f.jawaban.toLowerCase().includes(kata)
+      );
+    });
+
+    const butir = (f, sorot) => `
+      <details class="kartu group overflow-hidden ${sorot ? "border-emas/50" : ""}">
+        <summary class="flex cursor-pointer list-none items-start gap-3 px-5 py-4 transition hover:bg-biru-muda/40">
+          <span aria-hidden="true" class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-biru-muda text-sm font-bold text-biru transition group-open:rotate-45">+</span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-[15px] font-semibold text-teks">${e(f.pertanyaan)}</span>
+            <span class="mt-1 block text-xs text-samar">${e(f.kategori)}</span>
+          </span>
+        </summary>
+        <div class="border-t border-garis px-5 py-4 pl-14">
+          <p class="text-[15px] leading-relaxed whitespace-pre-line text-teks">${e(f.jawaban)}</p>
+        </div>
+      </details>`;
+
+    const disorot = cocok.filter((f) => f.sorot);
+    const lainnya = cocok.filter((f) => !f.sorot);
+
+    const wadah = isiPublik.querySelector("[data-daftar-faq]");
+    if (!wadah) return;
+
+    if (!cocok.length) {
+      wadah.innerHTML = `
+        <div class="kartu p-8 text-center">
+          <p class="font-semibold text-teks">Tidak ada pertanyaan yang cocok</p>
+          <p class="mt-1.5 text-sm leading-relaxed text-samar">
+            Coba kata lain, atau tanyakan langsung lewat tombol WhatsApp di pojok kanan bawah.
+          </p>
+        </div>`;
+      return;
+    }
+
+    wadah.innerHTML = `
+      ${
+        disorot.length
+          ? `<section>
+               <h2 class="mb-3 flex items-center gap-2 text-base">
+                 <span class="rounded bg-emas px-2 py-0.5 text-xs font-bold text-biru-tua">Sering ditanyakan</span>
+               </h2>
+               <div class="space-y-3">${disorot.map((f) => butir(f, true)).join("")}</div>
+             </section>`
+          : ""
+      }
+      ${
+        lainnya.length
+          ? `<section class="${disorot.length ? "mt-8" : ""}">
+               ${disorot.length ? '<h2 class="mb-3 text-base text-samar">Pertanyaan lainnya</h2>' : ""}
+               <div class="space-y-3">${lainnya.map((f) => butir(f, false)).join("")}</div>
+             </section>`
+          : ""
+      }`;
+  }
+
+  // Wadah daftar ditandai sekali, supaya penggambaran ulang tidak menimpa
+  // kotak pencarian dan tombol kategorinya.
+  const kartuPertama = isiPublik.querySelector(".kartu");
+  if (kartuPertama && !isiPublik.querySelector("[data-daftar-faq]")) {
+    const wadah = document.createElement("div");
+    wadah.dataset.daftarFaq = "1";
+    kartuPertama.after(wadah);
+    // Daftar dari tangkapan dibuang; yang dipakai hasil penggambaran ulang.
+    [...isiPublik.querySelectorAll("section")]
+      .filter((s) => s.querySelector("details"))
+      .forEach((s) => s.remove());
+  }
+
+  if (kotakCari) {
+    kotakCari.addEventListener("input", () => {
+      cari = kotakCari.value;
+      gambar();
+    });
+  }
+  tombolKategori.forEach((b) =>
+    b.addEventListener("click", () => {
+      const t = b.textContent.trim();
+      kategori = t === "Semua" ? "" : t;
+      tombolKategori.forEach((x) => {
+        const aktif = x === b;
+        x.className = aktif
+          ? "rounded-lg px-3.5 py-2 text-sm font-semibold transition bg-biru text-white"
+          : "rounded-lg px-3.5 py-2 text-sm font-semibold transition border border-garis text-teks hover:border-biru hover:text-biru";
+        x.setAttribute("aria-pressed", String(aktif));
+      });
+      gambar();
+    }),
+  );
+
+  gambar();
 }

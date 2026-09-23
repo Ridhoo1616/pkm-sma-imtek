@@ -439,10 +439,12 @@ khusus fitur baru:
   keterangannya.
 - Kartu peserta terbit sebagai PDF berisi barcode dan kode QR.
 
-**Demo statis, 88 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
+**Demo statis, 105 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
 pengelolaan isi situs, batas hak akses operator, tes seleksi dari masuk sampai
 nilai keluar, rincian biaya beserta totalnya, keempat menu panel baru, dan
-tombol PDF yang menjelaskan bahwa berkasnya dibuat oleh server.
+tombol PDF yang menjelaskan bahwa berkasnya dibuat oleh server, penunjuk
+alur, tombol bantuan melayang beserta penanda posisinya, dan tanya jawab
+lengkap dengan penyaring serta pencariannya.
 
 Pada demo, tes seleksi dijalankan di peramban pengunjung, jadi waktu dan kunci
 jawabannya tidak terlindungi seperti pada aplikasi sebenarnya. Batasan itu
