@@ -118,6 +118,36 @@ export function kePoinTerisi(isi: string): string[] {
   return kePoin(isi).filter((poin) => !belumTerisi(poin));
 }
 
+/**
+ * Tautan WhatsApp beserta pesan yang sudah terisi.
+ *
+ * Dipusatkan di sini karena tautan wa.me tersebar di lima tempat — bilah
+ * atas, footer, halaman Kontak, tombol bantuan melayang, dan panel pesan —
+ * dan empat di antaranya dulu mengarah ke wa.me TANPA pesan apa pun. Yang
+ * membuka jadi menghadap ruang obrolan kosong, lalu harus menyusun sendiri
+ * pertanyaannya; sebagian akan menutupnya begitu saja. Pesan bawaan
+ * menghilangkan hambatan itu, dan sekaligus memberi panitia konteks pada
+ * pesan pertama yang masuk.
+ *
+ * Nomor yang belum diisi mengembalikan string kosong, jadi pemanggilnya dapat
+ * menyembunyikan tombolnya — bukan menampilkan tautan yang menuju entah ke
+ * mana.
+ */
+export function tautanWa(nomor: string, pesan: string): string {
+  const wa = nomorWa(nomor);
+  if (!wa) return "";
+  const isi = pesan.trim();
+  return isi
+    ? `https://wa.me/${wa}?text=${encodeURIComponent(isi)}`
+    : `https://wa.me/${wa}`;
+}
+
+/** Pesan bawaan bagi pengunjung yang ingin bertanya tentang PPDB. */
+export function pesanTanyaPpdb(namaSekolah: string): string {
+  const nama = (namaSekolah || "").trim() || "sekolah";
+  return `Assalamualaikum, saya ingin bertanya tentang PPDB ${nama}.`;
+}
+
 export function nomorWa(nomor: string): string {
   const angkaSaja = (nomor || "").replace(/\D/g, "");
   if (!angkaSaja) return "";

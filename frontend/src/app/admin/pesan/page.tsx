@@ -4,7 +4,7 @@ import { useState } from "react";
 import { api, GalatApi } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
-import { angka, tanggalJam, nomorWa } from "@/lib/format";
+import { angka, tanggalJam, nomorWa, tautanWa } from "@/lib/format";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, KartuAngka, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
@@ -203,7 +203,13 @@ function IsiPesan() {
                   )}
                   {wa && (
                     <a
-                      href={`https://wa.me/${wa}`}
+                      // Pesan bawaannya menyebut subjek pertanyaannya, supaya
+                      // penanya tahu balasan ini untuk yang mana — panitia
+                      // membalas berhari-hari sesudah pertanyaannya masuk.
+                      href={tautanWa(
+                        p.no_hp,
+                        `Assalamualaikum, ini panitia PPDB. Kami membalas pertanyaan Anda: "${p.subjek || "(tanpa subjek)"}".`,
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="rounded-lg bg-green-50 px-3.5 py-2 text-sm font-semibold text-green-700 hover:bg-green-100"

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Pengaturan } from "@/lib/tipe";
-import { nomorWa } from "@/lib/format";
+import { pesanTanyaPpdb, tautanWa } from "@/lib/format";
 import { MENU } from "@/lib/menu";
 import { IkonSurel, IkonTelepon, IkonWhatsapp } from "./Ikon";
 
@@ -94,7 +94,12 @@ export default function Navigasi({
   const kelompokAktif = (jalur: string, anak?: { jalur: string }[]) =>
     aktif(jalur) || (anak ?? []).some((a) => aktif(a.jalur));
 
-  const wa = nomorWa(pengaturan.whatsapp ?? "");
+  // Pesannya sudah terisi, jadi yang membukanya tidak menghadap ruang
+  // obrolan kosong lalu harus menyusun sendiri pertanyaannya.
+  const wa = tautanWa(
+    pengaturan.whatsapp ?? "",
+    pesanTanyaPpdb(pengaturan.nama_sekolah ?? ""),
+  );
 
   return (
     <header className="tanpa-cetak sticky top-0 z-50">
@@ -125,7 +130,7 @@ export default function Navigasi({
           <div className="flex items-center gap-5">
             {wa && (
               <a
-                href={`https://wa.me/${wa}`}
+                href={wa}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5 opacity-85 hover:text-emas hover:opacity-100"

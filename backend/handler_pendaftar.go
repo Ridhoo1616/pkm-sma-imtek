@@ -74,15 +74,19 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		v.usiaWajar("tanggal_lahir", lahir)
 	}
 
-	/* ---- isian opsional ---- */
+	/* ---- NISN: wajib ---- */
+	// NISN diwajibkan supaya pendaftar tanpa nomor itu tidak masuk sebagai
+	// baris yang tidak dapat dicocokkan panitia ke data Dapodik sekolah asal.
 	nisn := isi("nisn")
+
+	/* ---- isian opsional ---- */
 	nik := isi("nik")
 	email := isi("email")
 	// Keduanya diperiksa strukturnya, lalu dicocokkan dengan isian lain pada
 	// formulir yang sama. Lihat validasi_identitas.go untuk alasannya, beserta
 	// keterangan bahwa pencocokan ke basis data pemerintah tidak mungkin
 	// dilakukan tanpa perjanjian kerja sama resmi.
-	v.periksaNisn(nisn, nik)
+	v.periksaNisn(nisn, nik, tanggalLahir)
 	v.periksaNik(nik, tanggalLahir, jenisKelamin)
 	v.telepon("no_hp", "Nomor HP/WhatsApp", noHP, true)
 	v.telepon("no_hp_ortu", "Nomor HP orang tua", isi("no_hp_ortu"), false)

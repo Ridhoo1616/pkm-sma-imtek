@@ -140,20 +140,30 @@ func TestPeriksaNikMencocokkanDenganIsianLain(t *testing.T) {
 }
 
 func TestPeriksaNisn(t *testing.T) {
+	// Tahun lahir acuan 2011, jadi awalan NISN yang sah adalah 011.
+	const lahir2011 = "2011-05-15"
+
 	kasus := []struct {
-		nama, nisn, nik, penanda string
+		nama, nisn, nik, lahir, penanda string
 	}{
-		{"sah", "0119876543", "", ""},
-		{"sembilan angka", "011987654", "", "10 angka"},
-		{"panjang NIK", nikLaki, "", "itu panjang NIK"},
-		{"ada hurufnya", "01198765A3", "", "hanya boleh berisi angka"},
-		{"nol semua", "0000000000", "", "nol semuanya"},
-		{"sepuluh angka pertama NIK", nikLaki[:10], nikLaki, "sepuluh angka pertama NIK"},
+		{"sah", "0119876543", "", lahir2011, ""},
+		{"tanpa tanggal lahir, awalan tidak diperiksa", "9876543210", "", "", ""},
+		{"kosong padahal wajib", "", "", lahir2011, "wajib diisi"},
+		{"sembilan angka", "011987654", "", lahir2011, "10 angka"},
+		{"panjang NIK", nikLaki, "", lahir2011, "itu panjang NIK"},
+		{"ada hurufnya", "01198765A3", "", lahir2011, "hanya boleh berisi angka"},
+		{"nol semua", "0000000000", "", lahir2011, "nol semuanya"},
+		{"sepuluh angka pertama NIK", nikLaki[:10], nikLaki, lahir2011, "sepuluh angka pertama NIK"},
+		// Inilah yang dulu lolos: sepuluh angka, bukan nol semuanya, tetapi
+		// awalannya mustahil bagi tahun lahir mana pun yang wajar.
+		{"nol berderet lalu angka", "0000000098", "", lahir2011, "tiga angka terakhir tahun lahir"},
+		{"awalan tidak cocok tahun lahir", "9876543210", "", lahir2011, "tiga angka terakhir tahun lahir"},
+		{"awalan cocok tahun lahir lain", "0129876543", "", lahir2011, "011"},
 	}
 	for _, k := range kasus {
 		t.Run(k.nama, func(t *testing.T) {
 			v := validasiBaru()
-			v.periksaNisn(k.nisn, k.nik)
+			v.periksaNisn(k.nisn, k.nik, k.lahir)
 			if k.penanda == "" {
 				if v.bermasalah() {
 					t.Fatalf("NISN yang sah ditolak: %v", v.Daftar)

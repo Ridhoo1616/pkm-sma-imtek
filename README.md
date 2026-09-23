@@ -489,11 +489,26 @@ menghitung angka yang masih kurang, lalu berubah menjadi keterangan hijau
 dijalankan ulang di backend, karena pemeriksaan di peramban tidak pernah
 menjadi satu-satunya penjaga.
 
-Satu hal sengaja **tidak** menolak pendaftaran. Tiga angka pertama NISN pada
-umumnya tiga angka terakhir tahun lahir, tetapi itu kebiasaan penomoran dan
-bukan aturan yang mengikat: ada NISN sah yang tidak mengikutinya. Karena itu
-ketidakcocokannya hanya berupa peringatan yang menyebut angka yang diharapkan,
-diakhiri "bila memang begitu tertulis di rapor, biarkan saja".
+**NISN wajib diisi, dan tiga angka pertamanya harus sama dengan tiga angka
+terakhir tahun lahir.** Aturan kedua itu semula hanya peringatan, dengan alasan
+yang masih benar: penomorannya kebiasaan, bukan aturan yang mengikat, dan ada
+NISN sah yang tidak mengikutinya. Tetapi sebagai peringatan ia membiarkan nomor
+karangan lewat — `0000000098` diterima apa adanya: sepuluh angka, bukan nol
+semuanya, jadi tidak ada satu pun aturan yang menolaknya — padahal nomor yang
+dikarang jauh lebih sering daripada NISN sah yang menyimpang dari kebiasaan
+penomorannya.
+
+Konsekuensinya diterima dengan sadar: pendaftar yang NISN aslinya memang tidak
+mengikuti kebiasaan itu **tidak dapat mengirim formulir sendiri**. Karena itu
+pesan galatnya wajib menyebutkan jalan keluarnya — "bila keduanya sudah sesuai
+rapor, hubungi panitia lewat halaman Kontak agar dicatat manual". Tanpa kalimat
+itu, pendaftar yang datanya benar akan mengira dirinya yang salah.
+
+Yang tetap **tidak** dapat dikerjakan: memastikan NISN-nya benar-benar ada dan
+benar-benar milik pendaftar. Laman NISN Kemendikbud tidak menyediakan API, dan
+Dapodik hanya terbuka bagi sekolah lewat akunnya sendiri. Kepastian itu tetap
+harus datang dari panitia yang mencocokkan nomor pada rapor atau ijazah SMP
+yang diunggah pendaftar — dan itulah sebabnya berkas itu diminta.
 
 ### H. Dukungan tujuan "meningkatkan efektivitas promosi"
 
@@ -594,7 +609,29 @@ kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
 
-### K. Lencana status
+### K. Tautan WhatsApp beserta pesan bawaannya
+
+Tautan `wa.me` ada di lima tempat: bilah atas, footer, halaman Kontak, tombol
+bantuan melayang, dan panel pesan panitia. Empat di antaranya dulu mengarah ke
+`wa.me` **tanpa pesan apa pun**, jadi yang membukanya menghadap ruang obrolan
+kosong lalu harus menyusun sendiri pertanyaannya — dan sebagian akan
+menutupnya begitu saja. Sekarang semuanya lewat `tautanWa()` di
+`lib/format.ts`, dengan pesan yang sudah terisi:
+
+- Pengunjung: "Assalamualaikum, saya ingin bertanya tentang PPDB
+  {nama sekolah}."
+- Panitia yang membalas dari panel pesan: menyebut subjek pertanyaannya,
+  supaya penanya tahu balasan ini untuk yang mana — panitia sering membalas
+  berhari-hari sesudah pertanyaannya masuk.
+
+Nomor yang belum diisi membuat `tautanWa()` mengembalikan string kosong, dan
+pemanggilnya menyembunyikan tombolnya. **Selama pengaturan Nomor WhatsApp
+panitia masih kosong, seluruh tombol WhatsApp tidak muncul** — tombol yang
+menuju entah ke mana lebih buruk daripada tombol yang tidak ada. Nomor telepon
+sekolah tidak dipakai sebagai gantinya, karena nomornya nomor kabel yang tidak
+punya WhatsApp.
+
+### L. Lencana status
 
 Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
 petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:

@@ -1,5 +1,10 @@
 import { muatProfil } from "@/lib/profil";
-import { alamatLengkap, nomorWa, belumTerisi } from "@/lib/format";
+import {
+  alamatLengkap,
+  belumTerisi,
+  pesanTanyaPpdb,
+  tautanWa,
+} from "@/lib/format";
 import { KepalaHalaman, JudulBagian } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
 import FormulirKontak from "@/komponen/FormulirKontak";
@@ -20,7 +25,7 @@ export const metadata: Metadata = {
 export default async function HalamanKontak() {
   const { profil } = await muatProfil();
   const p = profil.pengaturan;
-  const wa = nomorWa(p.whatsapp ?? "");
+  const wa = tautanWa(p.whatsapp ?? "", pesanTanyaPpdb(p.nama_sekolah ?? ""));
 
   return (
     <>
@@ -82,7 +87,7 @@ export default async function HalamanKontak() {
                 </p>
                 {wa ? (
                   <a
-                    href={`https://wa.me/${wa}`}
+                    href={wa}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-1 inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700"

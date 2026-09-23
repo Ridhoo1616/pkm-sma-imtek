@@ -215,17 +215,31 @@ func (v *Validasi) periksaNik(nik, tanggalLahir, jenisKelamin string) {
 	}
 }
 
-// periksaNisn memeriksa NISN. Yang dapat dipastikan hanya panjang dan isinya
-// angka, jadi hanya itu yang menolak kiriman.
+// periksaNisn memeriksa NISN beserta kecocokannya dengan tanggal lahir pada
+// formulir yang sama.
 //
-// Tiga angka pertama NISN pada umumnya adalah tiga angka terakhir tahun lahir,
-// tetapi itu kebiasaan penomoran, bukan aturan yang mengikat: ada NISN sah yang
-// tidak mengikutinya, terutama bagi peserta didik yang nomornya diterbitkan
-// menyusul. Karena itu ketidakcocokannya TIDAK menolak pendaftaran; peringatannya
-// ditampilkan di formulir saat pendaftar mengetik, sehingga salah ketik tetap
-// tertangkap tanpa menolak nomor yang sebenarnya benar.
-func (v *Validasi) periksaNisn(nisn, nik string) {
+// NISN WAJIB diisi, dan tiga angka pertamanya HARUS sama dengan tiga angka
+// terakhir tahun lahir. Aturan kedua itu semula hanya peringatan, dengan alasan
+// yang masih benar: penomorannya kebiasaan, bukan aturan yang mengikat, dan ada
+// NISN sah yang tidak mengikutinya. Tetapi sebagai peringatan ia membiarkan
+// nomor karangan lewat — 0000000098 dan sejenisnya diterima apa adanya —
+// padahal nomor yang dikarang jauh lebih sering daripada NISN sah yang
+// menyimpang dari kebiasaan penomorannya.
+//
+// Konsekuensinya diterima dengan sadar: pendaftar yang NISN aslinya memang
+// tidak mengikuti kebiasaan itu tidak dapat mengirim formulir sendiri, dan
+// pesan galatnya karena itu WAJIB menyebutkan bahwa ia dapat menghubungi
+// panitia. Tanpa kalimat itu, pendaftar yang datanya benar akan mengira
+// dirinya yang salah.
+//
+// Yang TIDAK dapat dikerjakan di sini: memastikan NISN-nya benar-benar ada dan
+// benar-benar milik pendaftar. Laman NISN Kemendikbud tidak menyediakan API,
+// dan Dapodik hanya terbuka bagi sekolah lewat akunnya sendiri. Kepastian itu
+// tetap harus datang dari panitia yang mencocokkan nomor pada rapor atau
+// ijazah SMP yang diunggah pendaftar.
+func (v *Validasi) periksaNisn(nisn, nik, tanggalLahir string) {
 	if nisn == "" {
+		v.tambah("nisn", "NISN wajib diisi. Nomor 10 angka ini tercantum pada rapor atau ijazah SMP; bila tidak ditemukan, tanyakan ke sekolah asal atau ke panitia.")
 		return
 	}
 	if !polaAngka.MatchString(nisn) {
@@ -249,12 +263,25 @@ func (v *Validasi) periksaNisn(nisn, nik string) {
 	}
 	if nik != "" && nisn == nik[:10] {
 		v.tambah("nisn", "NISN yang Anda tulis adalah sepuluh angka pertama NIK. Keduanya nomor yang berbeda: NISN ada di rapor atau ijazah SMP.")
+		return
+	}
+	if cocok, dapat := nisnSesuaiTahunLahir(nisn, tanggalLahir); dapat && !cocok {
+		tahun := "tahun lahir yang Anda isi"
+		if lahir, err := time.Parse("2006-01-02", tanggalLahir); err == nil {
+			tahun = fmt.Sprintf("tahun lahir %d", lahir.Year())
+			v.tambah("nisn", fmt.Sprintf(
+				"Tiga angka pertama NISN harus sama dengan tiga angka terakhir tahun lahir, yaitu %03d untuk %s. Yang Anda tulis %s. Periksa kembali NISN dan tanggal lahirnya; bila keduanya sudah sesuai rapor, hubungi panitia lewat halaman Kontak agar dicatat manual.",
+				lahir.Year()%1000, tahun, nisn[0:3]))
+			return
+		}
+		v.tambah("nisn", "Tiga angka pertama NISN harus sama dengan tiga angka terakhir tahun lahir. Periksa kembali NISN dan tanggal lahirnya.")
 	}
 }
 
 // nisnSesuaiTahunLahir melaporkan apakah tiga angka pertama NISN cocok dengan
-// tiga angka terakhir tahun lahir. Dipakai peringatan yang tidak menolak, baik
-// di formulir maupun sebagai penanda bagi panitia saat memverifikasi berkas.
+// tiga angka terakhir tahun lahir. Sejak NISN diwajibkan, ketidakcocokannya
+// MENOLAK kiriman; panitia tetap melihatnya sebagai penanda saat memverifikasi
+// berkas yang diunggah.
 func nisnSesuaiTahunLahir(nisn, tanggalLahir string) (cocok bool, dapatDiperiksa bool) {
 	if len(nisn) != 10 || len(tanggalLahir) < 4 {
 		return false, false

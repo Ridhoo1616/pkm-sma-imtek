@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { IkonSurel, IkonTelepon, IkonWhatsapp } from "@/komponen/Ikon";
-import { belumTerisi, nomorWa } from "@/lib/format";
+import { belumTerisi, pesanTanyaPpdb, tautanWa } from "@/lib/format";
 import type { Pengaturan } from "@/lib/tipe";
 
 /**
@@ -129,19 +129,17 @@ export default function BantuanMelayang({
     };
   }, [terbuka]);
 
-  const wa = nomorWa(pengaturan.whatsapp ?? "");
+  const wa = tautanWa(
+    pengaturan.whatsapp ?? "",
+    pesanTanyaPpdb(pengaturan.nama_sekolah ?? ""),
+  );
   const telepon = pengaturan.telepon ?? "";
   const surel = pengaturan.email ?? "";
-  const nama = pengaturan.nama_sekolah || "SMA IMTEK";
 
   const kini = langkahDari(jalur);
   // Langkah berikutnya yang disarankan. Bila PPDB tutup, pengunjung
   // diarahkan membaca ketentuan, bukan ke formulir yang pasti tertutup.
   const berikut = !ppdbDibuka && kini < 1 ? 1 : Math.min(kini + 1, ALUR.length - 1);
-
-  const pesanWa = encodeURIComponent(
-    `Assalamualaikum, saya ingin bertanya tentang PPDB ${nama}.`,
-  );
 
   return (
     <div className="tanpa-cetak fixed right-4 bottom-4 z-100 flex flex-col items-end gap-3">
@@ -221,7 +219,7 @@ export default function BantuanMelayang({
             </p>
             {wa ? (
               <a
-                href={`https://wa.me/${wa}?text=${pesanWa}`}
+                href={wa}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2.5 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"

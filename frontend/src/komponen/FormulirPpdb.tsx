@@ -466,12 +466,13 @@ export default function FormulirPpdb({
                       <Teks
                         nama="nisn"
                         label="NISN"
+                        wajib
                         maks={10}
                         nilai={isi.nisn}
                         ubah={ubah("nisn")}
                         galat={galat.nisn}
                         contoh="10 angka"
-                        bantuan="Nomor Induk Siswa Nasional, tercantum pada rapor atau ijazah SMP/MTs."
+                        bantuan="Nomor Induk Siswa Nasional, 10 angka, tercantum pada rapor atau ijazah SMP/MTs. Tiga angka pertamanya sama dengan tiga angka terakhir tahun lahir."
                       />
                       {!galat.nisn && <PeriksaLangsung kabar={kabarNisn} />}
                     </div>

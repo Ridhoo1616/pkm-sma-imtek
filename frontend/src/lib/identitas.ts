@@ -276,9 +276,15 @@ export function periksaNisn(
     if (tahun) {
       const awalan = String(tahun % 1000).padStart(3, "0");
       if (bersih.slice(0, 3) !== awalan) {
+        // Dulu ini cuma peringatan, dengan alasan yang masih benar:
+        // penomorannya kebiasaan, bukan aturan. Tetapi sebagai peringatan ia
+        // membiarkan nomor karangan lewat — 0000000098 dan sejenisnya —
+        // padahal nomor yang dikarang jauh lebih sering daripada NISN sah
+        // yang menyimpang. Jadi sekarang MENOLAK, dan pesannya wajib
+        // menyebutkan jalan keluar bagi pendaftar yang datanya memang benar.
         return {
-          jenis: "curiga",
-          pesan: `Tiga angka pertama NISN umumnya tiga angka terakhir tahun lahir, yaitu ${awalan}. Milik Anda ${bersih.slice(0, 3)}. Periksa kembali, tetapi bila memang begitu tertulis di rapor, biarkan saja.`,
+          jenis: "salah",
+          pesan: `Tiga angka pertama NISN harus sama dengan tiga angka terakhir tahun lahir, yaitu ${awalan}. Milik Anda ${bersih.slice(0, 3)}. Periksa kembali NISN dan tanggal lahirnya; bila keduanya sudah sesuai rapor, hubungi panitia lewat halaman Kontak.`,
         };
       }
       return { jenis: "benar", pesan: `Bentuknya benar, dan awalannya cocok dengan tahun lahir ${tahun}.` };

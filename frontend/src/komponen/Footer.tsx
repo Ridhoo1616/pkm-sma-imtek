@@ -8,11 +8,19 @@ import {
   IkonWhatsapp,
 } from "./Ikon";
 import type { Pengaturan } from "@/lib/tipe";
-import { alamatLengkap, belumTerisi, nomorWa } from "@/lib/format";
+import {
+  alamatLengkap,
+  belumTerisi,
+  pesanTanyaPpdb,
+  tautanWa,
+} from "@/lib/format";
 
 export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
   const tahun = new Date().getFullYear();
-  const wa = nomorWa(pengaturan.whatsapp ?? "");
+  const wa = tautanWa(
+    pengaturan.whatsapp ?? "",
+    pesanTanyaPpdb(pengaturan.nama_sekolah ?? ""),
+  );
 
   const sosial = [
     { label: "Instagram", url: pengaturan.instagram },
@@ -100,7 +108,7 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
             {wa && (
               <li>
                 <a
-                  href={`https://wa.me/${wa}`}
+                  href={wa}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 hover:text-emas"

@@ -1571,7 +1571,22 @@ function periksaPendaftaran() {
         `Tanggal lahir tidak wajar untuk calon peserta didik SMA (usia terhitung ${umur} tahun).`);
     }
   }
-  if (v("nisn") && !digitTepat(v("nisn"), 10)) tambah("nisn", "NISN harus berupa 10 angka.");
+  // NISN wajib, dan tiga angka pertamanya harus sama dengan tiga angka
+  // terakhir tahun lahir. Aturannya sama dengan validasi_identitas.go di
+  // aplikasinya: demo yang menerima apa yang aplikasinya tolak lebih buruk
+  // daripada demo yang tidak ada.
+  if (!v("nisn")) {
+    tambah("nisn", "NISN wajib diisi. Nomor 10 angka ini tercantum pada rapor atau ijazah SMP.");
+  } else if (!digitTepat(v("nisn"), 10)) {
+    tambah("nisn", "NISN harus berupa 10 angka.");
+  } else if (v("tanggal_lahir").length >= 4) {
+    const tahun = Number(v("tanggal_lahir").slice(0, 4));
+    const awalan = String(tahun % 1000).padStart(3, "0");
+    if (tahun && v("nisn").slice(0, 3) !== awalan) {
+      tambah("nisn",
+        `Tiga angka pertama NISN harus sama dengan tiga angka terakhir tahun lahir, yaitu ${awalan}. Yang Anda tulis ${v("nisn").slice(0, 3)}.`);
+    }
+  }
   if (v("nik") && !digitTepat(v("nik"), 16)) tambah("nik", "NIK harus berupa 16 angka.");
   if (v("no_hp") && !teleponSah(v("no_hp"))) {
     tambah("no_hp", "Nomor HP/WhatsApp tidak valid (gunakan 9-15 angka).");
