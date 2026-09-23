@@ -5,11 +5,11 @@
    dirender aplikasi Next.js, ditangkap apa adanya beserta kelas
    Tailwind-nya. Yang ditulis ulang hanya lapisan datanya: di
    aplikasi sebenarnya data berasal dari API Go dan basis data
-   MySQL, sedangkan di demo ini data disimpan pada penyimpanan
+   PostgreSQL, sedangkan di demo ini data disimpan pada penyimpanan
    peramban pengunjung masing-masing.
    ================================================================== */
 
-const KUNCI = "demo_pkm_v2";
+const KUNCI = "demo_pkm_v3";
 
 /* ---------- keadaan ---------- */
 
@@ -23,6 +23,14 @@ const bawaan = {
   pesan: DATA.pesan.map((p) => ({ ...p })),
   pengguna: DATA.pengguna.map((u) => ({ ...u })),
   pengaturan: { ...DATA.pengaturan },
+  // ----- fitur yang ditambahkan kemudian -----
+  biaya: DATA.biaya.map((b) => ({ ...b })),
+  soal: DATA.soal.map((s) => ({ ...s })),
+  paketUjian: DATA.paketUjian.map((p) => ({ ...p })),
+  notifikasi: DATA.notifikasi.map((n) => ({ ...n })),
+  // Sesi ujian dimulai kosong: pada demo, setiap pengunjung mengerjakan
+  // tesnya sendiri, dan hasil peserta contoh sudah ada di hasilUjian.
+  sesiUjian: [],
   urutBerikut: DATA.pendaftar.length + 1,
 };
 
@@ -192,6 +200,7 @@ const RUTE = [
   [/^\/ppdb$/,                  () => bukaPpdb()],
   [/^\/ppdb\/daftar$/,          () => bukaFormulir()],
   [/^\/ppdb\/cek$/,             () => bukaCekStatus()],
+  [/^\/ppdb\/ujian$/,           () => bukaUjian()],
   [/^\/admin\/masuk$/,          () => bukaMasuk()],
   [/^\/admin$/,                 () => bukaPanel("dasbor")],
   [/^\/admin\/pendaftar$/,      () => bukaPanel("pendaftar")],
@@ -202,6 +211,10 @@ const RUTE = [
   [/^\/admin\/galeri$/,         () => bukaPanel("galeriAdmin")],
   [/^\/admin\/fasilitas$/,      () => bukaPanel("fasilitasAdmin")],
   [/^\/admin\/pesan$/,          () => bukaPanel("pesan")],
+  [/^\/admin\/biaya$/,          () => bukaPanel("biayaAdmin")],
+  [/^\/admin\/soal$/,           () => bukaPanel("soalAdmin")],
+  [/^\/admin\/ujian$/,          () => bukaPanel("ujianAdmin")],
+  [/^\/admin\/notifikasi$/,     () => bukaPanel("notifikasiAdmin")],
   [/^\/admin\/pengaturan$/,     () => bukaPanel("pengaturan")],
   [/^\/admin\/pengguna$/,       () => bukaPanel("pengguna")],
   [/^\/admin\/sandi$/,          () => bukaPanel("sandi")],
@@ -1519,9 +1532,41 @@ function tampilkanHasilCek(p) {
         ${K.pengaturan.ppdb_pengumuman ? `
           <p class="text-sm text-samar">Pengumuman hasil seleksi dijadwalkan pada
             <strong class="text-biru-tua">${tanggalPanjang(K.pengaturan.ppdb_pengumuman)}</strong>.</p>` : ""}
+        ${(() => {
+          const paket = (K.paketUjian || []).find((x) => x.aktif);
+          const sesi = (K.sesiUjian || []).find((x) => x.pendaftar_id === p.id);
+          const bolehIkut = K.pengaturan.ujian_aktif === "1" && paket &&
+            p.status !== "Menunggu Verifikasi" && p.status !== "Ditolak";
+          if (!paket || (!bolehIkut && !sesi)) return "";
+          if (sesi && sesi.status !== "Berjalan") {
+            const lulus = sesi.status === "Selesai" && sesi.skor >= paket.nilai_minimum;
+            return `
+              <div class="tanpa-cetak space-y-3 border-t border-garis pt-4">
+                <p class="text-xs font-semibold tracking-wide text-samar uppercase">Tes seleksi</p>
+                <div class="rounded-lg border border-biru/20 bg-biru-muda px-5 py-4">
+                  <p class="text-sm text-samar">${e(paket.nama)}</p>
+                  <p class="mt-1 text-2xl font-bold text-biru-tua tabular-nums">Nilai ${sesi.skor}
+                    <span class="ml-2 text-sm font-semibold text-samar">(${sesi.jumlah_benar} dari ${sesi.soal.length} benar)</span>
+                  </p>
+                  <p class="mt-1.5 text-sm leading-relaxed text-teks">${
+                    lulus
+                      ? `Nilai Anda memenuhi batas minimum ${paket.nilai_minimum}. Keputusan penerimaan tetap diumumkan panitia.`
+                      : `Nilai Anda belum memenuhi batas minimum ${paket.nilai_minimum}. Keputusan penerimaan tetap diumumkan panitia.`
+                  }</p>
+                </div>
+              </div>`;
+          }
+          return `
+            <div class="tanpa-cetak space-y-3 border-t border-garis pt-4">
+              <p class="text-xs font-semibold tracking-wide text-samar uppercase">Tes seleksi</p>
+              <p class="text-sm leading-relaxed text-teks">Tes seleksi sedang dibuka: ${paket.jumlah_soal} soal dalam ${paket.durasi_menit} menit. Waktu mulai berjalan begitu Anda membukanya.</p>
+              <a href="/ppdb/ujian" class="inline-flex items-center justify-center gap-2 rounded-lg bg-biru px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-biru-tua">Kerjakan Tes Seleksi</a>
+            </div>`;
+        })()}
         <div class="tanpa-cetak space-y-3 border-t border-garis pt-4">
           <div class="flex flex-wrap gap-2">
             <button class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 bg-biru text-white hover:bg-biru-tua">Unduh Bukti Pendaftaran (PDF)</button>
+            <button class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 border border-garis bg-white text-teks hover:bg-biru-muda hover:text-biru">Kartu Peserta Ujian (PDF)</button>
             <button data-cetak-halaman class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 border border-garis bg-white text-teks hover:bg-biru-muda hover:text-biru">Cetak halaman ini</button>
           </div>
           <p class="text-xs leading-relaxed text-samar">Bukti pendaftaran dirakit di server, jadi bentuknya sama di semua peramban. Berkasnya memuat data pribadi, simpan di tempat yang aman.</p>
@@ -3076,7 +3121,12 @@ siapkanMenuPanel();
    menjalankan program di sisi server, jadi di demo tombolnya tetap ada supaya
    tampilannya sama, tetapi menjelaskan keadaannya ketika ditekan. */
 
-const TOMBOL_BUKTI = ["Unduh Bukti Pendaftaran (PDF)", "Bukti Pendaftaran (PDF)"];
+const TOMBOL_BUKTI = [
+  "Unduh Bukti Pendaftaran (PDF)",
+  "Bukti Pendaftaran (PDF)",
+  "Kartu Peserta Ujian (PDF)",
+  "Kartu Peserta (PDF)",
+];
 
 document.addEventListener("click", (ev) => {
   const b = ev.target.closest("button");
@@ -3085,9 +3135,314 @@ document.addEventListener("click", (ev) => {
   if (!TOMBOL_BUKTI.some((t) => teks.startsWith(t))) return;
   ev.preventDefault();
   ev.stopPropagation();
+  const apa = teks.includes("Kartu") ? "Kartu peserta" : "Bukti pendaftaran";
   beriTahu(
-    "Bukti pendaftaran PDF dibuat oleh server pada aplikasi sebenarnya. " +
-      "Demo ini berjalan sepenuhnya di peramban, jadi berkasnya tidak dapat dibuat di sini.",
+    apa + " berbentuk PDF dibuat oleh server pada aplikasi sebenarnya, " +
+      "lengkap dengan barcode dan kode QR. Demo ini berjalan sepenuhnya di " +
+      "peramban, jadi berkasnya tidak dapat dibuat di sini.",
     "galat",
   );
 }, true);
+
+/* ==================================================================
+   Tes seleksi pada demo
+
+   Aplikasi sebenarnya menjalankan tes di server: batas waktunya disimpan
+   sebagai waktu mutlak, susunan soalnya dibekukan, dan kunci jawabannya
+   tidak pernah sampai ke peramban. Demo ini tidak punya server, jadi
+   ketiganya dikerjakan di peramban pengunjung dengan localStorage.
+
+   Konsekuensinya jujur disebut di halaman: pada demo, kunci jawaban memang
+   ada di peramban, dan waktunya dapat dimanipulasi siapa pun yang membuka
+   alat pengembang. Pada aplikasi sebenarnya keduanya tidak mungkin.
+
+   Yang tetap sama persis dengan aplikasinya: tampilannya, aturan siapa yang
+   boleh ikut, cara jawaban tersimpan satu per satu, penghitung mundur,
+   penilaiannya, dan bagaimana nilainya muncul di halaman Cek Status.
+   ================================================================== */
+
+let jamUjian = null;
+
+function paketDemo() {
+  return (K.paketUjian || []).find((p) => p.aktif) || null;
+}
+
+function ujianDibuka() {
+  return K.pengaturan.ujian_aktif === "1" && paketDemo() !== null;
+}
+
+/** Sesi ujian milik seorang pendaftar, disimpan bersama data demo lainnya. */
+function sesiUjian(pendaftarId) {
+  return (K.sesiUjian || []).find((s) => s.pendaftar_id === pendaftarId) || null;
+}
+
+function bukaUjian() {
+  situs.hidden = false;
+  panel.hidden = true;
+  wadahMasuk.hidden = true;
+  tandaiMenuAktif("/ppdb");
+
+  const paket = paketDemo();
+  isiPublik.innerHTML = HALAMAN.ujian;
+
+  if (!ujianDibuka()) {
+    // Tangkapan halamannya sudah memuat keadaan "belum dibuka", jadi tidak
+    // ada yang perlu dirakit ulang.
+    return;
+  }
+  siapkanMasukUjian(paket);
+}
+
+function siapkanMasukUjian(paket) {
+  const form = isiPublik.querySelector("form");
+  if (!form) return;
+
+  form.onsubmit = (ev) => {
+    ev.preventDefault();
+    const no = (isiPublik.querySelector("#no_registrasi")?.value || "").trim();
+    const tgl = (isiPublik.querySelector("#tanggal_lahir")?.value || "").trim();
+
+    isiPublik.querySelectorAll("[data-galat-demo]").forEach((el) => el.remove());
+    const galat = [];
+    if (!no) galat.push("Nomor registrasi wajib diisi.");
+    if (!tgl) galat.push("Tanggal lahir wajib diisi.");
+
+    const p = K.pendaftar.find(
+      (x) => x.no_registrasi.toUpperCase() === no.toUpperCase() && x.tanggal_lahir === tgl,
+    );
+    if (!galat.length && !p) {
+      galat.push("Data tidak ditemukan. Periksa kembali nomor registrasi dan tanggal lahir.");
+    }
+    if (!galat.length && p.status === "Menunggu Verifikasi") {
+      galat.push("Berkas Anda masih menunggu verifikasi panitia, jadi tes seleksi belum dapat dimulai.");
+    }
+    if (!galat.length && p.status === "Ditolak") {
+      galat.push("Pendaftaran Anda tidak dapat dilanjutkan ke tes seleksi. Silakan hubungi panitia.");
+    }
+    if (galat.length) {
+      const d = document.createElement("div");
+      d.dataset.galatDemo = "1";
+      d.innerHTML = ringkasanGalat(galat);
+      form.prepend(d);
+      return;
+    }
+
+    const lama = sesiUjian(p.id);
+    if (lama && lama.status !== "Berjalan") {
+      tampilkanHasilUjian(lama, paket);
+      return;
+    }
+    mulaiUjianDemo(p, paket);
+  };
+}
+
+function mulaiUjianDemo(p, paket) {
+  let sesi = sesiUjian(p.id);
+  if (!sesi) {
+    const aktif = K.soal.filter((s) => s.aktif);
+    const acak = paket.acak_soal ? aktif.slice().sort(() => Math.random() - 0.5) : aktif;
+    sesi = {
+      id: (K.sesiUjian || []).length + 1,
+      pendaftar_id: p.id,
+      no_registrasi: p.no_registrasi,
+      nama: p.nama_lengkap,
+      batas_pada: Date.now() + paket.durasi_menit * 60000,
+      soal: acak.slice(0, paket.jumlah_soal).map((s) => ({ soal_id: s.id, jawaban: "" })),
+      status: "Berjalan",
+      jumlah_benar: 0,
+      skor: 0,
+    };
+    K.sesiUjian = (K.sesiUjian || []).concat(sesi);
+    simpan();
+  }
+  kerjakanUjian(sesi, paket);
+}
+
+function kerjakanUjian(sesi, paket) {
+  isiPublik.innerHTML = HALAMAN.ujianKerjakan;
+  let nomor = 0;
+
+  const elWaktu = isiPublik.querySelector("[class*='text-2xl'][class*='tabular-nums']");
+  const wadahNomor = isiPublik.querySelectorAll(".kartu")[1];
+
+  function jamMundur(ms) {
+    const d = Math.max(0, Math.floor(ms / 1000));
+    const m = Math.floor(d / 60);
+    return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}:${String(d % 60).padStart(2, "0")}`;
+  }
+
+  function perbaruiWaktu() {
+    const sisa = sesi.batas_pada - Date.now();
+    if (elWaktu) {
+      elWaktu.textContent = jamMundur(sisa);
+      elWaktu.classList.toggle("text-red-600", sisa <= 300000);
+      elWaktu.classList.toggle("text-biru-tua", sisa > 300000);
+    }
+    if (sisa <= 0) {
+      clearInterval(jamUjian);
+      selesaikanUjianDemo(sesi, paket, "Kedaluwarsa");
+    }
+  }
+
+  clearInterval(jamUjian);
+  jamUjian = setInterval(perbaruiWaktu, 1000);
+
+  function gambar() {
+    const terjawab = sesi.soal.filter((s) => s.jawaban).length;
+
+    // Kepala: nama peserta dan kemajuan.
+    const kepala = isiPublik.querySelector(".sticky");
+    if (kepala) {
+      const teks = kepala.querySelectorAll("p");
+      if (teks[0]) teks[0].textContent = paket.nama;
+      if (teks[1]) teks[1].textContent = `${sesi.nama} · ${sesi.no_registrasi}`;
+      const bilah = kepala.querySelector("[class*='bg-biru'][class*='rounded-full']");
+      if (bilah) bilah.style.width = `${(terjawab / sesi.soal.length) * 100}%`;
+      const hitung = kepala.querySelector("p[class*='text-xs'][class*='tabular-nums']");
+      if (hitung) hitung.textContent = `${terjawab}/${sesi.soal.length} terjawab`;
+    }
+
+    // Petak nomor soal.
+    if (wadahNomor) {
+      wadahNomor.innerHTML = `<div class="flex flex-wrap gap-2">${sesi.soal
+        .map((s, i) => {
+          const gaya =
+            i === nomor
+              ? "bg-biru-tua text-white"
+              : s.jawaban
+                ? "bg-biru-muda text-biru"
+                : "border border-garis text-samar hover:border-biru hover:text-biru";
+          return `<button type="button" data-nomor="${i}" class="h-9 w-9 rounded-lg text-sm font-semibold transition ${gaya}">${i + 1}</button>`;
+        })
+        .join("")}</div>`;
+      wadahNomor.querySelectorAll("[data-nomor]").forEach((b) =>
+        b.addEventListener("click", () => {
+          nomor = Number(b.dataset.nomor);
+          gambar();
+        }),
+      );
+    }
+
+    // Kartu soal.
+    const kartuSoal = isiPublik.querySelectorAll(".kartu")[2];
+    if (!kartuSoal) return;
+    const isiSesi = sesi.soal[nomor];
+    const soal = K.soal.find((s) => s.id === isiSesi.soal_id);
+    const pilihan = [
+      ["A", soal.pilihan_a],
+      ["B", soal.pilihan_b],
+      ["C", soal.pilihan_c],
+      ["D", soal.pilihan_d],
+      ["E", soal.pilihan_e],
+    ].filter(([, t]) => t);
+
+    kartuSoal.innerHTML = `
+      <div class="border-b border-garis bg-biru-muda px-6 py-3">
+        <p class="text-xs font-semibold tracking-wide text-samar uppercase">
+          Soal ${nomor + 1} dari ${sesi.soal.length} · ${e(soal.mata_pelajaran)}
+        </p>
+      </div>
+      <div class="space-y-5 px-6 py-6">
+        <p class="text-[15px] leading-relaxed whitespace-pre-line text-teks">${e(soal.pertanyaan)}</p>
+        <fieldset class="space-y-2.5">
+          <legend class="sr-only">Pilihan jawaban</legend>
+          ${pilihan
+            .map(
+              ([huruf, teks]) => `
+            <label class="flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 text-[15px] transition ${
+              isiSesi.jawaban === huruf
+                ? "border-biru bg-biru-muda text-biru-tua"
+                : "border-garis hover:border-biru hover:bg-biru-muda/40"
+            }">
+              <input type="radio" name="soal-${soal.id}" value="${huruf}" ${
+                isiSesi.jawaban === huruf ? "checked" : ""
+              } class="mt-1">
+              <span><strong class="mr-1.5">${huruf}.</strong>${e(teks)}</span>
+            </label>`,
+            )
+            .join("")}
+        </fieldset>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-garis px-6 py-4">
+        <button type="button" data-nav="sebelum" ${nomor === 0 ? "disabled" : ""}
+          class="inline-flex items-center justify-center gap-2 rounded-lg border border-garis bg-white px-4 py-2.5 text-sm font-semibold text-teks transition hover:bg-biru-muda hover:text-biru disabled:cursor-not-allowed disabled:opacity-60">← Sebelumnya</button>
+        <button type="button" data-nav="maju"
+          class="inline-flex items-center justify-center gap-2 rounded-lg bg-biru px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-biru-tua">${
+            nomor < sesi.soal.length - 1 ? "Selanjutnya →" : "Selesaikan Ujian"
+          }</button>
+      </div>`;
+
+    kartuSoal.querySelectorAll("input[type=radio]").forEach((r) =>
+      r.addEventListener("change", () => {
+        isiSesi.jawaban = r.value;
+        simpan();
+        gambar();
+      }),
+    );
+    kartuSoal.querySelector("[data-nav=sebelum]").addEventListener("click", () => {
+      if (nomor > 0) { nomor--; gambar(); }
+    });
+    kartuSoal.querySelector("[data-nav=maju]").addEventListener("click", () => {
+      if (nomor < sesi.soal.length - 1) { nomor++; gambar(); return; }
+      const belum = sesi.soal.length - sesi.soal.filter((s) => s.jawaban).length;
+      const pesan = belum > 0
+        ? `Masih ada ${belum} soal yang belum dijawab. Selesaikan ujian sekarang?`
+        : "Selesaikan ujian sekarang? Jawaban tidak dapat diubah lagi.";
+      if (confirm(pesan)) selesaikanUjianDemo(sesi, paket, "Selesai");
+    });
+  }
+
+  perbaruiWaktu();
+  gambar();
+}
+
+function selesaikanUjianDemo(sesi, paket, statusAkhir) {
+  clearInterval(jamUjian);
+  let benar = 0;
+  for (const s of sesi.soal) {
+    const soal = K.soal.find((x) => x.id === s.soal_id);
+    if (soal && s.jawaban && s.jawaban === soal.jawaban) benar++;
+  }
+  sesi.jumlah_benar = benar;
+  sesi.skor = Math.round((benar / sesi.soal.length) * 100);
+  sesi.status = statusAkhir;
+  simpan();
+  tampilkanHasilUjian(sesi, paket);
+}
+
+function tampilkanHasilUjian(sesi, paket) {
+  const lulus = sesi.status === "Selesai" && sesi.skor >= paket.nilai_minimum;
+  isiPublik.innerHTML = `
+    <div class="wadah max-w-3xl py-12">
+      <div class="kartu overflow-hidden">
+        <div class="border-b border-garis bg-biru-muda px-6 py-5">
+          <p class="text-xs font-semibold tracking-wide text-samar uppercase">Hasil tes seleksi</p>
+          <p class="mt-0.5 text-lg font-bold text-biru-tua">${e(paket.nama)}</p>
+        </div>
+        <div class="space-y-5 px-6 py-6">
+          <div class="flex flex-wrap items-end gap-6">
+            <div><p class="text-xs text-samar">Nilai</p>
+              <p class="text-4xl font-bold text-biru-tua tabular-nums">${sesi.skor}</p></div>
+            <div><p class="text-xs text-samar">Jawaban benar</p>
+              <p class="text-xl font-semibold text-teks tabular-nums">${sesi.jumlah_benar} dari ${sesi.soal.length}</p></div>
+            <div><p class="text-xs text-samar">Nilai minimum</p>
+              <p class="text-xl font-semibold text-teks tabular-nums">${paket.nilai_minimum}</p></div>
+          </div>
+          <p class="rounded-lg px-5 py-4 text-sm leading-relaxed ${
+            lulus ? "bg-green-50 text-green-800" : "bg-amber-50 text-amber-900"
+          }">
+            ${sesi.status === "Kedaluwarsa" ? "Waktu pengerjaan habis, dan jawaban yang sudah terisi tetap dinilai. " : ""}
+            ${
+              lulus
+                ? "Nilai Anda memenuhi batas minimum tes seleksi. Hasil akhir penerimaan tetap diumumkan panitia, karena nilai tes bukan satu-satunya pertimbangan."
+                : "Nilai Anda belum memenuhi batas minimum. Keputusan penerimaan tetap di tangan panitia, dan akan diumumkan lewat halaman Cek Status."
+            }
+          </p>
+          <p class="text-xs leading-relaxed text-samar">
+            Nilai ini juga dapat dilihat kapan saja di halaman Cek Status memakai
+            nomor registrasi dan tanggal lahir Anda.
+          </p>
+        </div>
+      </div>
+    </div>`;
+}
