@@ -16,8 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       (belumTerisi(p.tagline ?? "") ? "" : p.tagline) ||
       `Profil ${nama} dan pendaftaran peserta didik baru secara online` +
-        (p.kota ? ` di ${p.kota}` : "") +
-        ".",
+      (p.kota ? ` di ${p.kota}` : "") +
+      ".",
     // Tanpa nama domain yang sudah pasti, kata kunci dan judul saja yang
     // bisa dipastikan benar; alamat kanonis ditambahkan setelah domain
     // sekolah ditentukan.
@@ -35,6 +35,9 @@ export async function generateMetadata(): Promise<Metadata> {
         `Pendaftaran peserta didik baru ${nama}.`,
       type: "website",
       locale: "id_ID",
+    },
+    icons: {
+      icon: "gambar/sma-imtek.webp",
     },
   };
 }
