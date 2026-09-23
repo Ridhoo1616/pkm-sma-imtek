@@ -337,6 +337,30 @@ document.addEventListener("click", (ev) => {
 
 window.addEventListener("hashchange", rute);
 
+/* ---------- ikon fasilitas dan peminatan ----------
+   Jalur SVG-nya disalin dari src/komponen/Ikon.tsx pada aplikasi, supaya
+   gambarnya persis sama dengan yang dilihat pengunjung di aplikasi. */
+const PETA_IKON = {
+  "bi-pc-display": '<rect x="2.5" y="4" width="19" height="12.5" rx="2" /> <path d="M8.5 20.5h7M12 16.5v4" />',
+  "bi-eyedropper": '<path d="M9.5 12.5 4 18v2.5h2.5l5.5-5.5" /> <path d="m12.8 9.2 2 2M14.5 4.9l4.6 4.6a2 2 0 0 1 0 2.8l-1.4 1.4-7.4-7.4 1.4-1.4a2 2 0 0 1 2.8 0Z" />',
+  "bi-book": '<path d="M4 4.5h5.5a2.5 2.5 0 0 1 2.5 2.5v13a2 2 0 0 0-2-2H4Z" /> <path d="M20 4.5h-5.5A2.5 2.5 0 0 0 12 7v13a2 2 0 0 1 2-2h6Z" />',
+  "bi-dribbble": '<circle cx="12" cy="12" r="9.2" /> <path d="M4.2 8.4c5 .5 9.6-.6 13-3.3M3.4 14.6c4.6-1.8 9.6-1 13 2.4M8.6 3.4c3 3.6 5 8.3 5.4 13.6" />',
+  "bi-moon-stars": '<path d="M20.5 15.2A8.2 8.2 0 0 1 9.4 4.2a8.5 8.5 0 1 0 11.1 11Z" /> <path d="m17.5 3.2.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7Z" />',
+  "bi-easel": '<rect x="3" y="3.5" width="18" height="10.5" rx="1.6" /> <path d="M12 14v6.5M12 17.5l-4 3M12 17.5l4 3" />',
+  "bi-heart-pulse": '<path d="M20.3 6.2a4.6 4.6 0 0 0-6.6 0L12 7.9l-1.7-1.7a4.6 4.6 0 1 0-6.6 6.5l8.3 8.4 8.3-8.4a4.6 4.6 0 0 0 0-6.5Z" /> <path d="M4.5 12.5h3l1.5-2.5 2 5 1.7-3.5 1.3 1h3.5" />',
+  "bi-shop": '<path d="M3.5 9.5h17v10a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z" /> <path d="M2.8 9.5 4.5 4h15l1.7 5.5a2.6 2.6 0 0 1-4.6 1.4 2.6 2.6 0 0 1-4.6 0 2.6 2.6 0 0 1-4.6 0 2.6 2.6 0 0 1-4.6-1.4Z" />',
+  "bi-calculator": '<rect x="4.5" y="2.8" width="15" height="18.4" rx="2" /> <path d="M7.8 6.5h8.4v3H7.8zM8.2 13.2h.01M12 13.2h.01M15.8 13.2h.01M8.2 17h.01M12 17h.01M15.8 17h.01" />',
+  "bi-globe-americas": '<circle cx="12" cy="12" r="9.2" /> <path d="M2.9 12h18.2" /> <path d="M12 2.8a14 14 0 0 1 0 18.4 14 14 0 0 1 0-18.4Z" />',
+  "bi-translate": '<path d="M3.2 5.5h8.4M7.4 3.4v2.1M9.6 5.5c-.5 4-2.9 7.2-6.4 8.6M5.2 9.2c1 2.2 2.9 3.9 5.2 4.6" /> <path d="m12.8 20.6 4-10 4 10M14.4 17.2h4.8" />',
+  "gedung": '<path d="M3.2 20.5h17.6M4.8 20.5V9.8L12 5.5l7.2 4.3v10.7" /> <path d="M10 20.5v-4.6h4v4.6M9.4 11.8h1.4M13.2 11.8h1.4" />',
+};
+
+function ikonFasilitas(nama, ukuran = 18) {
+  const isi = PETA_IKON[(nama || "").trim().toLowerCase()] || PETA_IKON["gedung"];
+  return `<svg viewBox="0 0 24 24" width="${ukuran}" height="${ukuran}" aria-hidden="true" focusable="false"
+    fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${isi}</svg>`;
+}
+
 /* ==================================================================
    Halaman publik
    Bagian yang dapat berubah karena tindakan pengunjung atau admin
@@ -438,7 +462,7 @@ function segarkanJurusanBeranda() {
     return `
     <div><div class="kartu flex h-full flex-col p-6">
       <div class="mb-4 flex items-center justify-between gap-3">
-        <span class="rounded-lg bg-biru-muda px-2.5 py-1 text-xs font-bold tracking-wider text-biru">${e(j.kode)}</span>
+        <span class="flex items-center gap-2 rounded-lg bg-biru-muda px-2.5 py-1 text-xs font-bold tracking-wider text-biru">${ikonFasilitas(j.ikon, 15)}${e(j.kode)}</span>
         <span class="text-xs font-semibold text-samar tabular-nums">Kuota ${angka(j.kuota)}</span>
       </div>
       <h3 class="text-lg">${e(j.nama)}</h3>
@@ -773,7 +797,10 @@ function segarkanFasilitas() {
             ? `<img src="${gambarPengganti(f.gambar, f.nama)}" alt="${e(f.nama)}" class="h-48 w-full object-cover" loading="lazy">`
             : gambarKosong(f.nama)}
           <div class="p-5">
-            <h2 class="text-base">${e(f.nama)}</h2>
+            <h2 class="flex items-center gap-2 text-base">
+              <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-biru-muda text-biru">${ikonFasilitas(f.ikon)}</span>
+              ${e(f.nama)}
+            </h2>
             ${f.deskripsi ? `<p class="mt-2 text-sm leading-relaxed text-samar">${e(f.deskripsi)}</p>` : ""}
           </div>
         </div></div>`).join("")}
