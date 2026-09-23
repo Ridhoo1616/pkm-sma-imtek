@@ -142,6 +142,15 @@ func (a *Aplikasi) wajibMasuk(berikut http.HandlerFunc) http.HandlerFunc {
 			kirimGalat(w, http.StatusUnauthorized, err.Error())
 			return
 		}
+		// Peran diperiksa di sini, bukan hanya tanda tangannya. Token peserta
+		// tes seleksi ditandatangani dengan kunci yang sama, jadi tanpa
+		// pemeriksaan ini seorang peserta dapat memakai token ujiannya untuk
+		// membuka data seluruh pendaftar.
+		if isi.Role != "admin" && isi.Role != "operator" {
+			kirimGalat(w, http.StatusForbidden,
+				"Token ini bukan token petugas, jadi tidak berlaku untuk panel panitia.")
+			return
+		}
 		berikut(w, r.WithContext(context.WithValue(r.Context(), kunciPengguna, isi)))
 	}
 }

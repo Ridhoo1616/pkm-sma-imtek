@@ -95,11 +95,23 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/berita/{slug}", a.tanganiBeritaDetail)
 	m.HandleFunc("GET /api/galeri", a.tanganiGaleriPublik)
 	m.HandleFunc("POST /api/pesan", a.tanganiKirimPesan)
+	m.HandleFunc("GET /api/biaya", a.tanganiBiayaPublik)
 
 	/* ---- PPDB ---- */
 	m.HandleFunc("POST /api/ppdb/daftar", a.tanganiDaftar)
 	m.HandleFunc("POST /api/ppdb/cek", a.tanganiCekStatus)
 	m.HandleFunc("POST /api/ppdb/bukti", a.tanganiBuktiPendaftar)
+	m.HandleFunc("POST /api/ppdb/kartu", a.tanganiKartuPendaftar)
+
+	/* ---- tes seleksi online ----
+	   Peserta tidak punya akun. Jalur /mulai memakai nomor registrasi beserta
+	   tanggal lahir, lalu menerbitkan token berperan "peserta" yang hanya
+	   berlaku untuk tiga jalur di bawahnya. */
+	m.HandleFunc("GET /api/ppdb/ujian", a.tanganiInfoUjian)
+	m.HandleFunc("POST /api/ppdb/ujian/mulai", a.tanganiMulaiUjian)
+	m.HandleFunc("GET /api/ppdb/ujian/soal", a.wajibPeserta(a.tanganiSoalUjian))
+	m.HandleFunc("PATCH /api/ppdb/ujian/jawab", a.wajibPeserta(a.tanganiJawabUjian))
+	m.HandleFunc("POST /api/ppdb/ujian/selesai", a.wajibPeserta(a.tanganiSelesaikanUjian))
 
 	/* ---- autentikasi ---- */
 	m.HandleFunc("POST /api/masuk", a.tanganiMasuk)
@@ -113,6 +125,8 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/admin/pendaftar/{id}", a.wajibMasuk(a.tanganiDetailPendaftar))
 	m.HandleFunc("PATCH /api/admin/pendaftar/{id}/status", a.wajibMasuk(a.tanganiUbahStatus))
 	m.HandleFunc("GET /api/admin/pendaftar/{id}/bukti", a.wajibMasuk(a.tanganiBuktiAdmin))
+	m.HandleFunc("GET /api/admin/pendaftar/{id}/kartu", a.wajibMasuk(a.tanganiKartuAdmin))
+	m.HandleFunc("PATCH /api/admin/pendaftar/{id}/ruang", a.wajibMasuk(a.tanganiUbahRuangUjian))
 	// Menghapus data pendaftar berarti menghapus dokumen pribadinya juga,
 	// jadi hanya admin penuh yang boleh.
 	m.HandleFunc("DELETE /api/admin/pendaftar/{id}", a.wajibAdmin(a.tanganiHapusPendaftar))
@@ -139,6 +153,34 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("POST /api/admin/fasilitas", a.wajibMasuk(a.tanganiSimpanFasilitas))
 	m.HandleFunc("PUT /api/admin/fasilitas/{id}", a.wajibMasuk(a.tanganiUbahFasilitas))
 	m.HandleFunc("DELETE /api/admin/fasilitas/{id}", a.wajibMasuk(a.tanganiHapusFasilitas))
+
+	/* ---- rincian biaya ---- */
+	m.HandleFunc("GET /api/admin/biaya", a.wajibMasuk(a.tanganiDaftarBiayaAdmin))
+	// Besaran biaya adalah keputusan sekolah, bukan pekerjaan operator
+	// harian, jadi dibatasi admin penuh seperti halnya Pengaturan.
+	m.HandleFunc("POST /api/admin/biaya", a.wajibAdmin(a.tanganiSimpanBiaya))
+	m.HandleFunc("PUT /api/admin/biaya/{id}", a.wajibAdmin(a.tanganiUbahBiaya))
+	m.HandleFunc("DELETE /api/admin/biaya/{id}", a.wajibAdmin(a.tanganiHapusBiaya))
+
+	/* ---- bank soal dan paket ujian ---- */
+	m.HandleFunc("GET /api/admin/soal", a.wajibMasuk(a.tanganiDaftarSoal))
+	m.HandleFunc("POST /api/admin/soal", a.wajibMasuk(a.tanganiSimpanSoal))
+	m.HandleFunc("PUT /api/admin/soal/{id}", a.wajibMasuk(a.tanganiUbahSoal))
+	m.HandleFunc("DELETE /api/admin/soal/{id}", a.wajibMasuk(a.tanganiHapusSoal))
+
+	m.HandleFunc("GET /api/admin/paket-ujian", a.wajibMasuk(a.tanganiDaftarPaket))
+	m.HandleFunc("GET /api/admin/paket-ujian/{id}/hasil", a.wajibMasuk(a.tanganiHasilUjian))
+	// Membuka dan menutup jadwal tes menentukan siapa yang dapat mengerjakan,
+	// jadi dibatasi admin penuh.
+	m.HandleFunc("POST /api/admin/paket-ujian", a.wajibAdmin(a.tanganiSimpanPaket))
+	m.HandleFunc("PUT /api/admin/paket-ujian/{id}", a.wajibAdmin(a.tanganiUbahPaket))
+	m.HandleFunc("DELETE /api/admin/paket-ujian/{id}", a.wajibAdmin(a.tanganiHapusPaket))
+
+	/* ---- notifikasi ---- */
+	m.HandleFunc("GET /api/admin/notifikasi", a.wajibMasuk(a.tanganiDaftarNotifikasi))
+	m.HandleFunc("POST /api/admin/notifikasi", a.wajibMasuk(a.tanganiBuatNotifikasi))
+	m.HandleFunc("POST /api/admin/notifikasi/{id}/kirim", a.wajibMasuk(a.tanganiKirimNotifikasi))
+	m.HandleFunc("PATCH /api/admin/notifikasi/{id}/batal", a.wajibMasuk(a.tanganiBatalkanNotifikasi))
 
 	/* ---- pesan masuk ---- */
 	m.HandleFunc("GET /api/admin/pesan", a.wajibMasuk(a.tanganiDaftarPesan))

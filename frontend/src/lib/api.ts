@@ -83,6 +83,12 @@ interface PilihanPermintaan {
   formulir?: FormData;
   /** Sertakan token petugas. */
   token?: boolean;
+  /**
+   * Token selain token petugas. Dipakai peserta tes seleksi, yang tokennya
+   * berumur pendek dan sengaja tidak disimpan di localStorage bersama token
+   * petugas supaya keduanya tidak pernah tertukar.
+   */
+  tokenLain?: string;
   /** Berapa lama hasilnya boleh dipakai ulang di sisi server, dalam detik. */
   segarkanSetiap?: number;
 }
@@ -100,7 +106,9 @@ async function permintaan<T>(jalur: string, p: PilihanPermintaan = {}): Promise<
     badan = JSON.stringify(p.isi);
   }
 
-  if (p.token) {
+  if (p.tokenLain) {
+    kepala["Authorization"] = `Bearer ${p.tokenLain}`;
+  } else if (p.token) {
     const t = ambilToken();
     if (t) kepala["Authorization"] = `Bearer ${t}`;
   }
@@ -169,6 +177,14 @@ export const api = {
     ),
   kirimPesan: (isi: unknown) =>
     permintaan<{ pesan: string }>("/api/pesan", { metode: "POST", isi }),
+  biaya: () =>
+    permintaan<{
+      data: import("./tipe").Biaya[];
+      total_tahap: { tahap: string; total: number }[];
+      lengkap: boolean;
+      catatan: string;
+      tahapan: string[];
+    }>("/api/biaya", { segarkanSetiap: CACHE_PUBLIK }),
 
   /* ---------- PPDB ---------- */
   daftar: (formulir: FormData) =>
@@ -181,6 +197,58 @@ export const api = {
       metode: "POST",
       isi,
     }),
+
+  /* ---------- tes seleksi ---------- */
+  infoUjian: () =>
+    permintaan<{
+      dibuka: boolean;
+      info: string;
+      paket: {
+        nama: string;
+        durasi_menit: number;
+        jumlah_soal: number;
+        mulai: string | null;
+        selesai: string | null;
+        keterangan: string;
+        nilai_minimum: number;
+      } | null;
+    }>("/api/ppdb/ujian", { segarkanSetiap: CACHE_PUBLIK }),
+  mulaiUjian: (isi: { no_registrasi: string; tanggal_lahir: string }) =>
+    permintaan<{
+      sudah_selesai: boolean;
+      token?: string;
+      hasil?: import("./tipe").HasilUjian;
+      sesi?: {
+        id: number;
+        batas_pada: string;
+        sisa_detik: number;
+        jumlah_soal: number;
+        nama_paket: string;
+        nama_peserta: string;
+        no_registrasi: string;
+      };
+    }>("/api/ppdb/ujian/mulai", { metode: "POST", isi }),
+  soalUjian: (tokenLain: string) =>
+    permintaan<{
+      selesai: boolean;
+      hasil?: import("./tipe").HasilUjian;
+      soal?: import("./tipe").SoalPeserta[];
+      terjawab?: number;
+      jumlah_soal?: number;
+      sisa_detik?: number;
+      batas_pada?: string;
+      nama_paket?: string;
+    }>("/api/ppdb/ujian/soal", { tokenLain }),
+  jawabUjian: (tokenLain: string, isi: { soal_id: number; jawaban: string }) =>
+    permintaan<{ pesan: string; terjawab: number; sisa_detik: number }>(
+      "/api/ppdb/ujian/jawab",
+      { metode: "PATCH", isi, tokenLain },
+    ),
+  selesaikanUjian: (tokenLain: string) =>
+    permintaan<{ pesan?: string; hasil: import("./tipe").HasilUjian }>(
+      "/api/ppdb/ujian/selesai",
+      { metode: "POST", tokenLain },
+    ),
 
   /* ---------- autentikasi ---------- */
   masuk: (isi: { username: string; sandi: string }) =>
@@ -353,6 +421,133 @@ export const api = {
       metode: "DELETE",
       token: true,
     }),
+
+  /* ---------- rincian biaya (panitia) ---------- */
+  biayaAdmin: () =>
+    permintaan<{ data: import("./tipe").Biaya[]; tahapan: string[] }>(
+      "/api/admin/biaya",
+      { token: true },
+    ),
+  simpanBiaya: (isi: unknown) =>
+    permintaan<{ pesan: string; id: number }>("/api/admin/biaya", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  ubahBiaya: (id: number, isi: unknown) =>
+    permintaan<{ pesan: string }>(`/api/admin/biaya/${id}`, {
+      metode: "PUT",
+      isi,
+      token: true,
+    }),
+  hapusBiaya: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/biaya/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
+  /* ---------- bank soal ---------- */
+  soal: (kueri = "") =>
+    permintaan<{
+      data: import("./tipe").Soal[];
+      mata_pelajaran: string[] | null;
+      jumlah_aktif: number;
+    }>(`/api/admin/soal${kueri}`, { token: true }),
+  simpanSoal: (isi: unknown) =>
+    permintaan<{ pesan: string; id: number }>("/api/admin/soal", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  ubahSoal: (id: number, isi: unknown) =>
+    permintaan<{ pesan: string }>(`/api/admin/soal/${id}`, {
+      metode: "PUT",
+      isi,
+      token: true,
+    }),
+  hapusSoal: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/soal/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
+  /* ---------- paket ujian ---------- */
+  paketUjian: () =>
+    permintaan<{ data: import("./tipe").PaketUjian[]; jumlah_aktif: number }>(
+      "/api/admin/paket-ujian",
+      { token: true },
+    ),
+  simpanPaket: (isi: unknown) =>
+    permintaan<{ pesan: string; id: number }>("/api/admin/paket-ujian", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  ubahPaket: (id: number, isi: unknown) =>
+    permintaan<{ pesan: string }>(`/api/admin/paket-ujian/${id}`, {
+      metode: "PUT",
+      isi,
+      token: true,
+    }),
+  hapusPaket: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/paket-ujian/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+  hasilUjian: (id: number) =>
+    permintaan<{
+      data: {
+        sesi_id: number;
+        pendaftar_id: number;
+        no_registrasi: string;
+        nama_lengkap: string;
+        nama_jurusan: string;
+        status: string;
+        jumlah_benar: number;
+        jumlah_soal: number;
+        skor: number;
+        lulus: boolean;
+        mulai_pada: string;
+        selesai_pada: string | null;
+      }[];
+      nilai_minimum: number;
+      jumlah_lulus: number;
+    }>(`/api/admin/paket-ujian/${id}/hasil`, { token: true }),
+
+  /* ---------- notifikasi ---------- */
+  notifikasi: (kueri = "") =>
+    permintaan<{
+      data: import("./tipe").Notifikasi[];
+      total: number;
+      halaman: number;
+      per_halaman: number;
+      gateway_aktif: boolean;
+      pilihan_status: string[];
+    }>(`/api/admin/notifikasi${kueri}`, { token: true }),
+  buatNotifikasi: (isi: unknown) =>
+    permintaan<{ pesan: string }>("/api/admin/notifikasi", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  kirimNotifikasi: (id: number, isi?: { pesan: string }) =>
+    permintaan<{ pesan: string; tautan_wa?: string; dikirim_ke: string }>(
+      `/api/admin/notifikasi/${id}/kirim`,
+      { metode: "POST", isi, token: true },
+    ),
+  batalNotifikasi: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/notifikasi/${id}/batal`, {
+      metode: "PATCH",
+      token: true,
+    }),
+
+  /* ---------- ruang ujian pada kartu peserta ---------- */
+  ubahRuangUjian: (id: number, isi: { ruang_ujian: string; kursi_ujian: string }) =>
+    permintaan<{ pesan: string }>(`/api/admin/pendaftar/${id}/ruang`, {
+      metode: "PATCH",
+      isi,
+      token: true,
+    }),
 };
 
 /**
@@ -434,4 +629,49 @@ export async function unduhCsv(kueri = ""): Promise<{ nama: string; blob: Blob }
   const pemilik = jawaban.headers.get("content-disposition") ?? "";
   const cocok = pemilik.match(/filename="([^"]+)"/);
   return { nama: cocok?.[1] ?? "pendaftar.csv", blob: await jawaban.blob() };
+}
+
+/** Kartu peserta tes seleksi untuk pendaftar; kuncinya sama dengan cek status. */
+export async function unduhKartu(isi: {
+  no_registrasi: string;
+  tanggal_lahir: string;
+}): Promise<{ nama: string; blob: Blob }> {
+  const jawaban = await fetch(`${ALAMAT_API}/api/ppdb/kartu`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(isi),
+    cache: "no-store",
+  });
+  if (!jawaban.ok) {
+    let pesan = "Kartu peserta gagal dibuat.";
+    try {
+      pesan = ((await jawaban.json()) as IsiGalat).pesan || pesan;
+    } catch {
+      /* jawaban bukan JSON; pesan bawaan dipakai */
+    }
+    throw new GalatApi(jawaban.status, { pesan });
+  }
+  return {
+    nama: `kartu-peserta-${isi.no_registrasi}.pdf`,
+    blob: await jawaban.blob(),
+  };
+}
+
+/** Kartu peserta dari panel panitia. */
+export async function unduhKartuAdmin(
+  id: number,
+  noRegistrasi: string,
+): Promise<{ nama: string; blob: Blob }> {
+  const t = ambilToken();
+  const jawaban = await fetch(`${ALAMAT_API}/api/admin/pendaftar/${id}/kartu`, {
+    headers: t ? { Authorization: `Bearer ${t}` } : {},
+    cache: "no-store",
+  });
+  if (!jawaban.ok) {
+    throw new GalatApi(jawaban.status, { pesan: "Kartu peserta gagal dibuat." });
+  }
+  return {
+    nama: `kartu-peserta-${noRegistrasi}.pdf`,
+    blob: await jawaban.blob(),
+  };
 }

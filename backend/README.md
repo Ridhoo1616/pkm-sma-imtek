@@ -25,6 +25,11 @@ migrasi berada di `migrations/`, dan yang sudah dijalankan dicatat pada tabel
 `migrasi` sehingga aman dipanggil berulang kali. Basis data yang sudah berisi
 tabelnya dikenali dan dilewati, bukan ditimpa.
 
+Migrasi yang sudah ada dua berkas: `001_skema.sql` untuk sembilan tabel awal,
+dan `002_ujian_biaya_notifikasi.sql` untuk rincian biaya, bank soal, tes
+seleksi, dan catatan notifikasi. Basis data warisan versi PHP melewati migrasi
+**pertama** saja, lalu menerima migrasi berikutnya seperti biasa.
+
 Untuk memindahkan data dari versi PHP yang memakai MySQL, lihat
 `alat/pindah-mysql/` dan bagian 9 pada
 [PANDUAN-INSTALASI.md](../PANDUAN-INSTALASI.md).
@@ -53,6 +58,11 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | `validasi.go` | pemeriksaan isian formulir |
 | `unggah.go` | penyimpanan berkas dan pemeriksaan tipe aslinya |
 | `cetak.go` | bukti pendaftaran PDF, dirakit dengan Maroto |
+| `cetak_kartu.go` | kartu peserta tes seleksi: barcode Code 128 dan kode QR |
+| `notifikasi.go` | penyusunan naskah, pembersihan nomor, dan pengiriman WhatsApp |
+| `handler_ujian.go` | bank soal, paket ujian, dan sesi tes seleksi |
+| `handler_biaya.go` | rincian biaya per tahap pembayaran |
+| `handler_notifikasi.go` | panel notifikasi: tinjau, kirim, batalkan |
 | `model.go` | bentuk data dan daftar pilihan yang sah |
 | `respon.go` | bentuk respons dan galat yang seragam |
 | `handler_publik.go` | halaman publik: profil, jurusan, fasilitas, berita, galeri, kontak |
@@ -78,6 +88,10 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | POST | `/api/ppdb/daftar` | kirim formulir pendaftaran (multipart) |
 | POST | `/api/ppdb/cek` | cek status dengan nomor registrasi + tanggal lahir |
 | POST | `/api/ppdb/bukti` | unduh bukti pendaftaran PDF, kuncinya sama dengan cek status |
+| POST | `/api/ppdb/kartu` | unduh kartu peserta tes seleksi (PDF, barcode + QR) |
+| GET | `/api/biaya` | rincian biaya beserta total per tahap |
+| GET | `/api/ppdb/ujian` | keadaan tes seleksi: dibuka atau belum |
+| POST | `/api/ppdb/ujian/mulai` | mulai atau lanjutkan sesi, menerbitkan token peserta |
 | POST | `/api/masuk` | masuk sebagai petugas |
 
 ### Perlu token (petugas)
@@ -91,6 +105,11 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | GET | `/api/admin/pendaftar/ekspor` | unduh CSV sesuai penyaring yang dipakai |
 | GET | `/api/admin/pendaftar/{id}` | rincian satu pendaftar |
 | GET | `/api/admin/pendaftar/{id}/bukti` | cetak bukti pendaftaran PDF |
+| GET | `/api/admin/pendaftar/{id}/kartu` | cetak kartu peserta tes seleksi |
+| PATCH | `/api/admin/pendaftar/{id}/ruang` | ruang dan nomor kursi pada kartu peserta |
+| GET/POST/PUT/DELETE | `/api/admin/soal` | bank soal tes seleksi |
+| GET | `/api/admin/paket-ujian/{id}/hasil` | rekap nilai satu paket |
+| GET/POST/PATCH | `/api/admin/notifikasi` | tinjau, kirim, dan batalkan notifikasi |
 | PATCH | `/api/admin/pendaftar/{id}/status` | verifikasi: ubah status dan catatan |
 | GET | `/api/admin/laporan` | angka efektivitas promosi per kanal |
 | GET | `/api/admin/jurusan` | seluruh peminatan, termasuk yang nonaktif |
@@ -107,6 +126,8 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | POST/PUT/DELETE | `/api/admin/jurusan` | kelola peminatan |
 | GET/PUT | `/api/admin/pengaturan` | pengaturan sekolah dan PPDB |
 | GET/POST/PUT/DELETE | `/api/admin/pengguna` | kelola akun petugas |
+| GET/POST/PUT/DELETE | `/api/admin/biaya` | kelola rincian biaya |
+| POST/PUT/DELETE | `/api/admin/paket-ujian` | buka dan tutup jadwal tes seleksi |
 
 ### Berkas unggahan
 
@@ -147,3 +168,13 @@ salah, sedangkan `daftar` untuk ringkasan di atas formulir.
 - Penomoran nomor registrasi dikunci dengan `pg_advisory_xact_lock` selama
   transaksi, sehingga pendaftaran yang datang bersamaan tidak memperoleh nomor
   yang sama.
+- Peran diperiksa pada `wajibMasuk`, bukan hanya tanda tangan tokennya. Token
+  peserta tes seleksi ditandatangani dengan kunci yang sama, jadi tanpa
+  pemeriksaan peran seorang peserta dapat memakai token ujiannya untuk membuka
+  data seluruh pendaftar.
+- Kunci jawaban tes seleksi tidak pernah masuk ke respons yang diterima
+  peserta, dan penilaiannya seluruhnya dikerjakan server.
+- Batas waktu ujian ditegakkan pada setiap penyimpanan jawaban, bukan hanya
+  saat soal diambil.
+- Alamat gateway WhatsApp wajib `https`, kecuali bila menunjuk ke localhost
+  karena lalu lintasnya tidak meninggalkan mesin itu.

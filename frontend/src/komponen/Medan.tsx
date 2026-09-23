@@ -66,7 +66,7 @@ export function Teks({
   maks,
   ...dasar
 }: DasarProps & {
-  tipe?: "text" | "email" | "tel" | "date" | "number" | "password";
+  tipe?: "text" | "email" | "tel" | "date" | "number" | "password" | "datetime-local";
   nilai: string;
   ubah: (v: string) => void;
   contoh?: string;

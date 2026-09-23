@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
-import { angka, persen, tanggalPanjang, belumTerisi } from "@/lib/format";
+import { angka, persen, rupiah, tanggalPanjang, belumTerisi } from "@/lib/format";
 import { KepalaHalaman, JudulBagian, Lencana } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
 import type { Metadata } from "next";
@@ -46,6 +46,7 @@ export default async function HalamanPpdb() {
     .jurusan()
     .then((h) => h.data)
     .catch((): Jurusan[] => []);
+  const biaya = await api.biaya().catch(() => null);
 
   const alur = (p.ppdb_alur || "")
     .split("\n")
@@ -156,6 +157,105 @@ export default async function HalamanPpdb() {
                     <strong>Biaya pendaftaran:</strong> {p.ppdb_biaya}
                   </p>
                 )}
+              </section>
+            </MunculNaik>
+
+            {/* Rincian biaya.
+                Pos yang besarannya belum ditetapkan sekolah tetap ditampilkan
+                dan ditandai, bukan disembunyikan. Menyembunyikannya membuat
+                daftar terlihat lengkap padahal belum, dan itu justru melawan
+                maksud bagian ini. */}
+            {biaya && biaya.data.length > 0 && (
+              <MunculNaik>
+                <section>
+                  <JudulBagian atas="Biaya" judul="Rincian Biaya" />
+                  {!biaya.lengkap && (
+                    <p className="mb-4 rounded-lg border border-dashed border-emas/60 bg-emas/10 px-5 py-4 text-sm leading-relaxed text-biru-tua">
+                      Sebagian besaran biaya belum ditetapkan sekolah. Yang sudah
+                      tertera di bawah ini sudah final; yang bertanda belum
+                      ditetapkan akan diumumkan panitia.
+                    </p>
+                  )}
+                  <div className="kartu overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-biru-muda text-left">
+                        <tr>
+                          <th className="px-5 py-3 font-semibold text-biru-tua">Pos biaya</th>
+                          <th className="px-5 py-3 font-semibold text-biru-tua">Tahap</th>
+                          <th className="px-5 py-3 text-right font-semibold text-biru-tua">
+                            Jumlah
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-garis">
+                        {biaya.data.map((b) => (
+                          <tr key={b.id}>
+                            <td className="px-5 py-3.5">
+                              <p className="font-semibold text-teks">
+                                {b.nama}
+                                {!b.wajib && (
+                                  <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-samar">
+                                    opsional
+                                  </span>
+                                )}
+                              </p>
+                              {b.keterangan && !belumTerisi(b.keterangan) && (
+                                <p className="mt-0.5 text-xs leading-relaxed text-samar">
+                                  {b.keterangan}
+                                </p>
+                              )}
+                            </td>
+                            <td className="px-5 py-3.5 text-samar">{b.tahap}</td>
+                            <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                              {b.ditetapkan ? (
+                                <>
+                                  <span className="font-bold text-biru-tua tabular-nums">
+                                    {rupiah(b.jumlah)}
+                                  </span>
+                                  <span className="block text-xs text-samar">
+                                    {b.satuan}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="text-xs font-semibold text-amber-700">
+                                  Belum ditetapkan
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      {biaya.total_tahap.length > 0 && biaya.lengkap && (
+                        <tfoot className="border-t-2 border-garis bg-slate-50">
+                          {biaya.total_tahap.map((t) => (
+                            <tr key={t.tahap}>
+                              <td className="px-5 py-2.5 font-semibold text-teks" colSpan={2}>
+                                Total {t.tahap.toLowerCase()}
+                              </td>
+                              <td className="px-5 py-2.5 text-right font-bold text-biru-tua tabular-nums">
+                                {rupiah(t.total)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tfoot>
+                      )}
+                    </table>
+                  </div>
+                  {biaya.catatan && !belumTerisi(biaya.catatan) && (
+                    <p className="mt-4 text-sm leading-relaxed whitespace-pre-line text-samar">
+                      {biaya.catatan}
+                    </p>
+                  )}
+                  <p className="mt-4 rounded-lg bg-biru-muda px-5 py-4 text-sm leading-relaxed text-biru-tua">
+                    Tidak ada biaya di luar daftar ini. Bila ada pihak yang
+                    meminta pembayaran lain atas nama sekolah, laporkan kepada
+                    panitia lewat halaman Kontak.
+                  </p>
+                </section>
+              </MunculNaik>
+            )}
+            <MunculNaik>
+              <section>
               </section>
             </MunculNaik>
 

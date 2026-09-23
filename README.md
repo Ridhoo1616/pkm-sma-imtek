@@ -35,8 +35,10 @@ pkm-sma-imtek/
 │   ├── validasi.go          pemeriksaan isian formulir
 │   ├── unggah.go            penyimpanan dan pemeriksaan berkas
 │   ├── cetak.go             bukti pendaftaran PDF dengan Maroto
+│   ├── cetak_kartu.go       kartu peserta ujian, barcode + kode QR
+│   ├── notifikasi.go        penyusunan dan pengiriman notifikasi WhatsApp
 │   ├── handler_*.go         penangan tiap kelompok alamat API
-│   └── migrations/          skema basis data (9 tabel + data awal)
+│   └── migrations/          skema basis data (15 tabel + data awal)
 │
 ├── frontend/       Situs dan panel admin dengan Next.js
 │   └── src/
@@ -125,9 +127,10 @@ dipakai sekolah sungguhan tetap diperlukan hosting.
 
 | Halaman | Alamat | Isi |
 |---|---|---|
-| Informasi PPDB | `/ppdb` | Jadwal, empat jalur, alur, dokumen yang diminta, kuota per peminatan |
+| Informasi PPDB | `/ppdb` | Jadwal, empat jalur, alur, dokumen yang diminta, kuota per peminatan, rincian biaya |
 | Formulir Pendaftaran | `/ppdb/daftar` | Lima langkah pengisian + unggah enam dokumen + pernyataan kebenaran data |
-| Cek Status | `/ppdb/cek` | Pantau hasil verifikasi dengan nomor registrasi + tanggal lahir, dan unduh bukti pendaftaran PDF |
+| Cek Status | `/ppdb/cek` | Pantau hasil verifikasi, nilai tes seleksi, unduh bukti pendaftaran dan kartu peserta |
+| Tes Seleksi | `/ppdb/ujian` | Kerjakan tes seleksi online, waktunya dihitung server |
 
 Formulirnya dibagi lima langkah dan dapat dilompati bebas. Bila server menolak
 isian, halaman otomatis kembali ke langkah yang memuat kesalahan pertama, dan
@@ -147,13 +150,59 @@ setiap keterangan kesalahan menempel di bawah kolomnya masing-masing.
 | Fasilitas | `/admin/fasilitas` | Kelola sarana beserta gambar dan urutannya |
 | Pesan Masuk | `/admin/pesan` | Pesan dari halaman kontak, tanda baca, balas lewat email/WhatsApp |
 | Pengaturan | `/admin/pengaturan` | Seluruh isi situs publik, dikelompokkan menjadi enam bagian |
+| Notifikasi | `/admin/notifikasi` | Pesan WhatsApp yang disusun sistem, ditinjau lalu dikirim |
+| Bank Soal | `/admin/soal` | Soal pilihan ganda untuk tes seleksi |
+| Tes Seleksi | `/admin/ujian` | Jadwal tes, durasi, nilai minimum, dan rekap hasilnya |
+| Rincian Biaya | `/admin/biaya` | Pos biaya per tahap; totalnya dihitung sistem |
 | Pengguna | `/admin/pengguna` | Kelola akun petugas dan perannya |
 
 Seluruh isi situs publik berasal dari menu **Pengaturan**, sehingga sekolah
 dapat mengubah tampilan tanpa menyentuh kode. Setelah admin menyimpan,
 halaman publik disegarkan seketika.
 
-### D. Dukungan tujuan "meningkatkan efektivitas promosi"
+### D. Tes seleksi online, kartu peserta, dan notifikasi
+
+**Tes seleksi (CBT).** Peserta masuk dengan nomor registrasi beserta tanggal
+lahir, kunci yang sama dengan Cek Status, lalu menerima token berumur pendek
+yang hanya berlaku untuk jalur ujian. Tiga hal yang menentukan bentuknya:
+
+- Batas waktu disimpan sebagai waktu mutlak saat sesi dimulai, bukan dihitung
+  ulang dari durasi pada setiap permintaan. Memuat ulang halaman tidak
+  memperpanjang waktu, dan penghitung di layar hanyalah tampilan.
+- Susunan soal dibekukan saat sesi dimulai, sehingga nomor soal tidak
+  berpindah dan jawaban yang sudah diisi tidak salah tempat.
+- Kunci jawaban tidak pernah dikirim ke peramban; penilaiannya seluruhnya di
+  server.
+
+Jawaban dikirim satu per satu begitu dipilih, jadi jaringan yang terputus di
+tengah jalan tidak menghanguskan yang sudah dijawab. Waktu habis menutup sesi
+sendiri dan tetap menilai jawaban yang ada.
+
+**Kartu peserta.** PDF dengan barcode Code 128 dan kode QR, keduanya memuat
+nomor registrasi. Barcode untuk pemindai garis yang biasa dipakai saat
+presensi ruang ujian, kode QR untuk dipindai dengan telepon. Ruang dan nomor
+kursinya diisi panitia pada halaman rincian pendaftar.
+
+**Notifikasi WhatsApp.** Pesan disusun sistem saat status pendaftar diubah,
+lalu **menunggu ditinjau** panitia, bukan langsung terkirim; pesan yang salah
+tidak dapat ditarik kembali dari WhatsApp. Pengirimannya punya dua jalur:
+
+| Jalur | Cara kerja | Kapan dipakai |
+|---|---|---|
+| Bawaan | Panitia menekan tombol, WhatsApp terbuka dengan pesan yang sudah terisi penuh, panitia menekan kirim | Tanpa biaya, tanpa risiko nomor sekolah diblokir |
+| Gateway | `WA_GATEWAY_URL` disetel, server mengirim sendiri | Bila sekolah sudah punya akses WhatsApp Business API resmi |
+
+Gateway tidak resmi yang menumpang WhatsApp Web milik nomor sekolah **tidak**
+didukung dan tidak disarankan: itu melanggar ketentuan layanan, dan nomornya
+berisiko diblokir justru pada masa PPDB. Setiap pesan dicatat beserta isinya,
+sehingga panitia dapat menunjukkan persis apa yang diterima orang tua.
+
+**Rincian biaya.** Setiap pos berdiri sendiri dengan tahap pembayarannya, dan
+totalnya dihitung sistem. Pos yang besarannya belum ditetapkan sekolah tetap
+ditampilkan dan ditandai, bukan disembunyikan maupun ditulis Rp0, karena
+keduanya menyesatkan pada halaman yang judulnya transparansi biaya.
+
+### E. Dukungan tujuan "meningkatkan efektivitas promosi"
 
 Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 
@@ -195,7 +244,7 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 
 ---
 
-## Basis Data (9 tabel)
+## Basis Data (15 tabel)
 
 | Tabel | Fungsi |
 |---|---|
@@ -208,6 +257,12 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 | `fasilitas` | Sarana dan prasarana sekolah |
 | `pesan` | Pesan dari formulir kontak |
 | `statistik_kunjungan` | Kunjungan per halaman per hari + sumber rujukan |
+| `biaya` | Pos rincian biaya per tahap pembayaran |
+| `soal` | Bank soal pilihan ganda |
+| `paket_ujian` | Jadwal tes seleksi beserta durasi dan nilai minimum |
+| `sesi_ujian` | Satu sesi per peserta per paket, beserta nilainya |
+| `sesi_soal` | Susunan soal yang dibekukan per sesi, beserta jawabannya |
+| `notifikasi` | Catatan pesan WhatsApp beserta keadaan pengirimannya |
 
 Isinya dapat ditengok dengan **DBeaver**: buat sambungan PostgreSQL baru
 memakai host, porta, nama basis data, pengguna, dan sandi yang sama dengan
@@ -281,7 +336,8 @@ bahan pembanding pada laporan PkM. Keterangannya ada di
 
 Diuji pada Go 1.27, Node.js 24, dan PostgreSQL 17.4.
 
-**Backend, 151 pemeriksaan terhadap API yang berjalan:**
+**Backend, 151 pemeriksaan terhadap API yang berjalan**, ditambah pemeriksaan
+khusus fitur baru:
 
 - Pendaftaran lengkap dengan unggahan → nomor registrasi terbit, data dan
   berkas tersimpan.
@@ -327,6 +383,27 @@ Diuji pada Go 1.27, Node.js 24, dan PostgreSQL 17.4.
 - Jendela Radix: fokus terkurung di dalamnya, latar belakang diberi
   `aria-hidden`, gulir halaman terkunci, dan tombol Escape menutupnya.
 - Gulir halus Lenis aktif di halaman publik dan tidak dipasang di panel.
+
+**Tes seleksi, notifikasi, dan biaya, 28 pemeriksaan:**
+
+- Alur ujian penuh di peramban sungguhan: masuk, penghitung mundur berjalan,
+  lima jawaban tersimpan, ujian diselesaikan, nilai keluar, dan nilai itu ikut
+  tampil di Cek Status.
+- Kunci jawaban terbukti tidak ada di halaman yang diterima peserta.
+- Token peserta yang dipakai membuka panel panitia tertolak dengan 403.
+- Mulai ujian tertolak bila berkasnya belum diverifikasi, bila tanggal
+  lahirnya salah, bila jadwalnya belum dibuka, dan bila sesinya sudah selesai.
+- Jawaban tertolak sesudah sesi ditutup, dan soal dari sesi lain tertolak.
+- Paket yang meminta lebih banyak soal daripada bank soal aktif tertolak saat
+  hendak diaktifkan, beserta angka yang tersedia.
+- Kunci jawaban yang menunjuk pilihan kosong tertolak, di API maupun di panel.
+- Notifikasi tersusun sendiri dari perubahan status, tidak dapat dikirim dua
+  kali, dan tidak dapat dibatalkan setelah terkirim.
+- Kedua jalur pengiriman diuji: tanpa gateway menghasilkan tautan wa.me berisi
+  pesan lengkap, dengan gateway pesannya benar-benar diterima gateway beserta
+  token Bearer-nya, dan penolakan gateway tercatat sebagai Gagal beserta
+  keterangannya.
+- Kartu peserta terbit sebagai PDF berisi barcode dan kode QR.
 
 **Demo statis, 65 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
 pengelolaan isi situs, batas hak akses operator, dan tombol bukti PDF yang

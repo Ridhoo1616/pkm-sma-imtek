@@ -117,3 +117,13 @@ export function alamatLengkap(alamat?: string, kodePos?: string): string {
   if (!k || a.includes(k)) return a;
   return a ? `${a} ${k}` : k;
 }
+
+/**
+ * Menuliskan jumlah rupiah dengan pemisah ribuan gaya Indonesia.
+ *
+ * Sen tidak pernah dipakai pada biaya sekolah, jadi angkanya dibulatkan dan
+ * tidak diberi bagian desimal.
+ */
+export function rupiah(jumlah: number): string {
+  return "Rp" + Math.round(jumlah).toLocaleString("id-ID");
+}

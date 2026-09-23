@@ -138,6 +138,9 @@ export interface Pendaftar extends RingkasPendaftar {
   diverifikasi_oleh: number | null;
   nama_verifikator: string;
   ip_pendaftar: string;
+  /** Dicetak pada kartu peserta tes seleksi. */
+  ruang_ujian: string;
+  kursi_ujian: string;
   diubah: string;
 }
 
@@ -187,6 +190,8 @@ export interface StatusPendaftaran {
   catatan_admin: string;
   dibuat: string;
   pengumuman: string;
+  /** Keadaan tes seleksi bagi pendaftar ini. */
+  ujian: KeadaanUjian;
 }
 
 export interface ButirPengaturan {
@@ -223,4 +228,105 @@ export interface HalamanPesan {
   belum_dibaca: number;
   halaman: number;
   per_halaman: number;
+}
+
+/* ---------- rincian biaya ---------- */
+
+export interface Biaya {
+  id: number;
+  nama: string;
+  jumlah: number;
+  satuan: string;
+  tahap: string;
+  keterangan: string;
+  wajib: boolean;
+  urutan: number;
+  aktif: boolean;
+  /** false bila jumlahnya masih nol, yaitu belum ditetapkan sekolah. */
+  ditetapkan: boolean;
+}
+
+/* ---------- tes seleksi ---------- */
+
+export interface Soal {
+  id: number;
+  mata_pelajaran: string;
+  pertanyaan: string;
+  pilihan_a: string;
+  pilihan_b: string;
+  pilihan_c: string;
+  pilihan_d: string;
+  pilihan_e: string;
+  jawaban: string;
+  pembahasan: string;
+  aktif: boolean;
+}
+
+export interface PaketUjian {
+  id: number;
+  nama: string;
+  tahun_ajaran: string;
+  durasi_menit: number;
+  jumlah_soal: number;
+  acak_soal: boolean;
+  mulai: string | null;
+  selesai: string | null;
+  nilai_minimum: number;
+  keterangan: string;
+  aktif: boolean;
+  jumlah_peserta: number;
+  jumlah_selesai: number;
+}
+
+/** Satu soal seperti yang dilihat peserta. Kunci jawabannya tidak ada di sini
+ *  karena server memang tidak pernah mengirimkannya. */
+export interface SoalPeserta {
+  urutan: number;
+  soal_id: number;
+  mata_pelajaran: string;
+  pertanyaan: string;
+  pilihan: { huruf: string; teks: string }[];
+  /** Jawaban yang sudah dipilih peserta, bukan kunci. */
+  jawaban: string;
+}
+
+export interface HasilUjian {
+  status: string;
+  jumlah_benar: number;
+  jumlah_soal: number;
+  skor: number;
+  nilai_minimum: number;
+  lulus: boolean;
+  nama_paket: string;
+}
+
+/** Keadaan tes seleksi bagi seorang pendaftar, disertakan pada cek status. */
+export interface KeadaanUjian {
+  dibuka: boolean;
+  boleh_ikut: boolean;
+  sudah_ikut: boolean;
+  kartu_siap: boolean;
+  alasan: string;
+  hasil: HasilUjian | null;
+  nama_paket?: string;
+  durasi_menit?: number;
+  jumlah_soal?: number;
+}
+
+/* ---------- notifikasi ---------- */
+
+export interface Notifikasi {
+  id: number;
+  pendaftar_id: number | null;
+  nama_pendaftar?: string;
+  no_registrasi?: string;
+  kanal: string;
+  tujuan: string;
+  jenis: string;
+  pesan: string;
+  status: string;
+  galat?: string;
+  dikirim_pada: string | null;
+  dibuat: string;
+  tautan_wa?: string;
 }

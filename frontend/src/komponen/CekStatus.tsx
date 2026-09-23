@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { api, unduhBukti, GalatApi } from "@/lib/api";
+import Link from "next/link";
+import { api, unduhBukti, unduhKartu, GalatApi } from "@/lib/api";
 import { bukaBlob } from "@/lib/berkas";
 import { Teks, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import { PesanGalat } from "@/komponen/Memuat";
@@ -32,6 +33,7 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
   const [mencari, setMencari] = useState(false);
   const [hasil, setHasil] = useState<StatusPendaftaran | null>(null);
   const [mengunduh, setMengunduh] = useState(false);
+  const [mengunduhKartu, setMengunduhKartu] = useState(false);
   const [galatBukti, setGalatBukti] = useState("");
 
   async function cari(e: React.FormEvent) {
@@ -72,6 +74,25 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
       );
     } finally {
       setMengunduh(false);
+    }
+  }
+
+  async function ambilKartu() {
+    if (!hasil) return;
+    setGalatBukti("");
+    setMengunduhKartu(true);
+    try {
+      const { nama, blob } = await unduhKartu({
+        no_registrasi: hasil.no_registrasi,
+        tanggal_lahir: tgl,
+      });
+      bukaBlob(nama, blob);
+    } catch (e) {
+      setGalatBukti(
+        e instanceof GalatApi ? e.message : "Kartu peserta gagal dibuat.",
+      );
+    } finally {
+      setMengunduhKartu(false);
     }
   }
 
@@ -171,12 +192,73 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
               </p>
             )}
 
+            {/* Tes seleksi. Seluruh keadaannya datang dari server, jadi
+                halaman ini tidak pernah menawarkan tombol yang akan ditolak
+                begitu ditekan. */}
+            {hasil.ujian && (hasil.ujian.dibuka || hasil.ujian.hasil) && (
+              <div className="tanpa-cetak space-y-3 border-t border-garis pt-4">
+                <p className="text-xs font-semibold tracking-wide text-samar uppercase">
+                  Tes seleksi
+                </p>
+
+                {hasil.ujian.hasil ? (
+                  <div className="rounded-lg border border-biru/20 bg-biru-muda px-5 py-4">
+                    <p className="text-sm text-samar">
+                      {hasil.ujian.hasil.nama_paket}
+                    </p>
+                    <p className="mt-1 text-2xl font-bold text-biru-tua tabular-nums">
+                      Nilai {hasil.ujian.hasil.skor.toFixed(0)}
+                      <span className="ml-2 text-sm font-semibold text-samar">
+                        ({hasil.ujian.hasil.jumlah_benar} dari{" "}
+                        {hasil.ujian.hasil.jumlah_soal} benar)
+                      </span>
+                    </p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-teks">
+                      {hasil.ujian.hasil.lulus
+                        ? `Nilai Anda memenuhi batas minimum ${hasil.ujian.hasil.nilai_minimum}. Keputusan penerimaan tetap diumumkan panitia.`
+                        : `Nilai Anda belum memenuhi batas minimum ${hasil.ujian.hasil.nilai_minimum}. Keputusan penerimaan tetap diumumkan panitia.`}
+                    </p>
+                  </div>
+                ) : hasil.ujian.boleh_ikut ? (
+                  <>
+                    <p className="text-sm leading-relaxed text-teks">
+                      Tes seleksi sedang dibuka
+                      {hasil.ujian.jumlah_soal
+                        ? `: ${hasil.ujian.jumlah_soal} soal dalam ${hasil.ujian.durasi_menit} menit.`
+                        : "."}{" "}
+                      Waktu mulai berjalan begitu Anda membukanya.
+                    </p>
+                    <Link
+                      href="/ppdb/ujian"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-biru px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-biru-tua"
+                    >
+                      Kerjakan Tes Seleksi
+                    </Link>
+                  </>
+                ) : (
+                  <p className="text-sm leading-relaxed text-samar">
+                    {hasil.ujian.alasan ||
+                      "Tes seleksi belum dapat Anda kerjakan saat ini."}
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="tanpa-cetak space-y-3 border-t border-garis pt-4">
               {galatBukti && <PesanGalat pesan={galatBukti} />}
               <div className="flex flex-wrap gap-2">
                 <Tombol onClick={ambilBukti} sedangJalan={mengunduh}>
                   {mengunduh ? "Menyiapkan..." : "Unduh Bukti Pendaftaran (PDF)"}
                 </Tombol>
+                {hasil.ujian?.kartu_siap && (
+                  <Tombol
+                    jenis="kedua"
+                    onClick={ambilKartu}
+                    sedangJalan={mengunduhKartu}
+                  >
+                    {mengunduhKartu ? "Menyiapkan..." : "Kartu Peserta Ujian (PDF)"}
+                  </Tombol>
+                )}
                 <Tombol jenis="kedua" onClick={() => window.print()}>
                   Cetak halaman ini
                 </Tombol>

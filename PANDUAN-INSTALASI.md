@@ -79,6 +79,11 @@ DB_PASS=sandi-yang-panjang-dan-acak
 # disable saat di komputer sendiri, require bila basis datanya terpisah
 DB_SSLMODE=disable
 
+# Kosongkan bila panitia mengirim WhatsApp sendiri lewat tautan yang disiapkan
+# sistem. Isi hanya bila sekolah sudah punya WhatsApp Business API resmi.
+# WA_GATEWAY_URL=
+# WA_GATEWAY_TOKEN=
+
 # Kunci penanda tangan token masuk. Buat nilai acak:
 #   openssl rand -base64 48
 JWT_SECRET=
@@ -280,6 +285,35 @@ Dengan susunan ini, `NEXT_PUBLIC_API_URL` cukup diisi
 
 `X-Forwarded-For` perlu diteruskan agar pembatas percobaan masuk membaca
 alamat IP pengunjung yang sebenarnya, bukan alamat proksi.
+
+---
+
+## 6c. Menyalakan tes seleksi online
+
+Tes seleksi tertutup sampai tiga hal dipenuhi. Urutannya memang begitu, supaya
+tes tidak pernah terbuka sebelum soalnya siap.
+
+1. **Isi bank soal** lewat menu *Bank Soal* di panel. Soal yang berkeadaan
+   aktif itulah yang dapat terpilih.
+2. **Buat paket ujian** lewat menu *Tes Seleksi*: nama, lama pengerjaan,
+   jumlah soal per peserta, nilai minimum, dan jadwalnya. Paket tidak dapat
+   diaktifkan bila jumlah soal yang diminta melebihi jumlah soal aktif; pesan
+   penolakannya menyebutkan angka yang tersedia.
+3. **Setel `ujian_aktif` menjadi `1`** pada menu *Pengaturan*. Ini saklar
+   induknya, supaya tes dapat ditutup seketika tanpa mengubah paketnya.
+
+Sesudah itu pendaftar yang berkasnya sudah diverifikasi melihat ajakan
+mengerjakan tes pada halaman Cek Status.
+
+Yang perlu diketahui sebelum hari pelaksanaan:
+
+- Waktu dihitung server. Peserta yang memuat ulang halaman tidak mendapat
+  tambahan waktu, dan jawaban yang datang sesudah batas waktunya tertolak.
+- Jawaban tersimpan satu per satu begitu dipilih. Jaringan yang terputus di
+  tengah jalan tidak menghanguskan yang sudah dijawab.
+- Waktu yang habis menutup sesinya sendiri dan tetap menilai jawaban yang ada.
+- Soal yang sudah dipakai pada sebuah sesi tidak dapat dihapus, hanya
+  dinonaktifkan, supaya hasil peserta tetap dapat ditelusuri.
 
 ---
 

@@ -85,7 +85,12 @@ func jalankanMigrasi(db *sql.DB, folder string) error {
 		// migrasi awal cukup dicatat sebagai sudah diterapkan. Tanpa ini,
 		// pernyataan seed akan dijalankan ulang dan menggandakan data
 		// fasilitas serta berita yang tidak punya kunci unik.
-		if dasar {
+		//
+		// Yang dilewati HANYA migrasi pertama. Sebelumnya seluruh migrasi
+		// ikut dilewati, sehingga basis data warisan versi PHP tidak pernah
+		// mendapat tabel apa pun yang ditambahkan migrasi berikutnya, dan
+		// aplikasinya gagal dengan galat "relation does not exist".
+		if dasar && nama == filepath.Base(berkas[0]) {
 			log.Printf("melewati migrasi %s: basis data sudah berisi skema aplikasi", nama)
 			if _, err := db.Exec("INSERT INTO migrasi (berkas) VALUES ($1)", nama); err != nil {
 				return fmt.Errorf("mencatat migrasi %s: %w", nama, err)

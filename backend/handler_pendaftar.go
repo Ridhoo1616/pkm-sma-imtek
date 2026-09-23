@@ -357,7 +357,7 @@ func (a *Aplikasi) tanganiCekStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	kirimJSON(w, http.StatusOK, map[string]any{
+	jawab := map[string]any{
 		"no_registrasi": noReg,
 		"nama_lengkap":  nama,
 		"jalur":         jalur,
@@ -367,5 +367,70 @@ func (a *Aplikasi) tanganiCekStatus(w http.ResponseWriter, r *http.Request) {
 		"catatan_admin": catatan,
 		"dibuat":        dibuat,
 		"pengumuman":    a.atur("ppdb_pengumuman"),
-	})
+	}
+
+	// Keadaan tes seleksi ikut dikirim di sini, supaya halaman Cek Status
+	// menjadi satu-satunya tempat yang perlu dibuka pendaftar: memantau
+	// verifikasi, mengunduh kartu peserta, mengerjakan tes, lalu melihat
+	// nilainya. Menyebarnya ke beberapa halaman hanya menambah bingung.
+	jawab["ujian"] = a.keadaanUjianPendaftar(noReg, status)
+
+	kirimJSON(w, http.StatusOK, jawab)
+}
+
+// keadaanUjianPendaftar merangkum apa yang boleh dilakukan pendaftar terhadap
+// tes seleksi saat ini.
+func (a *Aplikasi) keadaanUjianPendaftar(noReg, status string) map[string]any {
+	keadaan := map[string]any{
+		"dibuka":     false,
+		"boleh_ikut": false,
+		"sudah_ikut": false,
+		"kartu_siap": status != "Menunggu Verifikasi" && status != "Ditolak",
+		"hasil":      nil,
+		"alasan":     "",
+	}
+
+	paket, err := a.paketBerlaku()
+	dibuka := a.atur("ujian_aktif") == "1" && err == nil
+	keadaan["dibuka"] = dibuka
+	if dibuka {
+		keadaan["nama_paket"] = paket.Nama
+		keadaan["durasi_menit"] = paket.DurasiMenit
+		keadaan["jumlah_soal"] = paket.JumlahSoal
+	}
+
+	switch status {
+	case "Menunggu Verifikasi":
+		keadaan["alasan"] = "Berkas Anda masih menunggu verifikasi panitia."
+	case "Ditolak":
+		keadaan["alasan"] = "Pendaftaran Anda tidak dilanjutkan ke tahap tes seleksi."
+	default:
+		keadaan["boleh_ikut"] = dibuka
+	}
+
+	if err != nil {
+		return keadaan
+	}
+
+	// Sesi yang sudah ada dilaporkan apa adanya, termasuk nilainya, sehingga
+	// pendaftar dapat memantau hasilnya tanpa menunggu pengumuman terpisah.
+	var s SesiUjian
+	errSesi := a.db.QueryRow(
+		`SELECT s.id, s.pendaftar_id, s.paket_id, s.batas_pada, s.jumlah_soal,
+		        s.jumlah_benar, s.skor, s.status, s.selesai_pada
+		 FROM sesi_ujian s JOIN pendaftar p ON p.id = s.pendaftar_id
+		 WHERE upper(p.no_registrasi) = upper($1) AND s.paket_id = $2`,
+		noReg, paket.ID).
+		Scan(&s.ID, &s.PendaftarID, &s.PaketID, &s.BatasPada, &s.JumlahSoal,
+			&s.JumlahBenar, &s.Skor, &s.Status, &s.SelesaiPada)
+	if errSesi != nil {
+		return keadaan
+	}
+
+	keadaan["sudah_ikut"] = true
+	if s.Status != "Berjalan" {
+		keadaan["hasil"] = a.ringkasanSesi(s, paket)
+		keadaan["boleh_ikut"] = false
+	}
+	return keadaan
 }

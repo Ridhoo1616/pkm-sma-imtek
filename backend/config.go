@@ -20,6 +20,16 @@ type Konfigurasi struct {
 	FolderUnggah  string
 	BatasUnggah   int64
 	Produksi      bool
+
+	// Gateway WhatsApp. Kosong berarti pengiriman otomatis tidak aktif, dan
+	// panitia mengirim sendiri lewat tautan wa.me. Lihat notifikasi.go untuk
+	// alasan kenapa yang otomatis tidak dijadikan bawaan.
+	WaGatewayURL   string
+	WaGatewayToken string
+	// Nama medan pada badan permintaan gateway. Tiap penyedia memakai nama
+	// yang berbeda, jadi dibuat dapat disetel tanpa mengubah kode.
+	WaMedanTujuan string
+	WaMedanPesan  string
 }
 
 // muatBerkasEnv membaca berkas .env di sebelah program dan menyetel
@@ -118,13 +128,45 @@ func muatKonfigurasi() Konfigurasi {
 		}
 	}
 
-	return Konfigurasi{
-		Alamat:        ":" + lingkungan("PORT", "8090"),
-		DSN:           dsn,
-		RahasiaToken:  []byte(rahasia),
-		AsalDiizinkan: asal,
-		FolderUnggah:  lingkungan("UPLOAD_DIR", "data/unggahan"),
-		BatasUnggah:   batas,
-		Produksi:      produksi,
+	waGateway := lingkungan("WA_GATEWAY_URL", "")
+	if waGateway != "" && !gatewaySah(waGateway) {
+		// Pesan notifikasi memuat nama dan nomor telepon orang tua. Mengirim
+		// data itu tanpa TLS berarti membocorkannya di sepanjang jalur.
+		//
+		// Kecualinya localhost: gateway WhatsApp sering dijalankan sebagai
+		// proses terpisah di server yang sama, dan lalu lintas yang tidak
+		// pernah meninggalkan mesin itu tidak melewati jaringan mana pun.
+		log.Fatal("WA_GATEWAY_URL harus memakai https, kecuali bila menunjuk ke localhost")
 	}
+
+	return Konfigurasi{
+		Alamat:         ":" + lingkungan("PORT", "8090"),
+		DSN:            dsn,
+		RahasiaToken:   []byte(rahasia),
+		AsalDiizinkan:  asal,
+		FolderUnggah:   lingkungan("UPLOAD_DIR", "data/unggahan"),
+		BatasUnggah:    batas,
+		WaGatewayURL:   waGateway,
+		WaGatewayToken: lingkungan("WA_GATEWAY_TOKEN", ""),
+		WaMedanTujuan:  lingkungan("WA_MEDAN_TUJUAN", "to"),
+		WaMedanPesan:   lingkungan("WA_MEDAN_PESAN", "message"),
+		Produksi:       produksi,
+	}
+}
+
+// gatewaySah menerima https ke mana pun, atau http yang menunjuk ke mesin
+// yang sama.
+func gatewaySah(alamat string) bool {
+	u, err := url.Parse(alamat)
+	if err != nil || u.Host == "" {
+		return false
+	}
+	if u.Scheme == "https" {
+		return true
+	}
+	if u.Scheme != "http" {
+		return false
+	}
+	tuan := u.Hostname()
+	return tuan == "localhost" || tuan == "127.0.0.1" || tuan == "::1"
 }
