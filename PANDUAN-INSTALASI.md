@@ -263,6 +263,20 @@ itu dan cukup menghapusnya.
    Selama fotonya belum ada, halaman publik menampilkan kerangka berukuran
    sama yang menyebutkan perbandingan sisi dan ukuran piksel yang diharapkan,
    jadi tata letaknya tidak berubah setelah fotonya diunggah.
+
+   Empat pengaturan ini yang menyusun bagian sambutan di halaman Profil
+   Sekolah:
+
+   | Pengaturan | Perannya pada bagian sambutan |
+   |---|---|
+   | `foto_kepsek` | Potret kepala sekolah, perbandingan sisi 1:1 |
+   | `sambutan_kepsek` | Naskah sambutan, ditampilkan sebagai kutipan |
+   | `foto_depan` | Foto gedung sekolah, ditampilkan **pudar** sebagai latar bagian bawah kartu |
+   | `tagline` | Semboyan sekolah, ditulis dengan huruf tulisan tangan |
+
+   Karena foto gedungnya dipudarkan sampai 20 persen lalu ditumpuk peredam,
+   foto apa pun yang memperlihatkan bangunan sekolah sudah memadai; tidak
+   perlu foto yang khusus disiapkan.
 6. **Isi menu Profil Sekolah, Akademik, dan Kesiswaan** di panel:
 
    | Menu panel | Mengisi halaman publik |

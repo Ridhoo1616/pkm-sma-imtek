@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { urlUnggahan } from "@/lib/api";
-import { belumTerisi, keParagraf } from "@/lib/format";
+import { keParagraf } from "@/lib/format";
 import { anakMenu } from "@/lib/menu";
 import { MunculNaik, KartuGerak } from "@/komponen/Gerak";
 
@@ -78,68 +77,6 @@ export function PetaAnak({ induk }: { induk: string }) {
         </MunculNaik>
       ))}
     </div>
-  );
-}
-
-/**
- * Potret kepala sekolah beserta kerangkanya.
- *
- * Selama fotonya belum diunggah, yang tampil adalah kerangka berukuran sama
- * yang menyebutkan ukuran dan perbandingan sisi yang diharapkan. Dengan
- * begitu tata letak halaman sudah final sejak sebelum fotonya ada, dan
- * panitia tahu foto seperti apa yang perlu disiapkan.
- */
-export function PotretKepsek({
-  foto,
-  nama,
-  jabatan = "Kepala Sekolah",
-}: {
-  foto?: string;
-  nama?: string;
-  jabatan?: string;
-}) {
-  const adaFoto = Boolean(foto && !belumTerisi(foto));
-  const adaNama = Boolean(nama && !belumTerisi(nama));
-
-  return (
-    <figure className="kartu overflow-hidden">
-      {adaFoto ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={urlUnggahan("profil", foto as string)}
-          alt={adaNama ? `Foto ${nama}, ${jabatan}` : `Foto ${jabatan}`}
-          className="aspect-[3/4] w-full bg-biru-muda object-cover"
-          loading="lazy"
-          decoding="async"
-        />
-      ) : (
-        <div className="grid aspect-[3/4] w-full place-items-center border-b border-dashed border-garis bg-biru-muda px-5 text-center">
-          <div>
-            <span
-              aria-hidden
-              className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-2xl text-biru"
-            >
-              ☐
-            </span>
-            <p className="mt-3 text-sm font-semibold text-biru-tua">
-              Tempat foto {jabatan.toLowerCase()}
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-biru/70">
-              Potret setengah badan, perbandingan sisi 3:4, paling tidak
-              600×800 piksel. Diunggah lewat menu Pengaturan di panel admin.
-            </p>
-          </div>
-        </div>
-      )}
-      <figcaption className="px-5 py-4 text-center">
-        <span className="block font-bold text-biru-tua">
-          {adaNama ? nama : "Nama kepala sekolah belum diisi"}
-        </span>
-        <span className="mt-0.5 block text-xs tracking-wide text-samar uppercase">
-          {jabatan}
-        </span>
-      </figcaption>
-    </figure>
   );
 }
 

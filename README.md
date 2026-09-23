@@ -55,6 +55,7 @@ pkm-sma-imtek/
 │       │                    dan kabar berbasis Radix serta gulir Lenis
 │       └── lib/             lapisan API, tipe data, pembantu format,
 │                            susunan menu, pemeriksa NISN dan NIK
+│       public/font/         huruf tulisan tangan Caveat beserta lisensinya
 │
 ├── alat/
 │   └── pindah-mysql/   Memindahkan data versi PHP (MySQL) ke PostgreSQL
@@ -286,11 +287,29 @@ hover sama sekali. Setiap halaman turunan juga membawa jejak lokasi beserta
 tautan ke halaman sekelompok, jadi pengunjung dapat berpindah ke topik sebelah
 tanpa kembali ke menu atas.
 
-**Tempat foto kepala sekolah** disiapkan pada bagian sambutan. Selama fotonya
-belum diunggah, yang tampil adalah kerangka berukuran sama yang menyebutkan
-perbandingan sisi dan ukuran piksel yang diharapkan. Dengan begitu tata letak
-halaman sudah final sebelum fotonya ada, dan panitia tahu foto seperti apa
-yang perlu disiapkan. Hal yang sama berlaku untuk bagan struktur organisasi.
+**Bagian sambutan kepala sekolah** disusun sebagai kartu berlatar gradasi:
+potret kepala sekolah bersudut membulat dengan aksen emas, naskah sambutan
+sebagai kutipan miring di antara dua tanda petik besar, foto gedung sekolah
+yang dipudarkan di bagian bawah kartu, dan semboyan sekolah ditulis dengan
+huruf tulisan tangan.
+
+Keempat bahannya berasal dari menu Pengaturan, tidak satu pun ditulis di dalam
+kode: `foto_kepsek`, `sambutan_kepsek`, `foto_depan`, dan `tagline`. Selama
+salah satunya belum diunggah atau diisi, yang tampil kerangka berukuran sama
+yang menyebutkan perbandingan sisi dan ukuran piksel yang diharapkan, bukan
+tulisan karangan. Dengan begitu tata letak halaman sudah final sebelum
+bahannya ada, dan panitia tahu apa yang perlu disiapkan. Hal yang sama berlaku
+untuk bagan struktur organisasi.
+
+Huruf tulisan tangannya **Caveat**, berlisensi SIL Open Font License, dan
+berkasnya disimpan di dalam proyek pada `frontend/public/font`, bukan dimuat
+dari Google Fonts. Tiga alasannya: halaman publik tidak memerlukan sambungan
+ke server pihak lain hanya untuk satu baris tulisan; alamat IP pengunjung,
+yang termasuk calon peserta didik dan orang tuanya, tidak ikut terkirim ke
+Google setiap kali halaman dibuka; dan demo statis di GitHub Pages ikut
+berjalan tanpa sambungan ke luar. Subsetnya Latin saja, 74 KB, dan dimuat
+dengan `font-display: swap` sehingga tulisannya langsung terbaca dengan huruf
+cadangan sebelum berkasnya siap.
 
 Keempat pengaturan bergambar — logo, foto halaman depan, foto kepala sekolah,
 dan bagan struktur organisasi — kini **diunggah** dari menu Pengaturan.
@@ -651,12 +670,20 @@ khusus fitur baru:
   keterangannya.
 - Kartu peserta terbit sebagai PDF berisi barcode dan kode QR.
 
-**Demo statis, 195 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
+**Demo statis, 203 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
 pengelolaan isi situs, batas hak akses operator, tes seleksi dari masuk sampai
 nilai keluar, rincian biaya beserta totalnya, keempat menu panel baru, dan
 tombol PDF yang menjelaskan bahwa berkasnya dibuat oleh server, penunjuk
 alur, tombol bantuan melayang beserta penanda posisinya, dan tanya jawab
 lengkap dengan penyaring serta pencariannya.
+
+Termasuk 8 pemeriksaan bagian sambutan: kedua gambar pengaturan benar-benar
+tersisip sebagai data URI dan termuat, foto gedungnya dipudarkan, semboyannya
+memakai huruf Caveat yang berkasnya terbukti termuat, dan naskah beserta nama
+kepala sekolahnya tampil. Gambar pengaturan tidak dapat diperlakukan seperti
+gambar berita dan galeri yang digambar ulang kode demo: gambar ini berada di
+dalam tangkapan markup yang dipasang apa adanya, jadi tanpa penyisipan itu
+yang tampil hanya ikon gambar rusak.
 
 Termasuk 6 pemeriksaan urutan kolom pada tabel pendaftar: barisnya digambar
 kode demo sedangkan kepala kolomnya berasal dari tangkapan markup, jadi bila

@@ -16,10 +16,37 @@
   --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial,
     sans-serif;
 
+  /* Huruf tulisan tangan, dipakai satu tempat: semboyan sekolah pada bagian
+     sambutan kepala sekolah. Berkasnya ada di public/font, bukan dimuat dari
+     Google Fonts; alasannya ditulis di public/font/README.md. Cadangannya
+     huruf tulisan tangan bawaan sistem, supaya barisnya tidak berubah
+     menjadi huruf biasa bila woff2-nya gagal dimuat. */
+  --font-tangan: "Caveat", "Bradley Hand", "Segoe Script", cursive;
+
   --radius-kartu: 14px;
 
   --shadow-lembut: 0 4px 20px rgba(15, 42, 74, 0.08);
   --shadow-kuat: 0 12px 34px rgba(15, 42, 74, 0.14);
+}
+
+/* Berkas fontnya dimuat sendiri, bukan lewat next/font, karena next/font
+   mengunduhnya dari Google saat membangun dan menaruhnya di antara berkas
+   bangunan. Demo statis di docs/ merakit HTML-nya di luar Next, jadi berkas
+   yang letaknya ditentukan Next tidak dapat ikut; satu berkas di public/
+   dengan alamat tetap dapat dipakai keduanya.
+
+   font-display: swap dipilih supaya tulisannya langsung terbaca dengan huruf
+   cadangan, lalu berganti begitu woff2-nya siap. Semboyan sekolah bukan
+   bagian yang pantas menahan tampilnya halaman. */
+@font-face {
+  font-family: "Caveat";
+  src: url("/font/caveat-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 /* Aturan dasar WAJIB berada di dalam @layer base. Aturan CSS yang ditulis
