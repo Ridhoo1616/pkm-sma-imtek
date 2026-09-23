@@ -273,6 +273,25 @@ Sejarah, Data Sekolah, serta Visi & Misi dibaca dari menu Pengaturan; Sarana
 dan Prasarana adalah halaman Fasilitas yang sudah ada; dan Prestasi Siswa
 mengambil berita berkategori Prestasi.
 
+**Halaman Visi & Misi dibuka dengan orang-orangnya, bukan rumusannya.**
+Bagian "Yang Menjalankannya" memuat tiga kartu berikon — guru dan tenaga
+kependidikan, siswa dan siswi, serta pelaksanaan bersama — lalu rumusan visi
+dan misinya di bawahnya. Visi dan misi yang berdiri sebagai dua blok teks
+terbaca seperti dokumen, padahal yang mengerjakannya orang. Ikonnya
+(`IkonGuru`, `IkonSiswa`, `IkonBersama`) digambar langsung sebagai SVG di
+`komponen/Ikon.tsx`, bukan dimuat dari pustaka ikon, jadi ia ikut apa adanya
+ke markup tangkapan demo dan tidak menambah satu pun permintaan jaringan.
+Keterangan tiap kartu menerangkan **perannya** secara umum dan tidak memuat
+penilaian apa pun tentang SMA IMTEK, karena penilaian seperti itu hanya boleh
+datang dari sekolahnya sendiri.
+
+Ilustrasi sekelas gambar rujukan — satu ruang kelas berisi guru dan siswa —
+sempat dicoba sebagai SVG penuh lalu dibuang: pada bidang sebesar itu bentuk
+badannya jadi seperti bel, bukan orang, dan mutunya di bawah halaman lainnya.
+Foto pun bukan pilihan, karena berarti memakai wajah guru dan siswa sungguhan
+tanpa izin mereka, atau memakai foto stok berisi orang yang sama sekali bukan
+bagian dari sekolah ini.
+
 Dua butir sengaja berupa pintu masuk, bukan sistem yang dibangun sendiri.
 E-Learning menampilkan tautan ke layanan yang sudah dipakai sekolah, misalnya
 Google Classroom atau Moodle, dan Jadwal Pelajaran menunjuk berkas jadwalnya.
