@@ -233,7 +233,20 @@ komputer rekan satu tim tidak perlu disetel ulang.
    Prestasi Siswa tidak punya menu sendiri: tulis capaiannya lewat menu
    *Berita* dengan kategori **Prestasi**, dan halaman Prestasi Siswa
    mengambilnya dari sana.
-7. **Isi `tautan_elearning` dan `tautan_jadwal`** pada menu *Pengaturan* bila
+7. **Ketahui apa yang diperiksa sistem pada NISN dan NIK.** Sistem ini
+   **tidak** mencocokkan keduanya ke basis data pemerintah, dan panitia
+   sebaiknya tidak menjanjikan begitu kepada orang tua. NIK hanya dapat
+   diperiksa ke Dukcapil lewat perjanjian kerja sama resmi, dan laman
+   pencarian NISN Kemendikbud tidak menyediakan API untuk program lain.
+   PDDIKTI juga bukan sumber yang tepat, karena isinya data pendidikan tinggi.
+
+   Yang diperiksa sistem: strukturnya, beserta kecocokannya dengan tanggal
+   lahir dan jenis kelamin yang diisi pendaftar. Itu cukup menangkap satu
+   angka yang tertukar, digit yang kurang, atau NISN yang diketik pada kolom
+   NIK, dan pesannya menyebut bagian mana yang salah. Verifikasi sebenarnya
+   tetap dilakukan panitia dengan membandingkan Kartu Keluarga dan rapor yang
+   diunggah.
+8. **Isi `tautan_elearning` dan `tautan_jadwal`** pada menu *Pengaturan* bila
    sekolah sudah memakai layanan belajar daring, misalnya Google Classroom
    atau Moodle, dan sudah punya berkas jadwal pelajaran. Keduanya berupa
    pintu masuk ke layanan yang sudah ada, bukan sistem yang dibangun di sini.

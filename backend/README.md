@@ -80,6 +80,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | `handler_pengaturan.go` | pesan masuk, pengaturan sekolah, pengguna |
 | `handler_faq.go` | tanya jawab |
 | `handler_profil.go` | halaman profil, tenaga pendidik, agenda, kegiatan siswa, pustaka |
+| `validasi_identitas.go` | pemeriksaan struktur NISN dan NIK beserta pencocokan silangnya |
 
 ## Daftar alamat API
 
@@ -161,6 +162,38 @@ profil (logo, foto kepala sekolah, bagan struktur, foto guru), kegiatan siswa,
 dan koleksi pustaka secara terbuka. Folder `pendaftar` berisi dokumen pribadi
 (Kartu Keluarga, akta kelahiran, ijazah), sehingga wajib membawa token
 petugas dan tidak disimpan di cache bersama.
+
+## Pemeriksaan NISN dan NIK
+
+`validasi_identitas.go` memeriksa struktur kedua nomor, lalu mencocokkannya
+dengan isian lain pada formulir yang sama. Yang **tidak** dikerjakan: mencocokkan
+ke basis data pemerintah. NIK hanya dapat diperiksa ke Dukcapil lewat
+perjanjian kerja sama resmi, laman pencarian NISN Kemendikbud tidak menyediakan
+API untuk program lain, dan PDDIKTI berisi data pendidikan tinggi sehingga bukan
+sumber yang tepat untuk jenjang SMA.
+
+NIK memuat tanggal lahir pada angka ke-7 sampai ke-12, ditambah 40 pada
+tanggalnya bila perempuan. Karena tanggal lahir dan jenis kelamin sudah diisi
+pendaftar di kolom lain, ketidakcocokannya dapat ditunjukkan dengan tepat, dan
+**kolom yang disalahkan dipilih sesuai bagian yang bertentangan**: bila hanya
+tahunnya yang berbeda, yang ditandai kolom `tanggal_lahir`, bukan `nik`.
+
+Satu aturan sengaja tidak menolak. Tiga angka pertama NISN pada umumnya tiga
+angka terakhir tahun lahir, tetapi itu kebiasaan penomoran dan bukan aturan
+yang mengikat, jadi ketidakcocokannya hanya berupa peringatan di formulir
+(`nisnSesuaiTahunLahir`).
+
+Aturannya diuji tanpa basis data maupun jaringan:
+
+```bash
+cd backend
+go test ./...
+```
+
+Aturan yang sama ditulis ulang di `frontend/src/lib/identitas.ts` untuk
+keterangan yang muncul saat pendaftar mengetik. Pemeriksaan di peramban tidak
+pernah menjadi satu-satunya penjaga: yang menentukan diterima atau tidak tetap
+yang di sini.
 
 ## Bentuk galat
 

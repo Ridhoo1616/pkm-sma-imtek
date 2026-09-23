@@ -78,8 +78,12 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 	nisn := isi("nisn")
 	nik := isi("nik")
 	email := isi("email")
-	v.digitTepat("nisn", "NISN", nisn, 10)
-	v.digitTepat("nik", "NIK", nik, 16)
+	// Keduanya diperiksa strukturnya, lalu dicocokkan dengan isian lain pada
+	// formulir yang sama. Lihat validasi_identitas.go untuk alasannya, beserta
+	// keterangan bahwa pencocokan ke basis data pemerintah tidak mungkin
+	// dilakukan tanpa perjanjian kerja sama resmi.
+	v.periksaNisn(nisn, nik)
+	v.periksaNik(nik, tanggalLahir, jenisKelamin)
 	v.telepon("no_hp", "Nomor HP/WhatsApp", noHP, true)
 	v.telepon("no_hp_ortu", "Nomor HP orang tua", isi("no_hp_ortu"), false)
 	v.email("email", email)

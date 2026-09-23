@@ -72,17 +72,6 @@ func (v *Validasi) pilihan(kolom, label, nilai string, opsi []string) {
 	}
 }
 
-// digitTepat untuk kolom seperti NISN dan NIK: opsional, tetapi bila diisi
-// panjangnya harus tepat.
-func (v *Validasi) digitTepat(kolom, label, nilai string, jumlah int) {
-	if nilai == "" {
-		return
-	}
-	if !polaAngka.MatchString(nilai) || len(nilai) != jumlah {
-		v.tambah(kolom, fmt.Sprintf("%s harus berupa %d angka.", label, jumlah))
-	}
-}
-
 func (v *Validasi) telepon(kolom, label, nilai string, wajib bool) {
 	if nilai == "" {
 		if wajib {

@@ -21,7 +21,42 @@ import {
   LABEL_SUMBER,
   KETERANGAN_JALUR,
 } from "@/lib/pilihan";
+import { periksaNik, periksaNisn, type KabarPeriksa } from "@/lib/identitas";
 import type { Jurusan } from "@/lib/tipe";
+
+/**
+ * Kabar pemeriksaan NISN dan NIK di bawah kolomnya, muncul saat pendaftar
+ * mengetik.
+ *
+ * Bentuknya sengaja hanya satu baris tulisan berwarna dengan satu tanda di
+ * depannya, tanpa kotak dan tanpa latar: kolomnya sudah punya tempat pesan
+ * galat sendiri, dan menambah kotak berwarna di situ membuat formulir yang
+ * panjang terlihat penuh peringatan.
+ */
+function PeriksaLangsung({ kabar }: { kabar: KabarPeriksa }) {
+  if (kabar.jenis === "kosong" || kabar.pesan === "") return null;
+
+  const gaya = {
+    sedang: { tanda: "\u00b7", warna: "text-samar" },
+    salah: { tanda: "!", warna: "text-red-700" },
+    curiga: { tanda: "?", warna: "text-amber-700" },
+    benar: { tanda: "\u2713", warna: "text-green-700" },
+  }[kabar.jenis];
+
+  return (
+    <p
+      // aria-live supaya pembaca layar ikut menyuarakan hasilnya tanpa
+      // pendaftar harus meninggalkan kolomnya lebih dulu.
+      aria-live="polite"
+      className={`mt-1 flex gap-1.5 text-xs leading-relaxed ${gaya.warna}`}
+    >
+      <span aria-hidden className="font-bold">
+        {gaya.tanda}
+      </span>
+      <span>{kabar.pesan}</span>
+    </p>
+  );
+}
 
 /* ---------------- bentuk isian ---------------- */
 
@@ -194,6 +229,13 @@ export default function FormulirPpdb({
     setBerkas((s) => ({ ...s, [k]: f }));
     if (galat[k]) setGalat((g) => ({ ...g, [k]: "" }));
   };
+
+  // Pemeriksaan NISN dan NIK dihitung ulang setiap ketikan. Keduanya juga
+  // membaca tanggal lahir dan jenis kelamin, karena di situlah kesalahan satu
+  // angka pada NIK menjadi kelihatan: NIK memuat tanggal lahir beserta
+  // penanda perempuan, jadi ketidakcocokannya dapat ditunjukkan dengan tepat.
+  const kabarNisn = periksaNisn(isi.nisn, isi.tanggal_lahir, isi.nik);
+  const kabarNik = periksaNik(isi.nik, isi.tanggal_lahir, isi.jenis_kelamin);
 
   const opsiJurusan = useMemo(
     () =>
@@ -420,26 +462,32 @@ export default function FormulirPpdb({
                       opsi={JENIS_KELAMIN}
                       galat={galat.jenis_kelamin}
                     />
-                    <Teks
-                      nama="nisn"
-                      label="NISN"
-                      maks={10}
-                      nilai={isi.nisn}
-                      ubah={ubah("nisn")}
-                      galat={galat.nisn}
-                      contoh="10 angka"
-                      bantuan="Nomor Induk Siswa Nasional dari SMP/MTs asal."
-                    />
-                    <Teks
-                      nama="nik"
-                      label="NIK"
-                      maks={16}
-                      nilai={isi.nik}
-                      ubah={ubah("nik")}
-                      galat={galat.nik}
-                      contoh="16 angka"
-                      bantuan="Sesuai Kartu Keluarga."
-                    />
+                    <div>
+                      <Teks
+                        nama="nisn"
+                        label="NISN"
+                        maks={10}
+                        nilai={isi.nisn}
+                        ubah={ubah("nisn")}
+                        galat={galat.nisn}
+                        contoh="10 angka"
+                        bantuan="Nomor Induk Siswa Nasional, tercantum pada rapor atau ijazah SMP/MTs."
+                      />
+                      {!galat.nisn && <PeriksaLangsung kabar={kabarNisn} />}
+                    </div>
+                    <div>
+                      <Teks
+                        nama="nik"
+                        label="NIK"
+                        maks={16}
+                        nilai={isi.nik}
+                        ubah={ubah("nik")}
+                        galat={galat.nik}
+                        contoh="16 angka"
+                        bantuan="Nomor Induk Kependudukan, 16 angka sesuai Kartu Keluarga."
+                      />
+                      {!galat.nik && <PeriksaLangsung kabar={kabarNik} />}
+                    </div>
                     <Teks
                       nama="tempat_lahir"
                       label="Tempat lahir"
