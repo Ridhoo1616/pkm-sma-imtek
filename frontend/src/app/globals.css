@@ -194,6 +194,22 @@
   will-change: auto;
 }
 
+/* Peta sematan dari Google Maps datang sebagai iframe dengan lebar dan
+   tinggi tetap dari kode yang ditempel panitia. Dipaksa memenuhi kotaknya
+   supaya tidak meluber pada layar sempit maupun menyisakan ruang pada layar
+   lebar. Perbandingan sisinya ditetapkan di sini, bukan pada iframe-nya,
+   karena isi iframe itu tidak dapat kita ubah. */
+.peta-sematan {
+  aspect-ratio: 16 / 9;
+}
+
+.peta-sematan iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
 /* Bilah informasi berjalan di paling atas halaman publik.
 
    Gerakannya menggeser isinya sejauh SEPARUH lebar, karena daftarnya

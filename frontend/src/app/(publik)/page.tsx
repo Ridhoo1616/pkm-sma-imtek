@@ -17,6 +17,7 @@ import {
 import { MunculNaik, MunculLangsung, KartuGerak } from "@/komponen/Gerak";
 import { MasalahJawaban } from "@/komponen/MasalahJawaban";
 import { SambutanRingkas } from "@/komponen/SambutanRingkas";
+import { PetaJarak } from "@/komponen/PetaJarak";
 import type { Berita, Fasilitas, Jurusan } from "@/lib/tipe";
 import { IkonFasilitas, IkonCentang, IkonLokasi } from "@/komponen/Ikon";
 
@@ -412,6 +413,13 @@ export default async function Beranda() {
           </div>
         </section>
       )}
+
+      {/* ---------------- Lokasi dan jarak ----------------
+          Sesudah fasilitas: "seberapa jauh" adalah pertanyaan yang muncul
+          tepat setelah orang tua selesai menimbang apa yang ditawarkan. */}
+      <MunculNaik>
+        <PetaJarak pengaturan={p} />
+      </MunculNaik>
 
       {/* ---------------- Prestasi ----------------
           Bukan klaim, melainkan berita berkategori Prestasi yang memang
