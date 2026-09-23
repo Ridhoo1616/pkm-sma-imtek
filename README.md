@@ -286,17 +286,21 @@ penilaian apa pun tentang SMA IMTEK, karena penilaian seperti itu hanya boleh
 datang dari sekolahnya sendiri.
 
 **Kartu Visi dan Kartu Misi masing-masing memuat satu ilustrasi di pojok
-kanan atas, di dalam kartunya, dan gambarnya DIAPUNGKAN — bukan ditempatkan
-mutlak.** Bedanya menentukan tinggi kartu. Gambar yang ditempatkan mutlak
-tidak menempati ruang, jadi kartunya harus diberi ruang kosong sendiri
-setinggi gambarnya supaya naskah tidak tertimpa, dan kartunya jadi jangkung —
-441 piksel meski rumusannya baru satu kalimat. Gambar yang diapungkan ikut
-dialiri naskah: tinggi kartu kembali ditentukan isinya (221 piksel saat
-rumusannya belum ada, 464 piksel saat misinya lima poin), dan naskahnya
-mengalir di samping lalu di bawah gambar tanpa ruang cadangan sama sekali.
-Margin negatifnya menarik gambar sampai menempel pojok melewati padding
-kartu, dan kartunya mengurung isinya sehingga gambarnya terpotong mengikuti
-sudut membulatnya.
+kanan bawah, di dalam kartunya, dan gambarnya MENEMPATI RUANG — bukan
+ditempatkan mutlak.** Bedanya menentukan tinggi kartu. Gambar bertempat
+mutlak tidak menempati ruang, jadi kartunya harus diberi ruang cadangan
+setinggi gambarnya supaya naskah tidak tertimpa, dan ruang itu tetap kosong
+walau rumusannya baru satu kalimat — kartunya jadi 441 piksel. Di sini
+gambarnya ikut dihitung sebagai isi, sehingga tinggi kartu = naskah + gambar
+tanpa ada yang terbuang: 321 piksel saat rumusannya belum ada, 541 piksel
+saat misinya lima poin.
+
+Kartunya `flex flex-col` dan gambarnya diberi `mt-auto` — itu yang mendorongnya
+ke dasar. Diperlukan karena kedua kartu dibuat setinggi sama oleh
+`auto-rows-fr`: pada kartu yang naskahnya lebih pendek, tanpa `mt-auto`
+gambarnya akan berhenti di tengah dan tidak menempel dasar. Margin negatifnya
+menarik gambar sampai menempel pojok melewati padding kartu, dan kartunya
+mengurung isinya sehingga gambarnya terpotong mengikuti sudut membulatnya.
 
 Tumpang tindihnya **tidak boleh** dinilai dari kotak pembatas elemen teks:
 untuk gambar yang diapungkan, kotak paragraf tetap selebar kartu meski

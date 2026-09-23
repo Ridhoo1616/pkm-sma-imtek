@@ -75,30 +75,8 @@ export default async function HalamanVisiMisi() {
           <MunculNaik>
             <section
               aria-labelledby="judul-visi"
-              className="kartu relative h-full overflow-hidden border-l-4 border-l-emas p-6 md:p-7"
+              className="kartu relative flex h-full flex-col overflow-hidden border-l-4 border-l-emas p-6 md:p-7"
             >
-              {/* Ilustrasi di pojok kanan ATAS, di dalam kartu, dan
-                  DIAPUNGKAN — bukan ditempatkan mutlak.
-
-                  Bedanya menentukan tinggi kartu. Gambar yang ditempatkan
-                  mutlak tidak menempati ruang, jadi kartunya harus diberi
-                  ruang kosong sendiri setinggi gambarnya supaya naskah tidak
-                  tertimpa, dan kartunya jadi jangkung. Gambar yang diapungkan
-                  ikut dialiri naskah: tinggi kartu kembali ditentukan isinya,
-                  dan naskahnya mengalir di samping lalu di bawah gambar tanpa
-                  perlu ruang cadangan sama sekali.
-
-                  Margin negatifnya menarik gambar sampai menempel pojok,
-                  melewati padding kartu; kartunya mengurung isinya sehingga
-                  gambarnya terpotong mengikuti sudut membulatnya. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/ilustrasi/visi.png"
-                alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis"
-                width={384}
-                height={426}
-                className="pointer-events-none float-right -mt-6 -mr-6 ml-4 h-32 w-auto sm:h-36 md:-mt-7 md:-mr-7"
-              />
               <div>
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
                   Arah
@@ -120,22 +98,40 @@ export default async function HalamanVisiMisi() {
                   {p.visi}
                 </p>
               )}
+              {/* Ilustrasi di pojok kanan BAWAH, di dalam kartu, dan ia
+                  MENEMPATI RUANG — bukan ditempatkan mutlak.
+
+                  Itu yang membuat kartunya tidak jangkung. Gambar bertempat
+                  mutlak tidak menempati ruang, jadi kartunya harus diberi
+                  ruang cadangan setinggi gambarnya supaya naskah tidak
+                  tertimpa, dan ruang itu tetap kosong walau rumusannya baru
+                  satu kalimat. Di sini gambarnya ikut dihitung sebagai isi:
+                  tinggi kartu = naskah + gambar, tidak ada yang terbuang.
+
+                  `mt-auto` yang mendorongnya ke dasar. Diperlukan karena
+                  kedua kartu dibuat setinggi sama oleh auto-rows-fr: pada
+                  kartu yang naskahnya lebih pendek, tanpa mt-auto gambarnya
+                  akan berhenti di tengah, tidak menempel dasar.
+
+                  Margin negatifnya menarik gambar sampai menempel pojok
+                  melewati padding kartu, dan kartunya mengurung isinya
+                  sehingga gambarnya terpotong mengikuti sudut membulatnya. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/ilustrasi/visi.png"
+                alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis"
+                width={384}
+                height={426}
+                className="pointer-events-none mt-auto -mr-6 -mb-6 ml-auto h-28 w-auto self-end pt-6 sm:h-32 md:-mr-7 md:-mb-7"
+              />
             </section>
           </MunculNaik>
 
           <MunculNaik jeda={0.08}>
             <section
               aria-labelledby="judul-misi"
-              className="kartu relative h-full overflow-hidden p-6 md:p-7"
+              className="kartu relative flex h-full flex-col overflow-hidden p-6 md:p-7"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/ilustrasi/misi.png"
-                alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar"
-                width={314}
-                height={434}
-                className="pointer-events-none float-right -mt-6 -mr-6 ml-4 h-32 w-auto sm:h-36 md:-mt-7 md:-mr-7"
-              />
               <div>
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
                   Langkah
@@ -166,6 +162,14 @@ export default async function HalamanVisiMisi() {
                   ))}
                 </ol>
               )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/ilustrasi/misi.png"
+                alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar"
+                width={314}
+                height={434}
+                className="pointer-events-none mt-auto -mr-6 -mb-6 ml-auto h-28 w-auto self-end pt-6 sm:h-32 md:-mr-7 md:-mb-7"
+              />
             </section>
           </MunculNaik>
         </div>
