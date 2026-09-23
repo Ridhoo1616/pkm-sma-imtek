@@ -36,9 +36,6 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       locale: "id_ID",
     },
-    icons: {
-      icon: "gambar/sma-imtek.webp",
-    },
   };
 }
 
