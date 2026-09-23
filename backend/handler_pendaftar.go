@@ -19,8 +19,8 @@ var berkasPendaftar = []struct {
 	{"file_foto", "Foto 3x4", true, TipeGambar},
 	{"file_ijazah", "Ijazah / SKL", true, TipeDokumen},
 	{"file_kk", "Kartu Keluarga", true, TipeDokumen},
-	{"file_akta", "Akta Kelahiran", false, TipeDokumen},
-	{"file_raport", "Rapor", false, TipeDokumen},
+	{"file_akta", "Akta Kelahiran", true, TipeDokumen},
+	{"file_raport", "Rapor semester akhir", true, TipeDokumen},
 	{"file_prestasi", "Sertifikat Prestasi", false, TipeDokumen},
 }
 
@@ -74,13 +74,33 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		v.usiaWajar("tanggal_lahir", lahir)
 	}
 
-	/* ---- NISN: wajib ---- */
-	// NISN diwajibkan supaya pendaftar tanpa nomor itu tidak masuk sebagai
-	// baris yang tidak dapat dicocokkan panitia ke data Dapodik sekolah asal.
+	/* ---- identitas dan alamat: wajib ----
+
+	   Sebelumnya NISN, NIK, dan seluruh rincian alamat bersifat opsional.
+	   Itu membuat baris pendaftar yang tidak dapat diverifikasi panitia:
+	   tanpa NISN dan NIK, tidak ada yang bisa dicocokkan ke data Dapodik
+	   maupun dokumen kependudukan; tanpa kelurahan sampai kode pos, jalur
+	   zonasi tidak dapat dinilai dan surat panggilan tidak dapat dikirim.
+
+	   Pesan galatnya disusun oleh v.wajib() dengan menyebut nama kolomnya,
+	   supaya pendaftar tahu tepat mana yang kurang. */
 	nisn := isi("nisn")
+	nik := v.wajib("nik", "NIK", isi("nik"))
+	kelurahan := v.wajib("kelurahan", "Kelurahan/Desa", isi("kelurahan"))
+	kecamatan := v.wajib("kecamatan", "Kecamatan", isi("kecamatan"))
+	kota := v.wajib("kota", "Kota/Kabupaten", isi("kota"))
+	provinsi := v.wajib("provinsi", "Provinsi", isi("provinsi"))
+	kodePos := v.wajib("kode_pos", "Kode pos", isi("kode_pos"))
+
+	/* ---- sekolah asal: wajib ----
+
+	   NPSN dan tahun lulus dipakai panitia mencocokkan pendaftar ke data
+	   sekolah asalnya, dan alamat sekolah dipakai menilai jalur zonasi. */
+	npsnSekolah := v.wajib("npsn_sekolah", "NPSN sekolah asal", isi("npsn_sekolah"))
+	alamatSekolah := v.wajib("alamat_sekolah", "Alamat sekolah asal", isi("alamat_sekolah"))
+	tahunLulus := v.wajib("tahun_lulus", "Tahun lulus", isi("tahun_lulus"))
 
 	/* ---- isian opsional ---- */
-	nik := isi("nik")
 	email := isi("email")
 	// Keduanya diperiksa strukturnya, lalu dicocokkan dengan isian lain pada
 	// formulir yang sama. Lihat validasi_identitas.go untuk alasannya, beserta
@@ -92,6 +112,16 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 	v.telepon("no_hp_ortu", "Nomor HP orang tua", isi("no_hp_ortu"), false)
 	v.email("email", email)
 
+	// Kode pos Indonesia selalu lima angka. Diperiksa di sini, bukan di
+	// v.wajib(), karena v.wajib() hanya memastikan isinya tidak kosong.
+	if kodePos != "" && !polaKodePos.MatchString(kodePos) {
+		v.tambah("kode_pos", "Kode pos harus lima angka.")
+	}
+	// NPSN sekolah selalu delapan angka, sama seperti NPSN pada Data Sekolah.
+	if npsnSekolah != "" && !polaNpsn.MatchString(npsnSekolah) {
+		v.tambah("npsn_sekolah", "NPSN sekolah asal harus delapan angka. Nomor ini tercantum pada ijazah atau dapat dicari di laman Referensi Kemendikbud.")
+	}
+
 	nilaiRata2 := v.desimalRentang("nilai_rata2", "Nilai rata-rata", isi("nilai_rata2"), 0, 100)
 
 	// Tiga kolom di bawah bertipe teks di basis data, mengikuti bentuk isian
@@ -100,7 +130,7 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 	// PostgreSQL tidak mengubah angka menjadi teks dengan sendirinya.
 	v.bulatRentang("anak_ke", "Anak ke-", isi("anak_ke"), 1, 20)
 	v.bulatRentang("jumlah_saudara", "Jumlah saudara", isi("jumlah_saudara"), 0, 20)
-	v.bulatRentang("tahun_lulus", "Tahun lulus", isi("tahun_lulus"), 2000, 2100)
+	v.bulatRentang("tahun_lulus", "Tahun lulus", tahunLulus, 2000, 2100)
 
 	sumberInfo := isi("sumber_informasi")
 	if sumberInfo != "" && !sumberSah(sumberInfo) {
@@ -222,11 +252,10 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		namaLengkap, kosongJadiNil(nisn), kosongJadiNil(nik), jenisKelamin,
 		tempatLahir, tanggalLahir, agama,
 		kosongJadiNil(isi("anak_ke")), kosongJadiNil(isi("jumlah_saudara")), alamat,
-		kosongJadiNil(isi("kelurahan")), kosongJadiNil(isi("kecamatan")),
-		kosongJadiNil(isi("kota")), kosongJadiNil(isi("provinsi")), kosongJadiNil(isi("kode_pos")),
+		kelurahan, kecamatan, kota, provinsi, kodePos,
 		noHP, kosongJadiNil(email),
-		asalSekolah, kosongJadiNil(isi("npsn_sekolah")), kosongJadiNil(isi("alamat_sekolah")),
-		kosongJadiNil(isi("tahun_lulus")), nilaiRata2,
+		asalSekolah, npsnSekolah, alamatSekolah,
+		tahunLulus, nilaiRata2,
 		namaAyah, kosongJadiNil(isi("pekerjaan_ayah")), kosongJadiNil(isi("pendidikan_ayah")),
 		namaIbu, kosongJadiNil(isi("pekerjaan_ibu")), kosongJadiNil(isi("pendidikan_ibu")),
 		kosongJadiNil(isi("penghasilan")), kosongJadiNil(isi("no_hp_ortu")), kosongJadiNil(isi("nama_wali")),

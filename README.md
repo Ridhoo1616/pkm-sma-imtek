@@ -154,6 +154,35 @@ Formulirnya dibagi lima langkah dan dapat dilompati bebas. Bila server menolak
 isian, halaman otomatis kembali ke langkah yang memuat kesalahan pertama, dan
 setiap keterangan kesalahan menempel di bawah kolomnya masing-masing.
 
+
+**Isian dan berkas yang wajib.** Awalnya hanya nama, jenis kelamin, tempat
+dan tanggal lahir, agama, alamat, nomor HP, asal sekolah, nama ayah dan ibu,
+serta jalur yang diwajibkan. Sisanya opsional — dan itu menghasilkan baris
+pendaftar yang **tidak dapat diverifikasi panitia**: tanpa NISN dan NIK tidak
+ada yang bisa dicocokkan ke data Dapodik maupun dokumen kependudukan; tanpa
+kelurahan sampai kode pos, jalur zonasi tidak dapat dinilai dan surat
+panggilan tidak dapat dikirim; tanpa NPSN dan tahun lulus, pendaftar tidak
+dapat dicocokkan ke sekolah asalnya.
+
+Yang kini wajib, di luar daftar awal itu:
+
+| Isian | Aturan tambahan |
+|---|---|
+| NISN | 10 angka, tiga angka pertama = tiga angka terakhir tahun lahir |
+| NIK | 16 angka, dicocokkan ke tanggal lahir dan jenis kelamin |
+| Kelurahan/Desa, Kecamatan, Kota/Kabupaten, Provinsi | — |
+| Kode pos | lima angka |
+| NPSN sekolah asal | delapan angka |
+| Alamat sekolah asal | — |
+| Tahun lulus | 2000–2100 |
+| Akta Kelahiran (berkas) | jpg, png, atau pdf |
+| Rapor semester akhir (berkas) | jpg, png, atau pdf |
+
+Sertifikat prestasi tetap opsional kecuali jalur Prestasi dipilih, dan surel
+tetap opsional karena tidak semua pendaftar memilikinya. Aturannya dipasang di
+**tiga tempat** supaya tidak ada yang menerima apa yang lain tolak: backend
+(`handler_pendaftar.go`), formulir di peramban (`FormulirPpdb.tsx`), dan
+pemeriksaan formulir demo (`demo-baru/js/05-ppdb.js`).
 ### C. Panel panitia
 
 | Halaman | Alamat | Isi |
@@ -581,12 +610,32 @@ keunggulan.
 
 ### J. Sambutan kepala sekolah di beranda
 
-Beranda memuat sambutan kepala sekolah dalam bentuk **ringkas**, tepat sesudah
-bilah keadaan PPDB: potret kecil, nama, jabatan, satu paragraf pertama
-naskahnya, dan tautan ke yang utuh. Yang lengkap tetap di halaman Profil
-Sekolah — potret besar, naskah penuh, dan semboyan berhuruf tulisan tangan.
-Menyalin kartu besarnya ke beranda hanya membuat pengunjung membaca hal yang
-sama dua kali.
+Beranda memuat sambutan kepala sekolah tepat sesudah bilah keadaan PPDB,
+mengikuti rancangan yang dikirim user: dua bidang bersebelahan. Panel biru
+muda di kiri berisi semboyan bertulisan tangan bergaris emas, potret yang
+berdiri di atas bulatan pucat, dan kartu nama putih di dasarnya. Panel putih
+di kanan berisi eyebrow, judul, semboyan, garis emas, naskah sambutan dengan
+salam pembuka ditebalkan, tombol **Lihat Profil Lengkap**, dan gedung sekolah
+bergaya garis yang samar di pojok kanan bawah.
+
+Bagian video pada rancangan itu tidak dibuat, atas permintaan user.
+
+Tiga hal lain berbeda dari rancangan aslinya, dan ketiganya karena bahannya
+harus datang dari sekolah:
+
+1. Rancangan itu memuat **dua** kalimat bertulisan tangan yang berbeda. Yang
+   tersedia hanya satu, yaitu pengaturan `tagline`; memakainya dua kali akan
+   terbaca sebagai pengulangan, dan mengarang yang kedua tidak boleh. Jadi
+   kotak kutipan di kanan atas tidak dibuat.
+2. Kalimat "Mewujudkan lingkungan belajar yang aman, nyaman, dan berdaya
+   saing" adalah penilaian tentang sekolahnya. Tempatnya di bawah judul diisi
+   `tagline` bila ada, dan dibiarkan kosong bila tidak.
+3. Tulisan tangan "Sekolah Unggul Generasi Hebat" di pojok kanan bawah juga
+   semboyan yang bukan milik sekolah ini, jadi tidak dibuat. Yang tinggal di
+   pojok itu gambar gedung bergaya garis — hiasan, tanpa satu kata.
+
+Potretnya paling rapi berupa **PNG berlatar tembus pandang**, supaya berdiri
+di atas bulatan pucat itu alih-alih tampil sebagai kotak persegi.
 
 **Bagian ini selalu tampil**, termasuk sebelum sekolah mengirim apa pun.
 Versi bersyaratnya sudah dicoba — hanya muncul kalau nama, foto, atau

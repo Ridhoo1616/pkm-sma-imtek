@@ -480,6 +480,7 @@ export default function FormulirPpdb({
                       <Teks
                         nama="nik"
                         label="NIK"
+                        wajib
                         maks={16}
                         nilai={isi.nik}
                         ubah={ubah("nik")}
@@ -556,6 +557,7 @@ export default function FormulirPpdb({
                     <Teks
                       nama="kelurahan"
                       label="Kelurahan / Desa"
+                      wajib
                       maks={80}
                       nilai={isi.kelurahan}
                       ubah={ubah("kelurahan")}
@@ -564,6 +566,7 @@ export default function FormulirPpdb({
                     <Teks
                       nama="kecamatan"
                       label="Kecamatan"
+                      wajib
                       maks={80}
                       nilai={isi.kecamatan}
                       ubah={ubah("kecamatan")}
@@ -572,6 +575,7 @@ export default function FormulirPpdb({
                     <Teks
                       nama="kota"
                       label="Kabupaten / Kota"
+                      wajib
                       maks={80}
                       nilai={isi.kota}
                       ubah={ubah("kota")}
@@ -580,6 +584,7 @@ export default function FormulirPpdb({
                     <Teks
                       nama="provinsi"
                       label="Provinsi"
+                      wajib
                       maks={80}
                       nilai={isi.provinsi}
                       ubah={ubah("provinsi")}
@@ -588,6 +593,7 @@ export default function FormulirPpdb({
                     <Teks
                       nama="kode_pos"
                       label="Kode pos"
+                      wajib
                       maks={10}
                       nilai={isi.kode_pos}
                       ubah={ubah("kode_pos")}
@@ -637,6 +643,7 @@ export default function FormulirPpdb({
                       <Teks
                         nama="npsn_sekolah"
                         label="NPSN sekolah asal"
+                        wajib
                         maks={20}
                         nilai={isi.npsn_sekolah}
                         ubah={ubah("npsn_sekolah")}
@@ -645,6 +652,7 @@ export default function FormulirPpdb({
                       <Teks
                         nama="tahun_lulus"
                         label="Tahun lulus"
+                        wajib
                         tipe="number"
                         nilai={isi.tahun_lulus}
                         ubah={ubah("tahun_lulus")}
@@ -664,6 +672,7 @@ export default function FormulirPpdb({
                     <Teks
                       nama="alamat_sekolah"
                       label="Alamat sekolah asal"
+                      wajib
                       maks={200}
                       nilai={isi.alamat_sekolah}
                       ubah={ubah("alamat_sekolah")}
@@ -794,12 +803,14 @@ export default function FormulirPpdb({
                     <Berkas
                       nama="file_akta"
                       label="Akta Kelahiran"
+                      wajib
                       ubah={ubahBerkas("file_akta")}
                       galat={galat.file_akta}
                     />
                     <Berkas
                       nama="file_raport"
                       label="Rapor semester terakhir"
+                      wajib
                       ubah={ubahBerkas("file_raport")}
                       galat={galat.file_raport}
                     />

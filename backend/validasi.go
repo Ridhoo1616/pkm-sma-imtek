@@ -41,7 +41,11 @@ func (v *Validasi) bermasalah() bool { return len(v.Daftar) > 0 }
 /* ---------------- pemeriksa satuan ---------------- */
 
 var (
-	polaAngka   = regexp.MustCompile(`^\d+$`)
+	polaAngka = regexp.MustCompile(`^\d+$`)
+	// Kode pos Indonesia lima angka, NPSN sekolah delapan angka. Keduanya
+	// panjang tetap, jadi polanya memeriksa panjangnya sekalian.
+	polaKodePos = regexp.MustCompile(`^\d{5}$`)
+	polaNpsn    = regexp.MustCompile(`^\d{8}$`)
 	polaTelepon = regexp.MustCompile(`^[0-9+\-\s()]{9,25}$`)
 )
 
