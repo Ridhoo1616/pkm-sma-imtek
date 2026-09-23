@@ -83,45 +83,38 @@ export function Sambutan({ pengaturan }: { pengaturan: Pengaturan }) {
         <div className="mt-8 grid gap-8 sm:grid-cols-[13rem_1fr] sm:gap-10">
           {/* Potret beserta nama */}
           <div>
-            <div className="relative">
-              {/* Aksen emas di atas potret, sebagaimana rancangannya. */}
-              <span
-                aria-hidden
-                className="absolute -top-2 left-0 h-1.5 w-14 rounded-full bg-emas"
+            {adaFoto ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={urlUnggahan("profil", p.foto_kepsek)}
+                alt={
+                  adaNama
+                    ? `Foto ${p.kepala_sekolah}, Kepala Sekolah`
+                    : "Foto Kepala Sekolah"
+                }
+                className="aspect-square w-full rounded-2xl bg-biru-muda object-cover shadow-lembut"
+                loading="lazy"
+                decoding="async"
               />
-              {adaFoto ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={urlUnggahan("profil", p.foto_kepsek)}
-                  alt={
-                    adaNama
-                      ? `Foto ${p.kepala_sekolah}, Kepala Sekolah`
-                      : "Foto Kepala Sekolah"
-                  }
-                  className="aspect-square w-full rounded-2xl bg-biru-muda object-cover shadow-lembut"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div className="grid aspect-square w-full place-items-center rounded-2xl border border-dashed border-biru/30 bg-white/70 px-4 text-center">
-                  <div>
-                    <span
-                      aria-hidden
-                      className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-biru-muda text-xl text-biru"
-                    >
-                      ☐
-                    </span>
-                    <p className="mt-2.5 text-xs font-semibold text-biru-tua">
-                      Tempat foto kepala sekolah
-                    </p>
-                    <p className="mt-1 text-[11px] leading-relaxed text-biru/70">
-                      Potret, perbandingan sisi 1:1, paling tidak 600×600
-                      piksel. Diunggah lewat menu Pengaturan.
-                    </p>
-                  </div>
+            ) : (
+              <div className="grid aspect-square w-full place-items-center rounded-2xl border border-dashed border-biru/30 bg-white/70 px-4 text-center">
+                <div>
+                  <span
+                    aria-hidden
+                    className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-biru-muda text-xl text-biru"
+                  >
+                    ☐
+                  </span>
+                  <p className="mt-2.5 text-xs font-semibold text-biru-tua">
+                    Tempat foto kepala sekolah
+                  </p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-biru/70">
+                    Potret, perbandingan sisi 1:1, paling tidak 600×600
+                    piksel. Diunggah lewat menu Pengaturan.
+                  </p>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             <p className="mt-4 text-[15px] leading-snug font-bold text-biru-tua">
               {adaNama ? p.kepala_sekolah : "Nama kepala sekolah belum diisi"}
@@ -150,7 +143,7 @@ export function Sambutan({ pengaturan }: { pengaturan: Pengaturan }) {
                 ))}
               </blockquote>
             ) : (
-              <p className="relative mt-4 rounded-lg border border-dashed border-amber-300 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
+              <p className="relative pt-4 text-[15px] leading-relaxed text-samar italic">
                 Naskah sambutan kepala sekolah belum tersedia. Bagian ini akan
                 terisi setelah pihak sekolah mengirimkan naskahnya, dan dapat
                 diisi lewat menu Pengaturan di panel admin.

@@ -288,10 +288,17 @@ tautan ke halaman sekelompok, jadi pengunjung dapat berpindah ke topik sebelah
 tanpa kembali ke menu atas.
 
 **Bagian sambutan kepala sekolah** disusun sebagai kartu berlatar gradasi:
-potret kepala sekolah bersudut membulat dengan aksen emas, naskah sambutan
-sebagai kutipan miring di antara dua tanda petik besar, foto gedung sekolah
-yang dipudarkan di bagian bawah kartu, dan semboyan sekolah ditulis dengan
-huruf tulisan tangan.
+potret kepala sekolah bersudut membulat, naskah sambutan sebagai kutipan
+miring di antara dua tanda petik besar, foto gedung sekolah yang dipudarkan di
+bagian bawah kartu, dan semboyan sekolah ditulis dengan huruf tulisan tangan.
+
+Garis emasnya satu saja, di bawah judul bagian. Sempat ada satu lagi di atas
+potret, dan dua garis yang bentuknya sama persis dalam satu kartu terbaca
+sebagai pengulangan, bukan aksen. Keterangan tentang bahan yang belum dikirim
+sekolah juga tidak dibungkus kotak berwarna di dalam kartu ini: kotak
+peringatan kuning di tengah kartu yang tata letaknya rapi justru terlihat
+seperti galat. Keterangannya tetap ada, ditulis sebagai kutipan tenang pada
+tempat naskah sambutan nanti berada.
 
 Keempat bahannya berasal dari menu Pengaturan, tidak satu pun ditulis di dalam
 kode: `foto_kepsek`, `sambutan_kepsek`, `foto_depan`, dan `tagline`. Selama
