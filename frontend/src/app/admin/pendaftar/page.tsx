@@ -190,16 +190,21 @@ function IsiPendaftar() {
           </p>
 
           <Tabel
+            // Status ditaruh tepat sesudah nama, bukan di kolom kesembilan.
+            // Tabelnya punya sebelas kolom dan selalu lebih lebar daripada
+            // jendela, jadi kolom apa pun yang ada di ujung kanan menuntut
+            // penggeseran mendatar lebih dulu. Status justru kolom yang
+            // paling sering dilihat panitia, dan kini tampil tanpa digeser.
             kepala={[
               "No. Registrasi",
               "Nama",
+              "Status",
               "L/P",
               "Peminatan",
               "Jalur",
               "Asal Sekolah",
               "Nilai",
               "Sumber Info",
-              "Status",
               "Waktu",
               "",
             ]}
@@ -215,6 +220,9 @@ function IsiPendaftar() {
                   </Link>
                 </td>
                 <td className="px-4 py-3">{p.nama_lengkap}</td>
+                <td className="px-4 py-3">
+                  <Lencana jenis={warnaStatus(p.status)}>{p.status}</Lencana>
+                </td>
                 <td className="px-4 py-3 text-samar">{p.jenis_kelamin}</td>
                 <td className="px-4 py-3 text-samar">{p.nama_jurusan || "-"}</td>
                 <td className="px-4 py-3 text-samar">{p.jalur}</td>
@@ -223,9 +231,6 @@ function IsiPendaftar() {
                   {formatNilai(p.nilai_rata2)}
                 </td>
                 <td className="px-4 py-3 text-samar">{p.sumber_informasi || "-"}</td>
-                <td className="px-4 py-3">
-                  <Lencana jenis={warnaStatus(p.status)}>{p.status}</Lencana>
-                </td>
                 <td className="px-4 py-3 whitespace-nowrap text-samar">
                   {tanggalJam(p.dibuat)}
                 </td>

@@ -2049,13 +2049,13 @@ function renderTabelPendaftar() {
       <td class="px-4 py-3 font-semibold whitespace-nowrap">
         <a href="/admin/pendaftar/${p.id}" class="text-biru hover:underline">${e(p.no_registrasi)}</a></td>
       <td class="px-4 py-3">${e(p.nama_lengkap)}</td>
+      <td class="px-4 py-3">${lencana(p.status, warnaStatus(p.status))}</td>
       <td class="px-4 py-3 text-samar">${e(p.jenis_kelamin)}</td>
       <td class="px-4 py-3 text-samar">${e(p.nama_jurusan || "-")}</td>
       <td class="px-4 py-3 text-samar">${e(p.jalur)}</td>
       <td class="px-4 py-3 text-samar">${e(p.asal_sekolah)}</td>
       <td class="px-4 py-3 text-right tabular-nums">${nilaiRapor(p.nilai_rata2)}</td>
       <td class="px-4 py-3 text-samar">${e(p.sumber_informasi || "-")}</td>
-      <td class="px-4 py-3">${lencana(p.status, warnaStatus(p.status))}</td>
       <td class="px-4 py-3 whitespace-nowrap text-samar">${tanggalJam(p.dibuat)}</td>
       <td class="px-4 py-3 whitespace-nowrap">
         <a href="/admin/pendaftar/${p.id}"

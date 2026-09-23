@@ -158,7 +158,7 @@ setiap keterangan kesalahan menempel di bawah kolomnya masing-masing.
 | Halaman | Alamat | Isi |
 |---|---|---|
 | Dasbor | `/admin` | Angka ringkas, sebaran status, kanal promosi teratas, keterisian kuota, tren 30 hari |
-| Data Pendaftar | `/admin/pendaftar` | Penyaring lima kriteria, pencarian, pengurutan, halaman, unduh CSV |
+| Data Pendaftar | `/admin/pendaftar` | Penyaring lima kriteria, pencarian, pengurutan, halaman, unduh CSV. Kolom status ditaruh tepat sesudah nama, karena tabelnya sebelas kolom dan selalu lebih lebar daripada jendela |
 | Detail Pendaftar | `/admin/pendaftar/{id}` | Seluruh isian, dokumen terlindungi token, ubah status, catatan panitia, cetak bukti PDF |
 | Laporan Promosi | `/admin/laporan` | Rekap per kanal, jalur, status, peminatan, jenis kelamin, asal sekolah, bulan |
 | Peminatan | `/admin/jurusan` | Kelola peminatan dan kuotanya |
@@ -651,12 +651,17 @@ khusus fitur baru:
   keterangannya.
 - Kartu peserta terbit sebagai PDF berisi barcode dan kode QR.
 
-**Demo statis, 189 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
+**Demo statis, 195 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
 pengelolaan isi situs, batas hak akses operator, tes seleksi dari masuk sampai
 nilai keluar, rincian biaya beserta totalnya, keempat menu panel baru, dan
 tombol PDF yang menjelaskan bahwa berkasnya dibuat oleh server, penunjuk
 alur, tombol bantuan melayang beserta penanda posisinya, dan tanya jawab
 lengkap dengan penyaring serta pencariannya.
+
+Termasuk 6 pemeriksaan urutan kolom pada tabel pendaftar: barisnya digambar
+kode demo sedangkan kepala kolomnya berasal dari tangkapan markup, jadi bila
+keduanya tidak sejalan, statusnya muncul di kolom yang salah tanpa satu pun
+galat yang menandainya.
 
 Termasuk 30 pemeriksaan lencana status pada demo. Itu perlu berdiri sendiri
 karena demo menggambar sebagian lencananya dengan kodenya sendiri, bukan hanya
