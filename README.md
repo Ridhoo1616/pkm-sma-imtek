@@ -588,17 +588,27 @@ Sekolah — potret besar, naskah penuh, dan semboyan berhuruf tulisan tangan.
 Menyalin kartu besarnya ke beranda hanya membuat pengunjung membaca hal yang
 sama dua kali.
 
-**Bagian ini tidak muncul selama sekolah belum mengirim apa pun.** Di halaman
-Profil, kerangka kosong beserta keterangannya memang berguna: panitia melihat
-sendiri bahan apa yang masih ditunggu. Di beranda tidak — yang membukanya
-orang tua yang sedang menimbang sekolah, dan kerangka foto kosong di halaman
-depan membuat sekolahnya tampak belum siap. Jadi bagiannya terbuka begitu
-**ada** yang bisa ditampilkan (nama, foto, atau naskahnya), dan sebelum itu
-tidak ada sama sekali.
+**Bagian ini selalu tampil**, termasuk sebelum sekolah mengirim apa pun.
+Versi bersyaratnya sudah dicoba — hanya muncul kalau nama, foto, atau
+naskahnya sudah ada — dan dibuang atas permintaan user, karena pada pemasangan
+sekolah ketiganya masih kosong sehingga bagiannya tidak pernah terlihat.
 
-Pada pemasangan sekolah sekarang ketiganya masih kosong, jadi bagian ini belum
-tampil. Ia akan muncul sendiri begitu salah satunya diisi lewat menu
-Pengaturan — tidak ada kode yang perlu diubah.
+Konsekuensinya ditangani di keadaan kosongnya, bukan diabaikan. Dua hal
+berbeda dari kerangka di halaman Profil:
+
+- **Tempat fotonya tidak memuat petunjuk unggah.** Di halaman Profil,
+  keterangan "diunggah lewat menu Pengaturan" masih pantas karena panitia
+  memang membacanya. Di beranda yang membaca orang tua, dan menyuruh mereka
+  membuka panel admin tidak berarti apa-apa. Jadi yang tampil hanya lambang
+  orang, tanpa satu kata pun.
+- **Kalimat penggantinya mengarahkan, bukan melapor.** "Naskah belum dikirim
+  sekolah" memberi tahu pengunjung sesuatu yang bukan urusannya, dan membuat
+  sekolahnya terdengar lalai. Yang ditulis: sambutannya akan dimuat di sini,
+  dan sementara itu profil sekolahnya dapat dibaca lebih dulu — beserta
+  tautannya, yang ikut berubah menjadi "Buka Profil Sekolah".
+
+Begitu nama, foto, atau naskahnya diisi lewat menu Pengaturan, bagian ini
+berganti sendiri ke bentuk terisinya. Tidak ada kode yang perlu diubah.
 
 ### K. Alur masalah dan jawabannya di beranda
 

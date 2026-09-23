@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { urlUnggahan } from "@/lib/api";
 import { belumTerisi, keParagraf } from "@/lib/format";
+import { IkonGuru } from "@/komponen/Ikon";
 import type { Pengaturan } from "@/lib/tipe";
 
 /**
@@ -12,21 +13,30 @@ import type { Pengaturan } from "@/lib/tipe";
  * memperkenalkan, halaman profil yang menjelaskan — menyalin kartu besarnya
  * ke beranda hanya membuat pengunjung membaca hal yang sama dua kali.
  *
- * BAGIAN INI TIDAK MUNCUL SELAMA SEKOLAH BELUM MENGIRIM APA PUN. Di halaman
- * Profil, kerangka kosong beserta keterangannya memang berguna: panitia
- * melihat sendiri bahan apa yang masih ditunggu. Di beranda tidak: yang
- * membukanya orang tua yang sedang menimbang sekolah, dan kerangka foto
- * kosong di halaman depan membuat sekolahnya tampak belum siap. Jadi
- * bagiannya dibuka begitu ADA yang bisa ditampilkan — nama, foto, atau
- * naskahnya — dan sebelum itu tidak ada sama sekali.
+ * BAGIAN INI SELALU TAMPIL, termasuk sebelum sekolah mengirim apa pun —
+ * begitu permintaan user, sesudah versi bersyaratnya dicoba dan bagiannya
+ * tidak pernah muncul karena ketiga bahannya masih kosong.
+ *
+ * Konsekuensinya ditangani di keadaan kosongnya, bukan diabaikan. Dua hal
+ * yang berbeda dari kerangka di halaman Profil:
+ *
+ * Pertama, tempat fotonya TIDAK memuat petunjuk unggah. Di halaman Profil
+ * keterangan "diunggah lewat menu Pengaturan" masih pantas, karena panitia
+ * memang membacanya. Di beranda yang membaca orang tua, dan menyuruh mereka
+ * membuka panel admin tidak berarti apa-apa. Jadi yang tampil hanya lambang
+ * orang tanpa satu kata pun.
+ *
+ * Kedua, kalimat penggantinya MENGARAHKAN, bukan melapor. "Naskah belum
+ * dikirim sekolah" memberitahu pengunjung sesuatu yang bukan urusannya, dan
+ * membuat sekolahnya terdengar lalai. Yang ditulis: sambutannya akan dimuat
+ * di sini, dan sementara itu profil sekolahnya dapat dibaca — beserta
+ * tautannya. Bagian yang kosong tetap jujur, tetapi tetap berguna.
  */
 export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
   const p = pengaturan;
   const adaFoto = Boolean(p.foto_kepsek && !belumTerisi(p.foto_kepsek));
   const adaNama = !belumTerisi(p.kepala_sekolah ?? "");
   const adaNaskah = !belumTerisi(p.sambutan_kepsek ?? "");
-
-  if (!adaFoto && !adaNama && !adaNaskah) return null;
 
   // Dua kalimat pertama saja. Naskah sambutan biasanya beberapa paragraf,
   // dan beranda bukan tempatnya.
@@ -55,10 +65,11 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
             decoding="async"
           />
         ) : (
-          <div className="grid h-40 w-full place-items-center bg-biru-muda px-6 text-center md:h-auto md:w-56 md:shrink-0 lg:w-64">
-            <p className="text-xs leading-relaxed text-biru/70">
-              Foto kepala sekolah diunggah lewat menu Pengaturan.
-            </p>
+          <div
+            aria-hidden
+            className="grid h-40 w-full place-items-center bg-biru-muda md:h-auto md:w-56 md:shrink-0 lg:w-64"
+          >
+            <IkonGuru ukuran={56} className="text-biru/35" />
           </div>
         )}
 
@@ -86,8 +97,9 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
             </blockquote>
           ) : (
             <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-samar">
-              Naskah sambutan belum dikirim sekolah. Yang sudah ada dapat
-              dibaca di halaman Profil Sekolah.
+              Sambutan kepala sekolah akan dimuat di bagian ini. Sementara itu,
+              profil sekolah beserta arah dan langkah yang dituju dapat dibaca
+              lebih dulu di halaman Profil Sekolah.
             </p>
           )}
 
@@ -95,7 +107,7 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
             href="/profil"
             className="mt-5 inline-block text-sm font-semibold text-biru underline-offset-4 hover:underline"
           >
-            Baca sambutan lengkap →
+            {kutipan ? "Baca sambutan lengkap" : "Buka Profil Sekolah"} →
           </Link>
         </div>
       </div>
