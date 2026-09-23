@@ -294,6 +294,20 @@ Pengaturan seperti logo dan foto kepala sekolah. Selama kosong yang tampil
 kerangka 16:9 beserta cara mengunggahnya, jadi tata letak halamannya sudah
 final sebelum gambarnya ada.
 
+**Kedua kartu Visi dan Misi menindih seperlima bagian bawah gambar itu**
+(`md:-mt-24 lg:-mt-28`, 112 piksel pada layar lebar). Itulah yang membuat
+orang di dalam gambar terbaca sedang **memegang** kartunya: tangan mereka
+berakhir di balik tepi kartu, sehingga tangan yang menggenggam kotak tidak
+perlu digambar sama sekali — dan justru bagian itulah yang paling sering
+keliru pada gambar buatan mesin. Susunan gambar yang pas: orang-orangnya di
+kiri dan kanan bawah, telapak terbuka pada sekitar 75–85 persen tinggi
+gambar, tengahnya kosong. Judul "Visi" dan "Misi" pindah **ke dalam** kartu,
+karena judul yang melintang di luar kartu memakan habis tarikan ke atas —
+kartunya hanya menindih empat piksel — dan judul itu sendirilah yang mendarat
+di atas gambar. Tindihannya hanya berlaku pada ambang `md` ke atas; pada layar
+sempit kedua kartu bertumpuk dan jauh lebih tinggi, jadi menindih gambar hanya
+akan menutupi orangnya.
+
 **Yang diterima hanya jpg dan png**, dicocokkan sampai ke byte penanda
 berkasnya di `unggah.go` — berkas SVG yang dinamai `.png` pun ditolak. SVG
 sengaja **tidak** diterima: SVG adalah XML yang boleh memuat `<script>`, jadi
