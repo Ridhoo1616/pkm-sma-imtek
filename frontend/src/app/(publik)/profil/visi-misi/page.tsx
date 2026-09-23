@@ -59,12 +59,10 @@ export default async function HalamanVisiMisi() {
       <div className="wadah py-14">
         <JejakMenu induk="/profil" jalur="/profil/visi-misi" />
 
-        {/* Ruang di ATAS petaknya bukan hiasan: ilustrasi pada tiap kartu
-            menonjol keluar melewati tepi atasnya, dan tanpa ruang ini ia akan
-            menabrak jejak lokasi di atasnya. `.kartu` memang tidak mengurung
-            isinya, jadi tidak ada yang perlu dimatikan supaya penonjolannya
-            terlihat. */}
-        <div className="mt-24 grid auto-rows-fr gap-8 sm:mt-28 lg:grid-cols-2 lg:gap-10">
+        {/* Kedua kartu setinggi sama (auto-rows-fr), sehingga pita bawah
+            tempat ilustrasinya duduk sama tinggi pada keduanya. Tanpa itu
+            ilustrasi kartu yang isinya lebih pendek akan menggantung. */}
+        <div className="mt-10 grid auto-rows-fr gap-8 lg:grid-cols-2 lg:gap-10">
           {/* Judulnya DI DALAM kartu, bukan melintang di atasnya.
               Sebelumnya "Arah / Visi" berdiri di luar kartu, dan itu
               menggagalkan dua hal sekaligus: judul setinggi seratus piksel
@@ -77,17 +75,25 @@ export default async function HalamanVisiMisi() {
           <MunculNaik>
             <section
               aria-labelledby="judul-visi"
-              className="kartu relative h-full border-l-4 border-l-emas p-6 md:p-7"
+              className="kartu relative h-full overflow-hidden border-l-4 border-l-emas p-6 pb-40 sm:pb-48 md:p-7 md:pb-48"
             >
+              {/* Ilustrasi duduk di pojok kanan bawah, DI DALAM kartu.
+                  Kartunya mengurung isinya supaya gambarnya terpotong
+                  mengikuti sudut membulat kartu, bukan menyembul di luarnya.
+
+                  Ruang bawah kartu (pb) dilebihkan setinggi gambarnya, jadi
+                  naskahnya berhenti di atas pita itu dan tidak pernah
+                  tertimpa — berapa pun panjang rumusan yang dikirim sekolah,
+                  dan berapa pun banyaknya poin misi. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/ilustrasi/visi.png"
                 alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis"
                 width={384}
                 height={426}
-                className="pointer-events-none absolute -top-20 right-2 w-32 sm:-top-24 sm:right-4 sm:w-40 md:w-44"
+                className="pointer-events-none absolute right-0 bottom-0 h-36 w-auto sm:h-44"
               />
-              <div className="pr-28 sm:pr-44 md:pr-48">
+              <div>
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
                   Arah
                 </p>
@@ -114,7 +120,7 @@ export default async function HalamanVisiMisi() {
           <MunculNaik jeda={0.08}>
             <section
               aria-labelledby="judul-misi"
-              className="kartu relative h-full p-6 md:p-7"
+              className="kartu relative h-full overflow-hidden p-6 pb-40 sm:pb-48 md:p-7 md:pb-48"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -122,9 +128,9 @@ export default async function HalamanVisiMisi() {
                 alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar"
                 width={314}
                 height={434}
-                className="pointer-events-none absolute -top-24 right-2 w-28 sm:-top-28 sm:right-4 sm:w-36 md:w-40"
+                className="pointer-events-none absolute right-0 bottom-0 h-36 w-auto sm:h-44"
               />
-              <div className="pr-24 sm:pr-40 md:pr-44">
+              <div>
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
                   Langkah
                 </p>

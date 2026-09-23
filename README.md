@@ -285,8 +285,15 @@ Keterangan tiap kartu menerangkan **perannya** secara umum dan tidak memuat
 penilaian apa pun tentang SMA IMTEK, karena penilaian seperti itu hanya boleh
 datang dari sekolahnya sendiri.
 
-**Kartu Visi dan Kartu Misi masing-masing memuat satu ilustrasi yang sosok
-orangnya menonjol keluar melewati tepi atas kartu** (95 dan 111 piksel).
+**Kartu Visi dan Kartu Misi masing-masing memuat satu ilustrasi di pojok
+kanan bawah, di dalam kartunya.** Kartunya mengurung isinya, jadi gambarnya
+terpotong mengikuti sudut membulat kartu. Ruang bawah kartu dilebihkan
+setinggi gambarnya, sehingga naskahnya berhenti di atas pita itu dan tidak
+pernah tertimpa — berapa pun panjang rumusan yang dikirim sekolah, dan berapa
+pun banyaknya poin misi. Kedua kartu setinggi sama (`auto-rows-fr`) supaya
+pita bawahnya sama tinggi; tanpa itu gambar pada kartu yang isinya lebih
+pendek akan menggantung. Sempat dicoba menonjol keluar melewati tepi atas
+kartu, lalu diminta dimasukkan kembali ke dalam.
 Ilustrasinya dikirim user sebagai berkas SVG, tetapi isinya ternyata PNG yang
 dibungkus wadah SVG — satu elemen `<image>` berisi data base64, tanpa satu
 jalur vektor pun. Jadi tidak ada yang bisa diwarnai ulang, dan yang dikerjakan
