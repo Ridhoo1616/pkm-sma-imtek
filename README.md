@@ -285,22 +285,25 @@ Keterangan tiap kartu menerangkan **perannya** secara umum dan tidak memuat
 penilaian apa pun tentang SMA IMTEK, karena penilaian seperti itu hanya boleh
 datang dari sekolahnya sendiri.
 
-**Kartu Visi dan Kartu Misi masing-masing memuat satu ilustrasi di pojok
-kanan bawah, di dalam kartunya, dan gambarnya MENEMPATI RUANG — bukan
-ditempatkan mutlak.** Bedanya menentukan tinggi kartu. Gambar bertempat
-mutlak tidak menempati ruang, jadi kartunya harus diberi ruang cadangan
-setinggi gambarnya supaya naskah tidak tertimpa, dan ruang itu tetap kosong
-walau rumusannya baru satu kalimat — kartunya jadi 441 piksel. Di sini
-gambarnya ikut dihitung sebagai isi, sehingga tinggi kartu = naskah + gambar
-tanpa ada yang terbuang: 321 piksel saat rumusannya belum ada, 541 piksel
-saat misinya lima poin.
+**Kartu Visi dan Kartu Misi masing-masing dibagi dua kolom: naskah di kiri,
+ilustrasi setinggi kartunya di kanan.** Kotak gambarnya persis setinggi kartu
+pada setiap keadaan — 244 piksel saat rumusannya belum ada, 530 piksel saat
+misinya lima poin — karena `self-stretch` pada petak mendatar. `object-contain`
+menjaga perbandingan sisi gambarnya di dalam kotak itu; tanpa contain, menarik
+tinggi gambar sampai setinggi kartu akan memipihkan orangnya. `object-bottom`
+menaruh sisa ruangnya di atas, jadi sosok orangnya duduk di dasar kartu.
 
-Kartunya `flex flex-col` dan gambarnya diberi `mt-auto` — itu yang mendorongnya
-ke dasar. Diperlukan karena kedua kartu dibuat setinggi sama oleh
-`auto-rows-fr`: pada kartu yang naskahnya lebih pendek, tanpa `mt-auto`
-gambarnya akan berhenti di tengah dan tidak menempel dasar. Margin negatifnya
-menarik gambar sampai menempel pojok melewati padding kartu, dan kartunya
-mengurung isinya sehingga gambarnya terpotong mengikuti sudut membulatnya.
+Margin negatif tegak dan kanan menghapus padding kartu pada tiga sisi itu
+sehingga gambarnya benar-benar menyentuh tepi, dan kartunya mengurung isinya
+sehingga gambarnya terpotong mengikuti sudut membulatnya. Naskahnya tidak
+pernah bertemu gambar karena keduanya kolom yang berbeda — bukan karena
+diberi jarak, dan bukan karena ada ruang cadangan.
+
+Ruang cadangan itu memang pernah dipakai, dan itu kekeliruannya: gambar yang
+ditempatkan mutlak tidak menempati ruang, jadi kartunya harus diberi ruang
+kosong setinggi gambarnya, dan ruang itu tetap kosong walau rumusannya baru
+satu kalimat — kartunya jadi 441 piksel. Letak atas atau bawah tidak pernah
+menjadi sebabnya.
 
 Tumpang tindihnya **tidak boleh** dinilai dari kotak pembatas elemen teks:
 untuk gambar yang diapungkan, kotak paragraf tetap selebar kartu meski

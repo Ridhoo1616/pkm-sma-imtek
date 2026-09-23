@@ -75,9 +75,9 @@ export default async function HalamanVisiMisi() {
           <MunculNaik>
             <section
               aria-labelledby="judul-visi"
-              className="kartu relative flex h-full flex-col overflow-hidden border-l-4 border-l-emas p-6 md:p-7"
+              className="kartu relative flex h-full gap-4 overflow-hidden border-l-4 border-l-emas p-6 md:gap-6 md:p-7"
             >
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
                   Arah
                 </p>
@@ -88,41 +88,39 @@ export default async function HalamanVisiMisi() {
                   aria-hidden
                   className="mt-3 block h-1 w-12 rounded-full bg-emas"
                 />
+                {belumTerisi(p.visi) ? (
+                  <div className="mt-5">
+                    <Menunggu apa="Rumusan visi" polos />
+                  </div>
+                ) : (
+                  <p className="mt-5 text-lg leading-relaxed font-semibold text-biru-tua">
+                    {p.visi}
+                  </p>
+                )}
               </div>
-              {belumTerisi(p.visi) ? (
-                <div className="mt-5">
-                  <Menunggu apa="Rumusan visi" polos />
-                </div>
-              ) : (
-                <p className="mt-5 text-lg leading-relaxed font-semibold text-biru-tua">
-                  {p.visi}
-                </p>
-              )}
-              {/* Ilustrasi di pojok kanan BAWAH, di dalam kartu, dan ia
-                  MENEMPATI RUANG — bukan ditempatkan mutlak.
+              {/* Ilustrasi setinggi KARTUNYA, menempel tepi kanan dari atas
+                  sampai bawah.
 
-                  Itu yang membuat kartunya tidak jangkung. Gambar bertempat
-                  mutlak tidak menempati ruang, jadi kartunya harus diberi
-                  ruang cadangan setinggi gambarnya supaya naskah tidak
-                  tertimpa, dan ruang itu tetap kosong walau rumusannya baru
-                  satu kalimat. Di sini gambarnya ikut dihitung sebagai isi:
-                  tinggi kartu = naskah + gambar, tidak ada yang terbuang.
+                  Kartunya petak mendatar: naskah di kolom kiri, gambar di
+                  kolom kanan. `self-stretch` yang membuat kotak gambarnya
+                  setinggi kartu, dan `object-contain` menjaga perbandingan
+                  sisinya di dalam kotak itu — tanpa contain, menarik tinggi
+                  gambar sampai setinggi kartu akan memipihkan orangnya.
+                  `object-bottom` menaruh sisa ruangnya di atas, jadi sosok
+                  orangnya duduk di dasar kartu.
 
-                  `mt-auto` yang mendorongnya ke dasar. Diperlukan karena
-                  kedua kartu dibuat setinggi sama oleh auto-rows-fr: pada
-                  kartu yang naskahnya lebih pendek, tanpa mt-auto gambarnya
-                  akan berhenti di tengah, tidak menempel dasar.
-
-                  Margin negatifnya menarik gambar sampai menempel pojok
-                  melewati padding kartu, dan kartunya mengurung isinya
-                  sehingga gambarnya terpotong mengikuti sudut membulatnya. */}
+                  Margin negatif tegak dan kanan menghapus padding kartu pada
+                  tiga sisi itu, sehingga gambarnya benar-benar menyentuh tepi;
+                  kartunya mengurung isinya sehingga terpotong mengikuti sudut
+                  membulatnya. Naskahnya tidak pernah bertemu gambar karena
+                  keduanya kolom yang berbeda, bukan karena diberi jarak. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/ilustrasi/visi.png"
                 alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis"
                 width={384}
                 height={426}
-                className="pointer-events-none mt-auto -mr-6 -mb-6 ml-auto h-28 w-auto self-end pt-6 sm:h-32 md:-mr-7 md:-mb-7"
+                className="pointer-events-none -my-6 -mr-6 w-28 self-stretch object-contain object-bottom sm:w-36 md:-my-7 md:-mr-7 md:w-44"
               />
             </section>
           </MunculNaik>
@@ -130,9 +128,9 @@ export default async function HalamanVisiMisi() {
           <MunculNaik jeda={0.08}>
             <section
               aria-labelledby="judul-misi"
-              className="kartu relative flex h-full flex-col overflow-hidden p-6 md:p-7"
+              className="kartu relative flex h-full gap-4 overflow-hidden p-6 md:gap-6 md:p-7"
             >
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
                   Langkah
                 </p>
@@ -143,32 +141,32 @@ export default async function HalamanVisiMisi() {
                   aria-hidden
                   className="mt-3 block h-1 w-12 rounded-full bg-emas"
                 />
+                {misi.length === 0 ? (
+                  <div className="mt-5">
+                    <Menunggu apa="Rumusan misi" polos />
+                  </div>
+                ) : (
+                  <ol className="mt-4 divide-y divide-garis">
+                    {misi.map((m, i) => (
+                      <li key={i} className="flex gap-3 py-3.5">
+                        <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-biru-muda text-xs font-bold text-biru tabular-nums">
+                          {i + 1}
+                        </span>
+                        <span className="text-[15px] leading-relaxed text-teks">
+                          {m}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
               </div>
-              {misi.length === 0 ? (
-                <div className="mt-5">
-                  <Menunggu apa="Rumusan misi" polos />
-                </div>
-              ) : (
-                <ol className="mt-4 divide-y divide-garis">
-                  {misi.map((m, i) => (
-                    <li key={i} className="flex gap-3 py-3.5">
-                      <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-biru-muda text-xs font-bold text-biru tabular-nums">
-                        {i + 1}
-                      </span>
-                      <span className="text-[15px] leading-relaxed text-teks">
-                        {m}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              )}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/ilustrasi/misi.png"
                 alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar"
                 width={314}
                 height={434}
-                className="pointer-events-none mt-auto -mr-6 -mb-6 ml-auto h-28 w-auto self-end pt-6 sm:h-32 md:-mr-7 md:-mb-7"
+                className="pointer-events-none -my-6 -mr-6 w-28 self-stretch object-contain object-bottom sm:w-36 md:-my-7 md:-mr-7 md:w-44"
               />
             </section>
           </MunculNaik>
