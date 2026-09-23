@@ -94,6 +94,30 @@ export function keParagraf(isi: string): string[] {
  * Nomor WhatsApp Indonesia untuk tautan wa.me: "0812..." -> "62812...".
  * Mengembalikan string kosong bila nomornya belum diisi sekolah.
  */
+/**
+ * Pengaturan yang isinya daftar — misi dan keunggulan — ditulis satu baris
+ * satu poin. Penomoran atau tanda hubung yang mungkin ikut diketik panitia
+ * dibuang, supaya tidak menjadi "1. 1." ketika halamannya menomori sendiri.
+ */
+export function kePoin(isi: string): string[] {
+  return (isi || "")
+    .split("\n")
+    .map((baris) => baris.trim().replace(/^[-•*\d.)\s]+/, ""))
+    .filter(Boolean);
+}
+
+/**
+ * Daftar poin yang benar-benar sudah dikirim sekolah.
+ *
+ * Perlu tersendiri karena belumTerisi() memeriksa SELURUH nilai: pada
+ * pengaturan berisi banyak baris, nilai yang barisnya sebagian sudah diisi
+ * tetap diawali "[" dan diakhiri "]", sehingga terbaca kosong seluruhnya dan
+ * poin yang sudah diisi pun hilang. Di sini penandanya diperiksa per baris.
+ */
+export function kePoinTerisi(isi: string): string[] {
+  return kePoin(isi).filter((poin) => !belumTerisi(poin));
+}
+
 export function nomorWa(nomor: string): string {
   const angkaSaja = (nomor || "").replace(/\D/g, "");
   if (!angkaSaja) return "";

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { keParagraf } from "@/lib/format";
 import { anakMenu } from "@/lib/menu";
 import { MunculNaik, KartuGerak } from "@/komponen/Gerak";
+import { kelasKartuAkhir } from "@/komponen/Bagian";
 
 /**
  * Bagian yang dipakai berulang oleh halaman Profil Sekolah, Akademik, dan
@@ -13,15 +14,41 @@ import { MunculNaik, KartuGerak } from "@/komponen/Gerak";
  * keterangan yang menyebut dari menu mana isinya diisi.
  */
 
-/** Penanda isi yang belum dikirim sekolah. Bukan data karangan. */
-export function Menunggu({ apa, dari }: { apa: string; dari?: string }) {
-  return (
-    <p className="rounded-lg border border-dashed border-amber-300 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
+/**
+ * Penanda isi yang belum dikirim sekolah. Bukan data karangan.
+ *
+ * Dulu berupa kotak kuning bergaris putus-putus. Itu dilepas atas permintaan
+ * user: kotak berwarna adalah bahasa untuk peringatan yang harus ditindak,
+ * sedangkan ini cuma catatan bahwa bahannya belum sampai. Dengan warna
+ * peringatan, catatan itu justru menarik mata lebih kuat daripada isi
+ * halamannya sendiri. Sekarang bentuknya sama seperti kartu yang akan
+ * memuat naskahnya nanti, dengan keterangan berupa teks miring redup di
+ * tempat naskahnya — jadi tata letak halaman sudah final sebelum bahannya
+ * ada. Kotak kuning tetap dipakai di tempat lain yang memang peringatan:
+ * server tidak merespons, jumlah biaya masih nol, dan konfirmasi hapus.
+ *
+ * `polos` untuk pemakaian DI DALAM kartu yang sudah ada (bagian sambutan),
+ * supaya kartunya tidak bersarang di dalam kartu.
+ */
+export function Menunggu({
+  apa,
+  dari,
+  polos,
+}: {
+  apa: string;
+  dari?: string;
+  polos?: boolean;
+}) {
+  const keterangan = (
+    <p className="text-[15px] leading-relaxed text-samar italic">
       {apa} belum tersedia. Bagian ini akan terisi setelah pihak sekolah
       mengirimkan naskahnya, dan dapat diisi lewat menu{" "}
       {dari ?? "Pengaturan"} di panel admin.
     </p>
   );
+
+  if (polos) return keterangan;
+  return <div className="kartu p-6 md:p-8">{keterangan}</div>;
 }
 
 /** Naskah panjang: dipecah menjadi paragraf, bukan satu blok rapat. */
@@ -52,7 +79,11 @@ export function PetaAnak({ induk }: { induk: string }) {
   return (
     <div className="grid auto-rows-fr gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {anak.map((a, i) => (
-        <MunculNaik key={a.label} jeda={(i % 3) * 0.08}>
+        <MunculNaik
+          key={a.label}
+          jeda={(i % 3) * 0.08}
+          className={kelasKartuAkhir(i, anak.length)}
+        >
           <KartuGerak className="kartu h-full">
             <Link href={a.jalur} className="flex h-full flex-col p-5">
               <h3 className="flex items-start gap-2 text-base">

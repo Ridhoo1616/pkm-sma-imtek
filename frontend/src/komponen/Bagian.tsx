@@ -66,6 +66,38 @@ export function JudulBagian({
 }
 
 /** Tempat gambar yang belum tersedia; memberi bentuk, bukan kotak kosong. */
+/**
+ * Kelas untuk KARTU TERAKHIR pada petak "sm:grid-cols-2 lg:grid-cols-3",
+ * supaya baris terakhirnya penuh.
+ *
+ * Jumlah kartu di beranda ditentukan isi basis data, bukan kode: peminatan
+ * bisa tiga atau empat, keunggulan bisa berapa pun yang diketik sekolah.
+ * Empat kartu pada petak tiga kolom meninggalkan satu kartu sendirian di
+ * baris kedua beserta ruang kosong selebar dua kartu, dan itu terbaca
+ * sebagai halaman yang rusak. Kartu terakhir dilebarkan supaya barisnya
+ * habis, di kedua ambang layar sekaligus.
+ *
+ * Kelasnya dituliskan utuh sebagai teks di sini, bukan disusun dari potongan,
+ * karena Tailwind memindai berkas sumber: kelas yang dirangkai saat program
+ * berjalan tidak akan pernah ikut dihasilkan.
+ */
+export function kelasKartuAkhir(indeks: number, jumlah: number): string {
+  if (indeks !== jumlah - 1) return "";
+  // Kedua ambang selalu dituliskan, termasuk yang lebarnya satu kolom.
+  // Ambang Tailwind itu min-width: "sm:col-span-2" tetap berlaku pada layar
+  // lebar, dan tanpa "lg:col-span-1" di sebelahnya ia menjadikan kartu
+  // terakhir dua kolom pada petak tiga kolom — tiga kartu pun jadi memakan
+  // empat kolom dan barisnya justru terpecah. Itu kebalikan dari maksudnya.
+  const sisa2 = jumlah % 2 === 1 ? "sm:col-span-2" : "sm:col-span-1";
+  const sisa3 =
+    jumlah % 3 === 1
+      ? "lg:col-span-3"
+      : jumlah % 3 === 2
+        ? "lg:col-span-2"
+        : "lg:col-span-1";
+  return `${sisa2} ${sisa3}`;
+}
+
 export function GambarKosong({
   label,
   tinggi = "h-48",

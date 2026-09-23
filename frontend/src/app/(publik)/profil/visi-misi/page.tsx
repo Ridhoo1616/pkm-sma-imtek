@@ -1,5 +1,5 @@
 import { muatProfil } from "@/lib/profil";
-import { belumTerisi } from "@/lib/format";
+import { belumTerisi, kePoinTerisi } from "@/lib/format";
 import { KepalaHalaman, JudulBagian } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
 import { Menunggu } from "@/komponen/Halaman";
@@ -15,12 +15,10 @@ export default async function HalamanVisiMisi() {
   const { profil } = await muatProfil();
   const p = profil.pengaturan;
 
-  // Misi ditulis satu baris per poin pada pengaturan. Penomoran bawaan yang
-  // mungkin ikut diketik panitia dibuang, supaya tidak menjadi "1. 1.".
-  const misi = (p.misi || "")
-    .split("\n")
-    .map((m) => m.trim().replace(/^[-•*\d.)\s]+/, ""))
-    .filter(Boolean);
+  // Misi ditulis satu baris per poin pada pengaturan; aturan memecahnya sama
+  // dengan keunggulan di beranda, jadi dipusatkan di kePoinTerisi(), yang
+  // sekaligus membuang baris yang masih berupa penanda [kurung siku].
+  const misi = kePoinTerisi(p.misi);
 
   return (
     <>

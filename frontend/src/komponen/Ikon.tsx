@@ -54,6 +54,10 @@ export function IkonTelepon(p: Props) {
   );
 }
 
+export function IkonCentang(p: Props) {
+  return <Bungkus {...p} isi={<path d="M4.5 12.6l5 5L19.5 6.5" />} />;
+}
+
 export function IkonSurel(p: Props) {
   return (
     <Bungkus

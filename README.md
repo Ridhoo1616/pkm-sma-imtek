@@ -125,7 +125,7 @@ dipakai sekolah sungguhan tetap diperlukan hosting.
 
 | Halaman | Alamat | Isi |
 |---|---|---|
-| Beranda | `/` | Keadaan PPDB waktu nyata, kuota terisi, peminatan, fasilitas, berita terbaru |
+| Beranda | `/` | Profil sekolah dulu: nama, akreditasi, foto gedung, angka sekolah, keunggulan, peminatan, fasilitas, prestasi, berita. Keadaan PPDB berupa satu bilah ringkas, ajakan mendaftar di ujung halaman |
 | Profil Sekolah | `/profil` | Sambutan kepala sekolah beserta fotonya, lalu pengantar ke enam halaman turunannya |
 | Sejarah Sekolah | `/profil/sejarah` | Riwayat berdirinya sekolah |
 | Data Sekolah | `/profil/data-sekolah` | NPSN, status, akreditasi, penyelenggara, alamat, jam layanan, peta |
@@ -298,7 +298,15 @@ sebagai pengulangan, bukan aksen. Keterangan tentang bahan yang belum dikirim
 sekolah juga tidak dibungkus kotak berwarna di dalam kartu ini: kotak
 peringatan kuning di tengah kartu yang tata letaknya rapi justru terlihat
 seperti galat. Keterangannya tetap ada, ditulis sebagai kutipan tenang pada
-tempat naskah sambutan nanti berada.
+tempat naskah sambutan nanti berada. Keterangan tentang bahan yang belum
+dikirim sekolah memakai satu komponen yang sama, `Menunggu` di
+`komponen/Halaman.tsx`, dan bentuknya **kartu biasa berisi teks miring redup**
+— bukan kotak kuning bergaris putus-putus seperti dulu. Kotak berwarna adalah
+bahasa untuk peringatan yang harus ditindak; catatan bahwa naskahnya belum
+sampai bukan peringatan, dan dengan warna peringatan ia justru menarik mata
+lebih kuat daripada isi halamannya sendiri. Kotak kuning tetap dipakai di
+tempat yang memang peringatan: server tidak merespons, pos biaya masih nol,
+nomor registrasi yang harus dicatat, dan konfirmasi hapus.
 
 Keempat bahannya berasal dari menu Pengaturan, tidak satu pun ditulis di dalam
 kode: `foto_kepsek`, `sambutan_kepsek`, `foto_depan`, dan `tagline`. Selama
@@ -416,7 +424,47 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
    tautan yang dibagikan ke WhatsApp dan media sosial tampil dengan judul dan
    keterangan yang benar.
 
-### I. Lencana status
+### I. Beranda mendahulukan profil sekolah
+
+Beranda semula dibuka dengan kartu putih besar berisi kuota PPDB, jumlah
+pendaftar, sisa kuota, dan tanggal penutupan. Angka itu menjawab pertanyaan
+orang yang **sudah** memutuskan mendaftar. Orang tua yang baru mencari sekolah
+menanyakan hal lain lebih dulu: sekolahnya seperti apa, apa yang ditawarkan,
+sebagus apa. Karena judul PkM ini tentang **promosi**, urutannya dibalik.
+
+Urutan beranda sekarang:
+
+1. **Sorotan sekolah** — nama, status, akreditasi, NPSN, semboyan, letak, foto
+   gedung sekolah, dan tiga angka yang bisa diperiksa (jumlah peminatan,
+   jumlah fasilitas, peringkat akreditasi). Tombol utamanya "Kenali Sekolah
+   Kami", bukan "Daftar".
+2. **Bilah keadaan PPDB** — satu baris: dibuka atau belum, tahun ajaran,
+   tanggal penutupan, sisa kuota, beserta tombol Daftar dan Cek Status.
+   Informasinya tidak hilang, hanya tidak lagi mengambil alih bagian atas.
+3. **Yang Ditawarkan Sekolah Ini** — alasan memilih sekolah ini.
+4. **Peminatan**, **Fasilitas**, **Catatan Prestasi**, **Berita**.
+5. **Ajakan mendaftar** di ujung halaman.
+
+Isi bagian keunggulan berasal dari pengaturan `keunggulan` (migrasi 005), satu
+baris satu poin, diisi lewat menu Pengaturan di panel admin. **Tidak ada satu
+kalimat pun tentang mutu sekolah yang ditulis di dalam kode.** Selama poinnya
+masih bertanda `[kurung siku]`, poin itu tidak tampil; bila seluruhnya belum
+diisi, bagiannya tidak ada sama sekali. Penandanya diperiksa **per baris**,
+sehingga sekolah dapat mengisi sebagian dulu — sebelumnya pemeriksaan
+dilakukan atas seluruh nilai sekaligus, dan nilai yang barisnya sebagian sudah
+terisi tetap terbaca kosong karena masih diawali `[` dan diakhiri `]`.
+
+Bagian **Catatan Prestasi** bukan klaim, melainkan berita berkategori
+`Prestasi` yang memang sudah dicatat sekolah. Kosong berarti bagiannya tidak
+muncul.
+
+Jumlah kartu di beranda ditentukan isi basis data, bukan kode, sehingga baris
+terakhirnya bisa tersisa satu kartu sendirian beserta ruang kosong selebar dua
+kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
+supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
+keunggulan, peminatan, prestasi, dan kartu halaman turunan.
+
+### J. Lencana status
 
 Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
 petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:

@@ -260,6 +260,41 @@ const KELAS_LENCANA =
   "text-[11px] leading-none font-bold tracking-[0.06em] whitespace-nowrap uppercase ";
 
 /** Kelas lengkap satu lencana menurut nama jenisnya. */
+/**
+ * Menemukan petak kartu sebuah bagian lewat JUDULNYA, bukan lewat kelas
+ * Tailwind-nya.
+ *
+ * Dulu petak beranda dicari dengan pemilih seperti ".grid.gap-6.md:grid-cols-2".
+ * Begitu tata letak aplikasinya diubah — dan beranda memang diubah supaya
+ * profil sekolah yang di depan — pemilih itu tidak menemukan apa pun, dan
+ * demo berhenti memperbarui bagiannya TANPA pesan galat. Judul bagian jauh
+ * lebih jarang berubah daripada kelas tata letaknya.
+ */
+function petakBagian(induk, judul) {
+  const seksi = [...induk.querySelectorAll("section")].find((s) => {
+    const h = s.querySelector("h1, h2");
+    return h && h.textContent.includes(judul);
+  });
+  return seksi ? { seksi, petak: seksi.querySelector(".grid") } : { seksi: null, petak: null };
+}
+
+/**
+ * Kelas pelebar untuk kartu TERAKHIR pada petak "sm:grid-cols-2
+ * lg:grid-cols-3", supaya baris terakhirnya tidak menyisakan lubang.
+ *
+ * Aturannya harus sama persis dengan kelasKartuAkhir() di
+ * frontend/src/komponen/Bagian.tsx. Petak yang digambar ulang oleh demo tidak
+ * mewarisi kelas dari markup tangkapan, jadi bila aturan ini ketinggalan,
+ * demo memperlihatkan lubang yang tidak ada di aplikasinya.
+ */
+function kelasKartuAkhir(indeks, jumlah) {
+  if (indeks !== jumlah - 1) return "";
+  const sisa2 = jumlah % 2 === 1 ? "sm:col-span-2" : "sm:col-span-1";
+  const sisa3 = jumlah % 3 === 1 ? "lg:col-span-3"
+    : jumlah % 3 === 2 ? "lg:col-span-2" : "lg:col-span-1";
+  return `${sisa2} ${sisa3}`;
+}
+
 function kelasLencana(jenis) {
   return KELAS_LENCANA + (GAYA_LENCANA[jenis] ?? GAYA_LENCANA.terang);
 }
@@ -552,55 +587,118 @@ function segarkanBeranda() {
   const total = pendaftarAktif().length;
   const kuota = Number(K.pengaturan.ppdb_kuota || 0);
   const sisa = Math.max(kuota - total, 0);
+  const buka = ppdbDibuka();
+  const jurusanAktif = K.jurusan.filter((j) => j.aktif);
 
-  // Tiga angka pada kartu keadaan PPDB.
-  const kartu = isiPublik.querySelectorAll("dl.grid.grid-cols-3 > div");
-  const nilai = [angka(kuota), angka(total), angka(sisa)];
-  kartu.forEach((d, i) => {
+  // Tiga angka di bawah foto gedung. BUKAN angka PPDB: beranda kini dibuka
+  // dengan sekolahnya sendiri, jadi yang ditampilkan jumlah peminatan,
+  // jumlah fasilitas, dan peringkat akreditasi. Yang jumlahnya nol tidak
+  // ditulis sebagai "0" melainkan disembunyikan, sama seperti aplikasinya.
+  const kotak = [...isiPublik.querySelectorAll("dl.grid.grid-cols-3 > div")];
+  const angkaSekolah = [];
+  if (jurusanAktif.length > 0) angkaSekolah.push([angka(jurusanAktif.length), "Peminatan"]);
+  if (K.fasilitas.length > 0) angkaSekolah.push([angka(K.fasilitas.length), "Fasilitas"]);
+  angkaSekolah.push([K.pengaturan.akreditasi || "\u2013", "Akreditasi"]);
+  kotak.forEach((d, i) => {
+    const isi = angkaSekolah[i];
+    d.hidden = !isi;
+    if (!isi) return;
     const dd = d.querySelector("dd");
-    if (dd && nilai[i] !== undefined) dd.textContent = nilai[i];
+    const dt = d.querySelector("dt");
+    if (dd) dd.textContent = isi[0];
+    if (dt) dt.textContent = isi[1];
   });
 
-  // Bilah kuota terisi.
-  const bilah = isiPublik.querySelector(".h-2\\.5.overflow-hidden > div");
-  if (bilah) bilah.style.width = `${Math.min(persen(total, kuota), 100)}%`;
-  isiPublik.querySelectorAll("span.tabular-nums").forEach((s) => {
-    if (/^\d+%$/.test(s.textContent.trim())) s.textContent = `${persen(total, kuota)}%`;
-  });
+  segarkanBilahPpdb(kuota, sisa, buka);
+  segarkanJurusanBeranda();
+  segarkanPrestasiBeranda();
+  segarkanBeritaBeranda();
+}
 
-  // Keadaan dibuka atau belum.
-  const lencanaKeadaan = [...isiPublik.querySelectorAll("span")].find((s) =>
-    ["Dibuka", "Belum dibuka"].includes(s.textContent.trim()));
-  if (lencanaKeadaan) {
-    const buka = ppdbDibuka();
-    lencanaKeadaan.textContent = buka ? "Dibuka" : "Belum dibuka";
-    lencanaKeadaan.className =
-      kelasLencana(buka ? "hijau" : "abu");
+/**
+ * Bilah ringkas keadaan PPDB, satu baris di bawah sorotan sekolah.
+ *
+ * Kalimatnya disusun ulang seluruhnya, bukan ditambal sebagian, karena
+ * isinya memang berbeda menurut keadaan: yang sedang dibuka menyebut tanggal
+ * penutupan, yang belum dibuka menyebut tanggal pembukaan.
+ */
+function segarkanBilahPpdb(kuota, sisa, buka) {
+  const lencanaKeadaan = [...isiPublik.querySelectorAll("span")].find((x) =>
+    ["PPDB Dibuka", "PPDB Belum Dibuka"].includes(x.textContent.trim()));
+  if (!lencanaKeadaan) return;
+  lencanaKeadaan.textContent = buka ? "PPDB Dibuka" : "PPDB Belum Dibuka";
+  lencanaKeadaan.className = kelasLencana(buka ? "hijau" : "abu");
+
+  const kalimat = lencanaKeadaan.parentElement.querySelector("p");
+  if (kalimat) {
+    const bagian = [
+      `<span class="font-semibold">Tahun Ajaran ${e(tahunAjaran() || "-")}</span>`,
+    ];
+    if (buka && K.pengaturan.ppdb_selesai) {
+      bagian.push(`ditutup ${tanggalPanjang(K.pengaturan.ppdb_selesai)}`);
+    }
+    if (!buka && K.pengaturan.ppdb_mulai) {
+      bagian.push(`dibuka ${tanggalPanjang(K.pengaturan.ppdb_mulai)}`);
+    }
+    if (kuota > 0) {
+      bagian.push(`sisa kuota <span class="font-semibold tabular-nums">${angka(sisa)}</span> dari ${angka(kuota)}`);
+    }
+    kalimat.innerHTML = bagian.join(" \u00b7 ");
   }
 
-  segarkanJurusanBeranda();
-  segarkanBeritaBeranda();
+  const seksi = lencanaKeadaan.closest("section");
+  const tombol = seksi && seksi.querySelector('a[href^="/ppdb"]');
+  if (tombol) {
+    tombol.setAttribute("href", buka ? "/ppdb/daftar" : "/ppdb");
+    tombol.textContent = buka ? "Daftar Sekarang" : "Lihat Jadwal";
+  }
+}
+
+/**
+ * Catatan prestasi: berita berkategori Prestasi yang sudah terbit. Bagiannya
+ * disembunyikan bila belum ada, persis seperti aplikasinya, supaya demo tidak
+ * memperlihatkan bagian kosong ketika prestasinya ditarik dari panel.
+ */
+function segarkanPrestasiBeranda() {
+  const { seksi, petak } = petakBagian(isiPublik, "Yang Sudah Diraih Siswa");
+  if (!petak) return;
+  const daftar = K.berita
+    .filter((b) => b.publish && b.kategori === "Prestasi")
+    .sort((a, b) => (a.dibuat < b.dibuat ? 1 : -1))
+    .slice(0, 3);
+
+  if (seksi) seksi.hidden = daftar.length === 0;
+  if (daftar.length === 0) return;
+
+  petak.innerHTML = daftar.map((b, i) => `
+    <div class="${kelasKartuAkhir(i, daftar.length)}">
+      <a href="/berita/${e(b.slug)}" class="flex h-full flex-col rounded-kartu bg-white/10 p-5 ring-1 ring-white/15 transition hover:bg-white/15">
+        <span class="text-xs font-semibold text-white/70">${tanggalPanjang(b.dibuat)}</span>
+        <h3 class="mt-2 text-base leading-snug text-balance text-white">${e(b.judul)}</h3>
+        ${b.ringkasan ? `<p class="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-white/75">${e(b.ringkasan)}</p>` : ""}
+        <span class="mt-4 text-sm font-semibold text-emas">Baca selengkapnya \u2192</span>
+      </a>
+    </div>`).join("");
 }
 
 function segarkanJurusanBeranda() {
   // Petaknya dirender ulang seluruhnya, bukan hanya angkanya, supaya
   // peminatan yang ditambahkan atau dinonaktifkan dari panel ikut terlihat.
-  const petak = isiPublik.querySelector(".grid.gap-6.md\\:grid-cols-2");
+  const { seksi, petak } = petakBagian(isiPublik, "Peminatan yang Dibuka");
   if (!petak) return;
   const aktif = K.jurusan.filter((j) => j.aktif).sort((a, b) => a.urutan - b.urutan || a.id - b.id);
 
-  const seksi = petak.closest("section");
   if (aktif.length === 0) {
     if (seksi) seksi.hidden = true;
     return;
   }
   if (seksi) seksi.hidden = false;
 
-  petak.innerHTML = aktif.map((j) => {
+  petak.innerHTML = aktif.map((j, i) => {
     const jml = pendaftarAktif().filter((p) => p.jurusan_id === j.id).length;
     const sisa = Math.max(j.kuota - jml, 0);
     return `
-    <div><div class="kartu flex h-full flex-col p-6">
+    <div class="${kelasKartuAkhir(i, aktif.length)}"><div class="kartu flex h-full flex-col p-6">
       <div class="mb-4 flex items-center justify-between gap-3">
         <span class="flex items-center gap-2 rounded-lg bg-biru-muda px-2.5 py-1 text-xs font-bold tracking-wider text-biru">${ikonFasilitas(j.ikon, 15)}${e(j.kode)}</span>
         <span class="text-xs font-semibold text-samar tabular-nums">Kuota ${angka(j.kuota)}</span>
@@ -626,7 +724,7 @@ function segarkanBeritaBeranda() {
     .sort((a, b) => (a.dibuat < b.dibuat ? 1 : -1))
     .slice(0, 3);
 
-  const petak = [...isiPublik.querySelectorAll(".grid.gap-6.md\\:grid-cols-3")].pop();
+  const { petak } = petakBagian(isiPublik, "Berita & Pengumuman");
   if (!petak) return;
   petak.innerHTML = terbit.map((b) => `
     <div><div class="kartu h-full overflow-hidden">

@@ -14,6 +14,7 @@ import (
 var pengaturanPublik = []string{
 	"nama_sekolah", "nama_singkat", "tagline", "npsn", "akreditasi", "status_sekolah",
 	"kepala_sekolah", "sambutan_kepsek", "visi", "misi", "sejarah", "yayasan",
+	"keunggulan",
 	"alamat", "kelurahan", "kecamatan", "kota", "provinsi", "kode_pos",
 	"telepon", "email", "whatsapp", "instagram", "facebook", "youtube", "tiktok",
 	"jam_layanan", "logo", "foto_depan", "peta_embed",

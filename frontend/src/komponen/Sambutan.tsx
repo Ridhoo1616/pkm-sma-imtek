@@ -1,4 +1,5 @@
 import { urlUnggahan } from "@/lib/api";
+import { Menunggu } from "@/komponen/Halaman";
 import { belumTerisi, keParagraf } from "@/lib/format";
 import type { Pengaturan } from "@/lib/tipe";
 
@@ -143,11 +144,13 @@ export function Sambutan({ pengaturan }: { pengaturan: Pengaturan }) {
                 ))}
               </blockquote>
             ) : (
-              <p className="relative pt-4 text-[15px] leading-relaxed text-samar italic">
-                Naskah sambutan kepala sekolah belum tersedia. Bagian ini akan
-                terisi setelah pihak sekolah mengirimkan naskahnya, dan dapat
-                diisi lewat menu Pengaturan di panel admin.
-              </p>
+              // Keterangannya diambil dari Menunggu, bukan ditulis ulang di
+              // sini, supaya susunan kata dan bentuknya sama dengan halaman
+              // lain yang naskahnya juga belum dikirim sekolah. `polos`
+              // karena tempat ini sudah berada di dalam kartu.
+              <div className="relative pt-4">
+                <Menunggu apa="Naskah sambutan kepala sekolah" polos />
+              </div>
             )}
 
             <span
