@@ -285,39 +285,51 @@ Keterangan tiap kartu menerangkan **perannya** secara umum dan tidak memuat
 penilaian apa pun tentang SMA IMTEK, karena penilaian seperti itu hanya boleh
 datang dari sekolahnya sendiri.
 
-Ilustrasi sekelas gambar rujukan — satu ruang kelas berisi guru dan siswa —
-sempat dicoba sebagai SVG penuh lalu dibuang: pada bidang sebesar itu bentuk
-badannya jadi seperti bel, bukan orang, dan mutunya di bawah halaman lainnya.
-Sebagai gantinya halaman ini punya **satu petak gambar yang diisi sekolah
-sendiri**, pengaturan `visi_gambar` (migrasi 006), diunggah lewat menu
-Pengaturan seperti logo dan foto kepala sekolah. Selama kosong yang tampil
-kerangka 16:9 beserta cara mengunggahnya, jadi tata letak halamannya sudah
-final sebelum gambarnya ada.
+**Kartu Visi dan Kartu Misi masing-masing memuat satu ilustrasi yang sosok
+orangnya menonjol keluar melewati tepi atas kartu** (95 dan 111 piksel).
+Ilustrasinya dikirim user sebagai berkas SVG, tetapi isinya ternyata PNG yang
+dibungkus wadah SVG — satu elemen `<image>` berisi data base64, tanpa satu
+jalur vektor pun. Jadi tidak ada yang bisa diwarnai ulang, dan yang dikerjakan
+tiga hal pada rasternya:
 
-**Kedua kartu Visi dan Misi menindih seperlima bagian bawah gambar itu**
-(`md:-mt-24 lg:-mt-28`, 112 piksel pada layar lebar). Itulah yang membuat
-orang di dalam gambar terbaca sedang **memegang** kartunya: tangan mereka
-berakhir di balik tepi kartu, sehingga tangan yang menggenggam kotak tidak
-perlu digambar sama sekali — dan justru bagian itulah yang paling sering
-keliru pada gambar buatan mesin. Susunan gambar yang pas: orang-orangnya di
-kiri dan kanan bawah, telapak terbuka pada sekitar 75–85 persen tinggi
-gambar, tengahnya kosong. Judul "Visi" dan "Misi" pindah **ke dalam** kartu,
-karena judul yang melintang di luar kartu memakan habis tarikan ke atas —
-kartunya hanya menindih empat piksel — dan judul itu sendirilah yang mendarat
-di atas gambar. Tindihannya hanya berlaku pada ambang `md` ke atas; pada layar
-sempit kedua kartu bertumpuk dan jauh lebih tinggi, jadi menindih gambar hanya
-akan menutupi orangnya.
+1. **Latarnya dibuang dengan perambatan dari tepi**, bukan penggantian warna
+   menyeluruh. Bedanya menentukan: kemeja seragam pada gambar itu putih, sama
+   dengan latarnya, jadi mengganti setiap piksel putih akan melubangi
+   kemejanya. Perambatan hanya menjangkau yang bersambung dengan tepi gambar,
+   dan garis tepi gambar yang gelap menahannya di luar sosok orangnya.
+2. **Sisa tulisan dipotong.** Gambar misi terbawa dari gambar yang lebih
+   besar, sehingga tepi kirinya masih memuat potongan kata — "didik",
+   "aman,", "tua," — yang terbaca sebagai kekeliruan. Kolomnya dihitung:
+   sampai x=34 isinya cuma 5–34 piksel per kolom, lalu melonjak ke ratusan
+   begitu masuk sosoknya, jadi 36 kolom pertama dibuang.
+3. **Warnanya dikurangi ke 64 dengan median cut**, sehingga 322 KB dan 294 KB
+   menjadi 47 KB dan 35 KB. Cara "ambil warna yang paling sering" sudah
+   dicoba dan gagal: puluhan ribu warnanya didominasi variasi putih, hitam,
+   dan hijau, jadi empat puluh warna teratas sama sekali tidak memuat kuning
+   kardigan maupun biru dasi — kardigannya berubah kelabu.
 
-**Yang diterima hanya jpg dan png**, dicocokkan sampai ke byte penanda
-berkasnya di `unggah.go` — berkas SVG yang dinamai `.png` pun ditolak. SVG
-sengaja **tidak** diterima: SVG adalah XML yang boleh memuat `<script>`, jadi
-menerimanya berarti siapa pun yang dapat masuk panel bisa menitipkan kode
-yang berjalan di peramban pengunjung. Gambar vektor yang memang dipakai situs
-ini ditanam langsung di dalam kode, seperti ikon pada `komponen/Ikon.tsx`.
-Foto orang sungguhan juga bukan pilihan bawaan, karena berarti memakai wajah
-guru dan siswa tanpa izin mereka, atau memakai foto stok berisi orang yang
-sama sekali bukan bagian dari sekolah ini — karena itu petaknya dibiarkan
-kosong sampai sekolah memutuskan sendiri isinya.
+Berkas hasilnya ada di `frontend/public/ilustrasi/`, **bukan lewat unggahan**.
+Karena itu pengaturan `visi_gambar` beserta kolom unggahnya dilepas kembali
+(migrasi 007): tidak ada gunanya menyediakan kendali yang tidak mengerjakan
+apa pun. Ilustrasi yang ditanam sebagai berkas juga tidak bisa hilang dari
+basis data, dan demo statis dapat menyalinnya apa adanya — `rakit.py`
+menyalinnya ke `docs/ilustrasi/` lalu membuat alamatnya relatif, sebab demo
+dilayani di bawah `/pkm-sma-imtek/` sehingga alamat berawalan garis miring
+berakhir 404. Disalin sebagai berkas, bukan disisipkan sebagai data URI
+seperti gambar pengaturan, karena sebagai berkas terpisah ia dapat disimpan
+cache peramban dan tidak menambah 110 KB pada `data.js`.
+
+**Yang masih perlu diputuskan sekolah:** kedua ilustrasi itu memuat tulisan
+yang ikut tergambar — "Belajar Bersama Meraih Masa Depan" dan "Pendidikan Hari
+Ini Untuk Masa Depan". Keduanya semboyan pendidikan yang umum, bukan
+pernyataan tentang SMA IMTEK, dan letaknya di dalam gambar sebagai tulisan
+pada papan. Tetap dicatat di sini supaya sekolah sadar bahwa kalimat itu ada
+dan bukan rumusan resmi mereka.
+
+Percobaan sebelumnya yang dibuang: satu adegan ruang kelas digambar sendiri
+sebagai SVG penuh, dan pada bidang sebesar itu bentuk badannya jadi seperti
+bel, bukan orang. Foto pun bukan pilihan, karena berarti memakai wajah guru
+dan siswa sungguhan tanpa izin mereka.
 
 Dua butir sengaja berupa pintu masuk, bukan sistem yang dibangun sendiri.
 E-Learning menampilkan tautan ke layanan yang sudah dipakai sekolah, misalnya

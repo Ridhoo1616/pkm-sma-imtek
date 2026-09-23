@@ -1,4 +1,3 @@
-import { urlUnggahan } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
 import { belumTerisi, kePoinTerisi } from "@/lib/format";
 import { KepalaHalaman } from "@/komponen/Bagian";
@@ -50,7 +49,6 @@ export default async function HalamanVisiMisi() {
   // sekaligus membuang baris yang masih berupa penanda [kurung siku].
   const misi = kePoinTerisi(p.misi);
   const adaSemboyan = !belumTerisi(p.tagline ?? "");
-  const adaGambar = Boolean(p.visi_gambar && !belumTerisi(p.visi_gambar));
 
   return (
     <>
@@ -61,75 +59,12 @@ export default async function HalamanVisiMisi() {
       <div className="wadah py-14">
         <JejakMenu induk="/profil" jalur="/profil/visi-misi" />
 
-        {/* Gambar pilihan sekolah, mendahului ketiga kartu peran. Kosong
-            berarti kerangka berukuran sama beserta cara mengunggahnya, bukan
-            bagian yang hilang — dengan begitu tata letak halaman sudah final
-            sebelum gambarnya ada, dan panitia melihat sendiri apa yang masih
-            ditunggu. Berkasnya diunggah lewat menu Pengaturan; hanya jpg dan
-            png yang diterima, dan SVG sengaja tidak, karena SVG boleh memuat
-            <script> dan situs ini menerima unggahan dari panel. */}
-        <MunculNaik>
-          {adaGambar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={urlUnggahan("profil", p.visi_gambar)}
-              alt="Ilustrasi guru dan siswa yang mengerjakan visi dan misi sekolah"
-              className="mt-8 aspect-video w-full rounded-kartu bg-biru-muda object-cover shadow-lembut"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <div className="mt-8 grid aspect-video w-full place-items-center rounded-kartu border border-dashed border-biru/30 bg-biru-muda px-6 text-center">
-              <div className="max-w-xl">
-                <span
-                  aria-hidden
-                  className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white text-xl text-biru"
-                >
-                  ☐
-                </span>
-                <p className="mt-3 text-sm font-semibold text-biru-tua">
-                  Tempat gambar halaman Visi &amp; Misi
-                </p>
-                <p className="mt-1.5 text-xs leading-relaxed text-biru/70">
-                  Mendatar, perbandingan sisi 16:9, paling tidak 1280 piksel
-                  lebarnya, PNG berlatar tembus pandang. Kedua kartu Visi dan
-                  Misi menindih <span className="font-semibold">seperlima
-                  bagian bawah</span> gambar ini, jadi susunan yang paling pas:
-                  orang-orangnya di sisi kiri dan kanan bawah, tangan terangkat
-                  dengan telapak terbuka pada sekitar 75&ndash;85 persen tinggi
-                  gambar, dan bagian tengah dibiarkan kosong. Dengan begitu
-                  tangan mereka berakhir di balik tepi kartu dan tampak
-                  memegangnya, tanpa perlu ada tangan yang digambar menggenggam
-                  kotak. Diunggah sebagai
-                  <span className="font-semibold"> Gambar halaman Visi &amp; Misi </span>
-                  lewat menu Pengaturan di panel admin.
-                </p>
-              </div>
-            </div>
-          )}
-        </MunculNaik>
-
-        {/* Kedua kartu MENINDIH bagian bawah gambar bila gambarnya ada.
-            Itu yang membuat orang di dalam gambar terbaca sedang memegang
-            kartunya: tangan mereka berakhir di balik tepi kartu, jadi tidak
-            perlu ada tangan yang digambar menggenggam kotak — bagian tersulit
-            pada gambar buatan mesin justru tidak pernah terlihat.
-
-            Tindihannya hanya pada ambang md ke atas. Pada layar sempit kedua
-            kartu bertumpuk dan jadi jauh lebih tinggi, sehingga menindih
-            gambar hanya akan menutupi orangnya. Tanpa gambar, jaraknya biasa
-            saja — kartu tidak boleh menindih kerangka kosong.
-
-            Kartunya sendiri berlatar putih dan berbayang, jadi ia menutup
-            gambar tanpa perlu z-index: urutannya di DOM sudah sesudah gambar.
-            Ruang ekstra di bawah gambar (pb) menjaga agar tarikan ke atas
-            tidak memakan jarak ke bagian berikutnya. */}
-        <div
-          className={
-            "grid auto-rows-fr gap-8 lg:grid-cols-2 lg:gap-10 " +
-            (adaGambar ? "mt-8 md:-mt-24 lg:-mt-28" : "mt-12")
-          }
-        >
+        {/* Ruang di ATAS petaknya bukan hiasan: ilustrasi pada tiap kartu
+            menonjol keluar melewati tepi atasnya, dan tanpa ruang ini ia akan
+            menabrak jejak lokasi di atasnya. `.kartu` memang tidak mengurung
+            isinya, jadi tidak ada yang perlu dimatikan supaya penonjolannya
+            terlihat. */}
+        <div className="mt-24 grid auto-rows-fr gap-8 sm:mt-28 lg:grid-cols-2 lg:gap-10">
           {/* Judulnya DI DALAM kartu, bukan melintang di atasnya.
               Sebelumnya "Arah / Visi" berdiri di luar kartu, dan itu
               menggagalkan dua hal sekaligus: judul setinggi seratus piksel
@@ -142,18 +77,28 @@ export default async function HalamanVisiMisi() {
           <MunculNaik>
             <section
               aria-labelledby="judul-visi"
-              className="kartu h-full border-l-4 border-l-emas p-6 md:p-7"
+              className="kartu relative h-full border-l-4 border-l-emas p-6 md:p-7"
             >
-              <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
-                Arah
-              </p>
-              <h2 id="judul-visi" className="mt-1.5 text-2xl font-bold">
-                Visi
-              </h2>
-              <span
-                aria-hidden
-                className="mt-3 block h-1 w-12 rounded-full bg-emas"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/ilustrasi/visi.png"
+                alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis"
+                width={384}
+                height={426}
+                className="pointer-events-none absolute -top-20 right-2 w-32 sm:-top-24 sm:right-4 sm:w-40 md:w-44"
               />
+              <div className="pr-28 sm:pr-44 md:pr-48">
+                <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
+                  Arah
+                </p>
+                <h2 id="judul-visi" className="mt-1.5 text-2xl font-bold">
+                  Visi
+                </h2>
+                <span
+                  aria-hidden
+                  className="mt-3 block h-1 w-12 rounded-full bg-emas"
+                />
+              </div>
               {belumTerisi(p.visi) ? (
                 <div className="mt-5">
                   <Menunggu apa="Rumusan visi" polos />
@@ -169,18 +114,28 @@ export default async function HalamanVisiMisi() {
           <MunculNaik jeda={0.08}>
             <section
               aria-labelledby="judul-misi"
-              className="kartu h-full p-6 md:p-7"
+              className="kartu relative h-full p-6 md:p-7"
             >
-              <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
-                Langkah
-              </p>
-              <h2 id="judul-misi" className="mt-1.5 text-2xl font-bold">
-                Misi
-              </h2>
-              <span
-                aria-hidden
-                className="mt-3 block h-1 w-12 rounded-full bg-emas"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/ilustrasi/misi.png"
+                alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar"
+                width={314}
+                height={434}
+                className="pointer-events-none absolute -top-24 right-2 w-28 sm:-top-28 sm:right-4 sm:w-36 md:w-40"
               />
+              <div className="pr-24 sm:pr-40 md:pr-44">
+                <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
+                  Langkah
+                </p>
+                <h2 id="judul-misi" className="mt-1.5 text-2xl font-bold">
+                  Misi
+                </h2>
+                <span
+                  aria-hidden
+                  className="mt-3 block h-1 w-12 rounded-full bg-emas"
+                />
+              </div>
               {misi.length === 0 ? (
                 <div className="mt-5">
                   <Menunggu apa="Rumusan misi" polos />

@@ -464,7 +464,6 @@ var gambarPengaturan = map[string]string{
 	"foto_depan":          "Foto halaman depan",
 	"foto_kepsek":         "Foto kepala sekolah",
 	"struktur_organisasi": "Bagan struktur organisasi",
-	"visi_gambar":         "Gambar halaman Visi & Misi",
 }
 
 // tanganiUnggahGambarPengaturan menyimpan satu gambar ke folder profil dan

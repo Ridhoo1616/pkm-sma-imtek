@@ -1,0 +1,21 @@
+-- ============================================================
+--  Migrasi 007 — Melepas pengaturan visi_gambar
+--
+--  Migrasi 006 menyiapkan satu petak gambar besar di atas halaman Visi &
+--  Misi, diisi sekolah lewat menu Pengaturan. Petak itu dilepas atas
+--  permintaan user: halaman itu sekarang memakai dua ilustrasi tetap yang
+--  ditanam di dalam berkas program, satu pada kartu Visi dan satu pada kartu
+--  Misi, dengan sosok orangnya menonjol keluar melewati tepi kartu.
+--
+--  Kedua ilustrasi itu tidak lewat unggahan sama sekali. Ia berupa berkas di
+--  frontend/public/ilustrasi/, jadi tidak ada kolom unggah yang perlu
+--  dijaga, tidak ada berkas yang bisa hilang dari basis data, dan demo
+--  statis dapat menyalinnya apa adanya.
+--
+--  Baris pengaturannya dihapus supaya panel tidak memuat kendali yang tidak
+--  mengerjakan apa pun. Berkas yang mungkin pernah terunggah TIDAK dihapus
+--  di sini: menghapus berkas orang lewat migrasi SQL adalah hal yang tidak
+--  bisa dibatalkan, dan di pemasangan sekolah nilainya masih kosong.
+-- ============================================================
+
+DELETE FROM pengaturan WHERE nama_setting = 'visi_gambar';
