@@ -14,12 +14,35 @@
   //     Proyek ini memakai TypeScript dari frontend/node_modules, yang sudah
   //     ditunjuk setelan typescript.tsdk, jadi versi harian hanya menambah
   //     kemungkinan perbedaan perilaku tanpa manfaat.
+  //
+  // PulkitGangwar.nextjs-snippets dipasang atas permintaan. Perlu diketahui:
+  // isinya mencampur App Router dan Pages Router, sedangkan proyek ini
+  // seluruhnya App Router. Yang berguna di sini hanya keluarga "na" dan "nr":
+  //
+  //   napage  nalayout  narootlayout  naloading  naerror  natemplate
+  //   nrget  nrpost  nrput  nrpatch  nrdelete
+  //   nil  nii  nud
+  //
+  // Yang JANGAN dipakai, karena menghasilkan kode Pages Router yang tidak
+  // berlaku di proyek ini dan hanya akan membuang waktu:
+  //
+  //   ngetServerSideProps  ngetStaticProps  ngetStaticPaths  ngipr
+  //   ncapp  ncdocument  napi  nspage  nstaticpage
+  //   nih  nuh     -> next/head, tidak dipakai App Router; judul halaman
+  //                   diatur lewat export metadata
+  //   nir  niur    -> next/router, App Router memakai next/navigation
+  //
+  // Satu lagi: napage:params menghasilkan tanda tangan buatan sendiri,
+  // sedangkan proyek ini memakai penolong bawaan Next 16, yaitu
+  // PageProps<"/halaman/[slug]"> dan LayoutProps<"/">. Lihat contohnya di
+  // src/app/(publik)/halaman/[slug]/page.tsx.
   "recommendations": [
     "golang.go",
     "bradlc.vscode-tailwindcss",
     "dbaeumer.vscode-eslint",
     "ckolkman.vscode-postgres",
     "eamodio.gitlens",
-    "usernamehw.errorlens"
+    "usernamehw.errorlens",
+    "PulkitGangwar.nextjs-snippets"
   ]
 }

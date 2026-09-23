@@ -162,8 +162,13 @@ bagian 3 dan 4 dapat dijalankan lewat menu.
    `pkm-sma-imtek`.
 3. VS Code akan menawarkan memasang ekstensi yang disarankan proyek ini.
    Tekan **Install**. Daftarnya ada di `.vscode/extensions.json`: Go,
-   Tailwind CSS IntelliSense, ESLint, klien PostgreSQL, GitLens, dan Error
-   Lens.
+   Tailwind CSS IntelliSense, ESLint, klien PostgreSQL, GitLens, Error Lens,
+   dan kumpulan potongan kode Next.js.
+
+   Ekstensi Golang resmi bernama **"Go"** di panel Extensions, bukan
+   "Golang". Next.js sendiri tidak punya ekstensi resmi; dukungannya datang
+   dari ESLint (lewat `eslint-config-next` yang sudah menjadi kebergantungan
+   proyek) beserta TypeScript bawaan VS Code.
 4. Buka sekali saja terminal di dalam VS Code lewat **Terminal > New
    Terminal**, lalu jalankan `cd frontend && npm install`. Langkah ini hanya
    diperlukan sekali, dan sesudahnya tidak ada lagi perintah yang perlu
@@ -193,6 +198,29 @@ panelnya.
 kiri, pilih **Backend + situs**, lalu tekan **F5**. Titik henti dipasang
 dengan mengeklik nomor baris. Untuk backend Go, ekstensi Go akan menawarkan
 memasang penelusur `dlv` sekali di awal; terima tawarannya.
+
+**Potongan kode Next.js.** Ketik prefiksnya lalu tekan Tab. Yang berlaku di
+proyek ini hanya keluarga App Router:
+
+| Prefiks | Menghasilkan |
+|---|---|
+| `napage` | Kerangka halaman |
+| `nalayout`, `narootlayout` | Kerangka tata letak |
+| `naloading`, `naerror`, `natemplate` | Berkas khusus App Router |
+| `nrget`, `nrpost`, `nrput`, `nrpatch`, `nrdelete` | Penangan rute API |
+| `nil`, `nii`, `nud` | Impor Link, Image, dan impor dinamis |
+
+Prefiks lainnya menghasilkan kode **Pages Router** yang tidak berlaku di sini,
+jadi jangan dipakai: `ngetServerSideProps`, `ngetStaticProps`,
+`ngetStaticPaths`, `ncapp`, `ncdocument`, `napi`, `nspage`, `nstaticpage`.
+Begitu pula `nih` dan `nuh` yang memakai `next/head` (judul halaman di App
+Router diatur lewat `export const metadata`), serta `nir` dan `niur` yang
+memakai `next/router` (App Router memakai `next/navigation`).
+
+Untuk halaman yang menerima parameter, `napage:params` menghasilkan tanda
+tangan buatan sendiri. Proyek ini memakai penolong bawaan Next 16,
+`PageProps<"/halaman/[slug]">` dan `LayoutProps<"/">`; contohnya ada di
+`frontend/src/app/(publik)/halaman/[slug]/page.tsx`.
 
 **Melihat isi basis data:** ekstensi PostgreSQL yang disarankan dapat dipakai
 langsung dari VS Code. Sambungannya: host `127.0.0.1`, porta `5432`, basis
