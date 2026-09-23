@@ -579,7 +579,28 @@ bukan memuji sekolahnya: kalimat tentang mutu sekolah hanya boleh datang dari
 sekolah sendiri, dan tempatnya sudah disediakan pada semboyan dan bagian
 keunggulan.
 
-### J. Alur masalah dan jawabannya di beranda
+### J. Sambutan kepala sekolah di beranda
+
+Beranda memuat sambutan kepala sekolah dalam bentuk **ringkas**, tepat sesudah
+bilah keadaan PPDB: potret kecil, nama, jabatan, satu paragraf pertama
+naskahnya, dan tautan ke yang utuh. Yang lengkap tetap di halaman Profil
+Sekolah — potret besar, naskah penuh, dan semboyan berhuruf tulisan tangan.
+Menyalin kartu besarnya ke beranda hanya membuat pengunjung membaca hal yang
+sama dua kali.
+
+**Bagian ini tidak muncul selama sekolah belum mengirim apa pun.** Di halaman
+Profil, kerangka kosong beserta keterangannya memang berguna: panitia melihat
+sendiri bahan apa yang masih ditunggu. Di beranda tidak — yang membukanya
+orang tua yang sedang menimbang sekolah, dan kerangka foto kosong di halaman
+depan membuat sekolahnya tampak belum siap. Jadi bagiannya terbuka begitu
+**ada** yang bisa ditampilkan (nama, foto, atau naskahnya), dan sebelum itu
+tidak ada sama sekali.
+
+Pada pemasangan sekolah sekarang ketiganya masih kosong, jadi bagian ini belum
+tampil. Ia akan muncul sendiri begitu salah satunya diisi lewat menu
+Pengaturan — tidak ada kode yang perlu diubah.
+
+### K. Alur masalah dan jawabannya di beranda
 
 Tepat sebelum ajakan mendaftar, beranda memuat tiga baris berpasangan: satu
 keadaan yang biasa terjadi pada pendaftaran berkas kertas, dan di sebelahnya
@@ -608,7 +629,7 @@ Sisanya bergantung bahan yang belum dimiliki sekolah: foto orang hasil studio,
 tangkapan antarmuka produk, dan baris logo "dipercaya oleh 123 merek" yang
 tidak boleh dikarang.
 
-### K. Beranda mendahulukan profil sekolah
+### L. Beranda mendahulukan profil sekolah
 
 Beranda semula dibuka dengan kartu putih besar berisi kuota PPDB, jumlah
 pendaftar, sisa kuota, dan tanggal penutupan. Angka itu menjawab pertanyaan
@@ -648,7 +669,7 @@ kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
 
-### L. Tautan WhatsApp beserta pesan bawaannya
+### M. Tautan WhatsApp beserta pesan bawaannya
 
 Tautan `wa.me` ada di lima tempat: bilah atas, footer, halaman Kontak, tombol
 bantuan melayang, dan panel pesan panitia. Empat di antaranya dulu mengarah ke
@@ -670,7 +691,7 @@ menuju entah ke mana lebih buruk daripada tombol yang tidak ada. Nomor telepon
 sekolah tidak dipakai sebagai gantinya, karena nomornya nomor kabel yang tidak
 punya WhatsApp.
 
-### M. Lencana status
+### N. Lencana status
 
 Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
 petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:

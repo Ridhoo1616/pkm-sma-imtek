@@ -16,6 +16,7 @@ import {
 } from "@/komponen/Bagian";
 import { MunculNaik, MunculLangsung, KartuGerak } from "@/komponen/Gerak";
 import { MasalahJawaban } from "@/komponen/MasalahJawaban";
+import { SambutanRingkas } from "@/komponen/SambutanRingkas";
 import type { Berita, Fasilitas, Jurusan } from "@/lib/tipe";
 import { IkonFasilitas, IkonCentang, IkonLokasi } from "@/komponen/Ikon";
 
@@ -257,6 +258,15 @@ export default async function Beranda() {
           </div>
         </div>
       </section>
+
+      {/* ---------------- Sambutan kepala sekolah, ringkas ----------------
+          Ditaruh tinggi, tepat sesudah bilah PPDB: yang pertama dicari orang
+          tua sesudah nama sekolahnya adalah siapa yang memimpinnya. Yang utuh
+          tetap di halaman Profil Sekolah; ini hanya perkenalan beserta
+          tautannya. Tidak muncul selama sekolah belum mengirim apa pun. */}
+      <MunculNaik>
+        <SambutanRingkas pengaturan={p} />
+      </MunculNaik>
 
       {/* ---------------- Keunggulan ----------------
           Kalimatnya milik sekolah, diisi lewat pengaturan. Selama belum
