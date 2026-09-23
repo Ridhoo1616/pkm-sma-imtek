@@ -1,0 +1,71 @@
+{
+  // ============================================================
+  //  Setelan bersama proyek ini
+  //  Setelan pribadi (tema, ukuran huruf) tidak ditaruh di sini.
+  // ============================================================
+
+  // Go, Node, dan psql pada komputer pembuat tidak berada di folder
+  // sistem. Tanpa baris ini, terminal di dalam VS Code tidak mengenal
+  // perintah go maupun npm, padahal keduanya ada.
+  "terminal.integrated.env.osx": {
+    "PATH": "${env:HOME}/.local/go/bin:${env:HOME}/.local/node/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/go/bin:/Applications/Postgres.app/Contents/Versions/17/bin:${env:PATH}"
+  },
+
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+
+  // Backend Go: gofmt dijalankan ekstensi Go, bukan pemformat lain.
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.insertSpaces": false,
+    "editor.tabSize": 4
+  },
+  "go.formatTool": "gofmt",
+  "go.lintOnSave": "package",
+  "go.vetOnSave": "package",
+
+  // Frontend: Tailwind 4 menaruh temanya di globals.css, dan kelasnya
+  // sering disusun dengan penggabungan tulisan. Dua setelan di bawah
+  // membuat saran kelas tetap muncul di tempat-tempat itu.
+  "tailwindCSS.experimental.classRegex": [
+    ["className=\\{([^}]*)\\}", "[\"'`]([^\"'`]*)[\"'`]"],
+    ["class(?:Name)?\\s*=\\s*[\"']([^\"']*)[\"']"]
+  ],
+  "tailwindCSS.includeLanguages": { "typescriptreact": "html" },
+  "css.lint.unknownAtRules": "ignore",
+  "editor.quickSuggestions": { "strings": "on" },
+
+  "[typescript]": { "editor.defaultFormatter": "vscode.typescript-language-features" },
+  "[typescriptreact]": { "editor.defaultFormatter": "vscode.typescript-language-features" },
+  "typescript.tsdk": "frontend/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "eslint.workingDirectories": ["frontend"],
+
+  // Folder yang isinya dihasilkan mesin dibuang dari pencarian, supaya
+  // hasil pencarian tidak dipenuhi berkas bangunan.
+  "search.exclude": {
+    "frontend/.next": true,
+    "frontend/node_modules": true,
+    "frontend/out": true,
+    "backend/data": true,
+    "backend/server": true,
+    "docs/data.js": true,
+    "docs/demo.js": true,
+    "legacy-php": true
+  },
+  "files.watcherExclude": {
+    "**/frontend/.next/**": true,
+    "**/frontend/node_modules/**": true,
+    "**/backend/data/**": true
+  },
+
+  "files.associations": {
+    "*.sql": "sql",
+    "jalankan.command": "shellscript"
+  },
+
+  // Batas kolom yang dipakai kode proyek ini.
+  "editor.rulers": [80, 100]
+}

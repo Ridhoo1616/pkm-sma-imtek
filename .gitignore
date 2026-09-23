@@ -27,8 +27,14 @@ dump/
 Thumbs.db
 desktop.ini
 
-# Berkas editor
-.vscode/
+# Berkas editor. Setelan bersama untuk proyek ini diikutkan supaya rekan
+# satu tim mendapat tugas, setelan, dan saran ekstensi yang sama; berkas
+# .vscode lain yang bersifat pribadi tetap dikecualikan.
+.vscode/*
+!.vscode/tasks.json
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
 .idea/
 *.sublime-*
 *.swp

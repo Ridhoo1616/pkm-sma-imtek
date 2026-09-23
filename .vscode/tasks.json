@@ -1,0 +1,131 @@
+{
+  // ============================================================
+  //  Tugas siap pakai untuk VS Code
+  //
+  //  Menjalankannya: Terminal > Run Task, atau tekan Cmd+Shift+P lalu
+  //  ketik "Run Task". Tugas "Jalankan semua" juga terpasang sebagai
+  //  tugas bawaan, jadi cukup Cmd+Shift+B.
+  //
+  //  Go, Node, dan PostgreSQL pada komputer ini tidak terpasang di
+  //  folder sistem, jadi setiap tugas menambahkan sendiri letaknya ke
+  //  PATH. Urutannya: milik pengguna, lalu Homebrew, lalu Postgres.app.
+  //  Komputer lain yang memasangnya lewat Homebrew tetap terlayani.
+  // ============================================================
+  "version": "2.0.0",
+  "options": {
+    "env": {
+      "PATH": "${env:HOME}/.local/go/bin:${env:HOME}/.local/node/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/go/bin:/Applications/Postgres.app/Contents/Versions/17/bin:${env:PATH}"
+    }
+  },
+  "tasks": [
+    {
+      "label": "Jalankan semua (PostgreSQL + backend + situs)",
+      "dependsOn": [
+        "1. Nyalakan PostgreSQL",
+        "2. Backend Go (porta 8090)",
+        "3. Situs Next.js (porta 3000)"
+      ],
+      // Berurutan, bukan serentak: backend perlu basis datanya sudah
+      // menyala, dan situs perlu backend-nya sudah menjawab.
+      "dependsOrder": "sequence",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "1. Nyalakan PostgreSQL",
+      "type": "shell",
+      "command": "if pg_isready -h 127.0.0.1 -p 5432 >/dev/null 2>&1; then echo 'PostgreSQL sudah menyala.'; elif [ -x /Applications/Postgres.app/Contents/Versions/17/bin/pg_ctl ]; then pg_ctl -D \"$HOME/Library/Application Support/Postgres/var-17\" -o '-p 5432' -l \"$HOME/Library/Application Support/Postgres/var-17.log\" start && for i in $(seq 1 20); do pg_isready -h 127.0.0.1 -p 5432 >/dev/null 2>&1 && break; sleep 1; done && echo 'PostgreSQL menyala.'; else echo 'PostgreSQL tidak ditemukan. Buka Postgres.app dari folder Applications, atau jalankan lewat Homebrew.'; exit 1; fi",
+      "presentation": { "reveal": "silent", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "2. Backend Go (porta 8090)",
+      "type": "shell",
+      "command": "go run .",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      // Tugas ini tidak pernah selesai sendiri: ia menjalankan server.
+      // isBackground memberi tahu VS Code agar tidak menunggunya.
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": { "regexp": "^(.*):(\\d+):(\\d+): (.*)$", "file": 1, "line": 2, "column": 3, "message": 4 },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "menjalankan migrasi|server berjalan",
+          "endsPattern": "server berjalan di"
+        }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "group": "aplikasi" }
+    },
+    {
+      "label": "3. Situs Next.js (porta 3000)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": { "regexp": "^(.*)$", "message": 1 },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting|Next\\.js",
+          "endsPattern": "Ready in|Local:"
+        }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "group": "aplikasi" }
+    },
+    {
+      "label": "Buka situs di peramban",
+      "type": "shell",
+      "command": "open http://localhost:3000",
+      "presentation": { "reveal": "never" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Buka panel panitia di peramban",
+      "type": "shell",
+      "command": "open http://localhost:3000/admin",
+      "presentation": { "reveal": "never" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Hentikan semua (porta 3000, 8090)",
+      "type": "shell",
+      "command": "for p in 3000 8090; do pid=$(lsof -ti:$p); if [ -n \"$pid\" ]; then kill $pid && echo \"porta $p dihentikan\"; else echo \"porta $p memang tidak dipakai\"; fi; done",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Bangun situs untuk server (npm run build)",
+      "type": "shell",
+      "command": "npm run build",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Periksa kode backend (gofmt + go vet)",
+      "type": "shell",
+      "command": "gofmt -l . && go vet ./... && echo 'backend bersih'",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": ["$go"]
+    },
+    {
+      "label": "Periksa kode frontend (tsc + eslint)",
+      "type": "shell",
+      "command": "npx tsc --noEmit && npx eslint src && echo 'frontend bersih'",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": ["$tsc", "$eslint-stylish"]
+    },
+    {
+      "label": "Periksa seluruh kode",
+      "dependsOn": [
+        "Periksa kode backend (gofmt + go vet)",
+        "Periksa kode frontend (tsc + eslint)"
+      ],
+      "dependsOrder": "sequence",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

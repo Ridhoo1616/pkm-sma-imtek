@@ -1,0 +1,14 @@
+{
+  // Ekstensi yang ditawarkan VS Code saat proyek ini dibuka pertama kali.
+  // Cukup tekan "Install" pada pemberitahuannya, tanpa perlu terminal.
+  "recommendations": [
+    "golang.go",
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+    "ckolkman.vscode-postgres",
+    "eamodio.gitlens",
+    "usernamehw.errorlens"
+  ]
+}

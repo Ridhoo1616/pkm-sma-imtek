@@ -148,6 +148,59 @@ Buka `http://localhost:3000`.
 
 ---
 
+## 4b. Menjalankan dari VS Code, tanpa mengetik di terminal
+
+Repositori ini sudah memuat setelan VS Code, sehingga seluruh perintah di
+bagian 3 dan 4 dapat dijalankan lewat menu.
+
+**Sekali saja, saat pertama kali:**
+
+1. Pasang **Visual Studio Code** dari <https://code.visualstudio.com>. Unduh
+   versi **Apple Silicon** bila Mac Anda memakai cip M1 sampai M4, atau
+   **Intel** bila bukan. Seret berkasnya ke folder Applications.
+2. Buka VS Code, pilih **File > Open Folder**, lalu pilih folder
+   `pkm-sma-imtek`.
+3. VS Code akan menawarkan memasang beberapa ekstensi yang disarankan proyek
+   ini. Tekan **Install**. Daftarnya ada di `.vscode/extensions.json`: Go,
+   Tailwind CSS IntelliSense, ESLint, dan beberapa lainnya.
+4. Buka sekali saja terminal di dalam VS Code lewat **Terminal > New
+   Terminal**, lalu jalankan `cd frontend && npm install`. Langkah ini hanya
+   diperlukan sekali, dan sesudahnya tidak ada lagi perintah yang perlu
+   diketik.
+
+**Sehari-hari:** buka menu **Terminal > Run Task**, lalu pilih tugasnya.
+
+| Tugas | Gunanya |
+|---|---|
+| Jalankan semua (PostgreSQL + backend + situs) | Menyalakan ketiganya berurutan. Juga terpasang sebagai tugas bawaan, jadi cukup tekan **Cmd+Shift+B** |
+| Buka situs di peramban | Membuka `http://localhost:3000` |
+| Buka panel panitia di peramban | Membuka `http://localhost:3000/admin` |
+| Hentikan semua (porta 3000, 8090) | Menghentikan backend dan situs |
+| Periksa seluruh kode | Menjalankan `gofmt`, `go vet`, `tsc`, dan `eslint` sekaligus |
+| Bangun situs untuk server | `npm run build`, dipakai sebelum memindahkan ke server |
+
+Backend dan situs berjalan di panel terminalnya masing-masing di dalam VS
+Code, jadi catatannya tetap terlihat dan dapat dihentikan dengan menutup
+panelnya.
+
+**Menelusuri kode dengan titik henti:** buka panel **Run and Debug** di bilah
+kiri, pilih **Backend + situs**, lalu tekan **F5**. Titik henti dipasang
+dengan mengeklik nomor baris. Untuk backend Go, ekstensi Go akan menawarkan
+memasang penelusur `dlv` sekali di awal; terima tawarannya.
+
+**Melihat isi basis data:** ekstensi PostgreSQL yang disarankan dapat dipakai
+langsung dari VS Code. Sambungannya: host `127.0.0.1`, porta `5432`, basis
+data `sma_imtek`, beserta pengguna dan sandi yang sama dengan `backend/.env`.
+DBeaver tetap dapat dipakai bila lebih terbiasa.
+
+Go, Node, dan `psql` pada komputer pembuat tidak terpasang di folder sistem,
+sehingga setiap tugas dan terminal di dalam VS Code menambahkan sendiri
+letaknya ke `PATH`. Itu diatur di `.vscode/tasks.json` dan
+`.vscode/settings.json`, dan sudah mencakup pemasangan lewat Homebrew, jadi
+komputer rekan satu tim tidak perlu disetel ulang.
+
+---
+
 ## 5. Hal pertama yang wajib dilakukan
 
 1. **Ganti kata sandi `admin`** lewat menu *Ganti Sandi*. Hash sandi bawaan ada

@@ -57,6 +57,7 @@ pkm-sma-imtek/
 ├── alat/
 │   └── pindah-mysql/   Memindahkan data versi PHP (MySQL) ke PostgreSQL
 │
+├── .vscode/        Tugas, setelan, dan saran ekstensi untuk VS Code
 ├── legacy-php/     Versi PHP pertama, diarsipkan sebagai rujukan perilaku
 ├── docs/           Demo statis untuk GitHub Pages
 └── PANDUAN-INSTALASI.md

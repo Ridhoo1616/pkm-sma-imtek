@@ -1,0 +1,49 @@
+{
+  // ============================================================
+  //  Menjalankan dengan penelusur (debugger), lengkap dengan titik henti
+  //
+  //  Tekan F5 setelah memilih salah satu susunan di bawah pada panel
+  //  Run and Debug. Untuk backend Go, ekstensi Go akan menawarkan
+  //  memasang "dlv" sekali di awal; terima tawarannya.
+  // ============================================================
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Backend Go (porta 8090)",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/backend",
+      "cwd": "${workspaceFolder}/backend",
+      // Konfigurasinya dibaca dari backend/.env oleh aplikasinya sendiri,
+      // jadi tidak ada kredensial yang perlu dituliskan di berkas ini.
+      "env": {
+        "PATH": "${env:HOME}/.local/go/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/go/bin:${env:PATH}"
+      }
+    },
+    {
+      "name": "Situs Next.js di peramban",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend",
+      // Situsnya harus sudah berjalan lebih dulu; tugas di tasks.json
+      // yang menyalakannya.
+      "preLaunchTask": "3. Situs Next.js (porta 3000)"
+    },
+    {
+      "name": "Panel panitia di peramban",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000/admin",
+      "webRoot": "${workspaceFolder}/frontend"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Backend + situs",
+      "configurations": ["Backend Go (porta 8090)", "Situs Next.js di peramban"],
+      "stopAll": true
+    }
+  ]
+}
