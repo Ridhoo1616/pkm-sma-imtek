@@ -181,6 +181,61 @@ function nomorRegistrasiBaru() {
 }
 
 /* ==================================================================
+   Susunan menu bertingkat
+
+   Ditaruh di berkas pertama karena tandaiMenuAktif() pada 02-rute.js
+   memerlukannya sejak halaman pertama dimuat, sedangkan perilaku menunya
+   dipasang di 08-navigasi.js yang dievaluasi lebih akhir.
+   ================================================================== */
+
+const MENU_BERTINGKAT = [
+  {
+    label: "Profil Sekolah",
+    jalur: "/profil",
+    anak: [
+      ["/profil/sejarah", "Sejarah Sekolah"],
+      ["/profil/data-sekolah", "Data Sekolah"],
+      ["/profil/visi-misi", "Visi & Misi"],
+      ["/fasilitas", "Sarana dan Prasarana"],
+      ["/profil/struktur-organisasi", "Struktur Organisasi"],
+      ["/profil/tenaga-pendidik", "Tenaga Pendidik dan Kependidikan"],
+    ],
+  },
+  {
+    label: "Akademik",
+    jalur: "/akademik",
+    anak: [
+      ["/akademik/elearning", "E-Learning / LMS"],
+      ["/akademik/jadwal", "Jadwal Pelajaran"],
+      ["/akademik/kalender", "Kalender Akademik"],
+      ["/halaman/kurikulum", "Kurikulum"],
+      ["/akademik/perpustakaan", "Perpustakaan Digital"],
+    ],
+  },
+  {
+    label: "Kesiswaan",
+    jalur: "/kesiswaan",
+    anak: [
+      ["/kesiswaan/ekstrakurikuler", "Ekstrakurikuler"],
+      ["/halaman/osis", "OSIS"],
+      ["/kesiswaan/prestasi", "Prestasi Siswa"],
+      ["/halaman/pendidikan-karakter", "Pendidikan Karakter"],
+    ],
+  },
+  {
+    label: "PPDB",
+    jalur: "/ppdb",
+    anak: [
+      ["/ppdb", "Ketentuan & Jadwal"],
+      ["/ppdb/daftar", "Formulir Pendaftaran"],
+      ["/ppdb/cek", "Cek Status & Hasil"],
+      ["/ppdb/ujian", "Tes Seleksi"],
+      ["/faq", "Tanya Jawab"],
+    ],
+  },
+];
+
+/* ==================================================================
    Perutean
    Alamat memakai tanda pagar supaya seluruh demo dapat dilayani
    sebagai satu berkas statis oleh GitHub Pages.
@@ -194,6 +249,22 @@ const isiPanel = document.getElementById("isi-panel");
 const RUTE = [
   [/^\/$/,                      () => bukaPublik("beranda")],
   [/^\/profil$/,                () => bukaPublik("profil")],
+  [/^\/profil\/sejarah$/,       () => bukaPublik("profilSejarah")],
+  [/^\/profil\/data-sekolah$/,  () => bukaPublik("profilData")],
+  [/^\/profil\/visi-misi$/,     () => bukaPublik("profilVisiMisi")],
+  [/^\/profil\/struktur-organisasi$/, () => bukaPublik("profilStruktur")],
+  [/^\/profil\/tenaga-pendidik$/,     () => bukaPublik("profilTenaga")],
+  [/^\/akademik$/,              () => bukaPublik("akademik")],
+  [/^\/akademik\/elearning$/,   () => bukaPublik("akademikElearning")],
+  [/^\/akademik\/jadwal$/,      () => bukaPublik("akademikJadwal")],
+  [/^\/akademik\/kalender$/,    () => bukaPublik("akademikKalender")],
+  [/^\/akademik\/perpustakaan$/, () => bukaPublik("akademikPerpustakaan")],
+  [/^\/kesiswaan$/,             () => bukaPublik("kesiswaan")],
+  [/^\/kesiswaan\/ekstrakurikuler$/, () => bukaPublik("kesiswaanEkstra")],
+  [/^\/kesiswaan\/prestasi$/,   () => bukaPublik("kesiswaanPrestasi")],
+  [/^\/halaman\/kurikulum$/,    () => bukaPublik("halamanKurikulum")],
+  [/^\/halaman\/osis$/,         () => bukaPublik("halamanOsis")],
+  [/^\/halaman\/pendidikan-karakter$/, () => bukaPublik("halamanKarakter")],
   [/^\/fasilitas$/,             () => bukaPublik("fasilitas")],
   [/^\/berita$/,                () => bukaBerita()],
   [/^\/berita\/(.+)$/,          (m) => bukaBeritaDetail(m[1])],
@@ -218,6 +289,11 @@ const RUTE = [
   [/^\/admin\/soal$/,           () => bukaPanel("soalAdmin")],
   [/^\/admin\/ujian$/,          () => bukaPanel("ujianAdmin")],
   [/^\/admin\/notifikasi$/,     () => bukaPanel("notifikasiAdmin")],
+  [/^\/admin\/halaman$/,        () => bukaPanel("halamanAdmin")],
+  [/^\/admin\/tenaga$/,         () => bukaPanel("tenagaAdmin")],
+  [/^\/admin\/kalender$/,       () => bukaPanel("kalenderAdmin")],
+  [/^\/admin\/kegiatan$/,       () => bukaPanel("kegiatanAdmin")],
+  [/^\/admin\/pustaka$/,        () => bukaPanel("pustakaAdmin")],
   [/^\/admin\/pengaturan$/,     () => bukaPanel("pengaturan")],
   [/^\/admin\/pengguna$/,       () => bukaPanel("pengguna")],
   [/^\/admin\/sandi$/,          () => bukaPanel("sandi")],
@@ -251,6 +327,10 @@ function rute() {
       // Penanda pada tombol bantuan bergantung halaman yang sedang dibuka,
       // jadi dipasang ulang setiap perpindahan.
       pasangBantuan();
+      // Menu bertingkat ditutup, seperti pada aplikasinya. Tanpa ini panel
+      // turunannya menggantung di atas halaman baru.
+      if (window.tutupMenuBertingkat) window.tutupMenuBertingkat();
+      if (window.tutupMenuRingkas) window.tutupMenuRingkas();
       window.scrollTo({ top: 0, behavior: "instant" });
       return;
     }
@@ -322,6 +402,18 @@ function tandaiMenuAktif(jalur) {
     if (!t || !t.startsWith("/")) return;
     const cocok = t === "/" ? jalur === "/" : jalur.startsWith(t);
     a.className = a.className
+      .replace(aktifPublik, "").replace(takAktifPublik, "").trim() +
+      " " + (cocok ? aktifPublik : takAktifPublik);
+  });
+
+  // Kelompok bertingkat dibuka oleh <button>, bukan <a>, jadi penandanya
+  // ditentukan dari jalur anak-anaknya yang tercatat di MENU_BERTINGKAT.
+  situs.querySelectorAll("nav > div > ul > li > button[aria-expanded]").forEach((b) => {
+    const kelompok = MENU_BERTINGKAT.find((k) => b.textContent.trim().startsWith(k.label));
+    if (!kelompok) return;
+    const cocok = [kelompok.jalur, ...kelompok.anak.map((a) => a[0])].some((t) =>
+      t === "/" ? jalur === "/" : jalur.startsWith(t));
+    b.className = b.className
       .replace(aktifPublik, "").replace(takAktifPublik, "").trim() +
       " " + (cocok ? aktifPublik : takAktifPublik);
   });
@@ -3062,44 +3154,140 @@ document.getElementById("ulang-demo").onclick = () => {
 rute();
 
 /* ==================================================================
-   Tombol menu pada layar kecil
-   Pada aplikasi aslinya menu ini dikendalikan keadaan React; di demo
-   susunannya dibentuk sekali lalu dibuka tutup lewat tombolnya.
+   Navigasi: menu bertingkat, menu layar kecil, dan menu panel
+
+   Pada aplikasi aslinya seluruhnya dikendalikan keadaan React. Di demo
+   markupnya sudah ditangkap apa adanya, jadi yang ditulis di sini hanya
+   perilakunya: membuka, menutup, dan menandai.
+
+   Panel turunan pada layar lebar TIDAK ada di markup tangkapan, karena
+   aplikasinya hanya memasangnya ketika menunya terbuka. Panel itu
+   ditangkap terpisah dan disimpan pada HALAMAN.menuTurunan.
    ================================================================== */
 
-const MENU_PUBLIK = [
-  ["/", "Beranda"], ["/profil", "Profil"], ["/fasilitas", "Fasilitas"],
-  ["/berita", "Berita"], ["/galeri", "Galeri"], ["/ppdb", "Info PPDB"],
-  ["/kontak", "Kontak"],
-];
+
+/* ---------- menu bertingkat, layar lebar ----------
+   Susunan MENU_BERTINGKAT berada di 01-keadaan.js, bukan di sini: berkas
+   demo digabung menjadi satu, dan tandaiMenuAktif() sudah memerlukannya
+   ketika rute() dipanggil pada akhir 07-konten.js. Bila tetapannya ditulis
+   di berkas ini, rujukannya jatuh ke temporal dead zone, pengecualiannya
+   menghentikan SISA berkas gabungan, dan seluruh pemasangan perilaku
+   sesudahnya tidak pernah berjalan. */
+
+function siapkanMenuBertingkat() {
+  const tombol = [...situs.querySelectorAll("nav > div > ul > li > button[aria-expanded]")];
+  if (tombol.length === 0) return;
+
+  const tutupSemua = () => {
+    tombol.forEach((b) => {
+      b.setAttribute("aria-expanded", "false");
+      const panah = b.querySelector("span[aria-hidden]");
+      if (panah) panah.className = panah.className.replace(" rotate-180", "");
+      const panel = b.parentElement.querySelector('div[id^="menu-"]');
+      if (panel) panel.remove();
+    });
+  };
+
+  tombol.forEach((b) => {
+    const kelompok = MENU_BERTINGKAT.find((k) => b.textContent.trim().startsWith(k.label));
+    if (!kelompok) return;
+    const li = b.parentElement;
+
+    const buka = () => {
+      if (li.querySelector('div[id^="menu-"]')) return;
+      tutupSemua();
+      const isi = (HALAMAN.menuTurunan || {})[kelompok.jalur];
+      if (!isi) return;
+      li.insertAdjacentHTML("beforeend", isi);
+      b.setAttribute("aria-expanded", "true");
+      const panah = b.querySelector("span[aria-hidden]");
+      if (panah && !panah.className.includes("rotate-180")) {
+        panah.className += " rotate-180";
+      }
+    };
+
+    li.addEventListener("mouseenter", buka);
+    li.addEventListener("mouseleave", tutupSemua);
+    b.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      if (li.querySelector('div[id^="menu-"]')) tutupSemua();
+      else buka();
+    });
+  });
+
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") tutupSemua();
+  });
+  document.addEventListener("mousedown", (ev) => {
+    if (!ev.target.closest("nav > div > ul > li")) tutupSemua();
+  });
+
+  // Dipanggil perutean setiap perpindahan halaman, supaya panelnya tidak
+  // menggantung di atas halaman baru seperti pada aplikasinya.
+  window.tutupMenuBertingkat = tutupSemua;
+}
+
+/* ---------- menu layar kecil ---------- */
+
+/** Membuka atau menutup wadah yang tingginya dianimasikan grid-template-rows. */
+function setelLipatan(el, terbuka) {
+  el.className = el.className
+    .replace("grid-rows-[1fr]", "").replace("grid-rows-[0fr]", "")
+    .replace("opacity-100", "").replace("opacity-0", "")
+    .replace(/\s+/g, " ").trim() +
+    (terbuka ? " grid-rows-[1fr] opacity-100" : " grid-rows-[0fr] opacity-0");
+  if (terbuka) el.removeAttribute("inert");
+  else el.setAttribute("inert", "");
+}
 
 function siapkanMenuRingkas() {
   const tombol = situs.querySelector('header button[aria-controls="menu-ringkas"]');
-  if (!tombol) return;
+  const wadah = situs.querySelector("#menu-ringkas");
+  if (!tombol || !wadah) return;
 
-  const wadah = document.createElement("div");
-  wadah.id = "menu-ringkas";
-  wadah.hidden = true;
-  wadah.className = "overflow-hidden border-t border-garis lg:hidden";
-  wadah.innerHTML = `
-    <ul class="wadah flex flex-col gap-1 py-3">
-      ${MENU_PUBLIK.map(([j, l]) => `
-        <li><a href="${j}" class="block rounded-lg px-3.5 py-2.5 font-semibold text-teks transition hover:bg-biru-muda hover:text-biru">${l}</a></li>`).join("")}
-      <li class="mt-1 flex gap-2">
-        <a href="/ppdb/daftar" class="flex-1 rounded-lg bg-biru px-4 py-2.5 text-center text-sm font-semibold text-white">Daftar PPDB</a>
-        <a href="/ppdb/cek" class="flex-1 rounded-lg border border-garis px-4 py-2.5 text-center text-sm font-semibold text-teks">Cek Status</a>
-      </li>
-    </ul>`;
-  situs.querySelector("header nav").appendChild(wadah);
+  const lipatan = [...wadah.querySelectorAll("button[aria-expanded]")];
+
+  const tutupLipatan = () => lipatan.forEach((b) => {
+    b.setAttribute("aria-expanded", "false");
+    const panah = b.querySelector("span[aria-hidden]");
+    if (panah) panah.className = panah.className.replace(" rotate-180", "");
+    const daftar = b.closest("li").querySelector("ul");
+    if (daftar) setelLipatan(daftar, false);
+  });
+
+  const tutup = () => {
+    setelLipatan(wadah, false);
+    tombol.setAttribute("aria-expanded", "false");
+    tutupLipatan();
+  };
 
   tombol.onclick = () => {
-    wadah.hidden = !wadah.hidden;
-    tombol.setAttribute("aria-expanded", String(!wadah.hidden));
+    const terbuka = wadah.getAttribute("inert") === null;
+    if (terbuka) tutup();
+    else {
+      setelLipatan(wadah, true);
+      tombol.setAttribute("aria-expanded", "true");
+    }
   };
-  wadah.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => {
-    wadah.hidden = true;
-    tombol.setAttribute("aria-expanded", "false");
-  }));
+
+  lipatan.forEach((b) => {
+    b.onclick = () => {
+      const daftar = b.closest("li").querySelector("ul");
+      if (!daftar) return;
+      const sudahTerbuka = daftar.getAttribute("inert") === null;
+      tutupLipatan();
+      if (!sudahTerbuka) {
+        setelLipatan(daftar, true);
+        b.setAttribute("aria-expanded", "true");
+        const panah = b.querySelector("span[aria-hidden]");
+        if (panah) panah.className += " rotate-180";
+      }
+    };
+  });
+
+  wadah.querySelectorAll("a").forEach((a) => a.addEventListener("click", tutup));
+  window.tutupMenuRingkas = tutup;
+  tutup();
 }
 
 function siapkanMenuPanel() {
@@ -3109,7 +3297,7 @@ function siapkanMenuPanel() {
 
   const salinan = document.createElement("div");
   salinan.hidden = true;
-  salinan.className = "overflow-hidden bg-biru-tua lg:hidden";
+  salinan.className = "overflow-hidden bg-biru-tua xl:hidden lg:hidden";
   salinan.innerHTML = `<div class="px-3 py-4">${sidebar.querySelector("nav").outerHTML}</div>`;
   panel.querySelector("header").appendChild(salinan);
 
@@ -3121,6 +3309,7 @@ function siapkanMenuPanel() {
     a.addEventListener("click", () => (salinan.hidden = true)));
 }
 
+siapkanMenuBertingkat();
 siapkanMenuRingkas();
 siapkanMenuPanel();
 
@@ -3140,6 +3329,25 @@ const TOMBOL_BUKTI = [
 document.addEventListener("click", (ev) => {
   const b = ev.target.closest("button");
   if (!b) return;
+
+  // Unggah gambar pengaturan memerlukan penyimpanan di server, yang tidak
+  // ada pada demo. Tombolnya tetap ditampilkan supaya bentuk halamannya sama.
+  const kotakGambar = b.closest("div.rounded-lg");
+  if (kotakGambar && kotakGambar.querySelector('input[id^="gambar-"]')) {
+    const teksTombol = b.textContent.trim();
+    if (teksTombol.startsWith("Unggah") || teksTombol === "Hapus") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      beriTahu(
+        "Gambar sekolah diunggah ke server pada aplikasi sebenarnya, lalu " +
+          "nama berkasnya dicatat pada pengaturan. Demo ini berjalan " +
+          "sepenuhnya di peramban, jadi berkasnya tidak dapat disimpan di sini.",
+        "galat",
+      );
+      return;
+    }
+  }
+
   const teks = b.textContent.trim();
   if (!TOMBOL_BUKTI.some((t) => teks.startsWith(t))) return;
   ev.preventDefault();
