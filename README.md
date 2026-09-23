@@ -286,14 +286,23 @@ penilaian apa pun tentang SMA IMTEK, karena penilaian seperti itu hanya boleh
 datang dari sekolahnya sendiri.
 
 **Kartu Visi dan Kartu Misi masing-masing memuat satu ilustrasi di pojok
-kanan bawah, di dalam kartunya.** Kartunya mengurung isinya, jadi gambarnya
-terpotong mengikuti sudut membulat kartu. Ruang bawah kartu dilebihkan
-setinggi gambarnya, sehingga naskahnya berhenti di atas pita itu dan tidak
-pernah tertimpa — berapa pun panjang rumusan yang dikirim sekolah, dan berapa
-pun banyaknya poin misi. Kedua kartu setinggi sama (`auto-rows-fr`) supaya
-pita bawahnya sama tinggi; tanpa itu gambar pada kartu yang isinya lebih
-pendek akan menggantung. Sempat dicoba menonjol keluar melewati tepi atas
-kartu, lalu diminta dimasukkan kembali ke dalam.
+kanan atas, di dalam kartunya, dan gambarnya DIAPUNGKAN — bukan ditempatkan
+mutlak.** Bedanya menentukan tinggi kartu. Gambar yang ditempatkan mutlak
+tidak menempati ruang, jadi kartunya harus diberi ruang kosong sendiri
+setinggi gambarnya supaya naskah tidak tertimpa, dan kartunya jadi jangkung —
+441 piksel meski rumusannya baru satu kalimat. Gambar yang diapungkan ikut
+dialiri naskah: tinggi kartu kembali ditentukan isinya (221 piksel saat
+rumusannya belum ada, 464 piksel saat misinya lima poin), dan naskahnya
+mengalir di samping lalu di bawah gambar tanpa ruang cadangan sama sekali.
+Margin negatifnya menarik gambar sampai menempel pojok melewati padding
+kartu, dan kartunya mengurung isinya sehingga gambarnya terpotong mengikuti
+sudut membulatnya.
+
+Tumpang tindihnya **tidak boleh** dinilai dari kotak pembatas elemen teks:
+untuk gambar yang diapungkan, kotak paragraf tetap selebar kartu meski
+baris-barisnya dipendekkan oleh gambar, sehingga pemeriksaan kotak memberi
+kegagalan palsu. Yang diukur kotak TIAP BARIS lewat `Range.getClientRects()`.
+Hasilnya nol baris bentrok pada 390, 640, 768, 1024, 1280, dan 1536 piksel.
 Ilustrasinya dikirim user sebagai berkas SVG, tetapi isinya ternyata PNG yang
 dibungkus wadah SVG — satu elemen `<image>` berisi data base64, tanpa satu
 jalur vektor pun. Jadi tidak ada yang bisa diwarnai ulang, dan yang dikerjakan

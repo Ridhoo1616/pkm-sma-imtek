@@ -75,23 +75,29 @@ export default async function HalamanVisiMisi() {
           <MunculNaik>
             <section
               aria-labelledby="judul-visi"
-              className="kartu relative h-full overflow-hidden border-l-4 border-l-emas p-6 pb-40 sm:pb-48 md:p-7 md:pb-48"
+              className="kartu relative h-full overflow-hidden border-l-4 border-l-emas p-6 md:p-7"
             >
-              {/* Ilustrasi duduk di pojok kanan bawah, DI DALAM kartu.
-                  Kartunya mengurung isinya supaya gambarnya terpotong
-                  mengikuti sudut membulat kartu, bukan menyembul di luarnya.
+              {/* Ilustrasi di pojok kanan ATAS, di dalam kartu, dan
+                  DIAPUNGKAN — bukan ditempatkan mutlak.
 
-                  Ruang bawah kartu (pb) dilebihkan setinggi gambarnya, jadi
-                  naskahnya berhenti di atas pita itu dan tidak pernah
-                  tertimpa — berapa pun panjang rumusan yang dikirim sekolah,
-                  dan berapa pun banyaknya poin misi. */}
+                  Bedanya menentukan tinggi kartu. Gambar yang ditempatkan
+                  mutlak tidak menempati ruang, jadi kartunya harus diberi
+                  ruang kosong sendiri setinggi gambarnya supaya naskah tidak
+                  tertimpa, dan kartunya jadi jangkung. Gambar yang diapungkan
+                  ikut dialiri naskah: tinggi kartu kembali ditentukan isinya,
+                  dan naskahnya mengalir di samping lalu di bawah gambar tanpa
+                  perlu ruang cadangan sama sekali.
+
+                  Margin negatifnya menarik gambar sampai menempel pojok,
+                  melewati padding kartu; kartunya mengurung isinya sehingga
+                  gambarnya terpotong mengikuti sudut membulatnya. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/ilustrasi/visi.png"
                 alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis"
                 width={384}
                 height={426}
-                className="pointer-events-none absolute right-0 bottom-0 h-36 w-auto sm:h-44"
+                className="pointer-events-none float-right -mt-6 -mr-6 ml-4 h-32 w-auto sm:h-36 md:-mt-7 md:-mr-7"
               />
               <div>
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
@@ -120,7 +126,7 @@ export default async function HalamanVisiMisi() {
           <MunculNaik jeda={0.08}>
             <section
               aria-labelledby="judul-misi"
-              className="kartu relative h-full overflow-hidden p-6 pb-40 sm:pb-48 md:p-7 md:pb-48"
+              className="kartu relative h-full overflow-hidden p-6 md:p-7"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -128,7 +134,7 @@ export default async function HalamanVisiMisi() {
                 alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar"
                 width={314}
                 height={434}
-                className="pointer-events-none absolute right-0 bottom-0 h-36 w-auto sm:h-44"
+                className="pointer-events-none float-right -mt-6 -mr-6 ml-4 h-32 w-auto sm:h-36 md:-mt-7 md:-mr-7"
               />
               <div>
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
