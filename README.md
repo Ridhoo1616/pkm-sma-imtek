@@ -516,7 +516,45 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
    tautan yang dibagikan ke WhatsApp dan media sosial tampil dengan judul dan
    keterangan yang benar.
 
-### I. Beranda mendahulukan profil sekolah
+### I. Bilah informasi berjalan
+
+Di paling atas setiap halaman publik ada bilah berisi **tiga kabar yang
+berjalan**, dan ketiganya diambil dari basis data — tidak satu pun ditulis di
+dalam kode:
+
+1. Keadaan PPDB beserta tanggalnya: sedang dibuka sampai kapan, atau dibuka
+   mulai kapan.
+2. Sisa kuota terhadap kuota yang disediakan, dihitung dari pendaftar yang
+   aktif.
+3. Pengumuman terbaru yang sudah diterbitkan sekolah; bila belum ada berita
+   yang terbit, gantinya tanggal pengumuman hasil seleksi.
+
+Kabar yang datanya belum ada **dibuang** dari daftar, bukan ditulis setengah
+jadi, dan bila ketiganya tidak ada bilahnya tidak muncul sama sekali.
+
+Tulisan berjalan itu bentuk yang mudah disalahgunakan: ia bergerak, dan yang
+bergerak menarik mata dari isi halaman. Karena itu ada tiga pembatasnya.
+Gerakannya **berhenti** saat penunjuk tetikus atau fokus papan tuntas berada
+di atasnya, supaya kalimat yang sedang dibaca tidak kabur. Pada peramban yang
+disetel mengurangi gerak (`prefers-reduced-motion`), gerakannya **dimatikan**
+dan bilahnya menjadi daftar yang dapat digulir sendiri — bukan dipotong. Dan
+seluruh kabar itu juga tetap ada di halamannya masing-masing, jadi tidak ada
+satu pun informasi yang HANYA dapat dibaca dari bilah berjalan.
+
+Daftarnya ditulis dua kali. Salinan kedua diberi `aria-hidden` dan hanya
+berguna untuk menyambung gerakannya: begitu salinan pertama habis, yang kedua
+sudah berada di tempatnya sehingga tidak ada jeda kosong, lalu geserannya
+kembali ke nol tanpa kelihatan melompat. Saat gerakannya dimatikan, salinan
+kedua ikut disembunyikan supaya tidak menjadi pengulangan yang membingungkan.
+
+Sorotan beranda juga mendapat **satu kalimat pengantar yang selalu tampil**,
+karena ketika semboyan sekolah belum dikirim bagian itu hanya berisi lambang,
+nama, dan tombol. Kalimatnya sengaja menerangkan apa yang ada di situs ini,
+bukan memuji sekolahnya: kalimat tentang mutu sekolah hanya boleh datang dari
+sekolah sendiri, dan tempatnya sudah disediakan pada semboyan dan bagian
+keunggulan.
+
+### J. Beranda mendahulukan profil sekolah
 
 Beranda semula dibuka dengan kartu putih besar berisi kuota PPDB, jumlah
 pendaftar, sisa kuota, dan tanggal penutupan. Angka itu menjawab pertanyaan
@@ -556,7 +594,7 @@ kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
 
-### J. Lencana status
+### K. Lencana status
 
 Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
 petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:

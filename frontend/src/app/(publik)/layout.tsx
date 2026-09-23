@@ -2,14 +2,26 @@ import Navigasi from "@/komponen/Navigasi";
 import Footer from "@/komponen/Footer";
 import GulirHalus from "@/komponen/GulirHalus";
 import BantuanMelayang from "@/komponen/BantuanMelayang";
+import { TeksBerjalan } from "@/komponen/TeksBerjalan";
+import { api } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
+import type { Berita } from "@/lib/tipe";
 
 export default async function TataLetakPublik({ children }: LayoutProps<"/">) {
   const { profil, gagal } = await muatProfil();
 
+  // Satu pengumuman terbaru untuk bilah berjalan. Kegagalannya tidak boleh
+  // mengosongkan seluruh halaman, jadi ditangkap di sini: bilahnya cukup
+  // memakai dua kabar lainnya.
+  const berita = await api
+    .berita("?per_halaman=1")
+    .then((h) => h.data)
+    .catch((): Berita[] => []);
+
   return (
     <>
       <GulirHalus />
+      <TeksBerjalan profil={profil} berita={berita} />
       <Navigasi pengaturan={profil.pengaturan} ppdbDibuka={profil.ppdb.dibuka} />
 
       {gagal && (

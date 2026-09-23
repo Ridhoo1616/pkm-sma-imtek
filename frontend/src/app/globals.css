@@ -194,6 +194,51 @@
   will-change: auto;
 }
 
+/* Bilah informasi berjalan di paling atas halaman publik.
+
+   Gerakannya menggeser isinya sejauh SEPARUH lebar, karena daftarnya
+   ditulis dua kali: begitu salinan pertama habis, yang kedua sudah berada di
+   tempatnya, lalu geserannya kembali ke nol tanpa kelihatan melompat.
+
+   Berhenti saat disentuh penunjuk atau fokus papan tuntas ada di dalamnya:
+   kalimat yang sedang dibaca tidak boleh kabur. Dan pada peramban yang
+   disetel mengurangi gerak, gerakannya dimatikan lalu bilahnya menjadi
+   daftar yang dapat digulir sendiri — bukan dipotong. */
+@keyframes teksBerjalan {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.berjalan-isi {
+  animation: teksBerjalan 42s linear infinite;
+}
+
+.berjalan:hover .berjalan-isi,
+.berjalan:focus-within .berjalan-isi {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .berjalan-isi {
+    animation: none;
+    width: 100%;
+  }
+
+  .berjalan-bingkai {
+    overflow-x: auto;
+  }
+
+  /* Salinan keduanya hanya penyambung gerakan; tanpa gerakan ia jadi
+     pengulangan yang membingungkan. */
+  .berjalan-isi .berjalan-daftar[aria-hidden="true"] {
+    display: none;
+  }
+}
+
 @keyframes gerakLangkah {
   from {
     opacity: 0;

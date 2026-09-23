@@ -391,6 +391,12 @@ function rute() {
       // Penanda pada tombol bantuan bergantung halaman yang sedang dibuka,
       // jadi dipasang ulang setiap perpindahan.
       pasangBantuan();
+      // Bilah informasi berjalan berada di kerangka, bukan di dalam halaman,
+      // jadi ia tidak ikut tergambar ulang saat halaman berganti. Isinya
+      // bergantung keadaan demo — sisa kuota berubah tiap ada pendaftar
+      // baru, dan pengumuman terbarunya bisa ditarik dari panel — jadi
+      // disegarkan di sini, sekali untuk setiap perpindahan halaman.
+      segarkanTeksBerjalan();
       // Menu bertingkat ditutup, seperti pada aplikasinya. Tanpa ini panel
       // turunannya menggantung di atas halaman baru.
       if (window.tutupMenuBertingkat) window.tutupMenuBertingkat();
@@ -579,6 +585,65 @@ function gambarBerita(b, tinggi = "h-48") {
   if (!b.gambar) return gambarKosong(b.kategori, tinggi);
   return `<img src="${gambarPengganti(b.gambar, b.judul)}" alt="${e(b.judul)}"
             class="${tinggi} w-full object-cover" loading="lazy">`;
+}
+
+/* ---------- bilah informasi berjalan ---------- */
+
+/**
+ * Menyusun ulang bilah informasi berjalan dari keadaan demo.
+ *
+ * Aturannya harus sama dengan komponen TeksBerjalan.tsx: tiga kabar, dan
+ * kabar yang datanya tidak ada DIBUANG, bukan ditulis setengah jadi. Bila
+ * ketiganya tidak ada, bilahnya disembunyikan seluruhnya.
+ *
+ * Daftarnya ditulis dua kali karena salinan kedua yang menyambung
+ * gerakannya. Salinan kedua diberi aria-hidden supaya pembaca layar tidak
+ * membaca kabar yang sama dua kali.
+ */
+function segarkanTeksBerjalan() {
+  const bilah = document.querySelector('[aria-label="Informasi terbaru"]');
+  if (!bilah) return;
+  const isi = bilah.querySelector(".berjalan-isi");
+  if (!isi) return;
+
+  const total = pendaftarAktif().length;
+  const kuota = Number(K.pengaturan.ppdb_kuota || 0);
+  const sisa = Math.max(kuota - total, 0);
+  const buka = ppdbDibuka();
+  const tahun = tahunAjaran();
+
+  const kabar = [];
+  if (buka) {
+    kabar.push(K.pengaturan.ppdb_selesai
+      ? `Pendaftaran peserta didik baru tahun ajaran ${tahun} sedang dibuka sampai ${tanggalPanjang(K.pengaturan.ppdb_selesai)}.`
+      : `Pendaftaran peserta didik baru tahun ajaran ${tahun} sedang dibuka.`);
+  } else if (K.pengaturan.ppdb_mulai) {
+    kabar.push(`Pendaftaran peserta didik baru tahun ajaran ${tahun} dibuka mulai ${tanggalPanjang(K.pengaturan.ppdb_mulai)}.`);
+  }
+  if (kuota > 0) {
+    kabar.push(`Sisa kuota ${angka(sisa)} dari ${angka(kuota)} tempat yang disediakan tahun ini.`);
+  }
+  const terbaru = K.berita
+    .filter((b) => b.publish)
+    .sort((a, b) => (a.dibuat < b.dibuat ? 1 : -1))[0];
+  if (terbaru) {
+    kabar.push(`Kabar terbaru: ${terbaru.judul}.`);
+  } else if (K.pengaturan.ppdb_pengumuman) {
+    kabar.push(`Hasil seleksi diumumkan pada ${tanggalPanjang(K.pengaturan.ppdb_pengumuman)}.`);
+  }
+
+  bilah.hidden = kabar.length === 0;
+  if (kabar.length === 0) return;
+
+  const daftar = (sembunyi) => `
+    <ul ${sembunyi ? 'aria-hidden="true" ' : ""}class="berjalan-daftar flex shrink-0 items-center gap-10 pr-10">
+      ${kabar.map((k) => `
+        <li class="flex shrink-0 items-center gap-3">
+          <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-emas"></span>
+          <span>${e(k)}</span>
+        </li>`).join("")}
+    </ul>`;
+  isi.innerHTML = daftar(false) + daftar(true);
 }
 
 /* ---------- beranda ---------- */

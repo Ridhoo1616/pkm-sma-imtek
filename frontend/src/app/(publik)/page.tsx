@@ -102,6 +102,25 @@ export default async function Beranda() {
                 </p>
               )}
 
+              {/* Satu kalimat pengantar, SELALU tampil. Sorotan pernah
+                  berisi lambang, nama, dan tombol saja, dan ketika semboyan
+                  sekolah belum dikirim bagian itu jadi terlalu lapang.
+
+                  Kalimatnya sengaja menerangkan APA YANG ADA DI SITUS INI,
+                  bukan memuji sekolahnya. Kalimat tentang mutu sekolah hanya
+                  boleh datang dari sekolah sendiri, dan tempatnya sudah
+                  disediakan: semboyan di atas dan bagian keunggulan di
+                  bawah. Yang ini dapat ditulis di sini karena isinya cuma
+                  daftar bagian yang memang ada, dan itu dapat diperiksa
+                  siapa pun dengan menggulir halamannya. */}
+              <p className="mt-4 max-w-xl leading-relaxed text-white/75">
+                Di halaman ini tersedia profil sekolah, peminatan yang dibuka,
+                sarana belajar, kegiatan siswa, beserta pendaftaran peserta
+                didik baru yang seluruhnya dikerjakan online — mengisi
+                formulir, mengunggah dokumen, sampai memantau hasil
+                verifikasinya.
+              </p>
+
               {/* Keterangan tempat, disusun dari data alamat yang sudah ada.
                   Bukan kalimat promosi: hanya menyebut sekolahnya di mana. */}
               {(p.kecamatan || p.kota) && (
