@@ -15,6 +15,7 @@ import {
   kelasKartuAkhir,
 } from "@/komponen/Bagian";
 import { MunculNaik, MunculLangsung, KartuGerak } from "@/komponen/Gerak";
+import { MasalahJawaban } from "@/komponen/MasalahJawaban";
 import type { Berita, Fasilitas, Jurusan } from "@/lib/tipe";
 import { IkonFasilitas, IkonCentang, IkonLokasi } from "@/komponen/Ikon";
 
@@ -519,6 +520,13 @@ export default async function Beranda() {
           </div>
         </section>
       )}
+
+      {/* ---------------- Masalah dan jawabannya ----------------
+          Ditaruh tepat sebelum ajakan mendaftar: yang dibaca lebih dulu
+          alasannya, baru tombolnya. */}
+      <MunculNaik>
+        <MasalahJawaban />
+      </MunculNaik>
 
       {/* ---------------- Ajakan mendaftar ----------------
           Tetap di ujung halaman: pengunjung sudah membaca sekolahnya dulu. */}

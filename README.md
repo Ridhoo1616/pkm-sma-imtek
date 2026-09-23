@@ -299,6 +299,16 @@ sehingga gambarnya terpotong mengikuti sudut membulatnya. Naskahnya tidak
 pernah bertemu gambar karena keduanya kolom yang berbeda — bukan karena
 diberi jarak, dan bukan karena ada ruang cadangan.
 
+**Susunannya sama di semua lebar, dan gambarnya selalu utuh.** Sempat dicoba
+bertumpuk di layar sempit dengan gambar melebar penuh memakai `object-cover`,
+supaya kotaknya terisi habis. Itu dibuang: kotak selebar 353 piksel setinggi
+144 piksel berbanding 2,45 sedangkan gambarnya 0,90, jadi `cover` harus
+membuang lebih dari separuh tinggi gambarnya — dan yang terbuang justru kepala
+serta wajah orangnya. **Ruang kosong di atas gambar jauh lebih baik daripada
+wajah yang terpotong.** Karena itu tetap `object-contain`, sisa ruangnya
+ditaruh di atas oleh `object-bottom`, dan kolomnya sedikit dilebarkan pada
+layar sempit supaya bukan bilah tipis.
+
 Ruang cadangan itu memang pernah dipakai, dan itu kekeliruannya: gambar yang
 ditempatkan mutlak tidak menempati ruang, jadi kartunya harus diberi ruang
 kosong setinggi gambarnya, dan ruang itu tetap kosong walau rumusannya baru
@@ -569,7 +579,36 @@ bukan memuji sekolahnya: kalimat tentang mutu sekolah hanya boleh datang dari
 sekolah sendiri, dan tempatnya sudah disediakan pada semboyan dan bagian
 keunggulan.
 
-### J. Beranda mendahulukan profil sekolah
+### J. Alur masalah dan jawabannya di beranda
+
+Tepat sebelum ajakan mendaftar, beranda memuat tiga baris berpasangan: satu
+keadaan yang biasa terjadi pada pendaftaran berkas kertas, dan di sebelahnya
+apa yang dikerjakan sistem ini terhadap keadaan itu, beserta tautan supaya
+pembaca dapat memeriksanya sendiri.
+
+| Keadaan | Jawaban sistem | Tautan |
+|---|---|---|
+| Harus datang lebih dulu hanya untuk menanyakan jadwal, syarat, dan biaya | Semuanya terbuka di halaman Informasi PPDB | `/ppdb` |
+| Berkas difotokopi berkali-kali, yang kurang baru diketahui di meja panitia | Dokumen diunggah dari ponsel, dan formulirnya menolak isian serta berkas yang kurang sebelum apa pun terkirim | `/ppdb/daftar` |
+| Berkas sudah diserahkan, tidak ada cara mengetahui sudah diperiksa atau belum | Nomor registrasi terbit seketika; keadaan verifikasi dapat dilihat sendiri dengan nomor itu beserta tanggal lahir | `/ppdb/cek` |
+
+Dua hal dijaga di bagian ini. Kalimat keadaannya **tentang cara manual, bukan
+tentang SMA IMTEK** — tidak ada tuduhan bahwa sekolah ini pernah begitu. Dan
+kalimat jawabannya menyebut perilaku yang benar-benar ada di sistem ini dan
+dapat dibuktikan dengan membuka tautannya; bukan janji, dan bukan penilaian
+mutu.
+
+Keadaannya ditulis redup dan bernomor `01`–`03`, **tanpa tanda silang merah**.
+Tanda silang akan membuatnya terbaca sebagai galat, padahal ia cuma keadaan
+yang sudah biasa. Yang berikon centang hanya jawabannya.
+
+Polanya diambil dari rancangan yang dikirim user — bagian `PROBLEM` pada satu
+halaman produk — dan itu **satu-satunya bagian rancangan itu yang dipakai**.
+Sisanya bergantung bahan yang belum dimiliki sekolah: foto orang hasil studio,
+tangkapan antarmuka produk, dan baris logo "dipercaya oleh 123 merek" yang
+tidak boleh dikarang.
+
+### K. Beranda mendahulukan profil sekolah
 
 Beranda semula dibuka dengan kartu putih besar berisi kuota PPDB, jumlah
 pendaftar, sisa kuota, dan tanggal penutupan. Angka itu menjawab pertanyaan
@@ -609,7 +648,7 @@ kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
 
-### K. Tautan WhatsApp beserta pesan bawaannya
+### L. Tautan WhatsApp beserta pesan bawaannya
 
 Tautan `wa.me` ada di lima tempat: bilah atas, footer, halaman Kontak, tombol
 bantuan melayang, dan panel pesan panitia. Empat di antaranya dulu mengarah ke
@@ -631,7 +670,7 @@ menuju entah ke mana lebih buruk daripada tombol yang tidak ada. Nomor telepon
 sekolah tidak dipakai sebagai gantinya, karena nomornya nomor kabel yang tidak
 punya WhatsApp.
 
-### L. Lencana status
+### M. Lencana status
 
 Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
 petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:
