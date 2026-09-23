@@ -288,9 +288,22 @@ datang dari sekolahnya sendiri.
 Ilustrasi sekelas gambar rujukan — satu ruang kelas berisi guru dan siswa —
 sempat dicoba sebagai SVG penuh lalu dibuang: pada bidang sebesar itu bentuk
 badannya jadi seperti bel, bukan orang, dan mutunya di bawah halaman lainnya.
-Foto pun bukan pilihan, karena berarti memakai wajah guru dan siswa sungguhan
-tanpa izin mereka, atau memakai foto stok berisi orang yang sama sekali bukan
-bagian dari sekolah ini.
+Sebagai gantinya halaman ini punya **satu petak gambar yang diisi sekolah
+sendiri**, pengaturan `visi_gambar` (migrasi 006), diunggah lewat menu
+Pengaturan seperti logo dan foto kepala sekolah. Selama kosong yang tampil
+kerangka 16:9 beserta cara mengunggahnya, jadi tata letak halamannya sudah
+final sebelum gambarnya ada.
+
+**Yang diterima hanya jpg dan png**, dicocokkan sampai ke byte penanda
+berkasnya di `unggah.go` — berkas SVG yang dinamai `.png` pun ditolak. SVG
+sengaja **tidak** diterima: SVG adalah XML yang boleh memuat `<script>`, jadi
+menerimanya berarti siapa pun yang dapat masuk panel bisa menitipkan kode
+yang berjalan di peramban pengunjung. Gambar vektor yang memang dipakai situs
+ini ditanam langsung di dalam kode, seperti ikon pada `komponen/Ikon.tsx`.
+Foto orang sungguhan juga bukan pilihan bawaan, karena berarti memakai wajah
+guru dan siswa tanpa izin mereka, atau memakai foto stok berisi orang yang
+sama sekali bukan bagian dari sekolah ini — karena itu petaknya dibiarkan
+kosong sampai sekolah memutuskan sendiri isinya.
 
 Dua butir sengaja berupa pintu masuk, bukan sistem yang dibangun sendiri.
 E-Learning menampilkan tautan ke layanan yang sudah dipakai sekolah, misalnya

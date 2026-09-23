@@ -18,7 +18,7 @@ var pengaturanPublik = []string{
 	"alamat", "kelurahan", "kecamatan", "kota", "provinsi", "kode_pos",
 	"telepon", "email", "whatsapp", "instagram", "facebook", "youtube", "tiktok",
 	"jam_layanan", "logo", "foto_depan", "peta_embed",
-	"foto_kepsek", "struktur_organisasi", "struktur_keterangan",
+	"foto_kepsek", "struktur_organisasi", "struktur_keterangan", "visi_gambar",
 	"tautan_elearning", "tautan_jadwal", "jadwal_keterangan",
 	"perpustakaan_keterangan",
 	"ppdb_status", "ppdb_tahun", "ppdb_mulai", "ppdb_selesai",

@@ -1,3 +1,4 @@
+import { urlUnggahan } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
 import { belumTerisi, kePoinTerisi } from "@/lib/format";
 import { KepalaHalaman, JudulBagian } from "@/komponen/Bagian";
@@ -49,6 +50,7 @@ export default async function HalamanVisiMisi() {
   // sekaligus membuang baris yang masih berupa penanda [kurung siku].
   const misi = kePoinTerisi(p.misi);
   const adaSemboyan = !belumTerisi(p.tagline ?? "");
+  const adaGambar = Boolean(p.visi_gambar && !belumTerisi(p.visi_gambar));
 
   return (
     <>
@@ -59,12 +61,53 @@ export default async function HalamanVisiMisi() {
       <div className="wadah py-14">
         <JejakMenu induk="/profil" jalur="/profil/visi-misi" />
 
+        {/* Gambar pilihan sekolah, mendahului ketiga kartu peran. Kosong
+            berarti kerangka berukuran sama beserta cara mengunggahnya, bukan
+            bagian yang hilang — dengan begitu tata letak halaman sudah final
+            sebelum gambarnya ada, dan panitia melihat sendiri apa yang masih
+            ditunggu. Berkasnya diunggah lewat menu Pengaturan; hanya jpg dan
+            png yang diterima, dan SVG sengaja tidak, karena SVG boleh memuat
+            <script> dan situs ini menerima unggahan dari panel. */}
+        <MunculNaik>
+          {adaGambar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={urlUnggahan("profil", p.visi_gambar)}
+              alt="Guru dan siswa yang menjalankan visi dan misi sekolah"
+              className="mt-8 aspect-video w-full rounded-kartu bg-biru-muda object-cover shadow-lembut"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="mt-8 grid aspect-video w-full place-items-center rounded-kartu border border-dashed border-biru/30 bg-biru-muda px-6 text-center">
+              <div className="max-w-md">
+                <span
+                  aria-hidden
+                  className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white text-xl text-biru"
+                >
+                  ☐
+                </span>
+                <p className="mt-3 text-sm font-semibold text-biru-tua">
+                  Tempat gambar halaman Visi &amp; Misi
+                </p>
+                <p className="mt-1.5 text-xs leading-relaxed text-biru/70">
+                  Ilustrasi atau foto kegiatan, mendatar, perbandingan sisi
+                  16:9, paling tidak 1280 piksel lebarnya. PNG berlatar tembus
+                  pandang paling rapi. Diunggah sebagai
+                  <span className="font-semibold"> Gambar halaman Visi &amp; Misi </span>
+                  lewat menu Pengaturan di panel admin.
+                </p>
+              </div>
+            </div>
+          )}
+        </MunculNaik>
+
         {/* Siapa yang menjalankan rumusannya, sebelum rumusannya sendiri.
             Visi dan misi yang berdiri sebagai dua blok teks terbaca seperti
             dokumen; yang mengerjakannya orang, dan itu yang ditunjuk di sini.
             Keterangan di tiap kartu menerangkan PERANNYA, bukan memuji
             sekolahnya — tidak ada satu pun klaim tentang SMA IMTEK di sini. */}
-        <section className="mt-8" aria-labelledby="judul-pelaku">
+        <section className="mt-10" aria-labelledby="judul-pelaku">
           <h2
             id="judul-pelaku"
             className="text-xs font-bold tracking-[0.18em] text-biru uppercase"

@@ -98,7 +98,7 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
 /**
  * Pengaturan yang isinya nama berkas gambar, bukan teks.
  *
- * Keempatnya tidak ikut ditampilkan sebagai kotak teks, karena mengetik nama
+ * Semuanya tidak ikut ditampilkan sebagai kotak teks, karena mengetik nama
  * berkas dengan tangan tidak pernah berguna: berkasnya harus diunggah lebih
  * dulu, dan itulah yang dikerjakan bagian Gambar di bawah halaman.
  */
@@ -124,6 +124,12 @@ const KUNCI_GAMBAR: { kunci: string; label: string; bantuan: string }[] = [
     label: "Bagan struktur organisasi",
     bantuan:
       "Gambar mendatar, perbandingan sisi 4:3, paling tidak 1200 piksel lebarnya.",
+  },
+  {
+    kunci: "visi_gambar",
+    label: "Gambar halaman Visi & Misi",
+    bantuan:
+      "Ilustrasi atau foto kegiatan, mendatar, perbandingan sisi 16:9, paling tidak 1280 piksel lebarnya. PNG berlatar tembus pandang paling rapi karena menyatu dengan latar kartunya. Dikosongkan berarti halamannya menampilkan kerangka, bukan gambar.",
   },
 ];
 
