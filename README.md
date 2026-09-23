@@ -405,9 +405,14 @@ khusus fitur baru:
   keterangannya.
 - Kartu peserta terbit sebagai PDF berisi barcode dan kode QR.
 
-**Demo statis, 65 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
-pengelolaan isi situs, batas hak akses operator, dan tombol bukti PDF yang
-menjelaskan bahwa berkasnya dibuat oleh server.
+**Demo statis, 88 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
+pengelolaan isi situs, batas hak akses operator, tes seleksi dari masuk sampai
+nilai keluar, rincian biaya beserta totalnya, keempat menu panel baru, dan
+tombol PDF yang menjelaskan bahwa berkasnya dibuat oleh server.
+
+Pada demo, tes seleksi dijalankan di peramban pengunjung, jadi waktu dan kunci
+jawabannya tidak terlindungi seperti pada aplikasi sebenarnya. Batasan itu
+disebutkan di spanduk demo, bukan disembunyikan.
 
 Backend bersih dari `go vet` dan `gofmt`; frontend bersih dari `eslint` dan
 `tsc`.
