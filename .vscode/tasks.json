@@ -8,13 +8,18 @@
   //
   //  Go, Node, dan PostgreSQL pada komputer ini tidak terpasang di
   //  folder sistem, jadi setiap tugas menambahkan sendiri letaknya ke
-  //  PATH. Urutannya: milik pengguna, lalu Homebrew, lalu Postgres.app.
-  //  Komputer lain yang memasangnya lewat Homebrew tetap terlayani.
+  //  PATH. Urutannya: milik pengguna, GOPATH/bin untuk gopls dan dlv,
+  //  lalu Homebrew, lalu Postgres.app. Komputer lain yang memasangnya
+  //  lewat Homebrew tetap terlayani.
+  //
+  //  /usr/sbin ikut dituliskan karena lsof berada di sana, dan tugas
+  //  "Hentikan semua" memerlukannya. Menggantungkannya pada ${env:PATH}
+  //  saja berisiko, sebab isinya bergantung cara VS Code dijalankan.
   // ============================================================
   "version": "2.0.0",
   "options": {
     "env": {
-      "PATH": "${env:HOME}/.local/go/bin:${env:HOME}/.local/node/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/go/bin:/Applications/Postgres.app/Contents/Versions/17/bin:${env:PATH}"
+      "PATH": "${env:HOME}/.local/go/bin:${env:HOME}/.local/node/bin:${env:HOME}/go/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/go/bin:/Applications/Postgres.app/Contents/Versions/17/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env:PATH}"
     }
   },
   "tasks": [

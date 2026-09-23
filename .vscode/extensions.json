@@ -1,12 +1,23 @@
 {
   // Ekstensi yang ditawarkan VS Code saat proyek ini dibuka pertama kali.
   // Cukup tekan "Install" pada pemberitahuannya, tanpa perlu terminal.
+  //
+  // Dua ekstensi sengaja TIDAK dicantumkan meskipun populer:
+  //
+  //   esbenp.prettier-vscode          Prettier bukan kebergantungan proyek
+  //     ini dan tidak ada berkas setelannya, jadi memasangnya berarti
+  //     memformat ulang berkas menurut aturan yang berbeda dari yang dipakai
+  //     kode yang sudah ada. Format simpan-otomatis tetap berjalan memakai
+  //     pemformat bawaan VS Code dan gofmt.
+  //
+  //   ms-vscode.vscode-typescript-next   Itu TypeScript versi harian.
+  //     Proyek ini memakai TypeScript dari frontend/node_modules, yang sudah
+  //     ditunjuk setelan typescript.tsdk, jadi versi harian hanya menambah
+  //     kemungkinan perbedaan perilaku tanpa manfaat.
   "recommendations": [
     "golang.go",
     "bradlc.vscode-tailwindcss",
     "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "ms-vscode.vscode-typescript-next",
     "ckolkman.vscode-postgres",
     "eamodio.gitlens",
     "usernamehw.errorlens"

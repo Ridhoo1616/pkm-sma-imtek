@@ -8,7 +8,7 @@
   // sistem. Tanpa baris ini, terminal di dalam VS Code tidak mengenal
   // perintah go maupun npm, padahal keduanya ada.
   "terminal.integrated.env.osx": {
-    "PATH": "${env:HOME}/.local/go/bin:${env:HOME}/.local/node/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/go/bin:/Applications/Postgres.app/Contents/Versions/17/bin:${env:PATH}"
+    "PATH": "${env:HOME}/.local/go/bin:${env:HOME}/.local/node/bin:${env:HOME}/go/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/go/bin:/Applications/Postgres.app/Contents/Versions/17/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env:PATH}"
   },
 
   "editor.formatOnSave": true,

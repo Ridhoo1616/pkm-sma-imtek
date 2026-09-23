@@ -160,13 +160,19 @@ bagian 3 dan 4 dapat dijalankan lewat menu.
    **Intel** bila bukan. Seret berkasnya ke folder Applications.
 2. Buka VS Code, pilih **File > Open Folder**, lalu pilih folder
    `pkm-sma-imtek`.
-3. VS Code akan menawarkan memasang beberapa ekstensi yang disarankan proyek
-   ini. Tekan **Install**. Daftarnya ada di `.vscode/extensions.json`: Go,
-   Tailwind CSS IntelliSense, ESLint, dan beberapa lainnya.
+3. VS Code akan menawarkan memasang ekstensi yang disarankan proyek ini.
+   Tekan **Install**. Daftarnya ada di `.vscode/extensions.json`: Go,
+   Tailwind CSS IntelliSense, ESLint, klien PostgreSQL, GitLens, dan Error
+   Lens.
 4. Buka sekali saja terminal di dalam VS Code lewat **Terminal > New
    Terminal**, lalu jalankan `cd frontend && npm install`. Langkah ini hanya
    diperlukan sekali, dan sesudahnya tidak ada lagi perintah yang perlu
    diketik.
+5. Ekstensi Go akan menawarkan memasang perkakasnya, `gopls` dan `dlv`.
+   Terima tawarannya. Keduanya masuk ke `~/go/bin`, dan jalur itu sudah
+   dicantumkan pada `PATH` di `.vscode/tasks.json`. Bila ingin
+   mendahuluinya dari terminal: `go install golang.org/x/tools/gopls@latest`
+   dan `go install github.com/go-delve/delve/cmd/dlv@latest`.
 
 **Sehari-hari:** buka menu **Terminal > Run Task**, lalu pilih tugasnya.
 
