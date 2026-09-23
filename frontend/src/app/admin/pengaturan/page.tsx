@@ -52,6 +52,7 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
       "whatsapp",
       "jam_layanan",
       "peta_embed",
+      "peta_koordinat",
     ],
   },
   {
@@ -159,6 +160,7 @@ function labelDari(kunci: string): string {
     ppdb_alur: "Alur pendaftaran",
     sambutan_kepsek: "Sambutan kepala sekolah",
     peta_embed: "Sematan peta (kode iframe)",
+    peta_koordinat: "Koordinat lokasi (lintang,bujur)",
     nama_singkat: "Nama singkat",
     foto_depan: "Foto halaman depan",
     whatsapp: "Nomor WhatsApp panitia",

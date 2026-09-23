@@ -659,7 +659,40 @@ berbeda dari kerangka di halaman Profil:
 Begitu nama, foto, atau naskahnya diisi lewat menu Pengaturan, bagian ini
 berganti sendiri ke bentuk terisinya. Tidak ada kode yang perlu diubah.
 
-### K. Alur masalah dan jawabannya di beranda
+### K. Peta lokasi dan pengukur jarak
+
+Beranda memuat peta lokasi sekolah beserta tombol yang memungkinkan
+pengunjung mengukur jarak dan waktu tempuh dari rumahnya, untuk tiga moda:
+mobil, motor, dan angkutan umum.
+
+**Perhitungannya tidak dikerjakan situs ini, dan itu keputusan yang
+disengaja.** Menghitung jarak jalan beserta estimasi waktu memerlukan layanan
+rute — Google Directions, Mapbox, atau sejenisnya — dan seluruhnya menuntut
+kunci API yang ditagih per permintaan. Kunci itu tidak boleh diletakkan di
+repositori publik, dan sekolah tidak punya anggaran langganan. Menghitung
+sendiri dengan rumus jarak lurus juga bukan jalan keluar: jarak lurus 5 km
+bisa berarti 12 km lewat jalan, dan **angka yang menyesatkan lebih buruk
+daripada tidak ada angka**.
+
+Jadi pengukurannya diserahkan ke Google Maps lewat tautan arah. Tautannya
+sengaja **tanpa titik asal**: Google Maps yang kosong titik asalnya memakai
+lokasi pengunjung sendiri, dan di ponsel ia membuka aplikasi Maps-nya — jadi
+pengunjung tidak perlu mengetik alamat rumah sama sekali.
+
+Ada keuntungan yang jarang disadari di situ: **lokasi rumah pengunjung tidak
+pernah melewati server sekolah.** Kalau rutenya dihitung sendiri, alamat setiap
+pengunjung akan tercatat di sana.
+
+Titik tujuannya memakai pengaturan `peta_koordinat` (migrasi 008) bila sudah
+diisi — bentuknya `lintang,bujur`, disalin dengan klik kanan pada Google Maps
+— dan memakai alamat sekolah sebagai teks bila belum. Keduanya bekerja;
+koordinat lebih tepat karena tidak bergantung pengenalan alamat.
+
+Petanya sendiri memakai `peta_embed` yang sudah ada. Bila kosong, yang tampil
+kerangka berukuran sama, dan **tombol penunjuk arahnya tetap bekerja** —
+keduanya tidak saling bergantung.
+
+### L. Alur masalah dan jawabannya di beranda
 
 Tepat sebelum ajakan mendaftar, beranda memuat tiga baris berpasangan: satu
 keadaan yang biasa terjadi pada pendaftaran berkas kertas, dan di sebelahnya
@@ -688,7 +721,7 @@ Sisanya bergantung bahan yang belum dimiliki sekolah: foto orang hasil studio,
 tangkapan antarmuka produk, dan baris logo "dipercaya oleh 123 merek" yang
 tidak boleh dikarang.
 
-### L. Beranda mendahulukan profil sekolah
+### M. Beranda mendahulukan profil sekolah
 
 Beranda semula dibuka dengan kartu putih besar berisi kuota PPDB, jumlah
 pendaftar, sisa kuota, dan tanggal penutupan. Angka itu menjawab pertanyaan
@@ -728,7 +761,7 @@ kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
 
-### M. Tautan WhatsApp beserta pesan bawaannya
+### N. Tautan WhatsApp beserta pesan bawaannya
 
 Tautan `wa.me` ada di lima tempat: bilah atas, footer, halaman Kontak, tombol
 bantuan melayang, dan panel pesan panitia. Empat di antaranya dulu mengarah ke
@@ -750,7 +783,7 @@ menuju entah ke mana lebih buruk daripada tombol yang tidak ada. Nomor telepon
 sekolah tidak dipakai sebagai gantinya, karena nomornya nomor kabel yang tidak
 punya WhatsApp.
 
-### N. Lencana status
+### O. Lencana status
 
 Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
 petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:
