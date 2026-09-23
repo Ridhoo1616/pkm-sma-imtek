@@ -651,12 +651,18 @@ khusus fitur baru:
   keterangannya.
 - Kartu peserta terbit sebagai PDF berisi barcode dan kode QR.
 
-**Demo statis, 159 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
+**Demo statis, 189 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
 pengelolaan isi situs, batas hak akses operator, tes seleksi dari masuk sampai
 nilai keluar, rincian biaya beserta totalnya, keempat menu panel baru, dan
 tombol PDF yang menjelaskan bahwa berkasnya dibuat oleh server, penunjuk
 alur, tombol bantuan melayang beserta penanda posisinya, dan tanya jawab
 lengkap dengan penyaring serta pencariannya.
+
+Termasuk 30 pemeriksaan lencana status pada demo. Itu perlu berdiri sendiri
+karena demo menggambar sebagian lencananya dengan kodenya sendiri, bukan hanya
+menampilkan tangkapan markup: pernah terjadi tangkapannya sudah benar tetapi
+kode demo menimpanya dengan pil pastel bergaya lama, dan pemeriksaan yang hanya
+membaca tangkapan tidak akan melihatnya.
 
 Termasuk 53 pemeriksaan untuk menu bertingkat: keempat kelompok terbuka dan
 tertutup dengan Escape, panelnya tidak menggantung setelah pindah halaman,

@@ -127,11 +127,11 @@ const jenisKelaminPanjang = (k) =>
 
 function warnaStatus(status) {
   switch (status) {
-    case "Diterima":      return "bg-green-100 text-green-800 border-green-200";
-    case "Terverifikasi": return "bg-blue-100 text-blue-800 border-blue-200";
-    case "Cadangan":      return "bg-amber-100 text-amber-800 border-amber-200";
-    case "Ditolak":       return "bg-red-100 text-red-800 border-red-200";
-    default:              return "bg-slate-100 text-slate-700 border-slate-200";
+    case "Diterima":      return "hijau";
+    case "Terverifikasi": return "biru";
+    case "Cadangan":      return "emas";
+    case "Ditolak":       return "merah";
+    default:              return "abu";
   }
 }
 
@@ -234,6 +234,35 @@ const MENU_BERTINGKAT = [
     ],
   },
 ];
+
+/* ==================================================================
+   Gaya lencana status
+
+   Disalin dari komponen Lencana pada aplikasinya: isian warna padat
+   dengan tulisan putih di tengah, tanpa garis tepi dan tanpa
+   transparansi. Demo tidak boleh menggambar ulang lencana dengan gaya
+   sendiri, karena itulah yang membuat tampilan demo menyimpang dari
+   aplikasi tanpa terlihat pada tangkapan markupnya.
+   ================================================================== */
+
+const GAYA_LENCANA = {
+  biru: "bg-biru-tua text-white",
+  hijau: "bg-green-700 text-white",
+  merah: "bg-red-700 text-white",
+  emas: "bg-amber-700 text-white",
+  abu: "bg-slate-600 text-white",
+  terang: "bg-biru-muda text-biru-tua",
+  putih: "bg-white text-biru-tua",
+};
+
+const KELAS_LENCANA =
+  "inline-flex items-center justify-center rounded-md px-2 py-1 " +
+  "text-[11px] leading-none font-bold tracking-[0.06em] whitespace-nowrap uppercase ";
+
+/** Kelas lengkap satu lencana menurut nama jenisnya. */
+function kelasLencana(jenis) {
+  return KELAS_LENCANA + (GAYA_LENCANA[jenis] ?? GAYA_LENCANA.terang);
+}
 
 /* ==================================================================
    Perutean
@@ -502,8 +531,10 @@ function gambarPengganti(nama, label) {
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
 
-const lencana = (teks, warna = "bg-biru-muda text-biru border-biru/15") =>
-  `<span class="inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold ${warna}">${e(teks)}</span>`;
+// Bentuknya dipusatkan di kelasLencana() pada 01-keadaan.js, supaya demo
+// tidak pernah menggambar lencana dengan gaya sendiri.
+const lencana = (teks, jenis = "terang") =>
+  `<span class="${kelasLencana(jenis)}">${e(teks)}</span>`;
 
 const gambarKosong = (label, tinggi = "h-48") =>
   `<div class="${tinggi} grid w-full place-items-center bg-biru-muda text-center">
@@ -544,9 +575,7 @@ function segarkanBeranda() {
     const buka = ppdbDibuka();
     lencanaKeadaan.textContent = buka ? "Dibuka" : "Belum dibuka";
     lencanaKeadaan.className =
-      "inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold " +
-      (buka ? "border-green-200 bg-green-100 text-green-800"
-            : "border-slate-200 bg-slate-100 text-slate-700");
+      kelasLencana(buka ? "hijau" : "abu");
   }
 
   segarkanJurusanBeranda();
@@ -1002,9 +1031,7 @@ function bukaPpdb() {
     ["Pendaftaran dibuka", "Pendaftaran belum dibuka"].includes(s.textContent.trim()));
   if (lb) {
     lb.textContent = buka ? "Pendaftaran dibuka" : "Pendaftaran belum dibuka";
-    lb.className = "inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold " +
-      (buka ? "border-green-200 bg-green-100 text-green-800"
-            : "border-slate-200 bg-slate-100 text-slate-700");
+    lb.className = kelasLencana(buka ? "hijau" : "abu");
   }
   const tombolIsi = [...isiPublik.querySelectorAll("a")].find((a) =>
     a.textContent.trim() === "Isi Formulir Pendaftaran");
@@ -1922,9 +1949,7 @@ function hidrasiDasbor() {
   if (lk) {
     const buka = ppdbDibuka();
     lk.textContent = buka ? "Pendaftaran dibuka" : "Pendaftaran ditutup";
-    lk.className = "inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold " +
-      (buka ? "border-green-200 bg-green-100 text-green-800"
-            : "border-slate-200 bg-slate-100 text-slate-700");
+    lk.className = kelasLencana(buka ? "hijau" : "abu");
   }
 }
 
@@ -2091,8 +2116,7 @@ function hidrasiPendaftarDetail(id) {
     DATA.statusPendaftar.includes(s.textContent.trim()));
   if (lst) {
     lst.textContent = gabung.status;
-    lst.className = "inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold " +
-      warnaStatus(gabung.status);
+    lst.className = kelasLencana(warnaStatus(gabung.status));
   }
 
   // Blok data.
@@ -2487,8 +2511,8 @@ function hidrasiJurusan() {
         <p class="mt-1 text-xs text-samar tabular-nums">${persen(jml, j.kuota)}%</p>
       </td>
       <td class="px-4 py-3">${lencana(j.aktif ? "Aktif" : "Nonaktif",
-        j.aktif ? "border-green-200 bg-green-100 text-green-800"
-                : "border-slate-200 bg-slate-100 text-slate-600")}</td>
+        j.aktif ? "hijau"
+                : "abu")}</td>
       <td class="px-4 py-3">
         <div class="flex gap-2 whitespace-nowrap">
           <button type="button" data-ubah="${j.id}"
@@ -2626,8 +2650,8 @@ function renderTabelBerita() {
         <p class="mt-0.5 text-xs text-samar">/${e(b.slug)}</p></td>
       <td class="px-4 py-3">${lencana(b.kategori)}</td>
       <td class="px-4 py-3">${lencana(b.publish ? "Terbit" : "Draf",
-        b.publish ? "border-green-200 bg-green-100 text-green-800"
-                  : "border-amber-200 bg-amber-100 text-amber-800")}</td>
+        b.publish ? "hijau"
+                  : "emas")}</td>
       <td class="px-4 py-3 text-right tabular-nums">${angka(b.dibaca)}</td>
       <td class="px-4 py-3 whitespace-nowrap text-samar">${tanggalJam(b.diubah || b.dibuat)}</td>
       <td class="px-4 py-3">
@@ -2923,7 +2947,7 @@ function renderPesan() {
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
               <h2 class="text-base">${e(p.subjek || "(tanpa subjek)")}</h2>
-              ${p.dibaca ? "" : lencana("Belum dibaca", "border-amber-200 bg-amber-100 text-amber-800")}
+              ${p.dibaca ? "" : lencana("Belum dibaca", "emas")}
             </div>
             <p class="mt-1 text-sm text-samar">Dari <strong class="text-teks">${e(p.nama)}</strong> &middot; ${tanggalJam(p.dibuat)}</p>
           </div>
@@ -3048,8 +3072,7 @@ function hidrasiPengguna() {
         iniSaya ? ` <span class="ml-2 text-xs text-samar">(Anda)</span>` : ""}</td>
       <td class="px-4 py-3 text-samar">${e(p.username)}</td>
       <td class="px-4 py-3">${lencana(p.role === "admin" ? "Admin" : "Operator",
-        p.role === "admin" ? "border-biru/20 bg-biru-muda text-biru"
-                           : "border-slate-200 bg-slate-100 text-slate-700")}</td>
+        p.role === "admin" ? "biru" : "abu")}</td>
       <td class="px-4 py-3 whitespace-nowrap text-samar">${
         p.masuk_akhir ? tanggalJam(p.masuk_akhir) : "Belum pernah"}</td>
       <td class="px-4 py-3 whitespace-nowrap text-samar">${tanggalJam(p.dibuat)}</td>
@@ -3739,7 +3762,7 @@ function perbaruiPenandaBantuan(wadah) {
     if (tautan) {
       tautan.className =
         "flex gap-3 px-5 py-3.5 transition " +
-        (disarankan ? "bg-emas/15 hover:bg-emas/25" : "hover:bg-biru-muda/50");
+        (disarankan ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-biru-muda/50");
     }
     if (nomor) {
       nomor.className =
@@ -3747,7 +3770,7 @@ function perbaruiPenandaBantuan(wadah) {
         (sekarang
           ? "bg-biru-tua text-white"
           : disarankan
-            ? "bg-emas text-biru-tua"
+            ? "bg-amber-700 text-white"
             : "bg-biru-muda text-biru");
     }
     if (sekarang || disarankan) {
@@ -3756,8 +3779,8 @@ function perbaruiPenandaBantuan(wadah) {
         const tanda = document.createElement("span");
         tanda.dataset.penanda = "1";
         tanda.className = sekarang
-          ? "rounded bg-biru-muda px-1.5 py-0.5 text-[11px] font-semibold text-biru"
-          : "rounded bg-emas px-1.5 py-0.5 text-[11px] font-bold text-biru-tua";
+          ? "inline-flex items-center justify-center rounded-md bg-biru-tua px-1.5 py-1 text-[10px] leading-none font-bold tracking-[0.06em] text-white uppercase"
+          : "inline-flex items-center justify-center rounded-md bg-amber-700 px-1.5 py-1 text-[10px] leading-none font-bold tracking-[0.06em] text-white uppercase";
         tanda.textContent = sekarang ? "Anda di sini" : "Langkah berikutnya";
         baris.appendChild(tanda);
       }
@@ -3864,7 +3887,7 @@ function siapkanFaq() {
         disorot.length
           ? `<section>
                <h2 class="mb-3 flex items-center gap-2 text-base">
-                 <span class="rounded bg-emas px-2 py-0.5 text-xs font-bold text-biru-tua">Sering ditanyakan</span>
+                 <span class="inline-flex items-center justify-center rounded-md bg-amber-700 px-2 py-1 text-[11px] leading-none font-bold tracking-[0.06em] text-white uppercase">Sering ditanyakan</span>
                </h2>
                <div class="space-y-3">${disorot.map((f) => butir(f, true)).join("")}</div>
              </section>`
