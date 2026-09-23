@@ -26,6 +26,20 @@
   "go.lintOnSave": "package",
   "go.vetOnSave": "package",
 
+  // Dua baris terakhir pada blok ini yang membuat ekstensi Go dan ESLint
+  // benar-benar jalan di komputer ini. Setelan terminal.integrated.env.osx
+  // di atas hanya mengubah PATH terminal DI DALAM VS Code, sedangkan
+  // ekstensinya mencari binernya di PATH proses VS Code, dan VS Code yang
+  // dibuka dari Finder tidak mewarisi PATH dari profil shell. Tanpa
+  // keduanya, ekstensi Go melaporkan "go not found" dan ESLint mati
+  // diam-diam, padahal keduanya ada di ~/.local.
+  //
+  // Komputer yang memasang Go dan Node lewat Homebrew tidak memerlukannya,
+  // karena /opt/homebrew/bin sudah dikenali aplikasi GUI di macOS. Dua baris
+  // ini cukup dihapus bila jalurnya memang tidak ada.
+  "go.goroot": "${env:HOME}/.local/go",
+  "eslint.runtime": "${env:HOME}/.local/node/bin/node",
+
   // Frontend: Tailwind 4 menaruh temanya di globals.css, dan kelasnya
   // sering disusun dengan penggabungan tulisan. Dua setelan di bawah
   // membuat saran kelas tetap muncul di tempat-tempat itu.

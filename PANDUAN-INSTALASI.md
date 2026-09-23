@@ -199,6 +199,15 @@ letaknya ke `PATH`. Itu diatur di `.vscode/tasks.json` dan
 `.vscode/settings.json`, dan sudah mencakup pemasangan lewat Homebrew, jadi
 komputer rekan satu tim tidak perlu disetel ulang.
 
+Dua setelan tambahan diperlukan karena alasan yang mudah terlewat: mengubah
+`PATH` terminal saja tidak cukup, sebab ekstensi Go dan ESLint mencari binernya
+di `PATH` proses VS Code, dan VS Code yang dibuka dari Finder tidak mewarisi
+`PATH` dari profil shell. Karena itu `settings.json` juga menunjuk langsung
+`go.goroot` dan `eslint.runtime`. Tanpa keduanya, ekstensi Go melaporkan
+"go not found" dan ESLint mati tanpa pesan, padahal keduanya terpasang.
+Komputer yang memasang Go dan Node lewat Homebrew tidak memerlukan dua baris
+itu dan cukup menghapusnya.
+
 ---
 
 ## 5. Hal pertama yang wajib dilakukan
