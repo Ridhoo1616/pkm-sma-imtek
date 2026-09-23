@@ -299,6 +299,16 @@ sehingga gambarnya terpotong mengikuti sudut membulatnya. Naskahnya tidak
 pernah bertemu gambar karena keduanya kolom yang berbeda — bukan karena
 diberi jarak, dan bukan karena ada ruang cadangan.
 
+**Susunannya sama di semua lebar, dan gambarnya selalu utuh.** Sempat dicoba
+bertumpuk di layar sempit dengan gambar melebar penuh memakai `object-cover`,
+supaya kotaknya terisi habis. Itu dibuang: kotak selebar 353 piksel setinggi
+144 piksel berbanding 2,45 sedangkan gambarnya 0,90, jadi `cover` harus
+membuang lebih dari separuh tinggi gambarnya — dan yang terbuang justru kepala
+serta wajah orangnya. **Ruang kosong di atas gambar jauh lebih baik daripada
+wajah yang terpotong.** Karena itu tetap `object-contain`, sisa ruangnya
+ditaruh di atas oleh `object-bottom`, dan kolomnya sedikit dilebarkan pada
+layar sempit supaya bukan bilah tipis.
+
 Ruang cadangan itu memang pernah dipakai, dan itu kekeliruannya: gambar yang
 ditempatkan mutlak tidak menempati ruang, jadi kartunya harus diberi ruang
 kosong setinggi gambarnya, dan ruang itu tetap kosong walau rumusannya baru

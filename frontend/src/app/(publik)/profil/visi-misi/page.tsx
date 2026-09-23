@@ -75,7 +75,7 @@ export default async function HalamanVisiMisi() {
           <MunculNaik>
             <section
               aria-labelledby="judul-visi"
-              className="kartu relative flex h-full flex-col gap-4 overflow-hidden border-l-4 border-l-emas p-6 sm:flex-row md:gap-6 md:p-7"
+              className="kartu relative flex h-full gap-4 overflow-hidden border-l-4 border-l-emas p-6 md:gap-6 md:p-7"
             >
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
@@ -115,24 +115,27 @@ export default async function HalamanVisiMisi() {
                   membulatnya. Naskahnya tidak pernah bertemu gambar karena
                   keduanya kolom yang berbeda, bukan karena diberi jarak.
 
-                  PADA LAYAR SEMPIT susunannya bertumpuk, dan gambarnya
-                  MELEBAR PENUH di dasar kartu dengan object-cover. Sebagai
-                  kolom sempit ia tidak pernah terisi: kolom selebar 112 piksel
-                  pada kartu setinggi 284 piksel berbanding 0,39 sedangkan
-                  gambarnya 0,90, jadi object-contain menyisakan ruang kosong
-                  seluas dua pertiga kotaknya — itulah gambar yang tampak
-                  "belum penuh". Melebar penuh, kotaknya justru lebih lebar
-                  daripada tinggi sehingga cover memotong sedikit di atas dan
-                  bawah, bukan membuang ruang. Dipotong dari TENGAH, bukan dari
-                  atas: bagian atas gambarnya papan tulis dan kertas tempel,
-                  sedangkan yang perlu terlihat justru orang-orangnya. */}
+                  SUSUNANNYA SAMA DI SEMUA LEBAR, dan gambarnya selalu utuh.
+                  Sempat dicoba bertumpuk di layar sempit dengan gambar melebar
+                  penuh memakai object-cover, supaya kotaknya terisi habis.
+                  Dibuang: kotak selebar 353 piksel setinggi 144 piksel
+                  berbanding 2,45 sedangkan gambarnya 0,90, jadi cover harus
+                  membuang lebih dari separuh tinggi gambarnya — dan yang
+                  terbuang justru kepala dan wajah orangnya. Ruang kosong di
+                  atas gambar jauh lebih baik daripada wajah yang terpotong.
+
+                  Karena itu tetap object-contain: perbandingan sisinya utuh,
+                  sisa ruangnya ditaruh di atas oleh object-bottom, dan yang
+                  tampak hanya udara di dalam kartu — bukan gambar yang
+                  dipotong. Kolomnya sedikit dilebarkan pada layar sempit
+                  supaya bukan bilah tipis. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/ilustrasi/visi.png"
                 alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis"
                 width={384}
                 height={426}
-                className="pointer-events-none -mx-6 -mb-6 mt-auto h-36 w-auto max-w-none self-stretch object-cover object-center sm:mx-0 sm:-my-6 sm:-mr-6 sm:mt-0 sm:h-auto sm:w-36 sm:object-contain sm:object-bottom md:-my-7 md:-mr-7 md:w-44"
+                className="pointer-events-none -my-6 -mr-6 w-32 self-stretch object-contain object-bottom sm:w-36 md:-my-7 md:-mr-7 md:w-44"
               />
             </section>
           </MunculNaik>
@@ -140,7 +143,7 @@ export default async function HalamanVisiMisi() {
           <MunculNaik jeda={0.08}>
             <section
               aria-labelledby="judul-misi"
-              className="kartu relative flex h-full flex-col gap-4 overflow-hidden p-6 sm:flex-row md:gap-6 md:p-7"
+              className="kartu relative flex h-full gap-4 overflow-hidden p-6 md:gap-6 md:p-7"
             >
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
@@ -178,7 +181,7 @@ export default async function HalamanVisiMisi() {
                 alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar"
                 width={314}
                 height={434}
-                className="pointer-events-none -mx-6 -mb-6 mt-auto h-36 w-auto max-w-none self-stretch object-cover object-center sm:mx-0 sm:-my-6 sm:-mr-6 sm:mt-0 sm:h-auto sm:w-36 sm:object-contain sm:object-bottom md:-my-7 md:-mr-7 md:w-44"
+                className="pointer-events-none -my-6 -mr-6 w-32 self-stretch object-contain object-bottom sm:w-36 md:-my-7 md:-mr-7 md:w-44"
               />
             </section>
           </MunculNaik>
