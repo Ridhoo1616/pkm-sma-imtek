@@ -54,6 +54,78 @@ export function IkonTelepon(p: Props) {
   );
 }
 
+/* Tiga ikon berikut dipakai halaman Visi & Misi untuk menunjuk siapa yang
+   menjalankan rumusannya. Digambar dengan bentuk paling sederhana yang masih
+   terbaca — kepala bulat dan bahu — karena ikon di sini selalu berdampingan
+   dengan tulisan yang sudah menjelaskan maksudnya. Mencoba menggambar wajah,
+   seragam, dan ruang kelas pada bidang 24 piksel justru membuatnya jadi
+   noda, bukan gambar. */
+
+/** Guru dan tenaga kependidikan: orang di samping papan tulis. */
+export function IkonGuru(p: Props) {
+  return (
+    <Bungkus
+      {...p}
+      isi={
+        <>
+          <rect x="1.8" y="3" width="11" height="8.5" rx="1.4" />
+          <path d="M4.6 6.4h5.4M4.6 8.8h3.4" />
+          {/* Kaki papan menempel pada papannya; sempat ada jarak, dan
+              papan yang menggantung di udara terbaca sebagai kekeliruan
+              gambar, bukan sebagai papan tulis. */}
+          <path d="M7.3 11.5v9.1" />
+          <path d="M4.5 20.6h5.6" />
+          <circle cx="17.4" cy="8.4" r="2.7" />
+          <path d="M13.2 20.6v-2.1a4.2 4.2 0 0 1 8.4 0v2.1" />
+        </>
+      }
+    />
+  );
+}
+
+/** Siswa dan siswi: orang berdasi, seragam SMA. */
+export function IkonSiswa(p: Props) {
+  return (
+    <Bungkus
+      {...p}
+      isi={
+        <>
+          <circle cx="12" cy="6.2" r="3.3" />
+          <path d="M5.4 20.6v-1.4a6.6 6.6 0 0 1 13.2 0v1.4" />
+          {/* Dasi diisi penuh tanpa garis tepi, dan diturunkan sampai
+              seluruhnya berada di dalam badan. Sebagai bentuk bergaris ia
+              cuma sebesar dua satuan, jadi garisnya sendiri memenuhi
+              bentuknya dan yang terlihat hanya noda di pangkal leher. */}
+          <path
+            d="M12 13.6 10.6 15.2l1.4 3.6 1.4-3.6z"
+            fill="currentColor"
+            stroke="none"
+          />
+        </>
+      }
+    />
+  );
+}
+
+/** Dikerjakan bersama: tiga orang berdampingan. */
+export function IkonBersama(p: Props) {
+  return (
+    <Bungkus
+      {...p}
+      isi={
+        <>
+          <circle cx="12" cy="6" r="2.9" />
+          <path d="M7.4 15.4a4.8 4.8 0 0 1 9.2 0" />
+          <circle cx="4.6" cy="10.2" r="2.4" />
+          <path d="M1 18.4a3.9 3.9 0 0 1 5.4-3.6" />
+          <circle cx="19.4" cy="10.2" r="2.4" />
+          <path d="M23 18.4a3.9 3.9 0 0 0-5.4-3.6" />
+        </>
+      }
+    />
+  );
+}
+
 export function IkonCentang(p: Props) {
   return <Bungkus {...p} isi={<path d="M4.5 12.6l5 5L19.5 6.5" />} />;
 }
