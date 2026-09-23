@@ -256,7 +256,7 @@ function IsiDetail() {
         keterangan={`${p.no_registrasi} · Tahun Ajaran ${p.tahun_ajaran} · Jalur ${p.jalur}`}
         aksi={
           <>
-            <Lencana warna={warnaStatus(p.status)}>{p.status}</Lencana>
+            <Lencana jenis={warnaStatus(p.status)}>{p.status}</Lencana>
             <Tombol
               jenis="kedua"
               onClick={async () => {

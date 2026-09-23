@@ -170,17 +170,17 @@ function IsiFaq() {
               <td className="px-4 py-3 whitespace-nowrap text-samar">{f.kategori}</td>
               <td className="px-4 py-3">
                 {f.sorot && (
-                  <Lencana warna="border-amber-200 bg-amber-100 text-amber-800">
+                  <Lencana jenis="emas">
                     Disorot
                   </Lencana>
                 )}
               </td>
               <td className="px-4 py-3">
                 <Lencana
-                  warna={
+                  jenis={
                     f.aktif
-                      ? "border-green-200 bg-green-100 text-green-800"
-                      : "border-slate-200 bg-slate-100 text-slate-600"
+                      ? "hijau"
+                      : "abu"
                   }
                 >
                   {f.aktif ? "Tampil" : "Disembunyikan"}

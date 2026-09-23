@@ -124,10 +124,10 @@ function IsiPengguna() {
                 <td className="px-4 py-3 text-samar">{p.username}</td>
                 <td className="px-4 py-3">
                   <Lencana
-                    warna={
+                    jenis={
                       p.role === "admin"
-                        ? "border-biru/20 bg-biru-muda text-biru"
-                        : "border-slate-200 bg-slate-100 text-slate-700"
+                        ? "terang"
+                        : "abu"
                     }
                   >
                     {p.role === "admin" ? "Admin" : "Operator"}

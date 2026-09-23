@@ -58,7 +58,7 @@ export default async function HalamanStruktur() {
                 <>
                   {/* Kerangka berukuran sama tetap ditampilkan, supaya tata
                       letak halaman sudah final sebelum bagannya diunggah. */}
-                  <div className="kartu grid aspect-[4/3] w-full max-w-3xl place-items-center border-dashed bg-biru-muda/50 px-6 text-center">
+                  <div className="kartu grid aspect-[4/3] w-full max-w-3xl place-items-center border-dashed bg-biru-muda px-6 text-center">
                     <div>
                       <p className="text-sm font-semibold text-biru-tua">
                         Tempat bagan struktur organisasi

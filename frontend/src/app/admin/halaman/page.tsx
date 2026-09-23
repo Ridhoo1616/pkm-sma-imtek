@@ -7,6 +7,7 @@ import { belumTerisi } from "@/lib/format";
 import { useKabar } from "@/komponen/Kabar";
 import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
+import { Lencana } from "@/komponen/Bagian";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import {
   Teks,
@@ -180,9 +181,7 @@ function IsiHalaman() {
                 {/* Naskah bertanda kurung siku berarti masih berupa kerangka
                     yang menunggu naskah dari sekolah, bukan naskah jadi. */}
                 {belumTerisi(h.isi) ? (
-                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
-                    Menunggu naskah
-                  </span>
+                  <Lencana jenis="emas">Menunggu naskah</Lencana>
                 ) : (
                   <span className="text-xs text-samar tabular-nums">
                     {h.isi.length.toLocaleString("id-ID")} karakter

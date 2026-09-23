@@ -34,6 +34,7 @@ pkm-sma-imtek/
 │   ├── aplikasi.go          lapisan tengah, cache pengaturan
 │   ├── auth.go              token masuk, pembatas percobaan
 │   ├── validasi.go          pemeriksaan isian formulir
+│   ├── validasi_identitas.go  struktur NISN dan NIK, beserta ujinya
 │   ├── unggah.go            penyimpanan dan pemeriksaan berkas
 │   ├── cetak.go             bukti pendaftaran PDF dengan Maroto
 │   ├── cetak_kartu.go       kartu peserta ujian, barcode + kode QR
@@ -52,7 +53,8 @@ pkm-sma-imtek/
 │       ├── app/admin/       20 halaman panel panitia
 │       ├── komponen/        elemen tampilan bersama, termasuk jendela
 │       │                    dan kabar berbasis Radix serta gulir Lenis
-│       └── lib/             lapisan API, tipe data, pembantu format
+│       └── lib/             lapisan API, tipe data, pembantu format,
+│                            susunan menu, pemeriksa NISN dan NIK
 │
 ├── alat/
 │   └── pindah-mysql/   Memindahkan data versi PHP (MySQL) ke PostgreSQL
@@ -300,7 +302,74 @@ Halaman yang naskahnya belum dikirim sekolah tidak ditampilkan sebagai halaman
 kosong dan tidak diisi karangan: yang tampil adalah keterangan bahwa naskahnya
 belum tersedia, beserta nama menu tempat naskahnya diisi.
 
-### G. Dukungan tujuan "meningkatkan efektivitas promosi"
+### G. Pemeriksaan NISN dan NIK
+
+Yang perlu diluruskan lebih dulu: sistem ini **tidak** mencocokkan NISN maupun
+NIK ke basis data pemerintah, dan tidak pernah mengaku begitu.
+
+- NIK hanya dapat diperiksa ke Dukcapil, dan aksesnya diberikan lewat
+  perjanjian kerja sama resmi, bukan lewat alamat API terbuka.
+- NISN dapat dicari satu per satu di <https://nisn.data.kemdikbud.go.id>,
+  tetapi laman itu tidak menyediakan API yang boleh dipakai program lain.
+- **PDDIKTI bukan sumber yang tepat**, karena isinya data pendidikan tinggi.
+  Untuk jenjang SMA, sumbernya Dapodik beserta referensi NISN-nya.
+
+Yang dikerjakan sistem adalah pemeriksaan **struktur** beserta **pencocokan
+silang** dengan isian lain pada formulir yang sama. Hasilnya bukan "NIK ini
+benar milik orang tersebut", melainkan "NIK ini tidak mungkin benar, dan
+inilah bagian yang salahnya". Itu sudah menangkap kesalahan yang paling sering
+terjadi: satu angka tertukar, digit kurang, atau nomor NISN diketik pada kolom
+NIK.
+
+NIK terdiri atas 16 angka yang isinya berarti:
+
+| Angka | Arti |
+|---|---|
+| 1–2 | Kode provinsi. Kode di luar 38 provinsi yang ada pasti salah ketik |
+| 3–4 | Kode kabupaten atau kota, tidak pernah 00 |
+| 5–6 | Kode kecamatan, tidak pernah 00 |
+| 7–8 | Tanggal lahir, **ditambah 40 bila perempuan** |
+| 9–10 | Bulan lahir |
+| 11–12 | Dua angka terakhir tahun lahir |
+| 13–16 | Nomor urut, tidak pernah 0000 |
+
+Bagian tanggal dan penanda perempuan itulah yang membuat pencocokan silang
+mungkin, karena tanggal lahir dan jenis kelamin sudah diisi pendaftar di kolom
+lain. Yang paling berguna: **kolom yang disalahkan dipilih sesuai bagian yang
+bertentangan.** Bila tanggal dan bulannya cocok dengan NIK tetapi tahunnya
+berbeda, yang ditandai adalah kolom Tanggal lahir beserta tahun yang terbaca
+dari NIK, bukan kolom NIK yang sebenarnya sudah benar.
+
+Contoh pesannya:
+
+```
+NIK ini memuat tanggal lahir 15 Mei 2011, sedangkan tanggal lahir yang
+Anda isi 20 Mei 2011. Salah satu di antaranya keliru.
+
+Dua angka pertama NIK adalah kode provinsi, dan 99 bukan kode provinsi
+yang ada. Periksa kembali angka pertama NIK Anda.
+
+NIK ini menunjukkan jenis kelamin perempuan, sedangkan yang Anda pilih
+laki-laki. Pada NIK perempuan, tanggal lahirnya ditambah 40.
+
+Yang Anda tulis 16 angka, itu panjang NIK. NISN terdiri atas 10 angka
+dan tercantum pada rapor atau ijazah SMP.
+```
+
+Pemeriksaannya berjalan **saat pendaftar mengetik**, bukan hanya setelah
+tombol kirim ditekan: di bawah kolomnya muncul satu baris keterangan yang
+menghitung angka yang masih kurang, lalu berubah menjadi keterangan hijau
+`NIK terbaca Banten, 15 Mei 2011.` begitu isinya cocok. Aturan yang sama
+dijalankan ulang di backend, karena pemeriksaan di peramban tidak pernah
+menjadi satu-satunya penjaga.
+
+Satu hal sengaja **tidak** menolak pendaftaran. Tiga angka pertama NISN pada
+umumnya tiga angka terakhir tahun lahir, tetapi itu kebiasaan penomoran dan
+bukan aturan yang mengikat: ada NISN sah yang tidak mengikutinya. Karena itu
+ketidakcocokannya hanya berupa peringatan yang menyebut angka yang diharapkan,
+diakhiri "bila memang begitu tertulis di rapor, biarkan saja".
+
+### H. Dukungan tujuan "meningkatkan efektivitas promosi"
 
 Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 
@@ -320,6 +389,36 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 7. **Meta tag SEO dan Open Graph** yang diambil dari data sekolah, sehingga
    tautan yang dibagikan ke WhatsApp dan media sosial tampil dengan judul dan
    keterangan yang benar.
+
+### I. Lencana status
+
+Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
+petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:
+`komponen/Bagian.tsx`. Bentuknya isian warna **padat** dengan tulisan putih
+huruf kapital, tanpa garis tepi dan tanpa sudut bulat penuh.
+
+Tiga hal dijaga di sana:
+
+1. **Warnanya padat, tanpa transparansi.** Latar setengah tembus membuat
+   warnanya berubah mengikuti apa pun yang ada di belakangnya, dan itu yang
+   membuat lencananya terlihat mengambang.
+2. **Tulisannya benar-benar di tengah**, dengan `inline-flex` beserta
+   `leading-none` supaya tinggi barisnya tidak menggeser tulisan ke atas.
+   Diukur pada pengujian: sisa ruang di atas dan di bawah tulisan harus sama.
+3. **Warnanya dipilih lewat nama**, bukan lewat gabungan kelas yang dikirim
+   setiap halaman. Sebelumnya sudah terkumpul sembilan variasi kelas yang
+   seharusnya sama, dan bentuk statusnya menyimpang antar halaman.
+
+| Nama | Dipakai untuk |
+|---|---|
+| `biru` | Terverifikasi, peran Admin |
+| `hijau` | Diterima, Terkirim, PPDB dibuka, Tampil |
+| `merah` | Ditolak, Gagal, dokumen Wajib |
+| `emas` | Cadangan, Menunggu, belum terisi |
+| `abu` | Menunggu Verifikasi, Dibatalkan, PPDB ditutup |
+| `terang`, `putih` | Label yang bukan status: kategori berita, tahap biaya |
+
+Seluruh warnanya lulus rasio kontras 4,5:1 terhadap tulisan putih.
 
 ---
 
@@ -374,6 +473,11 @@ memakai host, porta, nama basis data, pengguna, dan sandi yang sama dengan
 
 Skema diterapkan otomatis saat backend pertama kali dijalankan. Basis data
 yang sudah berisi tabelnya dikenali dan **dilewati**, bukan ditimpa.
+
+Pemisah perintah pada pelaksana migrasi mengenali komentar `--`. Tanpa itu,
+satu tanda titik koma di dalam komentar memotong perintah SQL di tengah jalan,
+dan PostgreSQL menolaknya dengan `syntax error at end of input` yang sama
+sekali tidak menyebut komentar.
 
 Tiga keputusan skema dicatat di kepala `backend/migrations/001_skema.sql`:
 pilihan yang terbatas ditulis sebagai `varchar` beserta `CHECK` dan bukan
@@ -446,9 +550,16 @@ khusus fitur baru:
 - Pendaftaran lengkap dengan unggahan → nomor registrasi terbit, data dan
   berkas tersimpan.
 - Validasi terbukti menolak: kolom wajib kosong, pendaftaran ganda dengan nama
-  dan tanggal lahir sama, jalur Prestasi tanpa sertifikat, NISN/NIK salah
-  jumlah angka, usia di luar 11–25 tahun, email tidak valid, nilai di luar
-  0–100, dan pilihan sumber informasi yang tidak dikenal.
+  dan tanggal lahir sama, jalur Prestasi tanpa sertifikat, usia di luar 11–25
+  tahun, email tidak valid, nilai di luar 0–100, dan pilihan sumber informasi
+  yang tidak dikenal.
+- **NISN dan NIK, 26 pemeriksaan satuan (`go test ./...`) dan 19 pemeriksaan
+  lewat API**: struktur NIK yang tidak mungkin, pencocokan silang dengan
+  tanggal lahir beserta jenis kelamin, NIK yang diketik pada kolom NISN, dan
+  yang terpenting, **kolom yang disalahkan harus tepat**. Galat yang menempel
+  pada kolom yang salah sama tidak bergunanya dengan tidak ada pemeriksaan.
+  Ditambah 11 pemeriksaan di peramban untuk keterangan yang muncul saat
+  pendaftar mengetik.
 - Berkas PHP yang diberi nama `.jpg` tertolak karena isinya diperiksa.
 - Unggahan dari kiriman yang gagal dibersihkan otomatis, tidak menumpuk.
 - Token yang diubah pada karakter terakhir, tengah tanda tangan, maupun
@@ -487,6 +598,10 @@ khusus fitur baru:
 - Jendela Radix: fokus terkurung di dalamnya, latar belakang diberi
   `aria-hidden`, gulir halaman terkunci, dan tombol Escape menutupnya.
 - Gulir halus Lenis aktif di halaman publik dan tidak dipasang di panel.
+- **Lencana status, 22 pemeriksaan**: tidak ada satu pun yang berlatar
+  setengah tembus, tulisannya putih, tanpa garis tepi, sudutnya tidak bulat
+  penuh, dan jarak sisa di atas-bawah serta kiri-kanan tulisan **diukur** dan
+  harus sama, karena "di tengah" tidak dapat dipastikan dengan melihat saja.
 
 **Menu Profil Sekolah, Akademik, dan Kesiswaan, 70 pemeriksaan:**
 

@@ -36,10 +36,10 @@ function IsiDasbor() {
         keterangan={`Ringkasan pendaftaran Tahun Ajaran ${data.tahun_ajaran}.`}
         aksi={
           <Lencana
-            warna={
+            jenis={
               data.ppdb_dibuka
-                ? "border-green-200 bg-green-100 text-green-800"
-                : "border-slate-200 bg-slate-100 text-slate-700"
+                ? "hijau"
+                : "abu"
             }
           >
             {data.ppdb_dibuka ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
@@ -258,7 +258,7 @@ function IsiDasbor() {
                   <td className="px-4 py-3 text-samar">{p.nama_jurusan || "-"}</td>
                   <td className="px-4 py-3 text-samar">{p.asal_sekolah}</td>
                   <td className="px-4 py-3">
-                    <Lencana warna={warnaStatus(p.status)}>{p.status}</Lencana>
+                    <Lencana jenis={warnaStatus(p.status)}>{p.status}</Lencana>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-samar">
                     {tanggalJam(p.dibuat)}

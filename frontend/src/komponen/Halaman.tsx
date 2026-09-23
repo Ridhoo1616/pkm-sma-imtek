@@ -113,11 +113,11 @@ export function PotretKepsek({
           decoding="async"
         />
       ) : (
-        <div className="grid aspect-[3/4] w-full place-items-center border-b border-dashed border-garis bg-biru-muda/70 px-5 text-center">
+        <div className="grid aspect-[3/4] w-full place-items-center border-b border-dashed border-garis bg-biru-muda px-5 text-center">
           <div>
             <span
               aria-hidden
-              className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white/70 text-2xl text-biru/50"
+              className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-2xl text-biru"
             >
               ☐
             </span>

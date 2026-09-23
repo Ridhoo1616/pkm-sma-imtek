@@ -164,10 +164,10 @@ function IsiJurusan() {
               </td>
               <td className="px-4 py-3">
                 <Lencana
-                  warna={
+                  jenis={
                     j.aktif
-                      ? "border-green-200 bg-green-100 text-green-800"
-                      : "border-slate-200 bg-slate-100 text-slate-600"
+                      ? "hijau"
+                      : "abu"
                   }
                 >
                   {j.aktif ? "Aktif" : "Nonaktif"}

@@ -68,10 +68,10 @@ export default async function HalamanPpdb() {
         anak={
           <div className="flex flex-wrap items-center gap-3">
             <Lencana
-              warna={
+              jenis={
                 profil.ppdb.dibuka
-                  ? "border-green-200 bg-green-100 text-green-800"
-                  : "border-slate-200 bg-slate-100 text-slate-700"
+                  ? "hijau"
+                  : "abu"
               }
             >
               {profil.ppdb.dibuka ? "Pendaftaran dibuka" : "Pendaftaran belum dibuka"}
@@ -358,10 +358,10 @@ export default async function HalamanPpdb() {
                       <div className="flex items-start justify-between gap-3">
                         <p className="text-[15px] font-semibold text-teks">{d.nama}</p>
                         <Lencana
-                          warna={
+                          jenis={
                             d.wajib
-                              ? "border-red-200 bg-red-50 text-red-700"
-                              : "border-garis bg-slate-50 text-samar"
+                              ? "merah"
+                              : "abu"
                           }
                         >
                           {d.wajib ? "Wajib" : "Opsional"}

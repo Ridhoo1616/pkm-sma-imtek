@@ -1,7 +1,7 @@
 import { api } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
 import { tanggalPanjang } from "@/lib/format";
-import { KepalaHalaman } from "@/komponen/Bagian";
+import { KepalaHalaman, Lencana, type JenisLencana } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
 import { TanpaData } from "@/komponen/Memuat";
 import { JejakMenu } from "@/komponen/JejakMenu";
@@ -14,12 +14,12 @@ export const metadata: Metadata = {
 };
 
 /** Warna lencana per kategori, supaya kalender terbaca dalam sekali pandang. */
-const WARNA: Record<string, string> = {
-  Ujian: "bg-amber-100 text-amber-900 border-amber-200",
-  Libur: "bg-red-100 text-red-800 border-red-200",
-  PPDB: "bg-blue-100 text-blue-800 border-blue-200",
-  Rapat: "bg-slate-100 text-slate-700 border-slate-200",
-  Kegiatan: "bg-green-100 text-green-800 border-green-200",
+const WARNA: Record<string, JenisLencana> = {
+  Ujian: "emas",
+  Libur: "merah",
+  PPDB: "biru",
+  Rapat: "abu",
+  Kegiatan: "hijau",
 };
 
 /** "2026-05-01" + "2026-05-06" -> satu baris tanggal yang enak dibaca. */
@@ -65,14 +65,7 @@ export default async function HalamanKalender() {
       <div className="min-w-0">
         <p className="flex flex-wrap items-center gap-2 text-[15px] font-semibold text-teks">
           {a.judul}
-          <span
-            className={
-              "rounded-full border px-2 py-0.5 text-xs font-semibold " +
-              (WARNA[a.kategori] ?? "border-garis bg-slate-100 text-slate-700")
-            }
-          >
-            {a.kategori}
-          </span>
+          <Lencana jenis={WARNA[a.kategori] ?? "abu"}>{a.kategori}</Lencana>
         </p>
         {a.keterangan && (
           <p className="mt-1 text-sm leading-relaxed whitespace-pre-line text-samar">

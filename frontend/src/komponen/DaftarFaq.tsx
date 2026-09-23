@@ -109,7 +109,7 @@ export default function DaftarFaq({
           {disorot.length > 0 && (
             <section>
               <h2 className="mb-3 flex items-center gap-2 text-base">
-                <span className="rounded bg-emas px-2 py-0.5 text-xs font-bold text-biru-tua">
+                <span className="inline-flex items-center justify-center rounded-md bg-amber-700 px-2 py-1 text-[11px] leading-none font-bold tracking-[0.06em] text-white uppercase">
                   Sering ditanyakan
                 </span>
               </h2>
@@ -143,7 +143,7 @@ function ButirFaq({ faq, sorot = false }: { faq: Faq; sorot?: boolean }) {
   return (
     <details
       className={
-        "kartu group overflow-hidden " + (sorot ? "border-emas/50" : "")
+        "kartu group overflow-hidden " + (sorot ? "border-amber-400" : "")
       }
     >
       <summary className="flex cursor-pointer list-none items-start gap-3 px-5 py-4 transition hover:bg-biru-muda/40">

@@ -171,7 +171,7 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
               <p className="truncate text-sm text-samar">
                 Masuk sebagai{" "}
                 <strong className="text-biru-tua">{pengguna.nama}</strong>
-                <span className="ml-2 rounded-full bg-biru-muda px-2 py-0.5 text-xs font-semibold text-biru">
+                <span className="ml-2 inline-flex items-center justify-center rounded-md bg-biru-tua px-2 py-1 text-[11px] leading-none font-bold tracking-[0.06em] text-white uppercase">
                   {pengguna.role === "admin" ? "Admin" : "Operator"}
                 </span>
               </p>

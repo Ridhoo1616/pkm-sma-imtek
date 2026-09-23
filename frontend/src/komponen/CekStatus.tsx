@@ -142,7 +142,7 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
                 {hasil.no_registrasi}
               </p>
             </div>
-            <Lencana warna={warnaStatus(hasil.status)}>{hasil.status}</Lencana>
+            <Lencana jenis={warnaStatus(hasil.status)}>{hasil.status}</Lencana>
           </div>
 
           <dl className="divide-y divide-garis text-sm">

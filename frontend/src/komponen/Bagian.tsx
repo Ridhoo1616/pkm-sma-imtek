@@ -15,7 +15,7 @@ export function KepalaHalaman({
   anak?: ReactNode;
 }) {
   return (
-    <div className="border-b border-garis bg-biru-muda/60">
+    <div className="border-b border-garis bg-biru-muda">
       <div className="wadah py-12 md:py-16">
         <h1 className="text-3xl font-bold text-balance md:text-4xl">{judul}</h1>
         {keterangan && (
@@ -83,16 +83,64 @@ export function GambarKosong({
   );
 }
 
+/**
+ * Lencana status.
+ *
+ * Bentuknya isian warna padat dengan tulisan putih, bukan pil pastel
+ * bergaris tepi. Alasannya bukan selera: pil pastel dengan garis tepi tipis
+ * dan sudut bulat penuh adalah bentuk yang dipakai hampir setiap tampilan
+ * hasil pembuat otomatis, dan pengguna proyek ini memang menilainya begitu.
+ *
+ * Tiga hal dijaga di sini:
+ *
+ *   1. Warnanya PADAT, tanpa transparansi. Latar setengah tembus membuat
+ *      warnanya berubah mengikuti apa pun yang ada di belakangnya, dan itulah
+ *      yang membuat lencananya terlihat mengambang.
+ *   2. Tulisannya benar-benar di tengah. inline-flex beserta leading-none
+ *      dipakai supaya tinggi barisnya tidak lagi menggeser tulisan ke atas,
+ *      dan jarak atas-bawahnya dibuat sama.
+ *   3. Warnanya dipilih lewat NAMA, bukan lewat kelas yang dikirim pemanggil.
+ *      Sebelumnya setiap halaman menuliskan sendiri gabungan kelasnya, dan
+ *      sudah terkumpul sembilan variasi yang seharusnya sama.
+ *
+ * Seluruh warna di bawah lulus rasio kontras 4,5:1 terhadap tulisan putih.
+ */
+
+export type JenisLencana =
+  | "biru"
+  | "hijau"
+  | "merah"
+  | "emas"
+  | "abu"
+  | "terang"
+  | "putih";
+
+const GAYA_LENCANA: Record<JenisLencana, string> = {
+  biru: "bg-biru-tua text-white",
+  hijau: "bg-green-700 text-white",
+  merah: "bg-red-700 text-white",
+  emas: "bg-amber-700 text-white",
+  abu: "bg-slate-600 text-white",
+  // Dua yang terakhir bukan status, melainkan label seperti kategori berita
+  // dan tahap pembayaran. Keduanya tetap berisian padat, hanya lebih terang.
+  terang: "bg-biru-muda text-biru-tua",
+  putih: "bg-white text-biru-tua",
+};
+
 export function Lencana({
   children,
-  warna = "bg-biru-muda text-biru border-biru/15",
+  jenis = "terang",
 }: {
   children: ReactNode;
-  warna?: string;
+  jenis?: JenisLencana;
 }) {
   return (
     <span
-      className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold ${warna}`}
+      className={
+        "inline-flex items-center justify-center rounded-md px-2 py-1 " +
+        "text-[11px] leading-none font-bold tracking-[0.06em] whitespace-nowrap uppercase " +
+        GAYA_LENCANA[jenis]
+      }
     >
       {children}
     </span>

@@ -9,6 +9,7 @@ import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
+import type { JenisLencana } from "@/komponen/Bagian";
 import { AreaTeks, Pilihan, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import { IkonWhatsapp } from "@/komponen/Ikon";
 import type { Notifikasi } from "@/lib/tipe";
@@ -22,11 +23,11 @@ import type { Notifikasi } from "@/lib/tipe";
  * terbuka dengan pesan yang sudah terisi dan panitia menekan kirim sendiri.
  */
 
-const WARNA_STATUS: Record<string, string> = {
-  Menunggu: "border-amber-200 bg-amber-100 text-amber-800",
-  Terkirim: "border-green-200 bg-green-100 text-green-800",
-  Gagal: "border-red-200 bg-red-100 text-red-800",
-  Dibatalkan: "border-slate-200 bg-slate-100 text-slate-600",
+const WARNA_STATUS: Record<string, JenisLencana> = {
+  Menunggu: "emas",
+  Terkirim: "hijau",
+  Gagal: "merah",
+  Dibatalkan: "abu",
 };
 
 export default function HalamanNotifikasi() {
@@ -153,7 +154,7 @@ function IsiNotifikasi() {
                 {n.tujuan}
               </td>
               <td className="px-4 py-3">
-                <Lencana warna={WARNA_STATUS[n.status] ?? WARNA_STATUS.Dibatalkan}>
+                <Lencana jenis={WARNA_STATUS[n.status] ?? WARNA_STATUS.Dibatalkan}>
                   {n.status}
                 </Lencana>
                 {n.galat && (

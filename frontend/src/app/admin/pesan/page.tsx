@@ -161,7 +161,7 @@ function IsiPesan() {
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-base">{p.subjek || "(tanpa subjek)"}</h2>
                       {!p.dibaca && (
-                        <Lencana warna="border-amber-200 bg-amber-100 text-amber-800">
+                        <Lencana jenis="emas">
                           Belum dibaca
                         </Lencana>
                       )}

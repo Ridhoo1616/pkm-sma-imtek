@@ -185,10 +185,10 @@ function IsiUjian() {
               </td>
               <td className="px-4 py-3">
                 <Lencana
-                  warna={
+                  jenis={
                     p.aktif
-                      ? "border-green-200 bg-green-100 text-green-800"
-                      : "border-slate-200 bg-slate-100 text-slate-600"
+                      ? "hijau"
+                      : "abu"
                   }
                 >
                   {p.aktif ? "Aktif" : "Nonaktif"}
@@ -401,15 +401,15 @@ function HasilPaket({
                 </td>
                 <td className="px-4 py-3">
                   {h.status === "Berjalan" ? (
-                    <Lencana warna="border-amber-200 bg-amber-100 text-amber-800">
+                    <Lencana jenis="emas">
                       Sedang mengerjakan
                     </Lencana>
                   ) : (
                     <Lencana
-                      warna={
+                      jenis={
                         h.lulus
-                          ? "border-green-200 bg-green-100 text-green-800"
-                          : "border-red-200 bg-red-100 text-red-800"
+                          ? "hijau"
+                          : "merah"
                       }
                     >
                       {h.lulus ? "Memenuhi" : "Belum memenuhi"}

@@ -278,7 +278,7 @@ function IsiPengaturan() {
         aksi={
           <>
             {berubah.length > 0 && (
-              <Lencana warna="border-amber-200 bg-amber-100 text-amber-800">
+              <Lencana jenis="emas">
                 {berubah.length} perubahan belum disimpan
               </Lencana>
             )}
@@ -328,12 +328,12 @@ function IsiPengaturan() {
                       >
                         {labelDari(k)}
                         {menunggu && (
-                          <Lencana warna="border-amber-200 bg-amber-50 text-amber-800">
+                          <Lencana jenis="emas">
                             belum terisi
                           </Lencana>
                         )}
                         {isi[k] !== awal[k] && (
-                          <Lencana warna="border-biru/20 bg-biru-muda text-biru">
+                          <Lencana jenis="terang">
                             diubah
                           </Lencana>
                         )}
@@ -495,7 +495,7 @@ function BagianGambar({
               <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-teks">
                 {g.label}
                 {!nama && (
-                  <Lencana warna="border-amber-200 bg-amber-50 text-amber-800">
+                  <Lencana jenis="emas">
                     belum ada
                   </Lencana>
                 )}

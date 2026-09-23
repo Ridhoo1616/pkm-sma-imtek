@@ -127,7 +127,7 @@ export function ArahanLangkah({
 }) {
   const warna =
     jenis === "sorot"
-      ? "border-emas/60 bg-emas/10"
+      ? "border-amber-300 bg-amber-50"
       : jenis === "tutup"
         ? "border-garis bg-slate-50"
         : "border-biru/20 bg-biru-muda";
@@ -138,7 +138,7 @@ export function ArahanLangkah({
         <div className="min-w-0">
           <p className="flex flex-wrap items-center gap-2 text-base font-bold text-biru-tua">
             {jenis === "sorot" && (
-              <span className="rounded bg-emas px-2 py-0.5 text-xs font-bold text-biru-tua">
+              <span className="inline-flex items-center justify-center rounded-md bg-amber-700 px-2 py-1 text-[11px] leading-none font-bold tracking-[0.06em] text-white uppercase">
                 Langkah berikutnya
               </span>
             )}
@@ -154,7 +154,7 @@ export function ArahanLangkah({
             className={
               "shrink-0 rounded-lg px-5 py-2.5 text-sm font-semibold transition " +
               (jenis === "sorot"
-                ? "bg-emas text-biru-tua hover:bg-emas/80"
+                ? "bg-amber-700 text-white hover:bg-amber-800"
                 : "bg-biru text-white hover:bg-biru-tua")
             }
           >

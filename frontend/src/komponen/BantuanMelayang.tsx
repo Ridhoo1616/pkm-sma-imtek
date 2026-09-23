@@ -173,7 +173,7 @@ export default function BantuanMelayang({
                     className={
                       "flex gap-3 px-5 py-3.5 transition " +
                       (disarankan
-                        ? "bg-emas/15 hover:bg-emas/25"
+                        ? "bg-amber-50 hover:bg-amber-100"
                         : "hover:bg-biru-muda/50")
                     }
                   >
@@ -183,7 +183,7 @@ export default function BantuanMelayang({
                         (sedangDibuka
                           ? "bg-biru-tua text-white"
                           : disarankan
-                            ? "bg-emas text-biru-tua"
+                            ? "bg-amber-700 text-white"
                             : "bg-biru-muda text-biru")
                       }
                     >
@@ -195,12 +195,12 @@ export default function BantuanMelayang({
                           {l.label}
                         </span>
                         {sedangDibuka && (
-                          <span className="rounded bg-biru-muda px-1.5 py-0.5 text-[11px] font-semibold text-biru">
+                          <span className="inline-flex items-center justify-center rounded-md bg-biru-tua px-1.5 py-1 text-[10px] leading-none font-bold tracking-[0.06em] text-white uppercase">
                             Anda di sini
                           </span>
                         )}
                         {disarankan && (
-                          <span className="rounded bg-emas px-1.5 py-0.5 text-[11px] font-bold text-biru-tua">
+                          <span className="inline-flex items-center justify-center rounded-md bg-amber-700 px-1.5 py-1 text-[10px] leading-none font-bold tracking-[0.06em] text-white uppercase">
                             Langkah berikutnya
                           </span>
                         )}

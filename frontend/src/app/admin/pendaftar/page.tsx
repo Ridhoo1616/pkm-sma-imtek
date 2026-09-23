@@ -224,7 +224,7 @@ function IsiPendaftar() {
                 </td>
                 <td className="px-4 py-3 text-samar">{p.sumber_informasi || "-"}</td>
                 <td className="px-4 py-3">
-                  <Lencana warna={warnaStatus(p.status)}>{p.status}</Lencana>
+                  <Lencana jenis={warnaStatus(p.status)}>{p.status}</Lencana>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-samar">
                   {tanggalJam(p.dibuat)}

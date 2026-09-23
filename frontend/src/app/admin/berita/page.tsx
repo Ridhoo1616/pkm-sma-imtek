@@ -255,10 +255,10 @@ function IsiBerita() {
               </td>
               <td className="px-4 py-3">
                 <Lencana
-                  warna={
+                  jenis={
                     b.publish
-                      ? "border-green-200 bg-green-100 text-green-800"
-                      : "border-amber-200 bg-amber-100 text-amber-800"
+                      ? "hijau"
+                      : "emas"
                   }
                 >
                   {b.publish ? "Terbit" : "Draf"}

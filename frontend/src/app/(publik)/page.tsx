@@ -43,17 +43,17 @@ export default async function Beranda() {
             <div>
               <div className="mb-5 flex flex-wrap items-center gap-2">
                 {p.status_sekolah && (
-                  <Lencana warna="border-white/25 bg-white/10 text-white">
+                  <Lencana jenis="putih">
                     {p.status_sekolah}
                   </Lencana>
                 )}
                 {p.akreditasi && (
-                  <Lencana warna="border-emas/40 bg-emas/20 text-emas">
+                  <Lencana jenis="emas">
                     Akreditasi {p.akreditasi}
                   </Lencana>
                 )}
                 {p.npsn && (
-                  <Lencana warna="border-white/25 bg-white/10 text-white">
+                  <Lencana jenis="putih">
                     NPSN {p.npsn}
                   </Lencana>
                 )}
@@ -119,10 +119,10 @@ export default async function Beranda() {
                   </p>
                 </div>
                 <Lencana
-                  warna={
+                  jenis={
                     profil.ppdb.dibuka
-                      ? "border-green-200 bg-green-100 text-green-800"
-                      : "border-slate-200 bg-slate-100 text-slate-700"
+                      ? "hijau"
+                      : "abu"
                   }
                 >
                   {profil.ppdb.dibuka ? "Dibuka" : "Belum dibuka"}

@@ -1,3 +1,5 @@
+import type { JenisLencana } from "@/komponen/Bagian";
+
 /** Pembantu penyajian angka dan tanggal dalam kebiasaan Indonesia. */
 
 const BULAN = [
@@ -54,21 +56,25 @@ export function persen(bagian: number, total: number): number {
 }
 
 /**
- * Warna lencana status pendaftar. Statusnya lima dan tetap, jadi
- * pemetaannya ditulis langsung agar warnanya konsisten di semua halaman.
+ * Warna lencana status pendaftar. Yang dikembalikan nama jenis lencana, bukan
+ * gabungan kelas: warnanya sendiri ditentukan komponen Lencana, sehingga
+ * bentuk seluruh status tidak dapat menyimpang satu halaman pun.
+ *
+ * Statusnya lima dan tetap, jadi pemetaannya ditulis langsung.
  */
-export function warnaStatus(status: string): string {
+export function warnaStatus(status: string): JenisLencana {
   switch (status) {
     case "Diterima":
-      return "bg-green-100 text-green-800 border-green-200";
+      return "hijau";
     case "Terverifikasi":
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "biru";
     case "Cadangan":
-      return "bg-amber-100 text-amber-800 border-amber-200";
+      return "emas";
     case "Ditolak":
-      return "bg-red-100 text-red-800 border-red-200";
+      return "merah";
     default:
-      return "bg-slate-100 text-slate-700 border-slate-200";
+      // "Menunggu Verifikasi" dan status lain yang belum diputuskan.
+      return "abu";
   }
 }
 
