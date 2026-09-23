@@ -452,3 +452,95 @@ func (a *Aplikasi) pastikanMasihAdaAdmin(id int, peranBaru string) error {
 	}
 	return nil
 }
+
+/* ================= gambar pada pengaturan ================= */
+
+// gambarPengaturan adalah pengaturan yang isinya nama berkas gambar, bukan
+// teks biasa. Sebelumnya keempatnya harus diketik sendiri nama berkasnya,
+// padahal tidak ada cara mengunggahnya lewat aplikasi; dua penangan di bawah
+// menutup celah itu.
+var gambarPengaturan = map[string]string{
+	"logo":                "Logo sekolah",
+	"foto_depan":          "Foto halaman depan",
+	"foto_kepsek":         "Foto kepala sekolah",
+	"struktur_organisasi": "Bagan struktur organisasi",
+}
+
+// tanganiUnggahGambarPengaturan menyimpan satu gambar ke folder profil dan
+// mencatat nama berkasnya pada pengaturan yang diminta.
+func (a *Aplikasi) tanganiUnggahGambarPengaturan(w http.ResponseWriter, r *http.Request) {
+	if !a.bacaFormulir(w, r) {
+		return
+	}
+	defer r.MultipartForm.RemoveAll()
+
+	kunci := strings.TrimSpace(r.FormValue("kunci"))
+	label, boleh := gambarPengaturan[kunci]
+	if !boleh {
+		kirimGalat(w, http.StatusBadRequest,
+			"Pengaturan "+kunci+" bukan pengaturan gambar.")
+		return
+	}
+
+	nama, err := a.ambilUnggahan(r.MultipartForm, "gambar", "profil", TipeGambar)
+	if errors.Is(err, GalatTanpaBerkas) {
+		kirimGalat(w, http.StatusBadRequest, "Pilih dulu berkas gambarnya.")
+		return
+	}
+	if err != nil {
+		v := validasiBaru()
+		v.tambah("gambar", label+": "+err.Error()+".")
+		kirimGalatValidasi(w, v)
+		return
+	}
+
+	lama := a.atur(kunci)
+	if _, err := a.db.Exec(
+		"UPDATE pengaturan SET nilai = $1 WHERE nama_setting = $2", nama, kunci); err != nil {
+		a.hapusUnggahan("profil", nama)
+		a.galatServer(w, "menyimpan "+kunci, err)
+		return
+	}
+	if err := a.muatPengaturan(); err != nil {
+		a.galatServer(w, "menyegarkan pengaturan", err)
+		return
+	}
+	// Berkas lama dibuang setelah penggantinya tercatat, supaya kegagalan
+	// penyimpanan tidak meninggalkan pengaturan yang menunjuk berkas hilang.
+	if lama != "" && lama != nama {
+		a.hapusUnggahan("profil", lama)
+	}
+
+	kirimJSON(w, http.StatusOK, map[string]string{
+		"pesan": label + " berhasil diunggah.",
+		"nama":  nama,
+	})
+}
+
+func (a *Aplikasi) tanganiHapusGambarPengaturan(w http.ResponseWriter, r *http.Request) {
+	kunci := strings.TrimSpace(r.PathValue("kunci"))
+	label, boleh := gambarPengaturan[kunci]
+	if !boleh {
+		kirimGalat(w, http.StatusBadRequest,
+			"Pengaturan "+kunci+" bukan pengaturan gambar.")
+		return
+	}
+
+	lama := a.atur(kunci)
+	if lama == "" {
+		kirimJSON(w, http.StatusOK, map[string]string{"pesan": label + " memang belum ada."})
+		return
+	}
+	if _, err := a.db.Exec(
+		"UPDATE pengaturan SET nilai = '' WHERE nama_setting = $1", kunci); err != nil {
+		a.galatServer(w, "menghapus "+kunci, err)
+		return
+	}
+	if err := a.muatPengaturan(); err != nil {
+		a.galatServer(w, "menyegarkan pengaturan", err)
+		return
+	}
+	a.hapusUnggahan("profil", lama)
+
+	kirimJSON(w, http.StatusOK, map[string]string{"pesan": label + " berhasil dihapus."})
+}

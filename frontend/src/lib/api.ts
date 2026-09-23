@@ -191,6 +191,36 @@ export const api = {
       catatan: string;
       tahapan: string[];
     }>("/api/biaya", { segarkanSetiap: CACHE_PUBLIK }),
+  halaman: (kelompok = "") =>
+    permintaan<{ data: import("./tipe").Halaman[] }>(
+      `/api/halaman${kelompok ? `?kelompok=${encodeURIComponent(kelompok)}` : ""}`,
+      { segarkanSetiap: CACHE_PUBLIK },
+    ),
+  halamanDetail: (slug: string) =>
+    permintaan<{ data: import("./tipe").Halaman }>(
+      `/api/halaman/${encodeURIComponent(slug)}`,
+      { segarkanSetiap: CACHE_PUBLIK },
+    ),
+  tenaga: () =>
+    permintaan<{ data: import("./tipe").Tenaga[]; kategori: string[] }>(
+      "/api/tenaga-pendidik",
+      { segarkanSetiap: CACHE_PUBLIK },
+    ),
+  agenda: (tahun = "") =>
+    permintaan<{ data: import("./tipe").Agenda[]; kategori: string[] }>(
+      `/api/agenda${tahun ? `?tahun=${encodeURIComponent(tahun)}` : ""}`,
+      { segarkanSetiap: CACHE_PUBLIK },
+    ),
+  kegiatanSiswa: () =>
+    permintaan<{ data: import("./tipe").KegiatanSiswa[]; jenis: string[] }>(
+      "/api/kegiatan-siswa",
+      { segarkanSetiap: CACHE_PUBLIK },
+    ),
+  pustaka: () =>
+    permintaan<{ data: import("./tipe").Pustaka[]; kategori: string[] }>(
+      "/api/pustaka",
+      { segarkanSetiap: CACHE_PUBLIK },
+    ),
 
   /* ---------- PPDB ---------- */
   daftar: (formulir: FormData) =>
@@ -394,7 +424,137 @@ export const api = {
       token: true,
     }),
 
+  /* ---------- profil, akademik, dan kesiswaan ---------- */
+  halamanAdmin: () =>
+    permintaan<{ data: import("./tipe").Halaman[]; kelompok: string[] }>(
+      "/api/admin/halaman",
+      { token: true },
+    ),
+  simpanHalaman: (formulir: FormData) =>
+    permintaan<{ pesan: string }>("/api/admin/halaman", {
+      metode: "POST",
+      formulir,
+      token: true,
+    }),
+  ubahHalaman: (id: number, formulir: FormData) =>
+    permintaan<{ pesan: string }>(`/api/admin/halaman/${id}`, {
+      metode: "PUT",
+      formulir,
+      token: true,
+    }),
+  hapusHalaman: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/halaman/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
+  tenagaAdmin: () =>
+    permintaan<{ data: import("./tipe").Tenaga[]; kategori: string[] }>(
+      "/api/admin/tenaga-pendidik",
+      { token: true },
+    ),
+  simpanTenaga: (formulir: FormData) =>
+    permintaan<{ pesan: string }>("/api/admin/tenaga-pendidik", {
+      metode: "POST",
+      formulir,
+      token: true,
+    }),
+  ubahTenaga: (id: number, formulir: FormData) =>
+    permintaan<{ pesan: string }>(`/api/admin/tenaga-pendidik/${id}`, {
+      metode: "PUT",
+      formulir,
+      token: true,
+    }),
+  hapusTenaga: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/tenaga-pendidik/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
+  agendaAdmin: () =>
+    permintaan<{ data: import("./tipe").Agenda[]; kategori: string[] }>(
+      "/api/admin/agenda",
+      { token: true },
+    ),
+  simpanAgenda: (isi: unknown) =>
+    permintaan<{ pesan: string }>("/api/admin/agenda", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  ubahAgenda: (id: number, isi: unknown) =>
+    permintaan<{ pesan: string }>(`/api/admin/agenda/${id}`, {
+      metode: "PUT",
+      isi,
+      token: true,
+    }),
+  hapusAgenda: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/agenda/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
+  kegiatanAdmin: () =>
+    permintaan<{ data: import("./tipe").KegiatanSiswa[]; jenis: string[] }>(
+      "/api/admin/kegiatan-siswa",
+      { token: true },
+    ),
+  simpanKegiatan: (formulir: FormData) =>
+    permintaan<{ pesan: string }>("/api/admin/kegiatan-siswa", {
+      metode: "POST",
+      formulir,
+      token: true,
+    }),
+  ubahKegiatan: (id: number, formulir: FormData) =>
+    permintaan<{ pesan: string }>(`/api/admin/kegiatan-siswa/${id}`, {
+      metode: "PUT",
+      formulir,
+      token: true,
+    }),
+  hapusKegiatan: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/kegiatan-siswa/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
+  pustakaAdmin: () =>
+    permintaan<{ data: import("./tipe").Pustaka[]; kategori: string[] }>(
+      "/api/admin/pustaka",
+      { token: true },
+    ),
+  simpanPustaka: (formulir: FormData) =>
+    permintaan<{ pesan: string }>("/api/admin/pustaka", {
+      metode: "POST",
+      formulir,
+      token: true,
+    }),
+  ubahPustaka: (id: number, formulir: FormData) =>
+    permintaan<{ pesan: string }>(`/api/admin/pustaka/${id}`, {
+      metode: "PUT",
+      formulir,
+      token: true,
+    }),
+  hapusPustaka: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/pustaka/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
   /* ---------- pengaturan & pengguna ---------- */
+  unggahGambarPengaturan: (kunci: string, gambar: File) => {
+    const formulir = new FormData();
+    formulir.append("kunci", kunci);
+    formulir.append("gambar", gambar);
+    return permintaan<{ pesan: string; nama: string }>(
+      "/api/admin/pengaturan/gambar",
+      { metode: "POST", formulir, token: true },
+    );
+  },
+  hapusGambarPengaturan: (kunci: string) =>
+    permintaan<{ pesan: string }>(
+      `/api/admin/pengaturan/gambar/${encodeURIComponent(kunci)}`,
+      { metode: "DELETE", token: true },
+    ),
   pengaturan: () =>
     permintaan<{ data: import("./tipe").ButirPengaturan[] }>("/api/admin/pengaturan", {
       token: true,

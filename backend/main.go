@@ -97,6 +97,12 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("POST /api/pesan", a.tanganiKirimPesan)
 	m.HandleFunc("GET /api/biaya", a.tanganiBiayaPublik)
 	m.HandleFunc("GET /api/faq", a.tanganiFaqPublik)
+	m.HandleFunc("GET /api/halaman", a.tanganiHalamanPublik)
+	m.HandleFunc("GET /api/halaman/{slug}", a.tanganiHalamanDetail)
+	m.HandleFunc("GET /api/tenaga-pendidik", a.tanganiTenagaPublik)
+	m.HandleFunc("GET /api/agenda", a.tanganiAgendaPublik)
+	m.HandleFunc("GET /api/kegiatan-siswa", a.tanganiKegiatanPublik)
+	m.HandleFunc("GET /api/pustaka", a.tanganiPustakaPublik)
 
 	/* ---- PPDB ---- */
 	m.HandleFunc("POST /api/ppdb/daftar", a.tanganiDaftar)
@@ -195,7 +201,35 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("DELETE /api/admin/pesan/{id}", a.wajibMasuk(a.tanganiHapusPesan))
 
 	/* ---- pengaturan & pengguna ---- */
+	/* ---- profil, akademik, dan kesiswaan ---- */
+	m.HandleFunc("GET /api/admin/halaman", a.wajibMasuk(a.tanganiHalamanAdmin))
+	m.HandleFunc("POST /api/admin/halaman", a.wajibMasuk(a.tanganiSimpanHalaman))
+	m.HandleFunc("PUT /api/admin/halaman/{id}", a.wajibMasuk(a.tanganiUbahHalaman))
+	m.HandleFunc("DELETE /api/admin/halaman/{id}", a.wajibMasuk(a.tanganiHapusHalaman))
+
+	m.HandleFunc("GET /api/admin/tenaga-pendidik", a.wajibMasuk(a.tanganiTenagaAdmin))
+	m.HandleFunc("POST /api/admin/tenaga-pendidik", a.wajibMasuk(a.tanganiSimpanTenaga))
+	m.HandleFunc("PUT /api/admin/tenaga-pendidik/{id}", a.wajibMasuk(a.tanganiUbahTenaga))
+	m.HandleFunc("DELETE /api/admin/tenaga-pendidik/{id}", a.wajibMasuk(a.tanganiHapusTenaga))
+
+	m.HandleFunc("GET /api/admin/agenda", a.wajibMasuk(a.tanganiAgendaAdmin))
+	m.HandleFunc("POST /api/admin/agenda", a.wajibMasuk(a.tanganiSimpanAgenda))
+	m.HandleFunc("PUT /api/admin/agenda/{id}", a.wajibMasuk(a.tanganiUbahAgenda))
+	m.HandleFunc("DELETE /api/admin/agenda/{id}", a.wajibMasuk(a.tanganiHapusAgenda))
+
+	m.HandleFunc("GET /api/admin/kegiatan-siswa", a.wajibMasuk(a.tanganiKegiatanAdmin))
+	m.HandleFunc("POST /api/admin/kegiatan-siswa", a.wajibMasuk(a.tanganiSimpanKegiatan))
+	m.HandleFunc("PUT /api/admin/kegiatan-siswa/{id}", a.wajibMasuk(a.tanganiUbahKegiatan))
+	m.HandleFunc("DELETE /api/admin/kegiatan-siswa/{id}", a.wajibMasuk(a.tanganiHapusKegiatan))
+
+	m.HandleFunc("GET /api/admin/pustaka", a.wajibMasuk(a.tanganiPustakaAdmin))
+	m.HandleFunc("POST /api/admin/pustaka", a.wajibMasuk(a.tanganiSimpanPustaka))
+	m.HandleFunc("PUT /api/admin/pustaka/{id}", a.wajibMasuk(a.tanganiUbahPustaka))
+	m.HandleFunc("DELETE /api/admin/pustaka/{id}", a.wajibMasuk(a.tanganiHapusPustaka))
+
 	m.HandleFunc("GET /api/admin/pengaturan", a.wajibAdmin(a.tanganiDaftarPengaturan))
+	m.HandleFunc("POST /api/admin/pengaturan/gambar", a.wajibAdmin(a.tanganiUnggahGambarPengaturan))
+	m.HandleFunc("DELETE /api/admin/pengaturan/gambar/{kunci}", a.wajibAdmin(a.tanganiHapusGambarPengaturan))
 	m.HandleFunc("PUT /api/admin/pengaturan", a.wajibAdmin(a.tanganiSimpanPengaturan))
 	m.HandleFunc("GET /api/admin/pengguna", a.wajibAdmin(a.tanganiDaftarPengguna))
 	m.HandleFunc("POST /api/admin/pengguna", a.wajibAdmin(a.tanganiSimpanPengguna))

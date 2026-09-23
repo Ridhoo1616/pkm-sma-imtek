@@ -40,13 +40,16 @@ pkm-sma-imtek/
 │   ├── notifikasi.go        penyusunan dan pengiriman notifikasi WhatsApp
 │   ├── handler_*.go         penangan tiap kelompok alamat API
 │   ├── handler_faq.go       tanya jawab
-│   └── migrations/          skema basis data (16 tabel + data awal)
+│   ├── handler_profil.go    profil sekolah, akademik, kesiswaan
+│   └── migrations/          skema basis data (21 tabel + data awal)
 │
 ├── frontend/       Situs dan panel admin dengan Next.js
 │   └── src/
-│       ├── app/(publik)/    beranda, profil, fasilitas, berita, galeri,
-│       │                    kontak, info PPDB, formulir, cek status
-│       ├── app/admin/       11 halaman panel panitia
+│       ├── app/(publik)/    beranda; menu Profil Sekolah, Akademik, dan
+│       │                    Kesiswaan beserta halaman turunannya; berita,
+│       │                    galeri, kontak, tanya jawab; info PPDB,
+│       │                    formulir, cek status, tes seleksi
+│       ├── app/admin/       20 halaman panel panitia
 │       ├── komponen/        elemen tampilan bersama, termasuk jendela
 │       │                    dan kabar berbasis Radix serta gulir Lenis
 │       └── lib/             lapisan API, tipe data, pembantu format
@@ -119,8 +122,16 @@ dipakai sekolah sungguhan tetap diperlukan hosting.
 | Halaman | Alamat | Isi |
 |---|---|---|
 | Beranda | `/` | Keadaan PPDB waktu nyata, kuota terisi, peminatan, fasilitas, berita terbaru |
-| Profil Sekolah | `/profil` | Sambutan kepala sekolah, visi, misi, sejarah, data pokok, peta |
-| Fasilitas | `/fasilitas` | Sarana dan prasarana beserta gambarnya |
+| Profil Sekolah | `/profil` | Sambutan kepala sekolah beserta fotonya, lalu pengantar ke enam halaman turunannya |
+| Sejarah Sekolah | `/profil/sejarah` | Riwayat berdirinya sekolah |
+| Data Sekolah | `/profil/data-sekolah` | NPSN, status, akreditasi, penyelenggara, alamat, jam layanan, peta |
+| Visi & Misi | `/profil/visi-misi` | Rumusan visi beserta poin-poin misinya |
+| Sarana dan Prasarana | `/fasilitas` | Sarana dan prasarana beserta gambarnya |
+| Struktur Organisasi | `/profil/struktur-organisasi` | Bagan struktur beserta unsur pimpinan |
+| Tenaga Pendidik | `/profil/tenaga-pendidik` | Guru dan tenaga kependidikan, dikelompokkan menurut kategorinya |
+| Akademik | `/akademik` beserta turunannya | E-learning, jadwal pelajaran, kalender akademik, kurikulum, perpustakaan digital |
+| Kesiswaan | `/kesiswaan` beserta turunannya | Ekstrakurikuler, OSIS, prestasi siswa, pendidikan karakter |
+| Halaman naskah | `/halaman/{slug}` | Halaman profil bernaskah panjang yang dapat ditambah sekolah sendiri |
 | Berita | `/berita`, `/berita/{slug}` | Berita dengan pencarian, penyaring kategori, halaman, pencacah baca, berita terkait |
 | Galeri | `/galeri` | Foto kegiatan dengan penyaring kategori dan tampilan besar |
 | Kontak | `/kontak` | Alamat, jalur kontak, peta, formulir pertanyaan |
@@ -157,7 +168,12 @@ setiap keterangan kesalahan menempel di bawah kolomnya masing-masing.
 | Bank Soal | `/admin/soal` | Soal pilihan ganda untuk tes seleksi |
 | Tes Seleksi | `/admin/ujian` | Jadwal tes, durasi, nilai minimum, dan rekap hasilnya |
 | Rincian Biaya | `/admin/biaya` | Pos biaya per tahap; totalnya dihitung sistem |
-| Tanya Jawab | `/admin/faq` | Kelola pertanyaan, kategori, urutan, dan penanda sorot |
+Tanya Jawab | `/admin/faq` | Kelola pertanyaan, kategori, urutan, dan penanda sorot |
+| Halaman Profil | `/admin/halaman` | Naskah halaman Kurikulum, OSIS, Pendidikan Karakter, dan halaman profil baru |
+| Tenaga Pendidik | `/admin/tenaga` | Guru dan tenaga kependidikan beserta foto, jabatan, dan mata pelajarannya |
+| Kalender Akademik | `/admin/kalender` | Tanggal kegiatan, ujian, hari libur, dan jadwal PPDB |
+| Kegiatan Siswa | `/admin/kegiatan` | Ekstrakurikuler, OSIS, dan pembinaan beserta pembina dan jadwalnya |
+| Perpustakaan | `/admin/pustaka` | Katalog koleksi digital: berkas unggahan atau tautan ke layanan lain |
 | Pengguna | `/admin/pengguna` | Kelola akun petugas dan perannya |
 
 Seluruh isi situs publik berasal dari menu **Pengaturan**, sehingga sekolah
@@ -235,7 +251,55 @@ menerangkan cara kerja sistem dan prosedurnya; angka dan tanggal milik sekolah
 tidak dikarang di sana, melainkan diarahkan ke bagian yang datanya diisi
 sekolah sendiri.
 
-### F. Dukungan tujuan "meningkatkan efektivitas promosi"
+### F. Menu Profil Sekolah, Akademik, dan Kesiswaan
+
+Situs sekolah dibaca dengan cara yang berbeda dari portal pendaftaran: orang
+tua mencari satu hal tertentu, lalu keluar. Karena itu isinya dipecah menjadi
+satu topik satu halaman, dikelompokkan pada tiga menu bertingkat.
+
+| Menu | Halaman turunannya |
+|---|---|
+| Profil Sekolah | Sejarah Sekolah, Data Sekolah, Visi & Misi, Sarana dan Prasarana, Struktur Organisasi, Tenaga Pendidik dan Kependidikan |
+| Akademik | E-Learning/LMS, Jadwal Pelajaran, Kalender Akademik, Kurikulum, Perpustakaan Digital |
+| Kesiswaan | Ekstrakurikuler, OSIS, Prestasi Siswa, Pendidikan Karakter |
+
+Empat butir di antaranya **tidak** memakai tempat penyimpanan baru, karena
+datanya sudah ada dan menduplikasinya hanya membuat panitia mengisi dua kali:
+Sejarah, Data Sekolah, serta Visi & Misi dibaca dari menu Pengaturan; Sarana
+dan Prasarana adalah halaman Fasilitas yang sudah ada; dan Prestasi Siswa
+mengambil berita berkategori Prestasi.
+
+Dua butir sengaja berupa pintu masuk, bukan sistem yang dibangun sendiri.
+E-Learning menampilkan tautan ke layanan yang sudah dipakai sekolah, misalnya
+Google Classroom atau Moodle, dan Jadwal Pelajaran menunjuk berkas jadwalnya.
+Membangun ruang kelas daring kedua hanya akan menghasilkan kelas kosong yang
+harus dirawat, sedangkan satu tautan yang mudah ditemukan justru dipakai.
+
+**Menu bertingkatnya dapat dipakai tanpa tetikus.** Pembukanya berupa
+`<button aria-expanded>`, bukan tautan yang tidak pernah dituju, sehingga Tab
+dan Enter bekerja seperti biasa; Escape menutupnya; dan pada layar kecil
+bentuknya berubah menjadi daftar yang dapat dilipat, karena di sana tidak ada
+hover sama sekali. Setiap halaman turunan juga membawa jejak lokasi beserta
+tautan ke halaman sekelompok, jadi pengunjung dapat berpindah ke topik sebelah
+tanpa kembali ke menu atas.
+
+**Tempat foto kepala sekolah** disiapkan pada bagian sambutan. Selama fotonya
+belum diunggah, yang tampil adalah kerangka berukuran sama yang menyebutkan
+perbandingan sisi dan ukuran piksel yang diharapkan. Dengan begitu tata letak
+halaman sudah final sebelum fotonya ada, dan panitia tahu foto seperti apa
+yang perlu disiapkan. Hal yang sama berlaku untuk bagan struktur organisasi.
+
+Keempat pengaturan bergambar — logo, foto halaman depan, foto kepala sekolah,
+dan bagan struktur organisasi — kini **diunggah** dari menu Pengaturan.
+Sebelumnya isinya berupa kotak teks berisi nama berkas, padahal tidak ada cara
+mengunggah berkasnya lewat aplikasi, sehingga keduanya tidak pernah dapat
+dipakai.
+
+Halaman yang naskahnya belum dikirim sekolah tidak ditampilkan sebagai halaman
+kosong dan tidak diisi karangan: yang tampil adalah keterangan bahwa naskahnya
+belum tersedia, beserta nama menu tempat naskahnya diisi.
+
+### G. Dukungan tujuan "meningkatkan efektivitas promosi"
 
 Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 
@@ -277,7 +341,7 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 
 ---
 
-## Basis Data (16 tabel)
+## Basis Data (21 tabel)
 
 | Tabel | Fungsi |
 |---|---|
@@ -297,6 +361,11 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 | `sesi_soal` | Susunan soal yang dibekukan per sesi, beserta jawabannya |
 | `notifikasi` | Catatan pesan WhatsApp beserta keadaan pengirimannya |
 | `faq` | Tanya jawab beserta kategori dan penanda sorot |
+| `halaman` | Halaman bernaskah panjang: Kurikulum, OSIS, Pendidikan Karakter |
+| `tenaga_pendidik` | Guru dan tenaga kependidikan beserta jabatannya |
+| `agenda` | Kalender akademik; satu baris boleh satu hari atau satu rentang |
+| `kegiatan_siswa` | Ekstrakurikuler, kegiatan OSIS, dan pembinaan |
+| `pustaka` | Katalog perpustakaan digital, berupa berkas atau tautan luar |
 
 Isinya dapat ditengok dengan **DBeaver**: buat sambungan PostgreSQL baru
 memakai host, porta, nama basis data, pengguna, dan sandi yang sama dengan
@@ -418,6 +487,33 @@ khusus fitur baru:
   `aria-hidden`, gulir halaman terkunci, dan tombol Escape menutupnya.
 - Gulir halus Lenis aktif di halaman publik dan tidak dipasang di panel.
 
+**Menu Profil Sekolah, Akademik, dan Kesiswaan, 70 pemeriksaan:**
+
+- Menu bertingkat: empat kelompok tampil di layar lebar, panelnya terbuka
+  saat diklik, `aria-expanded` ikut berubah, Escape menutupnya, dan bilahnya
+  tidak meluber pada 1440px.
+- Berpindah halaman menutup menunya; sebelumnya panel turunan dapat
+  menggantung di atas halaman baru.
+- Pada 390px menunya berubah menjadi daftar yang dapat dilipat, dan keenam
+  anak menu Profil Sekolah tetap dapat dijangkau.
+- "Sarana dan Prasarana" terbukti menunjuk halaman Fasilitas yang sudah ada,
+  bukan halaman kedua berisi data yang sama.
+- Jejak lokasi beserta lima tautan sekelompok muncul di setiap halaman
+  turunan, dan halaman yang sedang dibuka ditandai `aria-current`.
+- Kerangka foto kepala sekolah berukuran 3:4 tampil selama fotonya belum ada,
+  lalu diganti fotonya setelah diunggah dari panel.
+- Naskah Kurikulum yang diisi dari panel langsung tampil di halaman publik,
+  dipecah menjadi paragraf, dan penanda "menunggu naskah" hilang.
+- Data tenaga pendidik tersimpan beserta fotonya; yang tanpa foto memakai
+  inisial nama, bukan kotak kosong.
+- Agenda dengan tanggal selesai lebih awal ditolak beserta pesan yang
+  menjelaskan masalahnya, lalu yang sah tersimpan dan tampil pada kalender
+  publik dengan rentang tanggal yang tidak mengulang nama bulan.
+- Keempat pengaturan bergambar terunggah dari panel, dan kunci gambarnya
+  tidak lagi muncul sebagai kotak teks berisi nama berkas.
+- Halaman yang naskahnya belum dikirim sekolah tetap menampilkan keterangan,
+  dan kerangka bertanda kurung siku tidak pernah bocor ke pengunjung.
+
 **Tes seleksi, notifikasi, dan biaya, 28 pemeriksaan:**
 
 - Alur ujian penuh di peramban sungguhan: masuk, penghitung mundur berjalan,
@@ -439,16 +535,24 @@ khusus fitur baru:
   keterangannya.
 - Kartu peserta terbit sebagai PDF berisi barcode dan kode QR.
 
-**Demo statis, 105 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
+**Demo statis, 159 pemeriksaan:** seluruh alur pendaftaran sampai verifikasi,
 pengelolaan isi situs, batas hak akses operator, tes seleksi dari masuk sampai
 nilai keluar, rincian biaya beserta totalnya, keempat menu panel baru, dan
 tombol PDF yang menjelaskan bahwa berkasnya dibuat oleh server, penunjuk
 alur, tombol bantuan melayang beserta penanda posisinya, dan tanya jawab
 lengkap dengan penyaring serta pencariannya.
 
+Termasuk 53 pemeriksaan untuk menu bertingkat: keempat kelompok terbuka dan
+tertutup dengan Escape, panelnya tidak menggantung setelah pindah halaman,
+ketujuh belas halaman turunan terbuka dan berisi, jejak lokasi beserta tautan
+sekelompok bekerja, menu ponsel dapat dilipat, kelima menu panel baru memuat
+barisnya, dan sidebar panel tampil dalam lima kelompok.
+
 Pada demo, tes seleksi dijalankan di peramban pengunjung, jadi waktu dan kunci
-jawabannya tidak terlindungi seperti pada aplikasi sebenarnya. Batasan itu
-disebutkan di spanduk demo, bukan disembunyikan.
+jawabannya tidak terlindungi seperti pada aplikasi sebenarnya. Hal yang sama
+berlaku untuk unggah gambar sekolah: pada aplikasi berkasnya disimpan server,
+sedangkan di demo tombolnya menjelaskan bahwa berkasnya tidak dapat disimpan.
+Kedua batasan itu disebutkan, bukan disembunyikan.
 
 Backend bersih dari `go vet` dan `gofmt`; frontend bersih dari `eslint` dan
 `tsc`.

@@ -162,6 +162,30 @@ Buka `http://localhost:3000`.
    tombolnya.
 4. **Buat akun operator** untuk panitia lain, supaya akun admin tidak dipakai
    bersama-sama.
+5. **Unggah gambar sekolah** pada bagian *Gambar* di menu *Pengaturan*: logo,
+   foto halaman depan, foto kepala sekolah, dan bagan struktur organisasi.
+   Selama fotonya belum ada, halaman publik menampilkan kerangka berukuran
+   sama yang menyebutkan perbandingan sisi dan ukuran piksel yang diharapkan,
+   jadi tata letaknya tidak berubah setelah fotonya diunggah.
+6. **Isi menu Profil Sekolah, Akademik, dan Kesiswaan** di panel:
+
+   | Menu panel | Mengisi halaman publik |
+   |---|---|
+   | *Halaman Profil* | Kurikulum, OSIS, Pendidikan Karakter. Ketiganya sudah tersedia sebagai kerangka dan menunggu naskah dari sekolah |
+   | *Tenaga Pendidik* | Halaman Tenaga Pendidik; yang berkategori Pimpinan juga tampil pada halaman Struktur Organisasi |
+   | *Kalender Akademik* | Halaman Kalender Akademik |
+   | *Kegiatan Siswa* | Halaman Ekstrakurikuler |
+   | *Perpustakaan* | Halaman Perpustakaan Digital |
+
+   Prestasi Siswa tidak punya menu sendiri: tulis capaiannya lewat menu
+   *Berita* dengan kategori **Prestasi**, dan halaman Prestasi Siswa
+   mengambilnya dari sana.
+7. **Isi `tautan_elearning` dan `tautan_jadwal`** pada menu *Pengaturan* bila
+   sekolah sudah memakai layanan belajar daring, misalnya Google Classroom
+   atau Moodle, dan sudah punya berkas jadwal pelajaran. Keduanya berupa
+   pintu masuk ke layanan yang sudah ada, bukan sistem yang dibangun di sini.
+   Dibiarkan kosong, halamannya menjelaskan bahwa layanannya belum tersedia,
+   bukan menampilkan tautan mati.
 
 ---
 

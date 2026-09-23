@@ -179,3 +179,76 @@ var JenisKelamin = []string{"L", "P"}
 var Agama = []string{"Islam", "Kristen Protestan", "Katolik", "Hindu", "Buddha", "Konghucu", "Lainnya"}
 
 func sumberSah(s string) bool { return adaDalam(SumberInformasi, s) }
+
+/* ---------------- profil, akademik, dan kesiswaan ---------------- */
+
+// Halaman adalah satu halaman bernaskah panjang: Kurikulum, OSIS,
+// Pendidikan Karakter, dan halaman lain yang ditambahkan sekolah kemudian.
+type Halaman struct {
+	ID        int       `json:"id"`
+	Slug      string    `json:"slug"`
+	Judul     string    `json:"judul"`
+	Ringkasan string    `json:"ringkasan"`
+	Isi       string    `json:"isi"`
+	Gambar    string    `json:"gambar"`
+	Kelompok  string    `json:"kelompok"`
+	Urutan    int       `json:"urutan"`
+	Aktif     bool      `json:"aktif"`
+	Diubah    time.Time `json:"diubah"`
+}
+
+type Tenaga struct {
+	ID            int    `json:"id"`
+	Nama          string `json:"nama"`
+	NIP           string `json:"nip"`
+	Jabatan       string `json:"jabatan"`
+	MataPelajaran string `json:"mata_pelajaran"`
+	Kategori      string `json:"kategori"`
+	Foto          string `json:"foto"`
+	Urutan        int    `json:"urutan"`
+	Aktif         bool   `json:"aktif"`
+}
+
+type Agenda struct {
+	ID         int    `json:"id"`
+	Judul      string `json:"judul"`
+	Mulai      string `json:"mulai"`
+	Selesai    string `json:"selesai"`
+	Kategori   string `json:"kategori"`
+	Keterangan string `json:"keterangan"`
+	Aktif      bool   `json:"aktif"`
+}
+
+type KegiatanSiswa struct {
+	ID        int    `json:"id"`
+	Nama      string `json:"nama"`
+	Jenis     string `json:"jenis"`
+	Deskripsi string `json:"deskripsi"`
+	Pembina   string `json:"pembina"`
+	Jadwal    string `json:"jadwal"`
+	Gambar    string `json:"gambar"`
+	Urutan    int    `json:"urutan"`
+	Aktif     bool   `json:"aktif"`
+}
+
+type Pustaka struct {
+	ID         int    `json:"id"`
+	Judul      string `json:"judul"`
+	Penulis    string `json:"penulis"`
+	Kategori   string `json:"kategori"`
+	Tahun      *int   `json:"tahun"`
+	Keterangan string `json:"keterangan"`
+	Tautan     string `json:"tautan"`
+	Berkas     string `json:"berkas"`
+	Urutan     int    `json:"urutan"`
+	Aktif      bool   `json:"aktif"`
+}
+
+// Pilihan yang dipakai formulir panel admin sekaligus menjadi acuan CHECK
+// pada migrasi 004. Keduanya harus tetap sama.
+var (
+	KelompokHalaman = []string{"Profil", "Akademik", "Kesiswaan"}
+	KategoriTenaga  = []string{"Pimpinan", "Pendidik", "Kependidikan"}
+	KategoriAgenda  = []string{"Kegiatan", "Ujian", "Libur", "PPDB", "Rapat", "Lainnya"}
+	JenisKegiatan   = []string{"Ekstrakurikuler", "OSIS", "Pembinaan"}
+)

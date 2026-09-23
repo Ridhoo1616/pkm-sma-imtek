@@ -15,22 +15,62 @@ import { Memuat } from "@/komponen/Memuat";
  * satu-satunya pengaman.
  */
 
-const MENU = [
-  { jalur: "/admin", label: "Dasbor", khususAdmin: false },
-  { jalur: "/admin/pendaftar", label: "Pendaftar", khususAdmin: false },
-  { jalur: "/admin/laporan", label: "Laporan Promosi", khususAdmin: false },
-  { jalur: "/admin/notifikasi", label: "Notifikasi", khususAdmin: false },
-  { jalur: "/admin/soal", label: "Bank Soal", khususAdmin: false },
-  { jalur: "/admin/ujian", label: "Tes Seleksi", khususAdmin: false },
-  { jalur: "/admin/biaya", label: "Rincian Biaya", khususAdmin: true },
-  { jalur: "/admin/jurusan", label: "Peminatan", khususAdmin: true },
-  { jalur: "/admin/berita", label: "Berita", khususAdmin: false },
-  { jalur: "/admin/galeri", label: "Galeri", khususAdmin: false },
-  { jalur: "/admin/fasilitas", label: "Fasilitas", khususAdmin: false },
-  { jalur: "/admin/pesan", label: "Pesan Masuk", khususAdmin: false },
-  { jalur: "/admin/faq", label: "Tanya Jawab", khususAdmin: false },
-  { jalur: "/admin/pengaturan", label: "Pengaturan", khususAdmin: true },
-  { jalur: "/admin/pengguna", label: "Pengguna", khususAdmin: true },
+/**
+ * Menu panel, dikelompokkan menurut pekerjaan panitia.
+ *
+ * Sebelumnya menunya berupa satu daftar rata. Setelah menu Profil Sekolah,
+ * Akademik, dan Kesiswaan ditambahkan, daftarnya menjadi dua puluh butir dan
+ * tidak lagi bisa dibaca sekali lihat, jadi sekarang diberi judul kelompok.
+ */
+const KELOMPOK: {
+  judul: string;
+  butir: { jalur: string; label: string; khususAdmin: boolean }[];
+}[] = [
+  {
+    judul: "Pendaftaran",
+    butir: [
+      { jalur: "/admin", label: "Dasbor", khususAdmin: false },
+      { jalur: "/admin/pendaftar", label: "Pendaftar", khususAdmin: false },
+      { jalur: "/admin/laporan", label: "Laporan Promosi", khususAdmin: false },
+      { jalur: "/admin/notifikasi", label: "Notifikasi", khususAdmin: false },
+      { jalur: "/admin/soal", label: "Bank Soal", khususAdmin: false },
+      { jalur: "/admin/ujian", label: "Tes Seleksi", khususAdmin: false },
+      { jalur: "/admin/biaya", label: "Rincian Biaya", khususAdmin: true },
+      { jalur: "/admin/jurusan", label: "Peminatan", khususAdmin: true },
+    ],
+  },
+  {
+    judul: "Profil Sekolah",
+    butir: [
+      { jalur: "/admin/halaman", label: "Halaman Profil", khususAdmin: false },
+      { jalur: "/admin/tenaga", label: "Tenaga Pendidik", khususAdmin: false },
+      { jalur: "/admin/fasilitas", label: "Sarana & Prasarana", khususAdmin: false },
+    ],
+  },
+  {
+    judul: "Akademik & Kesiswaan",
+    butir: [
+      { jalur: "/admin/kalender", label: "Kalender Akademik", khususAdmin: false },
+      { jalur: "/admin/kegiatan", label: "Kegiatan Siswa", khususAdmin: false },
+      { jalur: "/admin/pustaka", label: "Perpustakaan", khususAdmin: false },
+    ],
+  },
+  {
+    judul: "Isi Situs",
+    butir: [
+      { jalur: "/admin/berita", label: "Berita", khususAdmin: false },
+      { jalur: "/admin/galeri", label: "Galeri", khususAdmin: false },
+      { jalur: "/admin/faq", label: "Tanya Jawab", khususAdmin: false },
+      { jalur: "/admin/pesan", label: "Pesan Masuk", khususAdmin: false },
+    ],
+  },
+  {
+    judul: "Sistem",
+    butir: [
+      { jalur: "/admin/pengaturan", label: "Pengaturan", khususAdmin: true },
+      { jalur: "/admin/pengguna", label: "Pengguna", khususAdmin: true },
+    ],
+  },
 ];
 
 export default function KerangkaAdmin({ children }: { children: ReactNode }) {
@@ -49,31 +89,41 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
   const aktif = (jalur: string) =>
     jalur === "/admin" ? jalurSekarang === "/admin" : jalurSekarang.startsWith(jalur);
 
-  const menuTampil = MENU.filter(
-    (m) => !m.khususAdmin || pengguna.role === "admin",
-  );
+  // Kelompok yang seluruh butirnya khusus admin ikut hilang bagi operator,
+  // jadi tidak ada judul kelompok yang menggantung tanpa isi.
+  const kelompokTampil = KELOMPOK.map((g) => ({
+    judul: g.judul,
+    butir: g.butir.filter((m) => !m.khususAdmin || pengguna.role === "admin"),
+  })).filter((g) => g.butir.length > 0);
 
   const daftarMenu = (
-    <nav aria-label="Menu panel admin">
-      <ul className="space-y-1">
-        {menuTampil.map((m) => (
-          <li key={m.jalur}>
-            <Link
-              href={m.jalur}
-              // Sidebar layar kecil ditutup saat menunya dipilih.
-              onClick={() => setSidebarTerbuka(false)}
-              className={
-                "block rounded-lg px-4 py-2.5 text-sm font-semibold transition " +
-                (aktif(m.jalur)
-                  ? "bg-biru text-white"
-                  : "text-white/75 hover:bg-white/10 hover:text-white")
-              }
-            >
-              {m.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
+    <nav aria-label="Menu panel admin" className="space-y-5">
+      {kelompokTampil.map((g) => (
+        <div key={g.judul}>
+          <p className="px-4 pb-1.5 text-[11px] font-bold tracking-wider text-white/40 uppercase">
+            {g.judul}
+          </p>
+          <ul className="space-y-1">
+            {g.butir.map((m) => (
+              <li key={m.jalur}>
+                <Link
+                  href={m.jalur}
+                  // Sidebar layar kecil ditutup saat menunya dipilih.
+                  onClick={() => setSidebarTerbuka(false)}
+                  className={
+                    "block rounded-lg px-4 py-2.5 text-sm font-semibold transition " +
+                    (aktif(m.jalur)
+                      ? "bg-biru text-white"
+                      : "text-white/75 hover:bg-white/10 hover:text-white")
+                  }
+                >
+                  {m.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </nav>
   );
 

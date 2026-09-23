@@ -343,3 +343,69 @@ export interface Faq {
   urutan: number;
   aktif: boolean;
 }
+
+/* ---------------- profil, akademik, dan kesiswaan ---------------- */
+
+export type KelompokHalaman = "Profil" | "Akademik" | "Kesiswaan";
+
+export interface Halaman {
+  id: number;
+  slug: string;
+  judul: string;
+  ringkasan: string;
+  /** Naskah lengkap. Kosong pada daftar halaman publik, terisi pada detail. */
+  isi: string;
+  gambar: string;
+  kelompok: KelompokHalaman;
+  urutan: number;
+  aktif: boolean;
+  diubah: string;
+}
+
+export interface Tenaga {
+  id: number;
+  nama: string;
+  nip: string;
+  jabatan: string;
+  mata_pelajaran: string;
+  kategori: string;
+  foto: string;
+  urutan: number;
+  aktif: boolean;
+}
+
+export interface Agenda {
+  id: number;
+  judul: string;
+  mulai: string;
+  /** Kosong berarti kegiatan satu hari. */
+  selesai: string;
+  kategori: string;
+  keterangan: string;
+  aktif: boolean;
+}
+
+export interface KegiatanSiswa {
+  id: number;
+  nama: string;
+  jenis: string;
+  deskripsi: string;
+  pembina: string;
+  jadwal: string;
+  gambar: string;
+  urutan: number;
+  aktif: boolean;
+}
+
+export interface Pustaka {
+  id: number;
+  judul: string;
+  penulis: string;
+  kategori: string;
+  tahun: number | null;
+  keterangan: string;
+  tautan: string;
+  berkas: string;
+  urutan: number;
+  aktif: boolean;
+}

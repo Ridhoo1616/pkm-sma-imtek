@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { api, GalatApi, segarkanHalamanPublik } from "@/lib/api";
+import { api, urlUnggahan, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { belumTerisi } from "@/lib/format";
@@ -77,9 +77,53 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
     ],
   },
   {
-    judul: "Gambar",
-    keterangan: "Nama berkas gambar yang sudah diunggah ke server.",
-    kunci: ["logo", "foto_depan"],
+    judul: "Akademik",
+    keterangan:
+      "Mengisi halaman di menu Akademik. Alamat e-learning dan jadwal yang dibiarkan kosong membuat halamannya menjelaskan bahwa layanannya belum tersedia, bukan menampilkan tautan mati.",
+    kunci: [
+      "tautan_elearning",
+      "tautan_jadwal",
+      "jadwal_keterangan",
+      "perpustakaan_keterangan",
+    ],
+  },
+  {
+    judul: "Struktur Organisasi",
+    keterangan:
+      "Keterangan di bawah bagan struktur organisasi. Bagannya sendiri diunggah pada bagian Gambar di bawah.",
+    kunci: ["struktur_keterangan"],
+  },
+];
+
+/**
+ * Pengaturan yang isinya nama berkas gambar, bukan teks.
+ *
+ * Keempatnya tidak ikut ditampilkan sebagai kotak teks, karena mengetik nama
+ * berkas dengan tangan tidak pernah berguna: berkasnya harus diunggah lebih
+ * dulu, dan itulah yang dikerjakan bagian Gambar di bawah halaman.
+ */
+const KUNCI_GAMBAR: { kunci: string; label: string; bantuan: string }[] = [
+  {
+    kunci: "logo",
+    label: "Logo sekolah",
+    bantuan: "Sebaiknya PNG berlatar tembus pandang, sisi sekitar 512 piksel.",
+  },
+  {
+    kunci: "foto_depan",
+    label: "Foto halaman depan",
+    bantuan: "Foto mendatar, perbandingan sisi 16:9, paling tidak 1600 piksel lebarnya.",
+  },
+  {
+    kunci: "foto_kepsek",
+    label: "Foto kepala sekolah",
+    bantuan:
+      "Potret setengah badan, perbandingan sisi 3:4, paling tidak 600x800 piksel. Tampil pada bagian sambutan di halaman Profil Sekolah.",
+  },
+  {
+    kunci: "struktur_organisasi",
+    label: "Bagan struktur organisasi",
+    bantuan:
+      "Gambar mendatar, perbandingan sisi 4:3, paling tidak 1200 piksel lebarnya.",
   },
 ];
 
@@ -93,6 +137,9 @@ const AREA_TEKS = [
   "ppdb_syarat",
   "ppdb_alur",
   "peta_embed",
+  "struktur_keterangan",
+  "jadwal_keterangan",
+  "perpustakaan_keterangan",
 ];
 
 const TANGGAL = ["ppdb_mulai", "ppdb_selesai", "ppdb_pengumuman"];
@@ -114,6 +161,13 @@ function labelDari(kunci: string): string {
     nama_singkat: "Nama singkat",
     foto_depan: "Foto halaman depan",
     whatsapp: "Nomor WhatsApp panitia",
+    foto_kepsek: "Foto kepala sekolah",
+    struktur_organisasi: "Bagan struktur organisasi",
+    struktur_keterangan: "Keterangan struktur organisasi",
+    tautan_elearning: "Alamat e-learning / LMS",
+    tautan_jadwal: "Alamat atau berkas jadwal pelajaran",
+    jadwal_keterangan: "Keterangan jadwal pelajaran",
+    perpustakaan_keterangan: "Keterangan perpustakaan",
   };
   if (khusus[kunci]) return khusus[kunci];
   return kunci
@@ -162,7 +216,13 @@ function IsiPengaturan() {
   // ternyata kembali ke nilai asalnya juga tidak dihitung sebagai perubahan.
   const berubah = Object.keys(suntingan).filter((k) => suntingan[k] !== awal[k]);
 
-  const kunciDikenal = new Set(KELOMPOK.flatMap((k) => k.kunci));
+  // Kunci gambar ditangani bagian unggahan, jadi tidak boleh ikut muncul
+  // sebagai kotak teks, termasuk lewat kelompok "Lainnya".
+  const kunciGambar = new Set(KUNCI_GAMBAR.map((g) => g.kunci));
+  const kunciDikenal = new Set([
+    ...KELOMPOK.flatMap((k) => k.kunci),
+    ...kunciGambar,
+  ]);
   const lainnya = data.data
     .map((b) => b.nama_setting)
     .filter((k) => !kunciDikenal.has(k));
@@ -329,6 +389,8 @@ function IsiPengaturan() {
         })}
       </div>
 
+      <BagianGambar isi={isi} muatUlang={muatUlang} />
+
       {/* Tombol simpan kedua di bawah, karena halaman ini panjang. */}
       <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-garis pt-6">
         <Tombol type="submit" sedangJalan={menyimpan} disabled={berubah.length === 0}>
@@ -346,5 +408,157 @@ function IsiPengaturan() {
         </p>
       </div>
     </form>
+  );
+}
+
+/**
+ * Unggah dan hapus gambar pengaturan.
+ *
+ * Berbeda dari kotak teks di atasnya, bagian ini tidak menunggu tombol
+ * "Simpan Perubahan": unggahan berjalan sendiri lewat alamat API terpisah,
+ * dan nama berkasnya langsung dicatat ke pengaturan oleh server. Karena itu
+ * seluruh tombol di sini bertipe button, supaya tidak ikut mengirim formulir
+ * pengaturan yang membungkusnya.
+ */
+function BagianGambar({
+  isi,
+  muatUlang,
+}: {
+  isi: Record<string, string>;
+  muatUlang: () => void;
+}) {
+  const kabar = useKabar();
+  const [pilihan, setPilihan] = useState<Record<string, File | null>>({});
+  const [sibuk, setSibuk] = useState<string | null>(null);
+  const [galat, setGalat] = useState<Record<string, string>>({});
+
+  async function unggah(kunci: string) {
+    const berkas = pilihan[kunci];
+    if (!berkas) return;
+    setSibuk(kunci);
+    setGalat((g) => ({ ...g, [kunci]: "" }));
+    try {
+      const hasil = await api.unggahGambarPengaturan(kunci, berkas);
+      kabar.beri(hasil.pesan);
+      setPilihan((p) => ({ ...p, [kunci]: null }));
+      muatUlang();
+      segarkanHalamanPublik();
+    } catch (e) {
+      setGalat((g) => ({
+        ...g,
+        [kunci]:
+          e instanceof GalatApi
+            ? e.kolom.gambar || e.message
+            : "Gambar gagal diunggah.",
+      }));
+    } finally {
+      setSibuk(null);
+    }
+  }
+
+  async function hapus(kunci: string) {
+    setSibuk(kunci);
+    setGalat((g) => ({ ...g, [kunci]: "" }));
+    try {
+      const hasil = await api.hapusGambarPengaturan(kunci);
+      kabar.beri(hasil.pesan);
+      muatUlang();
+      segarkanHalamanPublik();
+    } catch (e) {
+      setGalat((g) => ({
+        ...g,
+        [kunci]:
+          e instanceof GalatApi ? e.message : "Gambar gagal dihapus.",
+      }));
+    } finally {
+      setSibuk(null);
+    }
+  }
+
+  return (
+    <section className="kartu mt-6 overflow-hidden">
+      <div className="border-b border-garis bg-slate-50 px-6 py-4">
+        <h2 className="text-base">Gambar</h2>
+        <p className="mt-1 text-sm text-samar">
+          Diunggah langsung dari sini, tanpa menekan tombol simpan. JPG atau
+          PNG, maksimal 2 MB. Gambar lama otomatis dibuang setelah penggantinya
+          tersimpan.
+        </p>
+      </div>
+
+      <div className="grid gap-6 px-6 py-6 md:grid-cols-2">
+        {KUNCI_GAMBAR.filter((g) => g.kunci in isi).map((g) => {
+          const nama = isi[g.kunci];
+          const sedang = sibuk === g.kunci;
+          return (
+            <div key={g.kunci} className="rounded-lg border border-garis p-5">
+              <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-teks">
+                {g.label}
+                {!nama && (
+                  <Lencana warna="border-amber-200 bg-amber-50 text-amber-800">
+                    belum ada
+                  </Lencana>
+                )}
+              </p>
+
+              {nama ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={urlUnggahan("profil", nama)}
+                  alt={g.label}
+                  className="mt-3 max-h-40 w-full rounded border border-garis bg-white object-contain"
+                />
+              ) : (
+                <div className="mt-3 grid h-40 w-full place-items-center rounded border border-dashed border-garis bg-slate-50 text-xs text-samar">
+                  Belum ada gambar
+                </div>
+              )}
+
+              <p className="mt-2 text-xs leading-relaxed text-samar">{g.bantuan}</p>
+
+              <input
+                id={`gambar-${g.kunci}`}
+                type="file"
+                accept="image/jpeg,image/png"
+                onChange={(e) =>
+                  setPilihan((p) => ({
+                    ...p,
+                    [g.kunci]: e.target.files?.[0] ?? null,
+                  }))
+                }
+                className="mt-3 w-full rounded-lg border border-garis px-3.5 py-2 text-sm text-samar file:mr-3 file:rounded-md file:border-0 file:bg-biru-muda file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-biru hover:file:bg-biru/10"
+              />
+
+              {galat[g.kunci] && (
+                <p className="mt-2 text-xs font-medium text-red-700">
+                  {galat[g.kunci]}
+                </p>
+              )}
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Tombol
+                  type="button"
+                  sedangJalan={sedang}
+                  disabled={!pilihan[g.kunci] || sedang}
+                  onClick={() => unggah(g.kunci)}
+                >
+                  {sedang ? "Mengunggah..." : "Unggah"}
+                </Tombol>
+                {nama && (
+                  <Tombol
+                    jenis="kedua"
+                    type="button"
+                    disabled={sedang}
+                    onClick={() => hapus(g.kunci)}
+                  >
+                    Hapus
+                  </Tombol>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

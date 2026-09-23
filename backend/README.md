@@ -25,10 +25,18 @@ migrasi berada di `migrations/`, dan yang sudah dijalankan dicatat pada tabel
 `migrasi` sehingga aman dipanggil berulang kali. Basis data yang sudah berisi
 tabelnya dikenali dan dilewati, bukan ditimpa.
 
-Migrasi yang sudah ada tiga berkas: `001_skema.sql` untuk sembilan tabel
+Migrasi yang sudah ada empat berkas: `001_skema.sql` untuk sembilan tabel
 awal, `002_ujian_biaya_notifikasi.sql` untuk rincian biaya, bank soal, tes
-seleksi, dan catatan notifikasi, serta `003_faq.sql` untuk tanya jawab. Basis data warisan versi PHP melewati migrasi
-**pertama** saja, lalu menerima migrasi berikutnya seperti biasa.
+seleksi, dan catatan notifikasi, `003_faq.sql` untuk tanya jawab, serta
+`004_profil_akademik_kesiswaan.sql` untuk halaman profil, tenaga pendidik,
+kalender akademik, kegiatan siswa, dan katalog perpustakaan. Basis data
+warisan versi PHP melewati migrasi **pertama** saja, lalu menerima migrasi
+berikutnya seperti biasa.
+
+Pemisah perintah pada pelaksana migrasi mengenali komentar `--`. Tanpa itu,
+satu tanda titik koma di dalam komentar memotong perintah SQL di tengah jalan,
+dan PostgreSQL menolaknya dengan galat `syntax error at end of input` yang
+sama sekali tidak menyebut komentar.
 
 Untuk memindahkan data dari versi PHP yang memakai MySQL, lihat
 `alat/pindah-mysql/` dan bagian 9 pada
@@ -71,6 +79,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | `handler_konten.go` | jurusan, berita, galeri, fasilitas |
 | `handler_pengaturan.go` | pesan masuk, pengaturan sekolah, pengguna |
 | `handler_faq.go` | tanya jawab |
+| `handler_profil.go` | halaman profil, tenaga pendidik, agenda, kegiatan siswa, pustaka |
 
 ## Daftar alamat API
 
@@ -92,6 +101,12 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | POST | `/api/ppdb/kartu` | unduh kartu peserta tes seleksi (PDF, barcode + QR) |
 | GET | `/api/biaya` | rincian biaya beserta total per tahap |
 | GET | `/api/faq` | tanya jawab yang aktif beserta kategorinya |
+| GET | `/api/halaman` | daftar halaman profil yang aktif; `?kelompok=` menyaring menunya |
+| GET | `/api/halaman/{slug}` | satu halaman profil beserta naskah lengkapnya |
+| GET | `/api/tenaga-pendidik` | guru dan tenaga kependidikan yang aktif |
+| GET | `/api/agenda` | kalender akademik; `?tahun=` menyaring tahunnya |
+| GET | `/api/kegiatan-siswa` | ekstrakurikuler, OSIS, dan pembinaan yang aktif |
+| GET | `/api/pustaka` | katalog perpustakaan digital beserta kategorinya |
 | GET | `/api/ppdb/ujian` | keadaan tes seleksi: dibuka atau belum |
 | POST | `/api/ppdb/ujian/mulai` | mulai atau lanjutkan sesi, menerbitkan token peserta |
 | POST | `/api/masuk` | masuk sebagai petugas |
@@ -120,6 +135,11 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | POST/PUT/DELETE | `/api/admin/galeri` | kelola foto galeri |
 | POST/PUT/DELETE | `/api/admin/fasilitas` | kelola fasilitas |
 | GET/PATCH/DELETE | `/api/admin/pesan` | pesan masuk dari halaman kontak |
+| GET/POST/PUT/DELETE | `/api/admin/halaman` | kelola halaman profil bernaskah panjang |
+| GET/POST/PUT/DELETE | `/api/admin/tenaga-pendidik` | kelola guru dan tenaga kependidikan |
+| GET/POST/PUT/DELETE | `/api/admin/agenda` | kelola kalender akademik |
+| GET/POST/PUT/DELETE | `/api/admin/kegiatan-siswa` | kelola ekstrakurikuler dan kegiatan OSIS |
+| GET/POST/PUT/DELETE | `/api/admin/pustaka` | kelola katalog perpustakaan digital |
 
 ### Khusus peran `admin`
 
@@ -131,11 +151,14 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | GET/POST/PUT/DELETE | `/api/admin/pengguna` | kelola akun petugas |
 | GET/POST/PUT/DELETE | `/api/admin/biaya` | kelola rincian biaya |
 | POST/PUT/DELETE | `/api/admin/paket-ujian` | buka dan tutup jadwal tes seleksi |
+| POST | `/api/admin/pengaturan/gambar` | unggah logo, foto halaman depan, foto kepala sekolah, atau bagan struktur |
+| DELETE | `/api/admin/pengaturan/gambar/{kunci}` | hapus salah satu gambar di atas |
 
 ### Berkas unggahan
 
-`GET /unggahan/{folder}/{berkas}` melayani gambar berita, galeri, dan
-fasilitas secara terbuka. Folder `pendaftar` berisi dokumen pribadi
+`GET /unggahan/{folder}/{berkas}` melayani gambar berita, galeri, fasilitas,
+profil (logo, foto kepala sekolah, bagan struktur, foto guru), kegiatan siswa,
+dan koleksi pustaka secara terbuka. Folder `pendaftar` berisi dokumen pribadi
 (Kartu Keluarga, akta kelahiran, ijazah), sehingga wajib membawa token
 petugas dan tidak disimpan di cache bersama.
 

@@ -180,6 +180,21 @@ func pecahPerintahSQL(isi string) []string {
 		}
 
 		switch c {
+		case '-':
+			// Komentar "--" dilewati sampai akhir barisnya. Tanpa ini, satu
+			// tanda titik koma di dalam komentar memotong perintah SQL di
+			// tengah jalan, dan PostgreSQL menolaknya dengan galat "syntax
+			// error at end of input" yang sama sekali tidak menyebut
+			// komentar. Barisnya sendiri tidak ditulis, jadi bersihkan-
+			// Perintah tidak perlu menemuinya lagi.
+			if i+1 < len(r) && r[i+1] == '-' {
+				for i < len(r) && r[i] != '\n' {
+					i++
+				}
+				b.WriteRune('\n')
+				continue
+			}
+			b.WriteRune(c)
 		case '$':
 			if t, panjang := bacaTandaDolar(r, i); t != "" {
 				b.WriteString(t)
