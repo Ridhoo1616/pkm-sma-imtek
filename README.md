@@ -292,14 +292,25 @@ potret kepala sekolah bersudut membulat, naskah sambutan sebagai kutipan
 miring di antara dua tanda petik besar, foto gedung sekolah yang dipudarkan di
 bagian bawah kartu, dan semboyan sekolah ditulis dengan huruf tulisan tangan.
 
+**Potretnya sengaja menonjol ke luar kartu.** Ia dinaikkan sampai menembus
+tepi atas kartu sekaligus garis pemisah di bawah kepala halaman, jadi satu
+benda memotong dua bidang warna — itulah yang membuatnya terbaca sebagai foto
+sungguhan, bukan gambar yang dijejalkan ke dalam kotak. Angkanya bukan
+kira-kira: jarak kartu ke garis 3,5rem dan padding atas kartu 3rem, jadi
+`md:-mt-40` menaikkannya 7rem di atas tepi kartu dan 3,5rem di atas garis,
+berhenti di dalam padding bawah kepala halaman yang 4rem sehingga tidak
+menimpa keterangan di sana. Pada ambang `sm` paddingnya lebih kecil, maka di
+sana potret dinaikkan lebih sedikit; pada layar sempit tidak dinaikkan sama
+sekali karena kolomnya bertumpuk. Konsekuensinya: kartu itu **tidak boleh**
+memakai `overflow-hidden`, dan lapisan foto gedung diberi pengurung sendiri
+supaya tetap terpotong mengikuti sudut kartu. Judul bagian pindah ke kolom
+kanan bersama naskahnya — kalau melintang di atas kedua kolom, potret yang
+dinaikkan akan menimpanya.
+
 Garis emasnya satu saja, di bawah judul bagian. Sempat ada satu lagi di atas
 potret, dan dua garis yang bentuknya sama persis dalam satu kartu terbaca
 sebagai pengulangan, bukan aksen. Keterangan tentang bahan yang belum dikirim
-sekolah juga tidak dibungkus kotak berwarna di dalam kartu ini: kotak
-peringatan kuning di tengah kartu yang tata letaknya rapi justru terlihat
-seperti galat. Keterangannya tetap ada, ditulis sebagai kutipan tenang pada
-tempat naskah sambutan nanti berada. Keterangan tentang bahan yang belum
-dikirim sekolah memakai satu komponen yang sama, `Menunggu` di
+sekolah memakai satu komponen yang sama, `Menunggu` di
 `komponen/Halaman.tsx`, dan bentuknya **kartu biasa berisi teks miring redup**
 — bukan kotak kuning bergaris putus-putus seperti dulu. Kotak berwarna adalah
 bahasa untuk peringatan yang harus ditindak; catatan bahwa naskahnya belum
