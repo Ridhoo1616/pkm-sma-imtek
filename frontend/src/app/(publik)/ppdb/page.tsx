@@ -7,6 +7,7 @@ import { MunculNaik } from "@/komponen/Gerak";
 import type { Metadata } from "next";
 import type { Jurusan } from "@/lib/tipe";
 import { IkonFasilitas } from "@/komponen/Ikon";
+import { PenunjukAlur, ArahanLangkah } from "@/komponen/PenunjukAlur";
 
 export const metadata: Metadata = {
   title: "Informasi PPDB",
@@ -93,6 +94,8 @@ export default async function HalamanPpdb() {
         }
       />
 
+
+      <PenunjukAlur aktif="ketentuan" ppdbDibuka={profil.ppdb.dibuka} />
       <div className="wadah py-14">
         {/* Angka penting */}
         <MunculNaik>
@@ -158,6 +161,29 @@ export default async function HalamanPpdb() {
                   </p>
                 )}
               </section>
+            </MunculNaik>
+
+            {/* Arahan langkah berikutnya. Isinya mengikuti keadaan PPDB:
+                terbuka mengarahkan ke formulir, tertutup menjelaskan apa
+                yang masih bisa dilakukan. */}
+            <MunculNaik>
+              {profil.ppdb.dibuka ? (
+                <ArahanLangkah
+                  jenis="sorot"
+                  judul="Isi formulir pendaftaran"
+                  keterangan="Pendaftaran sedang dibuka. Siapkan dokumen yang diminta di atas, lalu isi formulir lima langkah. Nomor registrasi terbit begitu formulirnya terkirim."
+                  tautan="/ppdb/daftar"
+                  labelTautan="Daftar Sekarang"
+                />
+              ) : (
+                <ArahanLangkah
+                  jenis="tutup"
+                  judul="Pendaftaran sedang ditutup"
+                  keterangan="Perhatikan tanggal pada jadwal di atas. Bila Anda sudah pernah mendaftar, hasil verifikasinya tetap dapat dipantau di halaman Cek Status."
+                  tautan="/ppdb/cek"
+                  labelTautan="Cek Status"
+                />
+              )}
             </MunculNaik>
 
             {/* Rincian biaya.

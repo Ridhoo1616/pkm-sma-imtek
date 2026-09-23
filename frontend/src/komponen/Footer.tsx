@@ -168,8 +168,8 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
             © {tahun} {pengaturan.nama_sekolah || "SMA IMTEK"}. Seluruh hak dilindungi.
           </p>
           <p>
-            Dikembangkan sebagai Program Kreativitas Mahasiswa bidang Manajemen
-            Komputer &amp; Sistem.
+            Dikembangkan oleh mahasiswa Program Kreativitas Mahasiswa (PkM)
+            Jurusan Teknik Informatika, bidang Manajemen Komputer &amp; Sistem.
           </p>
         </div>
       </div>

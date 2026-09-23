@@ -96,6 +96,7 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/galeri", a.tanganiGaleriPublik)
 	m.HandleFunc("POST /api/pesan", a.tanganiKirimPesan)
 	m.HandleFunc("GET /api/biaya", a.tanganiBiayaPublik)
+	m.HandleFunc("GET /api/faq", a.tanganiFaqPublik)
 
 	/* ---- PPDB ---- */
 	m.HandleFunc("POST /api/ppdb/daftar", a.tanganiDaftar)
@@ -161,6 +162,12 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("POST /api/admin/biaya", a.wajibAdmin(a.tanganiSimpanBiaya))
 	m.HandleFunc("PUT /api/admin/biaya/{id}", a.wajibAdmin(a.tanganiUbahBiaya))
 	m.HandleFunc("DELETE /api/admin/biaya/{id}", a.wajibAdmin(a.tanganiHapusBiaya))
+
+	/* ---- tanya jawab ---- */
+	m.HandleFunc("GET /api/admin/faq", a.wajibMasuk(a.tanganiDaftarFaqAdmin))
+	m.HandleFunc("POST /api/admin/faq", a.wajibMasuk(a.tanganiSimpanFaq))
+	m.HandleFunc("PUT /api/admin/faq/{id}", a.wajibMasuk(a.tanganiUbahFaq))
+	m.HandleFunc("DELETE /api/admin/faq/{id}", a.wajibMasuk(a.tanganiHapusFaq))
 
 	/* ---- bank soal dan paket ujian ---- */
 	m.HandleFunc("GET /api/admin/soal", a.wajibMasuk(a.tanganiDaftarSoal))

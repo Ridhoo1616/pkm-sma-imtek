@@ -1,6 +1,7 @@
 import { KepalaHalaman } from "@/komponen/Bagian";
 import CekStatus from "@/komponen/CekStatus";
 import type { Metadata } from "next";
+import { PenunjukAlur } from "@/komponen/PenunjukAlur";
 
 export const metadata: Metadata = {
   title: "Cek Status Pendaftaran",
@@ -18,6 +19,8 @@ export default async function HalamanCekStatus(props: PageProps<"/ppdb/cek">) {
         judul="Cek Status Pendaftaran"
         keterangan="Masukkan nomor registrasi dan tanggal lahir yang Anda gunakan saat mendaftar. Keduanya diperlukan agar data pribadi tidak dapat dibuka oleh orang lain."
       />
+
+      <PenunjukAlur aktif="pantau" />
       <div className="wadah py-12">
         <div className="mx-auto max-w-3xl">
           <CekStatus nomorAwal={nomorAwal} />

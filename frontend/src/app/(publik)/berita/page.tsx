@@ -128,7 +128,7 @@ export default async function HalamanBeritaPublik(
               {cari && ` untuk pencarian "${cari}"`}.
             </p>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid auto-rows-fr gap-6 md:grid-cols-2 lg:grid-cols-3">
               {hasil.data.map((b, i) => (
                 <MunculNaik key={b.id} jeda={(i % 3) * 0.07}>
                   <KartuGerak className="kartu h-full overflow-hidden">

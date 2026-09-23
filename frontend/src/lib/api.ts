@@ -177,6 +177,12 @@ export const api = {
     ),
   kirimPesan: (isi: unknown) =>
     permintaan<{ pesan: string }>("/api/pesan", { metode: "POST", isi }),
+  faq: () =>
+    permintaan<{
+      data: import("./tipe").Faq[];
+      kategori: string[];
+      pengantar: string;
+    }>("/api/faq", { segarkanSetiap: CACHE_PUBLIK }),
   biaya: () =>
     permintaan<{
       data: import("./tipe").Biaya[];
@@ -546,6 +552,30 @@ export const api = {
     permintaan<{ pesan: string }>(`/api/admin/pendaftar/${id}/ruang`, {
       metode: "PATCH",
       isi,
+      token: true,
+    }),
+
+  /* ---------- tanya jawab (panitia) ---------- */
+  faqAdmin: () =>
+    permintaan<{ data: import("./tipe").Faq[]; kategori: string[] }>(
+      "/api/admin/faq",
+      { token: true },
+    ),
+  simpanFaq: (isi: unknown) =>
+    permintaan<{ pesan: string; id: number }>("/api/admin/faq", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  ubahFaq: (id: number, isi: unknown) =>
+    permintaan<{ pesan: string }>(`/api/admin/faq/${id}`, {
+      metode: "PUT",
+      isi,
+      token: true,
+    }),
+  hapusFaq: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/faq/${id}`, {
+      metode: "DELETE",
       token: true,
     }),
 };

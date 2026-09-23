@@ -6,6 +6,7 @@ import { KepalaHalaman } from "@/komponen/Bagian";
 import FormulirPpdb from "@/komponen/FormulirPpdb";
 import type { Metadata } from "next";
 import type { Jurusan } from "@/lib/tipe";
+import { PenunjukAlur } from "@/komponen/PenunjukAlur";
 
 export const metadata: Metadata = {
   title: "Formulir Pendaftaran PPDB",
@@ -26,6 +27,9 @@ export default async function HalamanDaftar() {
           judul="Pendaftaran Belum Dibuka"
           keterangan="Formulir pendaftaran hanya dapat diisi selama masa pendaftaran berlangsung."
         />
+
+        <PenunjukAlur aktif="daftar" ppdbDibuka={false} />
+
         <div className="wadah py-14">
           <div className="kartu mx-auto max-w-2xl p-7 text-center">
             <p className="text-[15px] leading-relaxed text-teks">
@@ -77,6 +81,9 @@ export default async function HalamanDaftar() {
         judul="Formulir Pendaftaran PPDB"
         keterangan={`Tahun Ajaran ${p.ppdb_tahun ?? ""}. Isian bertanda bintang wajib diisi. Pengisian dibagi menjadi lima langkah, dan Anda dapat berpindah antar langkah kapan saja sebelum mengirim.`}
       />
+
+      <PenunjukAlur aktif="daftar" />
+
       <div className="wadah py-12">
         <div className="mx-auto max-w-4xl">
           <FormulirPpdb

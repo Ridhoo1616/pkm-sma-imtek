@@ -25,9 +25,9 @@ migrasi berada di `migrations/`, dan yang sudah dijalankan dicatat pada tabel
 `migrasi` sehingga aman dipanggil berulang kali. Basis data yang sudah berisi
 tabelnya dikenali dan dilewati, bukan ditimpa.
 
-Migrasi yang sudah ada dua berkas: `001_skema.sql` untuk sembilan tabel awal,
-dan `002_ujian_biaya_notifikasi.sql` untuk rincian biaya, bank soal, tes
-seleksi, dan catatan notifikasi. Basis data warisan versi PHP melewati migrasi
+Migrasi yang sudah ada tiga berkas: `001_skema.sql` untuk sembilan tabel
+awal, `002_ujian_biaya_notifikasi.sql` untuk rincian biaya, bank soal, tes
+seleksi, dan catatan notifikasi, serta `003_faq.sql` untuk tanya jawab. Basis data warisan versi PHP melewati migrasi
 **pertama** saja, lalu menerima migrasi berikutnya seperti biasa.
 
 Untuk memindahkan data dari versi PHP yang memakai MySQL, lihat
@@ -70,6 +70,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | `handler_admin.go` | dasbor, kelola pendaftar, laporan, ekspor CSV |
 | `handler_konten.go` | jurusan, berita, galeri, fasilitas |
 | `handler_pengaturan.go` | pesan masuk, pengaturan sekolah, pengguna |
+| `handler_faq.go` | tanya jawab |
 
 ## Daftar alamat API
 
@@ -90,6 +91,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | POST | `/api/ppdb/bukti` | unduh bukti pendaftaran PDF, kuncinya sama dengan cek status |
 | POST | `/api/ppdb/kartu` | unduh kartu peserta tes seleksi (PDF, barcode + QR) |
 | GET | `/api/biaya` | rincian biaya beserta total per tahap |
+| GET | `/api/faq` | tanya jawab yang aktif beserta kategorinya |
 | GET | `/api/ppdb/ujian` | keadaan tes seleksi: dibuka atau belum |
 | POST | `/api/ppdb/ujian/mulai` | mulai atau lanjutkan sesi, menerbitkan token peserta |
 | POST | `/api/masuk` | masuk sebagai petugas |
@@ -108,6 +110,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | GET | `/api/admin/pendaftar/{id}/kartu` | cetak kartu peserta tes seleksi |
 | PATCH | `/api/admin/pendaftar/{id}/ruang` | ruang dan nomor kursi pada kartu peserta |
 | GET/POST/PUT/DELETE | `/api/admin/soal` | bank soal tes seleksi |
+| GET/POST/PUT/DELETE | `/api/admin/faq` | kelola tanya jawab |
 | GET | `/api/admin/paket-ujian/{id}/hasil` | rekap nilai satu paket |
 | GET/POST/PATCH | `/api/admin/notifikasi` | tinjau, kirim, dan batalkan notifikasi |
 | PATCH | `/api/admin/pendaftar/{id}/status` | verifikasi: ubah status dan catatan |

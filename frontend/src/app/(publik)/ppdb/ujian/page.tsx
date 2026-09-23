@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { belumTerisi } from "@/lib/format";
 import { KepalaHalaman } from "@/komponen/Bagian";
 import Ujian from "@/komponen/Ujian";
+import { PenunjukAlur } from "@/komponen/PenunjukAlur";
 
 export const metadata: Metadata = {
   title: "Tes Seleksi Online",
@@ -22,6 +23,8 @@ export default async function HalamanUjian() {
         keterangan="Dikerjakan langsung di peramban. Jawaban tersimpan otomatis, dan waktunya dihitung server."
       />
 
+
+      <PenunjukAlur aktif="tes" />
       <div className="wadah max-w-3xl py-12">
         {info && !info.dibuka ? (
           <div className="kartu space-y-3 p-6">

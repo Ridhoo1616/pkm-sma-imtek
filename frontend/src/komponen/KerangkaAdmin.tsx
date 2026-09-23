@@ -28,6 +28,7 @@ const MENU = [
   { jalur: "/admin/galeri", label: "Galeri", khususAdmin: false },
   { jalur: "/admin/fasilitas", label: "Fasilitas", khususAdmin: false },
   { jalur: "/admin/pesan", label: "Pesan Masuk", khususAdmin: false },
+  { jalur: "/admin/faq", label: "Tanya Jawab", khususAdmin: false },
   { jalur: "/admin/pengaturan", label: "Pengaturan", khususAdmin: true },
   { jalur: "/admin/pengguna", label: "Pengguna", khususAdmin: true },
 ];

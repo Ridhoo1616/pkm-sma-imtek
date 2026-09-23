@@ -330,3 +330,16 @@ export interface Notifikasi {
   dibuat: string;
   tautan_wa?: string;
 }
+
+/* ---------- tanya jawab ---------- */
+
+export interface Faq {
+  id: number;
+  pertanyaan: string;
+  jawaban: string;
+  kategori: string;
+  /** Muncul lebih dulu dan diberi penanda; dipakai untuk yang paling sering ditanyakan. */
+  sorot: boolean;
+  urutan: number;
+  aktif: boolean;
+}

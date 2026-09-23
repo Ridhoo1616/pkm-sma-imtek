@@ -4,14 +4,15 @@ Sistem informasi berbasis web yang menggabungkan **profil sekolah** dan
 **Pendaftaran Peserta Didik Baru (PPDB) online** untuk meningkatkan efektivitas
 promosi SMA IMTEK.
 
-Dikembangkan dalam rangka **Program Kreativitas Mahasiswa (PkM)**
-bidang *Manajemen Komputer & Sistem*.
+Dikembangkan oleh mahasiswa **Program Kreativitas Mahasiswa (PkM)**
+**Jurusan Teknik Informatika**, bidang *Manajemen Komputer & Sistem*.
 
 | | |
 |---|---|
 | **Judul** | Digitalisasi Profil Sekolah dan Pendaftaran Peserta Didik Baru (PPDB) Berbasis Web untuk Meningkatkan Efektivitas Promosi pada SMA IMTEK |
 | **Sekolah** | SMA IMTEK (Swasta), NPSN 20613766, Akreditasi B<br>Jl. Raya Pagedangan, Cicalengka, Kec. Pagedangan, Kab. Tangerang, Banten 15339 |
-| **Bidang** | Manajemen Komputer & Sistem |
+| **Jurusan** | Teknik Informatika |
+| **Bidang PkM** | Manajemen Komputer & Sistem |
 | **Backend** | Go 1.27 (pustaka standar, tanpa kerangka kerja web) + PostgreSQL 17 + Maroto (cetak PDF) |
 | **Frontend** | Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4 + Framer Motion + Lenis + Radix UI |
 | **Dosen Pendamping** | Nurhayati, S.Kom., M.Kom. |
@@ -38,7 +39,8 @@ pkm-sma-imtek/
 │   ├── cetak_kartu.go       kartu peserta ujian, barcode + kode QR
 │   ├── notifikasi.go        penyusunan dan pengiriman notifikasi WhatsApp
 │   ├── handler_*.go         penangan tiap kelompok alamat API
-│   └── migrations/          skema basis data (15 tabel + data awal)
+│   ├── handler_faq.go       tanya jawab
+│   └── migrations/          skema basis data (16 tabel + data awal)
 │
 ├── frontend/       Situs dan panel admin dengan Next.js
 │   └── src/
@@ -122,6 +124,7 @@ dipakai sekolah sungguhan tetap diperlukan hosting.
 | Berita | `/berita`, `/berita/{slug}` | Berita dengan pencarian, penyaring kategori, halaman, pencacah baca, berita terkait |
 | Galeri | `/galeri` | Foto kegiatan dengan penyaring kategori dan tampilan besar |
 | Kontak | `/kontak` | Alamat, jalur kontak, peta, formulir pertanyaan |
+| Tanya Jawab | `/faq` | 24 pertanyaan dengan penyaring kategori, pencarian, dan penanda yang sering ditanyakan |
 
 ### B. PPDB online
 
@@ -154,6 +157,7 @@ setiap keterangan kesalahan menempel di bawah kolomnya masing-masing.
 | Bank Soal | `/admin/soal` | Soal pilihan ganda untuk tes seleksi |
 | Tes Seleksi | `/admin/ujian` | Jadwal tes, durasi, nilai minimum, dan rekap hasilnya |
 | Rincian Biaya | `/admin/biaya` | Pos biaya per tahap; totalnya dihitung sistem |
+| Tanya Jawab | `/admin/faq` | Kelola pertanyaan, kategori, urutan, dan penanda sorot |
 | Pengguna | `/admin/pengguna` | Kelola akun petugas dan perannya |
 
 Seluruh isi situs publik berasal dari menu **Pengaturan**, sehingga sekolah
@@ -202,7 +206,36 @@ totalnya dihitung sistem. Pos yang besarannya belum ditetapkan sekolah tetap
 ditampilkan dan ditandai, bukan disembunyikan maupun ditulis Rp0, karena
 keduanya menyesatkan pada halaman yang judulnya transparansi biaya.
 
-### E. Dukungan tujuan "meningkatkan efektivitas promosi"
+### E. Penuntun alur bagi pendaftar
+
+Pertanyaan yang paling sering masuk ke panitia bukan pertanyaan sulit,
+melainkan "saya harus ke mana sekarang". Tiga hal dibuat untuk menjawabnya
+sebelum ditanyakan:
+
+**Tombol bantuan melayang** di pojok kanan bawah setiap halaman publik.
+Dibuka, tombolnya menampilkan enam langkah alur pendaftaran, menandai posisi
+pengunjung dengan "Anda di sini", dan menyorot langkah berikutnya. Di
+bawahnya ada jalur bertanya: WhatsApp, telepon, surel, dan tautan ke Tanya
+Jawab. Bila nomor WhatsApp belum diisi sekolah, tombolnya tidak hilang; yang
+hilang hanya pilihan WhatsApp-nya, karena penunjuk alurnya tetap berguna.
+
+**Penunjuk alur** berupa bilah lima tahap di atas setiap halaman PPDB. Tahap
+yang sudah lewat ditandai centang, tahap sekarang disorot, dan tahap yang
+belum tercapai dibiarkan pudar. Tahap "Isi formulir" tidak dapat diklik bila
+pendaftaran sedang ditutup, jadi pengunjung tidak dibawa ke halaman yang pasti
+menolaknya.
+
+**Arahan langkah berikutnya** pada halaman Info PPDB, yang isinya mengikuti
+keadaan: terbuka mengarahkan ke formulir, tertutup menjelaskan apa yang masih
+bisa dilakukan.
+
+**Tanya jawab** berisi 24 pertanyaan dengan penyaring kategori dan pencarian.
+Yang ditandai sorot muncul lebih dulu. Seluruh jawaban bawaannya hanya
+menerangkan cara kerja sistem dan prosedurnya; angka dan tanggal milik sekolah
+tidak dikarang di sana, melainkan diarahkan ke bagian yang datanya diisi
+sekolah sendiri.
+
+### F. Dukungan tujuan "meningkatkan efektivitas promosi"
 
 Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 
@@ -244,7 +277,7 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 
 ---
 
-## Basis Data (15 tabel)
+## Basis Data (16 tabel)
 
 | Tabel | Fungsi |
 |---|---|
@@ -263,6 +296,7 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 | `sesi_ujian` | Satu sesi per peserta per paket, beserta nilainya |
 | `sesi_soal` | Susunan soal yang dibekukan per sesi, beserta jawabannya |
 | `notifikasi` | Catatan pesan WhatsApp beserta keadaan pengirimannya |
+| `faq` | Tanya jawab beserta kategori dan penanda sorot |
 
 Isinya dapat ditengok dengan **DBeaver**: buat sambungan PostgreSQL baru
 memakai host, porta, nama basis data, pengguna, dan sandi yang sama dengan

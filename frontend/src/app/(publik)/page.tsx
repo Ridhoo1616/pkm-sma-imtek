@@ -202,7 +202,7 @@ export default async function Beranda() {
             keterangan="Pilih peminatan saat mendaftar. Kuota setiap peminatan terbatas dan terisi berdasarkan urutan verifikasi berkas."
             tengah
           />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid auto-rows-fr gap-6 md:grid-cols-2 lg:grid-cols-3">
             {jurusan.map((j, i) => {
               const sisa = Math.max(j.kuota - j.pendaftar, 0);
               return (
@@ -298,7 +298,7 @@ export default async function Beranda() {
             </Link>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid auto-rows-fr gap-6 md:grid-cols-3">
             {berita.map((b, i) => (
               <MunculNaik key={b.id} jeda={i * 0.08}>
                 <KartuGerak className="kartu h-full overflow-hidden">

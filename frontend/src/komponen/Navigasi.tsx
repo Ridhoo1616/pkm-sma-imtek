@@ -15,6 +15,7 @@ const MENU = [
   { jalur: "/galeri", label: "Galeri" },
   { jalur: "/ppdb", label: "Info PPDB" },
   { jalur: "/kontak", label: "Kontak" },
+  { jalur: "/faq", label: "Tanya Jawab" },
 ];
 
 export default function Navigasi({

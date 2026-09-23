@@ -85,7 +85,7 @@ export default function PetakGaleri({
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {tersaring.map((f, i) => (
           <MunculNaik key={f.id} jeda={(i % 4) * 0.06}>
             <button

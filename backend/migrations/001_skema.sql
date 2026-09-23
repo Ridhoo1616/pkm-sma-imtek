@@ -1,7 +1,8 @@
 -- ============================================================
 --  BASIS DATA SISTEM INFORMASI PROFIL SEKOLAH & PPDB SMA IMTEK
 --  Program Kreativitas Mahasiswa (PkM)
---  Bidang: Manajemen Komputer & Sistem
+--  Jurusan: Teknik Informatika
+--  Bidang PkM: Manajemen Komputer & Sistem
 --
 --  PostgreSQL 14 atau lebih baru.
 --
