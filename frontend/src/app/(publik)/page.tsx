@@ -224,27 +224,29 @@ export default async function Beranda() {
           Ringkas dan satu baris. Angka lengkapnya ada di halaman PPDB; di
           sini cukup supaya pengunjung tahu pendaftarannya sedang dibuka atau
           belum, tanpa mengambil alih bagian atas halaman. */}
-      <section className="border-b border-garis bg-biru-muda">
-        <div className="wadah flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-4">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <Lencana jenis={profil.ppdb.dibuka ? "hijau" : "abu"}>
-              {profil.ppdb.dibuka ? "PPDB Dibuka" : "PPDB Belum Dibuka"}
-            </Lencana>
-            <p className="text-sm leading-relaxed text-biru-tua">
-              <span className="font-semibold">
-                Tahun Ajaran {p.ppdb_tahun || "-"}
+      <section className="wadah relative z-20 -mt-8 sm:-mt-12 mb-8">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 rounded-2xl bg-white/90 backdrop-blur-xl p-6 sm:px-8 sm:py-6 shadow-[0_12px_40px_rgba(15,42,74,0.15)] border border-white/40 ring-1 ring-garis/50">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start lg:items-center gap-4 text-center sm:text-left">
+            <div className="flex items-center gap-2.5 rounded-full bg-emerald-100/80 px-3.5 py-1.5 text-sm font-bold tracking-wide text-emerald-700 ring-1 ring-emerald-500/20">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-600 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
               </span>
+              {profil.ppdb.dibuka ? "Pendaftaran Dibuka" : "Segera Dibuka"}
+            </div>
+            <p className="text-[15px] font-medium leading-relaxed text-teks">
+              Tahun Ajaran <span className="font-bold text-biru-tua">{p.ppdb_tahun || "-"}</span>
               {profil.ppdb.dibuka && p.ppdb_selesai && (
-                <> · ditutup {tanggalPanjang(p.ppdb_selesai)}</>
+                <> · Ditutup <span className="font-semibold">{tanggalPanjang(p.ppdb_selesai)}</span></>
               )}
               {!profil.ppdb.dibuka && p.ppdb_mulai && (
-                <> · dibuka {tanggalPanjang(p.ppdb_mulai)}</>
+                <> · Mulai {tanggalPanjang(p.ppdb_mulai)}</>
               )}
               {profil.ppdb.kuota > 0 && (
                 <>
-                  {" "}
-                  · sisa kuota{" "}
-                  <span className="font-semibold tabular-nums">
+                  <span className="mx-2 text-garis">|</span>
+                  Sisa Kuota:{" "}
+                  <span className="font-bold text-emas drop-shadow-sm">
                     {angka(sisaKuota)}
                   </span>{" "}
                   dari {angka(profil.ppdb.kuota)}
@@ -252,16 +254,17 @@ export default async function Beranda() {
               )}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full sm:w-auto flex-wrap items-center justify-center gap-3">
             <Link
               href={profil.ppdb.dibuka ? "/ppdb/daftar" : "/ppdb"}
-              className="rounded-lg bg-biru px-4 py-2 text-sm font-semibold text-white transition hover:bg-biru-tua"
+              className="group flex-1 sm:flex-none relative flex items-center justify-center gap-2 rounded-xl bg-biru-tua px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl hover:bg-biru hover:ring-2 hover:ring-biru/50 hover:ring-offset-2"
             >
-              {profil.ppdb.dibuka ? "Daftar Sekarang" : "Lihat Jadwal"}
+              {profil.ppdb.dibuka ? "Mulai Daftar" : "Lihat Syarat"}
+              <span className="transition-transform group-hover:translate-x-1 opacity-70 group-hover:opacity-100">→</span>
             </Link>
             <Link
               href="/ppdb/cek"
-              className="rounded-lg border border-biru/25 bg-white px-4 py-2 text-sm font-semibold text-biru transition hover:bg-white/60"
+              className="flex-1 sm:flex-none rounded-xl border-2 border-biru-tua/10 bg-white px-6 py-3.5 text-center text-sm font-bold text-biru-tua transition-all hover:bg-biru-muda hover:border-biru-tua/30"
             >
               Cek Status
             </Link>
