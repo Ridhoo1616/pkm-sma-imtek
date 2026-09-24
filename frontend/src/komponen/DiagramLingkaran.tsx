@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, type PointerEvent } from "react";
 import { angka, persen } from "@/lib/format";
 
 /**
@@ -9,15 +12,18 @@ import { angka, persen } from "@/lib/format";
  * pada satu lingkaran. Itu satu atribut CSS, `stroke-dasharray`, jadi tidak
  * ada yang perlu diimpor.
  *
- * TIDAK MEMAKAI JAVASCRIPT SAMA SEKALI, sehingga dapat dipakai langsung di
- * komponen server dan tetap tergambar utuh pada HTML yang dikirim server.
- *
  * WARNANYA SATU RONA, biru sekolah dengan kepekatan menurun. Diagram
- * lingkaran memang menuntut irisannya dapat dibedakan — itu sebabnya ia tidak
- * bisa seragam sepenuhnya seperti deretan angka di halaman lain — tetapi
- * membedakan dengan kepekatan, bukan dengan rona yang berbeda-beda, membuatnya
- * tetap satu keluarga warna dengan seluruh situs. Urutannya pun bermakna:
- * irisan terbesar paling pekat.
+ * lingkaran memang menuntut irisannya dapat dibedakan, tetapi membedakan
+ * dengan kepekatan, bukan dengan rona yang berbeda-beda, membuatnya tetap
+ * satu keluarga warna dengan seluruh situs. Urutannya pun bermakna: irisan
+ * terbesar paling pekat.
+ *
+ * SEKARANG BERUPA KOMPONEN KLIEN. Sebelumnya sengaja tanpa JavaScript sama
+ * sekali supaya dapat dipakai di komponen server, tetapi satu-satunya
+ * pemakainya panel dasbor yang memang komponen klien, dan nilai yang muncul
+ * saat kursor diarahkan ke irisannya menuntut keadaan. Bila kelak dipakai di
+ * halaman publik yang dirender server, angkanya tetap tergambar utuh pada
+ * HTML pertama; yang menuntut JavaScript hanya sorotannya.
  */
 export function DiagramLingkaran({
   data,
@@ -29,6 +35,8 @@ export function DiagramLingkaran({
   /** Mengubah label mentah — misalnya "2026-09" — menjadi tulisan yang enak dibaca. */
   formatLabel?: (label: string) => string;
 }) {
+  const [disorot, setDisorot] = useState<string | null>(null);
+
   const terurut = [...data]
     .filter((d) => d.jumlah > 0)
     .sort((a, b) => b.jumlah - a.jumlah);
@@ -47,11 +55,8 @@ export function DiagramLingkaran({
   // 100/(2π), dan dipakai justru supaya tidak ada perhitungan keliling di
   // sini yang bisa salah.
   const JARI = 15.9155;
+  const TEBAL = 9;
 
-  // Titik mulai tiap busur adalah jumlah busur sebelumnya. Dihitung dengan
-  // reduce, bukan dengan menambah satu variabel di dalam map: mengubah
-  // variabel di luar sementara merender melanggar aturan React tentang
-  // fungsi render yang harus bersih, dan penyusun kodenya menolak.
   const irisan = terurut.reduce<
     {
       label: string;
@@ -75,53 +80,110 @@ export function DiagramLingkaran({
     ];
   }, []);
 
+  const nama = (label: string) => (formatLabel ? formatLabel(label) : label);
+  const aktif = irisan.find((s) => s.label === disorot) ?? null;
+
+  /**
+   * Hanya tetikus yang menyorot. Pada sentuhan, pointerenter ikut terpicu
+   * sekali lalu tertinggal menyala karena tidak ada pointerleave, sehingga
+   * angka di tengahnya terkunci pada irisan yang terakhir disentuh. Di layar
+   * sentuh nilainya sudah tertulis lengkap pada daftar keterangan di
+   * sebelahnya, jadi tidak ada yang hilang.
+   */
+  const sorot = (label: string) => (e: PointerEvent) => {
+    if (e.pointerType === "mouse") setDisorot(label);
+  };
+  const lepas = (e: PointerEvent) => {
+    if (e.pointerType === "mouse") setDisorot(null);
+  };
+
   return (
     <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
-      <svg
-        viewBox="0 0 40 40"
-        className="h-40 w-40 shrink-0 -rotate-90"
-        role="img"
-        aria-label={`Diagram lingkaran, ${irisan.length} bagian, total ${angka(total)}`}
-      >
-        {irisan.map((s) => (
-          <circle
-            key={s.label}
-            cx="20"
-            cy="20"
-            r={JARI}
-            fill="none"
-            stroke="var(--color-biru)"
-            strokeOpacity={s.alfa}
-            strokeWidth="9"
-            // Busur sepanjang bagiannya, lalu sisanya kosong; digeser ke
-            // tempatnya lewat dashoffset yang negatif.
-            strokeDasharray={`${s.bagian} ${100 - s.bagian}`}
-            strokeDashoffset={-s.mulai}
-          />
-        ))}
-        <text
-          x="20"
-          y="20"
-          // Teksnya diputar balik karena lingkarannya diputar -90 derajat.
-          transform="rotate(90 20 20)"
-          textAnchor="middle"
-          dominantBaseline="central"
-          className="fill-biru-tua text-[6px] font-bold"
+      {/* Kotak gambarnya diberi ukuran tetap, dan angka di tengahnya
+          ditumpuk sebagai HTML, bukan <text> di dalam SVG: keterangan irisan
+          bisa dua baris dan perlu dipotong bila panjang, dan itu jauh lebih
+          mudah diatur dengan HTML biasa. */}
+      <div className="relative h-40 w-40 shrink-0">
+        <svg
+          // viewBox-nya 42 satuan, bukan 40. Jari-jari 15,9155 ditambah
+          // separuh ketebalan garis 9 membuat tepi luarnya berada di 20,4,
+          // sedangkan kotak 40 satuan hanya sampai 20 — tepinya terpotong
+          // rata di keempat sisi. Itu yang dilaporkan user.
+          viewBox="-1 -1 42 42"
+          className="h-full w-full -rotate-90"
+          role="img"
+          aria-label={
+            `Diagram lingkaran, total ${angka(total)}. ` +
+            irisan
+              .map(
+                (s) =>
+                  `${nama(s.label)}: ${angka(s.jumlah)}, ${persen(s.jumlah, total)} persen`,
+              )
+              .join("; ")
+          }
         >
-          {angka(total)}
-        </text>
-      </svg>
+          {irisan.map((s) => (
+            <circle
+              key={s.label}
+              cx="20"
+              cy="20"
+              r={JARI}
+              fill="none"
+              stroke="var(--color-biru)"
+              strokeOpacity={
+                disorot && disorot !== s.label ? s.alfa * 0.35 : s.alfa
+              }
+              strokeWidth={disorot === s.label ? TEBAL + 2 : TEBAL}
+              // Busur sepanjang bagiannya, lalu sisanya kosong; digeser ke
+              // tempatnya lewat dashoffset yang negatif.
+              strokeDasharray={`${s.bagian} ${100 - s.bagian}`}
+              strokeDashoffset={-s.mulai}
+              className="irisan-diagram"
+              onPointerEnter={sorot(s.label)}
+              onPointerLeave={lepas}
+            />
+          ))}
+        </svg>
+
+        <div className="pointer-events-none absolute inset-0 grid place-items-center px-9 text-center">
+          {aktif ? (
+            <div>
+              <p className="text-xl leading-none font-bold text-biru-tua tabular-nums">
+                {angka(aktif.jumlah)}
+              </p>
+              <p className="mt-0.5 text-[11px] leading-none font-semibold text-biru tabular-nums">
+                {persen(aktif.jumlah, total)}%
+              </p>
+              <p className="mt-1 line-clamp-2 text-[10px] leading-tight text-samar">
+                {nama(aktif.label)}
+              </p>
+            </div>
+          ) : (
+            <p className="text-2xl leading-none font-bold text-biru-tua tabular-nums">
+              {angka(total)}
+            </p>
+          )}
+        </div>
+      </div>
 
       <ul className="min-w-0 flex-1 space-y-2">
         {irisan.map((s) => (
-          <li key={s.label} className="flex items-center gap-2.5 text-sm">
+          <li
+            key={s.label}
+            onPointerEnter={sorot(s.label)}
+            onPointerLeave={lepas}
+            className={
+              "flex items-center gap-2.5 rounded-md px-1.5 py-0.5 text-sm transition-colors " +
+              (disorot === s.label ? "bg-biru-muda" : "")
+            }
+          >
             <span
               aria-hidden
               className="h-3 w-3 shrink-0 rounded-sm bg-biru"
               style={{ opacity: s.alfa }}
             />
             <span className="min-w-0 flex-1 truncate text-teks">
-              {formatLabel ? formatLabel(s.label) : s.label}
+              {nama(s.label)}
             </span>
             <span className="shrink-0 font-semibold text-biru-tua tabular-nums">
               {angka(s.jumlah)}

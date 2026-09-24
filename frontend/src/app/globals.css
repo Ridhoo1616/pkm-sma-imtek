@@ -336,6 +336,33 @@
 
    `:focus-within` disertakan supaya pengguna papan ketik mendapat tanggapan
    yang sama saat berpindah ke dalam kartunya. */
+/* Irisan diagram lingkaran pada panel dasbor.
+
+   Sorotannya diatur React lewat atribut, bukan lewat `:hover` di sini, sebab
+   yang berubah juga angka di tengah lingkarannya — satu keadaan, satu
+   sumber. Yang tinggal di CSS hanya bentuk kursornya dan kehalusan
+   peralihannya.
+
+   `stroke-width` ikut dianimasikan, dan itu sengaja: irisan yang disorot
+   menebal sedikit sehingga terlihat terangkat dari yang lain. */
+.irisan-diagram {
+  transition:
+    stroke-opacity 0.18s ease-out,
+    stroke-width 0.18s ease-out;
+}
+
+@media (hover: hover) {
+  .irisan-diagram {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .irisan-diagram {
+    transition: none;
+  }
+}
+
 .kartu-orang {
   transition:
     transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),

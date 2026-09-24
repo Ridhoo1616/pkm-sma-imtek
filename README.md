@@ -1682,6 +1682,44 @@ dijawab 429 dengan `Retry-After: 3600`; nomor lain tidak terpengaruh; dan
 kepala karangan yang ditambahi alamat sebenarnya oleh proksi tetap terhitung
 satu pengunjung.
 
+### Diagram lingkaran: tepi yang terpotong, dan nilai saat disorot
+
+Dua hal yang dilaporkan user pada diagram di panel dasbor.
+
+**Tepinya terpotong rata di keempat sisi.** Jari-jari lingkarannya 15,9155
+satuan, ditambah separuh ketebalan garis 9 membuat tepi luar busurnya berada
+di 20,4 dari pusat, sedangkan kotak gambarnya (`viewBox="0 0 40 40"`) hanya
+sampai 20. Jadi 0,4 satuan terluar memang di luar kotak dan dipangkas
+peramban. Kotaknya sekarang 42 satuan (`viewBox="-1 -1 42 42"`), bukan
+jari-jarinya yang dikecilkan: angka 15,9155 itu 100/(2π), yang membuat keliling
+lingkarannya tepat 100 sehingga panjang tiap busur dapat dituliskan langsung
+sebagai persennya, dan mengubahnya berarti membawa kembali perhitungan
+keliling yang justru mau dihindari.
+
+**Nilainya muncul saat kursor diarahkan ke irisannya.** Yang disorot menebal
+dan pekat penuh, yang lain diredupkan, dan angka di tengah lingkarannya
+berganti dari total menjadi nilai irisan itu beserta persen dan namanya. Baris
+keterangan di sebelahnya ikut tersorot, dan sebaliknya: menyorot barisnya juga
+menyorot irisannya.
+
+Karena itu komponennya sekarang komponen klien, yang sebelumnya sengaja
+dihindari supaya dapat dipakai di komponen server. Satu-satunya pemakainya
+panel dasbor yang memang komponen klien, jadi tidak ada yang hilang; dan bila
+kelak dipakai di halaman yang dirender server, angkanya tetap tergambar utuh
+pada HTML pertama, yang menuntut JavaScript hanya sorotannya.
+
+Sorotannya HANYA untuk tetikus, diperiksa lewat `pointerType`. Pada layar
+sentuh, `pointerenter` terpicu sekali lalu tertinggal menyala karena tidak ada
+`pointerleave`, sehingga angka di tengahnya akan terkunci pada irisan yang
+terakhir disentuh. Di layar sentuh nilainya sudah tertulis lengkap pada daftar
+keterangan di sebelahnya, jadi tidak ada yang hilang.
+
+Diuji lewat peramban sungguhan: ketiga diagram terbukti tidak lagi terpotong
+(dihitung dari viewBox, jari-jari, dan ketebalan garisnya), kursor yang
+diarahkan ke irisan terbesar memunculkan 70, 49%, dan "Beranda" di tengahnya,
+kursor yang keluar mengembalikannya ke total, dan peristiwa sentuh sungguhan
+tidak mengunci sorotannya.
+
 ### Kepala keamanan HTTP
 
 Sebelumnya tidak ada satu pun, jadi peramban tidak diberi tahu apa pun tentang
