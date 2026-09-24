@@ -130,7 +130,7 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar tetap untuk layar lebar */}
-      <aside className="tanpa-cetak hidden w-64 shrink-0 flex-col bg-biru-tua lg:flex">
+      <aside className="tanpa-cetak sticky top-0 h-screen hidden w-64 shrink-0 flex-col bg-biru-tua lg:flex">
         <div className="border-b border-white/10 px-6 py-6">
           <p className="text-xs font-semibold tracking-wider text-white/50 uppercase">
             Panel Admin
