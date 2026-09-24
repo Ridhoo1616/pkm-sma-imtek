@@ -1,0 +1,46 @@
+# Backend Go. Pasang ke /etc/systemd/system/pkm-backend.service
+#
+# Berkas .env TIDAK dibaca systemd lewat EnvironmentFile, melainkan oleh
+# aplikasinya sendiri dari folder kerjanya. Memuatnya dua kali hanya
+# menimbulkan selisih ketika salah satunya diubah.
+
+[Unit]
+Description=Backend PPDB dan Profil Sekolah SMA IMTEK
+Documentation=https://github.com/Ridhoo1616/pkm-sma-imtek
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=pkm
+Group=pkm
+WorkingDirectory=/srv/pkm/backend
+ExecStart=/srv/pkm/backend/server
+Restart=always
+RestartSec=3
+
+# Pengerasan. Yang boleh ditulis hanya folder unggahan; sisanya cukup dibaca.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/pkm/backend/data
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectClock=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+RestrictRealtime=true
+LockPersonality=true
+# Go tidak menyusun kode saat berjalan, jadi larangan ini tidak menghalanginya.
+MemoryDenyWriteExecute=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

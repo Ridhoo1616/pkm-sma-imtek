@@ -117,6 +117,23 @@ Porta 8090 perlu disetel publik karena peramban pengunjung memanggil API
 secara langsung. Codespace berhenti sendiri setelah menganggur, jadi untuk
 dipakai sekolah sungguhan tetap diperlukan hosting.
 
+### Memasang di server sungguhan
+
+Langkah lengkapnya di [`deploy/README.md`](deploy/README.md), beserta berkas
+yang siap dipakai: dua unit systemd, Caddyfile untuk HTTPS otomatis, serta
+skrip cadangan beserta timer-nya.
+
+Yang paling sering terlewat dan membuat pemasangan pertama gagal: pada VPS
+2 GB, **swap wajib dibuat lebih dulu**. `next build` memuncak di 1.671 MB
+(terukur, bukan dikira), dan tanpa swap prosesnya dihentikan kernel di tengah
+jalan. Node.js juga tidak boleh dari `apt install nodejs`, sebab Ubuntu 24.04
+membawa Node 18 sedangkan Next 16 menuntut yang lebih baru.
+
+Berkas systemd dan Caddyfile itu belum pernah dijalankan pada server
+sungguhan; ditulis dari pengukuran di komputer pengembang. Yang sudah diuji
+sungguhan `cadangan.sh`, termasuk memulihkan hasilnya ke basis data kosong dan
+memeriksa isinya kembali utuh.
+
 ---
 
 ## Ringkasan Fitur
@@ -1601,6 +1618,7 @@ Seluruh warnanya lulus rasio kontras 4,5:1 terhadap tulisan putih.
 | Spam | Kolom perangkap tersembunyi pada formulir pendaftaran dan kontak |
 | CORS | Asal yang diizinkan disebutkan satu per satu, bukan `*`, karena permintaannya membawa token |
 | Kepala keamanan HTTP | CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, dan HSTS saat produksi. Dipasang pada halaman Next maupun jawaban API, dengan isi yang berbeda sesuai apa yang dilayani masing-masing |
+| Cadangan | Basis data dicadangkan harian (disimpan 14 hari) dan dokumen pendaftar pekanan (4 pekan) lewat systemd timer. Hasilnya diperiksa, bukan dianggap berhasil begitu `pg_dump` selesai |
 | Kredensial | Seluruhnya dibaca dari variabel lingkungan. `JWT_SECRET` wajib diisi saat `APP_ENV=produksi`, dan berkas `.env` tidak ikut ke repositori |
 
 ### Pembatas laju pada rute publik

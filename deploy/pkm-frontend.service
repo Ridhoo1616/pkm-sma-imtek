@@ -1,0 +1,38 @@
+# Frontend Next.js. Pasang ke /etc/systemd/system/pkm-frontend.service
+#
+# Mengikat ke 127.0.0.1 saja: yang menghadap internet Caddy, dan Next tidak
+# perlu dapat dihubungi langsung dari luar.
+
+[Unit]
+Description=Frontend Next.js PPDB dan Profil Sekolah SMA IMTEK
+Documentation=https://github.com/Ridhoo1616/pkm-sma-imtek
+After=network-online.target pkm-backend.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pkm
+Group=pkm
+WorkingDirectory=/srv/pkm/frontend
+Environment=NODE_ENV=production
+Environment=PORT=3000
+ExecStart=/usr/bin/node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3000
+Restart=always
+RestartSec=3
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# Next menulis cache ISR ke dalam .next saat berjalan.
+ReadWritePaths=/srv/pkm/frontend/.next
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target
