@@ -292,9 +292,88 @@
 @media (prefers-reduced-motion: reduce) {
   .gerak-awal,
   .gerak-tampil,
-  .gerak-kartu {
+  .gerak-kartu,
+  /* Sama alasannya dengan .kartu-orang di bawah: tanpa menyebut :hover,
+     aturan hover yang lebih spesifik tetap menggerakkan kartunya. */
+  .gerak-kartu:hover {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+}
+
+/* Kartu satu orang pada halaman Tenaga Pendidik.
+
+   Gerakannya sengaja kecil dan hanya tiga hal sekaligus: kartunya naik
+   sedikit, fotonya membesar empat persen di dalam bingkainya sendiri, dan
+   garis emas di bawah namanya tumbuh dari kiri. Tiga gerak kecil yang
+   serempak terbaca sebagai satu tanggapan, sedangkan satu gerak besar
+   terbaca sebagai kartunya melompat.
+
+   Fotonya membesar DI DALAM pembungkus ber-overflow-hidden, bukan kartunya
+   yang membesar, supaya tepi kartu dan jarak antar kartu tidak ikut bergeser
+   — kalau kartunya sendiri yang diperbesar, tetangganya seolah terdorong.
+
+   Hanya berlaku pada peranti yang benar-benar punya kursor. Di layar sentuh
+   `:hover` menempel setelah disentuh dan tidak lepas, sehingga satu kartu
+   akan tertinggal dalam keadaan terangkat tanpa sebab yang terlihat.
+
+   `:focus-within` disertakan supaya pengguna papan ketik mendapat tanggapan
+   yang sama saat berpindah ke dalam kartunya. */
+.kartu-orang {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.kartu-orang-foto {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.kartu-orang-garis {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .kartu-orang:hover,
+  .kartu-orang:focus-within {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-kuat);
+  }
+
+  .kartu-orang:hover .kartu-orang-foto,
+  .kartu-orang:focus-within .kartu-orang-foto {
+    transform: scale(1.04);
+  }
+
+  .kartu-orang:hover .kartu-orang-garis,
+  .kartu-orang:focus-within .kartu-orang-garis {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Keadaan :hover ikut disebut di sini, bukan cuma keadaan diamnya.
+     `.kartu-orang:hover` lebih spesifik daripada `.kartu-orang`, jadi
+     menulis `transform: none` pada keadaan diam saja tidak menghentikan
+     apa pun: begitu kursor masuk, aturan hover yang menang dan kartunya
+     tetap naik. Diuji dan memang begitu kejadiannya. */
+  .kartu-orang,
+  .kartu-orang:hover,
+  .kartu-orang:focus-within,
+  .kartu-orang-foto,
+  .kartu-orang:hover .kartu-orang-foto,
+  .kartu-orang:focus-within .kartu-orang-foto {
+    transform: none;
+    transition: none;
+  }
+
+  /* Garisnya tetap tampak penuh: ia bagian dari rancangan kartunya, bukan
+     semata hiasan gerak, jadi tanpa animasi ia harus tetap terlihat. */
+  .kartu-orang-garis {
+    transform: scaleX(1);
     transition: none;
   }
 }

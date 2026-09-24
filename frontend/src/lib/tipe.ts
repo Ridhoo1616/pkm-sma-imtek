@@ -368,6 +368,9 @@ export interface Tenaga {
   nip: string;
   jabatan: string;
   mata_pelajaran: string;
+  /** Kelas yang diampu sebagai wali kelas, misalnya "X-1". Kosong berarti
+   *  bukan wali kelas. */
+  wali_kelas: string;
   kategori: string;
   foto: string;
   urutan: number;

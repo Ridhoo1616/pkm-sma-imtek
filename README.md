@@ -132,7 +132,7 @@ dipakai sekolah sungguhan tetap diperlukan hosting.
 | Visi & Misi | `/profil/visi-misi` | Rumusan visi beserta poin-poin misinya |
 | Sarana dan Prasarana | `/fasilitas` | Sarana dan prasarana beserta gambarnya |
 | Struktur Organisasi | `/profil/struktur-organisasi` | Bagan struktur beserta unsur pimpinan |
-| Tenaga Pendidik | `/profil/tenaga-pendidik` | Guru dan tenaga kependidikan, dikelompokkan menurut kategorinya |
+| Tenaga Pendidik | `/profil/tenaga-pendidik` | Guru dan tenaga kependidikan beserta angka ringkas, pencarian, dan penyaring kategori serta mata pelajaran |
 | Akademik | `/akademik` beserta turunannya | E-learning, jadwal pelajaran, kalender akademik, kurikulum, perpustakaan digital |
 | Kesiswaan | `/kesiswaan` beserta turunannya | Ekstrakurikuler, OSIS, prestasi siswa, pendidikan karakter |
 | Halaman naskah | `/halaman/{slug}` | Halaman profil bernaskah panjang yang dapat ditambah sekolah sendiri |
@@ -203,7 +203,7 @@ pemeriksaan formulir demo (`demo-baru/js/05-ppdb.js`).
 | Rincian Biaya | `/admin/biaya` | Pos biaya per tahap; totalnya dihitung sistem |
 Tanya Jawab | `/admin/faq` | Kelola pertanyaan, kategori, urutan, dan penanda sorot |
 | Halaman Profil | `/admin/halaman` | Naskah halaman Kurikulum, OSIS, Pendidikan Karakter, dan halaman profil baru |
-| Tenaga Pendidik | `/admin/tenaga` | Guru dan tenaga kependidikan beserta foto, jabatan, dan mata pelajarannya |
+| Tenaga Pendidik | `/admin/tenaga` | Guru dan tenaga kependidikan beserta foto, jabatan, mata pelajaran, dan kelas yang diampunya sebagai wali kelas |
 | Kalender Akademik | `/admin/kalender` | Tanggal kegiatan, ujian, hari libur, dan jadwal PPDB |
 | Kegiatan Siswa | `/admin/kegiatan` | Ekstrakurikuler, OSIS, dan pembinaan beserta pembina dan jadwalnya |
 | Perpustakaan | `/admin/pustaka` | Katalog koleksi digital: berkas unggahan atau tautan ke layanan lain |
@@ -392,6 +392,80 @@ Percobaan sebelumnya yang dibuang: satu adegan ruang kelas digambar sendiri
 sebagai SVG penuh, dan pada bidang sebesar itu bentuk badannya jadi seperti
 bel, bukan orang. Foto pun bukan pilihan, karena berarti memakai wajah guru
 dan siswa sungguhan tanpa izin mereka.
+
+### Halaman Tenaga Pendidik dan Kependidikan
+
+Susunannya: kartu pembuka berilustrasi, empat angka ringkas, pencarian
+beserta penyaringnya, lalu petak kartu satu orang per kartu.
+
+**Kartu pembukanya memakai susunan yang sama dengan kartu Visi dan Misi** —
+naskah di kolom kiri, ilustrasi setinggi kartunya di kolom kanan, menempel
+tepi lewat margin negatif, `object-contain` dan `object-bottom`. Ilustrasinya
+datang dari user dalam bentuk yang persis sama dengan dua sebelumnya: berkas
+berakhiran `.svg` yang isinya ternyata satu elemen `<image>` berisi PNG
+base64, 1536×1024, tanpa satu jalur vektor pun. Jadi alatnya pun sama —
+perambatan dari tepi untuk membuang latar, lalu median cut ke 64 warna: 1,2 MB
+menjadi 109 KB, 1487×709.
+
+Latar putihnya hilang seluruhnya, sedangkan gedung sekolah, pepohonan, dan
+awan di belakang sosoknya **tetap tinggal**. Itu disengaja: ambang perambatan
+membuang yang pucat dan bersambung dengan tepi gambar, dan ketiganya berwarna
+cukup pekat untuk bertahan. Yang diminta memang latarnya, yaitu kotak putih
+yang akan menabrak gradasi kartunya — bukan isi gambarnya.
+
+**Satu hal berbeda dari kartu Visi dan Misi: di layar sempit ilustrasinya
+turun ke bawah naskah, tidak bertahan di samping.** Gambar ini berbanding sisi
+2,1 sedangkan gambar visi 0,90. Dipaksa menjadi kolom samping pada lebar
+ponsel, kolomnya hanya menyisakan seratusan piksel dan kelima wajahnya tidak
+terbaca lagi. Di bawah naskah ia melebar penuh melewati padding kartu dan
+tetap utuh.
+
+**Empat angka ringkasnya satu warna, bukan empat.** Rancangan acuan yang
+dikirim user memberi tiap angka warna sendiri — biru, hijau, kuning, ungu.
+Itu diganti: empat warna berbeda membuat deretan ini terbaca sebagai empat hal
+yang tidak berhubungan, padahal keempatnya satu tabel yang sama. Semuanya kini
+biru sekolah di atas biru muda, dengan angka tebal berukuran besar sebagai
+pembeda antar kartu.
+
+**Angka "Wali Kelas" punya kolomnya sendiri (migrasi 009), tidak ditebak dari
+tulisan pada kolom jabatan.** Mencocokkan kata "wali kelas" di dalam jabatan
+akan meleset begitu sekolah menulisnya dengan cara lain — "Walikelas",
+"Wali Kls X-1", atau menaruhnya di kolom keterangan — dan angka yang salah
+pada halaman profil lebih buruk daripada tidak ada angka. Isi kolomnya nama
+kelasnya, misalnya `X-1`, bukan ya/tidak, sehingga satu isian menjawab dua
+hal sekaligus: siapa wali kelasnya dan kelas mana yang diampunya. Keduanya
+tampil pada kartu orangnya. Kosong berarti bukan wali kelas — keadaan yang
+wajar bagi kepala sekolah, guru BK, dan seluruh tenaga kependidikan.
+
+**Gerak saat kursor diarahkan ke satu kartu sengaja kecil dan berjumlah
+tiga:** kartunya naik lima piksel, fotonya membesar empat persen di dalam
+bingkainya, dan garis emas di bawah namanya tumbuh dari kiri. Tiga gerak kecil
+yang serempak terbaca sebagai satu tanggapan; satu gerak besar terbaca sebagai
+kartunya melompat. Fotonya yang membesar, bukan kartunya, supaya jarak antar
+kartu tidak ikut bergeser. Hanya berlaku pada peranti bertetikus (`@media
+(hover: hover)`), sebab pada layar sentuh `:hover` menempel sesudah disentuh
+dan tidak lepas.
+
+Pengujiannya menemukan satu cacat yang tidak kelihatan mata: **menulis
+`transform: none` pada keadaan diam saja tidak menghentikan apa pun**, karena
+`.kartu-orang:hover` lebih spesifik daripada `.kartu-orang`. Jadi pengunjung
+yang menyalakan "kurangi gerakan" tetap melihat kartunya naik. Keadaan
+`:hover` kini ikut disebut di dalam blok `prefers-reduced-motion`, dan
+`.gerak-kartu` yang sudah ada lebih dulu ternyata mengidap cacat yang sama,
+jadi sekalian dibetulkan. Yang tersisa saat gerakan dikurangi hanya
+perubahan bayangan — penanda tanpa gerak.
+
+**Panjang halaman di ponsel ditahan oleh tiga hal.** Pencarian dan penyaringnya
+menghemat gulir bagi pengunjung yang mencari satu nama; fotonya persegi di
+layar sempit dan 3:4 mulai ambang `sm`; dan yang tampil sebelum tombolnya
+ditekan dua belas di layar lebar tetapi delapan di ponsel. Pembedanya **CSS,
+bukan JavaScript**: mengukur lebar layar lalu mengatur ulang jumlahnya sesudah
+halaman terpasang akan membuat empat kartu berkedip hilang di depan mata,
+sebab markup yang dikirim server sudah memuat dua belas. Dengan
+`max-sm:hidden`, yang dikirim server tetap satu bentuk dan perambanlah yang
+menyembunyikan kelebihannya sejak lukisan pertama. Halaman berisi 16 orang
+turun dari 4.797 piksel menjadi 3.829 piksel, dan tidak ada gulir mendatar
+pada 390 maupun 1280 piksel.
 
 Dua butir sengaja berupa pintu masuk, bukan sistem yang dibangun sendiri.
 E-Learning menampilkan tautan ke layanan yang sudah dipakai sekolah, misalnya

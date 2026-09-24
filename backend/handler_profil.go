@@ -285,8 +285,8 @@ func (a *Aplikasi) tanganiHapusHalaman(w http.ResponseWriter, r *http.Request) {
 /* ================= tenaga pendidik dan kependidikan ================= */
 
 func (a *Aplikasi) ambilTenaga(hanyaAktif bool) ([]Tenaga, error) {
-	sqlStr := `SELECT id, nama, nip, jabatan, mata_pelajaran, kategori,
-	                  COALESCE(foto, ''), urutan, aktif
+	sqlStr := `SELECT id, nama, nip, jabatan, mata_pelajaran, wali_kelas,
+	                  kategori, COALESCE(foto, ''), urutan, aktif
 	             FROM tenaga_pendidik`
 	if hanyaAktif {
 		sqlStr += " WHERE aktif = true"
@@ -307,7 +307,7 @@ func (a *Aplikasi) ambilTenaga(hanyaAktif bool) ([]Tenaga, error) {
 	for baris.Next() {
 		var t Tenaga
 		if err := baris.Scan(&t.ID, &t.Nama, &t.NIP, &t.Jabatan, &t.MataPelajaran,
-			&t.Kategori, &t.Foto, &t.Urutan, &t.Aktif); err != nil {
+			&t.WaliKelas, &t.Kategori, &t.Foto, &t.Urutan, &t.Aktif); err != nil {
 			return nil, err
 		}
 		hasil = append(hasil, t)
@@ -345,6 +345,8 @@ func bacaIsianTenaga(r *http.Request) (t Tenaga, v *Validasi) {
 	v.panjangMaks("jabatan", "Jabatan", t.Jabatan, 120)
 	t.MataPelajaran = ambil("mata_pelajaran")
 	v.panjangMaks("mata_pelajaran", "Mata pelajaran", t.MataPelajaran, 120)
+	t.WaliKelas = ambil("wali_kelas")
+	v.panjangMaks("wali_kelas", "Wali kelas", t.WaliKelas, 40)
 
 	t.Kategori = ambil("kategori")
 	if t.Kategori == "" {
@@ -376,9 +378,10 @@ func (a *Aplikasi) tanganiSimpanTenaga(w http.ResponseWriter, r *http.Request) {
 
 	var id int
 	err := a.db.QueryRow(`INSERT INTO tenaga_pendidik
-	        (nama, nip, jabatan, mata_pelajaran, kategori, foto, urutan, aktif)
-	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-		t.Nama, t.NIP, t.Jabatan, t.MataPelajaran, t.Kategori,
+	        (nama, nip, jabatan, mata_pelajaran, wali_kelas, kategori, foto,
+	         urutan, aktif)
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+		t.Nama, t.NIP, t.Jabatan, t.MataPelajaran, t.WaliKelas, t.Kategori,
 		kosongJadiNil(foto), t.Urutan, t.Aktif).Scan(&id)
 	if err != nil {
 		a.hapusUnggahan("profil", foto)
@@ -428,9 +431,9 @@ func (a *Aplikasi) tanganiUbahTenaga(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := a.db.Exec(`UPDATE tenaga_pendidik SET nama = $1, nip = $2, jabatan = $3,
-	                               mata_pelajaran = $4, kategori = $5, foto = $6,
-	                               urutan = $7, aktif = $8 WHERE id = $9`,
-		t.Nama, t.NIP, t.Jabatan, t.MataPelajaran, t.Kategori,
+	                               mata_pelajaran = $4, wali_kelas = $5, kategori = $6,
+	                               foto = $7, urutan = $8, aktif = $9 WHERE id = $10`,
+		t.Nama, t.NIP, t.Jabatan, t.MataPelajaran, t.WaliKelas, t.Kategori,
 		kosongJadiNil(fotoDipakai), t.Urutan, t.Aktif, id); err != nil {
 		a.hapusUnggahan("profil", fotoBaru)
 		a.galatServer(w, "memperbarui tenaga pendidik", err)

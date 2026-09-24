@@ -203,10 +203,13 @@ type Tenaga struct {
 	NIP           string `json:"nip"`
 	Jabatan       string `json:"jabatan"`
 	MataPelajaran string `json:"mata_pelajaran"`
-	Kategori      string `json:"kategori"`
-	Foto          string `json:"foto"`
-	Urutan        int    `json:"urutan"`
-	Aktif         bool   `json:"aktif"`
+	// Nama kelas yang diampu sebagai wali kelas, misalnya "X-1". Kosong
+	// berarti bukan wali kelas — wajar bagi pimpinan dan tenaga kependidikan.
+	WaliKelas string `json:"wali_kelas"`
+	Kategori  string `json:"kategori"`
+	Foto      string `json:"foto"`
+	Urutan    int    `json:"urutan"`
+	Aktif     bool   `json:"aktif"`
 }
 
 type Agenda struct {

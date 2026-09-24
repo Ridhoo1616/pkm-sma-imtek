@@ -29,6 +29,7 @@ const KOSONG = {
   nip: "",
   jabatan: "",
   mata_pelajaran: "",
+  wali_kelas: "",
   kategori: "Pendidik",
   urutan: 0,
   aktif: true,
@@ -71,6 +72,7 @@ function IsiTenaga() {
         nip: t.nip,
         jabatan: t.jabatan,
         mata_pelajaran: t.mata_pelajaran,
+        wali_kelas: t.wali_kelas,
         kategori: t.kategori,
         urutan: t.urutan,
         aktif: t.aktif,
@@ -94,6 +96,7 @@ function IsiTenaga() {
     fd.append("nip", isi.nip);
     fd.append("jabatan", isi.jabatan);
     fd.append("mata_pelajaran", isi.mata_pelajaran);
+    fd.append("wali_kelas", isi.wali_kelas);
     fd.append("kategori", isi.kategori);
     fd.append("urutan", String(isi.urutan));
     fd.append("aktif", isi.aktif ? "1" : "0");
@@ -157,7 +160,17 @@ function IsiTenaga() {
         />
       ) : (
         <Tabel
-          kepala={["Urut", "Foto", "Nama", "Jabatan", "Mata pelajaran", "Kategori", "Tampil", ""]}
+          kepala={[
+            "Urut",
+            "Foto",
+            "Nama",
+            "Jabatan",
+            "Mata pelajaran",
+            "Wali kelas",
+            "Kategori",
+            "Tampil",
+            "",
+          ]}
         >
           {data.data.map((t) => (
             <tr key={t.id} className="hover:bg-slate-50">
@@ -184,6 +197,15 @@ function IsiTenaga() {
               </td>
               <td className="px-4 py-3 text-samar">{t.jabatan || "-"}</td>
               <td className="px-4 py-3 text-samar">{t.mata_pelajaran || "-"}</td>
+              <td className="px-4 py-3">
+                {t.wali_kelas ? (
+                  <span className="rounded-md bg-biru-muda px-2 py-0.5 text-xs font-bold text-biru">
+                    {t.wali_kelas}
+                  </span>
+                ) : (
+                  <span className="text-samar">-</span>
+                )}
+              </td>
               <td className="px-4 py-3">
                 <span className="rounded-full bg-biru-muda px-2.5 py-0.5 text-xs font-semibold text-biru">
                   {t.kategori}
@@ -278,6 +300,17 @@ function IsiTenaga() {
               contoh="Matematika"
             />
           </div>
+
+          <Teks
+            nama="wali_kelas"
+            label="Wali kelas"
+            maks={40}
+            nilai={isi.wali_kelas}
+            ubah={(v) => setIsi((s) => ({ ...s, wali_kelas: v }))}
+            galat={galatKolom.wali_kelas}
+            contoh="X-1"
+            bantuan="Isi nama kelasnya bila yang bersangkutan menjadi wali kelas. Kosongkan bila tidak. Dari kolom inilah angka Wali Kelas pada halaman publik dihitung."
+          />
 
           <Teks
             nama="urutan"
