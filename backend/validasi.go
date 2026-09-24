@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // Validasi mengumpulkan galat masukan. Pesan per kolom dipakai frontend untuk
@@ -165,6 +166,72 @@ func (v *Validasi) bulatRentang(kolom, label, nilai string, min, maks int) *int 
 
 // kosongJadiNil memetakan string kosong ke NULL basis data, seperti idiom
 // `$d['x'] ?: null` pada versi PHP.
+// teksWajar menolak isian yang jelas bukan tulisan sungguhan: "aaaa",
+// "123", ".....". Gunanya menahan kiriman asal-asalan, bukan menilai benar
+// tidaknya isi — kebenarannya tetap diperiksa panitia dari berkas yang
+// diunggah.
+//
+// Aturannya sengaja dibuat sempit, sebab salah tolak pada kolom nama jauh
+// lebih merugikan daripada satu kiriman sampah yang lolos: pendaftar yang
+// namanya ditolak tidak punya jalan lain selain menghubungi panitia. Yang
+// ditolak hanya tiga hal yang tidak pernah ada pada nama maupun alamat
+// orang Indonesia:
+//
+//  1. kurang dari tiga huruf sama sekali;
+//  2. tidak memuat satu pun huruf hidup;
+//  3. tiga huruf sama berturut-turut, misalnya "aaa".
+//
+// Huruf ganda seperti pada "Abdullah" tetap lolos karena yang ditolak tiga
+// berturut-turut, bukan dua. Angka dilarang hanya pada kolom yang memang
+// tidak pernah berangka — nama orang — dan tetap diizinkan pada alamat,
+// karena alamat justru hampir selalu memuat nomor rumah.
+func (v *Validasi) teksWajar(kolom, label, nilai string, bolehAngka bool) {
+	// Kosongnya diurus v.wajib; di sini isian kosong dilewati saja supaya
+	// pendaftar tidak menerima dua galat untuk satu kolom.
+	if nilai == "" {
+		return
+	}
+
+	huruf := 0
+	adaHurufHidup := false
+	var sebelumnya rune
+	berulang := 1
+	for _, r := range nilai {
+		if unicode.IsDigit(r) && !bolehAngka {
+			v.tambah(kolom, label+" tidak boleh memuat angka.")
+			return
+		}
+		if !unicode.IsLetter(r) {
+			sebelumnya = 0
+			berulang = 1
+			continue
+		}
+		huruf++
+		kecil := unicode.ToLower(r)
+		if strings.ContainsRune("aiueo", kecil) {
+			adaHurufHidup = true
+		}
+		if kecil == sebelumnya {
+			berulang++
+			if berulang >= 3 {
+				v.tambah(kolom, label+" memuat tiga huruf sama berturut-turut. Tulis sesuai dokumen resmi Anda.")
+				return
+			}
+		} else {
+			berulang = 1
+		}
+		sebelumnya = kecil
+	}
+
+	if huruf < 3 {
+		v.tambah(kolom, label+" harus memuat sedikitnya tiga huruf.")
+		return
+	}
+	if !adaHurufHidup {
+		v.tambah(kolom, label+" tidak memuat satu pun huruf hidup, jadi tidak mungkin benar. Tulis sesuai dokumen resmi Anda.")
+	}
+}
+
 func kosongJadiNil(s string) any {
 	if strings.TrimSpace(s) == "" {
 		return nil

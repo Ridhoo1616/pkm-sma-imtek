@@ -146,8 +146,12 @@ func TestPeriksaNisn(t *testing.T) {
 	kasus := []struct {
 		nama, nisn, nik, lahir, penanda string
 	}{
-		{"sah", "0119876543", "", lahir2011, ""},
-		{"tanpa tanggal lahir, awalan tidak diperiksa", "9876543210", "", "", ""},
+		// Dua contoh "sah" di bawah ini semula 0119876543 dan 9876543210.
+		// Keduanya ternyata berpola berurutan turun, jadi sejak pemeriksaan
+		// pola karangan ada, keduanya memang HARUS ditolak — contohnya yang
+		// keliru dipilih, bukan pemeriksaannya. Diganti nomor yang acak.
+		{"sah", "0119384756", "", lahir2011, ""},
+		{"tanpa tanggal lahir, awalan tidak diperiksa", "5839274615", "", "", ""},
 		{"kosong padahal wajib", "", "", lahir2011, "wajib diisi"},
 		{"sembilan angka", "011987654", "", lahir2011, "10 angka"},
 		{"panjang NIK", nikLaki, "", lahir2011, "itu panjang NIK"},
@@ -224,4 +228,137 @@ func kolomBermasalah(v *Validasi) string {
 
 func pesanKolom(v *Validasi, kolom string) string {
 	return v.Kolom[kolom]
+}
+
+// TestPeriksaNisnMenolakPolaKarangan menjaga celah yang ditemukan setelah
+// NISN diwajibkan: nomor yang tiga angka pertamanya sengaja dibuat cocok
+// dengan tahun lahir, tetapi tujuh angka sisanya asal-asalan. Sebelum
+// pemeriksaan pola ada, seluruh nomor pada daftar "tolak" di bawah ini
+// diterima apa adanya.
+func TestPeriksaNisnMenolakPolaKarangan(t *testing.T) {
+	const lahir = "2011-05-14" // awalan NISN yang sah: 011
+
+	tolak := []string{
+		"0111111111", // tujuh angka sesudah awalan seluruhnya sama
+		"0110000000", // idem, nol semua
+		"0119999999",
+		"0111234567", // berurutan naik
+		"0119876543", // berurutan turun
+		"1111111111", // kesepuluh angkanya sama
+		"0123456789", // kesepuluhnya berurutan naik
+	}
+	for _, n := range tolak {
+		v := validasiBaru()
+		v.periksaNisn(n, "", lahir)
+		if !v.bermasalah() {
+			t.Errorf("NISN %s seharusnya ditolak, tetapi diterima", n)
+		}
+	}
+
+	// Tanpa tanggal lahir, pemeriksaan tahun lahir tidak dapat berjalan.
+	// Pemeriksaan pola HARUS tetap menjaring, supaya tidak ada celah di situ.
+	for _, n := range []string{"1111111111", "0111111111", "0123456789"} {
+		v := validasiBaru()
+		v.periksaNisn(n, "", "")
+		if !v.bermasalah() {
+			t.Errorf("NISN %s tanpa tanggal lahir seharusnya tetap ditolak", n)
+		}
+	}
+
+	// Nomor yang sah tidak boleh ikut tertolak.
+	terima := []string{
+		"0112345680", // acak, awalan tahunnya benar
+		"0119384756",
+		"0110293847",
+		"0117654320",
+	}
+	for _, n := range terima {
+		v := validasiBaru()
+		v.periksaNisn(n, "", lahir)
+		if v.bermasalah() {
+			t.Errorf("NISN %s seharusnya diterima, tetapi ditolak: %s", n, v.Daftar[0])
+		}
+	}
+}
+
+func TestAngkaKarangan(t *testing.T) {
+	kasus := []struct {
+		angka  string
+		karang bool
+	}{
+		{"1111111", true},
+		{"0000000", true},
+		{"1234567", true},
+		{"7654321", true},
+		{"0123456789", true},
+		{"9876543210", true},
+		{"1234", true},
+		{"123", false}, // terlalu pendek untuk dinilai
+		{"1122334", false},
+		{"0112345680", false},
+		{"1029384756", false},
+		{"1234568", false}, // nyaris berurutan, tetapi tidak
+	}
+	for _, k := range kasus {
+		if dapat := angkaKarangan(k.angka); dapat != k.karang {
+			t.Errorf("angkaKarangan(%q) = %v, diharapkan %v", k.angka, dapat, k.karang)
+		}
+	}
+}
+
+// TestTeksWajar menjaga agar penolakan isian asal-asalan tidak ikut menolak
+// nama dan alamat yang sungguhan. Salah tolak pada kolom nama jauh lebih
+// merugikan daripada satu kiriman sampah yang lolos, jadi daftar "terima" di
+// bawah ini sengaja memuat bentuk-bentuk yang mudah tertolak keliru.
+func TestTeksWajar(t *testing.T) {
+	terima := []struct {
+		nilai      string
+		bolehAngka bool
+	}{
+		{"Nurhayati", false},
+		{"Abdullah Syafi'i", false}, // huruf ganda, bukan tiga
+		{"Raditia Vindua", false},
+		{"Siti Aisyah binti Umar", false},
+		{"R.A. Kartini", false},
+		{"Ng Wei Ming", false},
+		{"Jl. Raya Pagedangan No. 12, RT 003/RW 002", true},
+		{"SMP Negeri 1 Pagedangan", true},
+	}
+	for _, k := range terima {
+		v := validasiBaru()
+		v.teksWajar("uji", "Kolom", k.nilai, k.bolehAngka)
+		if v.bermasalah() {
+			t.Errorf("%q seharusnya diterima, tetapi ditolak: %s", k.nilai, v.Daftar[0])
+		}
+	}
+
+	tolak := []struct {
+		nilai      string
+		bolehAngka bool
+	}{
+		{"aaaa", false}, // tiga huruf sama berturut-turut
+		{"AAA", false},
+		{"ab", false},     // kurang dari tiga huruf
+		{"123456", false}, // berangka pada kolom nama
+		{"Budi 2", false},
+		{".....", false},  // tanpa huruf sama sekali
+		{"12345", true},   // berangka boleh, tetapi hurufnya kurang
+		{"zxcvbn", false}, // tanpa huruf hidup
+		{"aaaa", true},
+	}
+	for _, k := range tolak {
+		v := validasiBaru()
+		v.teksWajar("uji", "Kolom", k.nilai, k.bolehAngka)
+		if !v.bermasalah() {
+			t.Errorf("%q seharusnya ditolak, tetapi diterima", k.nilai)
+		}
+	}
+
+	// Kolom kosong dilewati: kewajibannya diurus v.wajib, dan dua galat untuk
+	// satu kolom hanya membingungkan.
+	v := validasiBaru()
+	v.teksWajar("uji", "Kolom", "", false)
+	if v.bermasalah() {
+		t.Error("isian kosong seharusnya dilewati, bukan ditolak di sini")
+	}
 }

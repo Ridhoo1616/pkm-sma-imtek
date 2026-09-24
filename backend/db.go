@@ -113,7 +113,47 @@ func jalankanMigrasi(db *sql.DB, folder string) error {
 			return fmt.Errorf("mencatat migrasi %s: %w", nama, err)
 		}
 	}
+
+	periksaIndeksNisn(db)
 	return nil
+}
+
+// periksaIndeksNisn memperingatkan bila indeks unik NISN tidak ada.
+//
+// Migrasi 010 sengaja MELEWATI pembuatan indeksnya ketika tabel pendaftar
+// masih memuat NISN kembar, supaya server tetap menyala — migrasi yang gagal
+// menghentikan server dan mematikan situsnya, dan itu persis yang terjadi
+// pada migrasi 008. Tetapi pelewatan itu dilaporkan migrasinya lewat RAISE
+// NOTICE, dan notice PostgreSQL tidak terbawa ke log aplikasi, sehingga
+// operator tidak menerima tanda apa pun.
+//
+// Pemeriksaan ini yang memberi tandanya, dan dijalankan setiap kali server
+// menyala — bukan sekali saat migrasi — sebab catatan migrasinya sudah
+// terlanjur tercatat selesai dan tidak akan diulang. Jadi sesudah datanya
+// dirapikan, peringatan ini hilang sendiri begitu indeksnya dibuat.
+//
+// Tidak adanya indeks bukan alasan menolak menyala: pemeriksaan di
+// handler_pendaftar.go tetap menahan kiriman baru yang NISN-nya sudah
+// terpakai. Indeksnya penjaga lapis kedua, untuk dua kiriman yang tepat
+// bersamaan.
+func periksaIndeksNisn(db *sql.DB) {
+	var ada int
+	err := db.QueryRow(`SELECT COUNT(*) FROM pg_indexes
+	                     WHERE tablename = 'pendaftar'
+	                       AND indexname = 'uniq_pendaftar_nisn'`).Scan(&ada)
+	if err != nil || ada > 0 {
+		return
+	}
+
+	var kembar int
+	_ = db.QueryRow(`SELECT COUNT(*) FROM (
+	                   SELECT nisn, tahun_ajaran FROM pendaftar
+	                    WHERE nisn IS NOT NULL AND nisn <> ''
+	                    GROUP BY nisn, tahun_ajaran HAVING COUNT(*) > 1) k`).Scan(&kembar)
+
+	log.Printf("PERINGATAN: indeks unik NISN belum ada (%d pasang NISN kembar pada tabel pendaftar). "+
+		"Rapikan baris kembarnya, lalu jalankan: CREATE UNIQUE INDEX uniq_pendaftar_nisn "+
+		"ON pendaftar (nisn, tahun_ajaran) WHERE nisn IS NOT NULL AND nisn <> '';", kembar)
 }
 
 // perluDijadikanDasar menjawab apakah basis data ini sudah berisi skema

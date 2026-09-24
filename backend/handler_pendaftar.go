@@ -70,6 +70,16 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 	v.panjangMaks("nama_lengkap", "Nama lengkap", namaLengkap, 100)
 	v.panjangMaks("alamat", "Alamat", alamat, 1000)
 
+	// Isian asal-asalan — "aaaa", "123", "....." — ditahan di sini. Nama
+	// orang tidak pernah berangka, sedangkan alamat hampir selalu berangka,
+	// jadi keduanya dibedakan lewat parameter terakhir.
+	v.teksWajar("nama_lengkap", "Nama lengkap", namaLengkap, false)
+	v.teksWajar("nama_ayah", "Nama ayah", namaAyah, false)
+	v.teksWajar("nama_ibu", "Nama ibu", namaIbu, false)
+	v.teksWajar("tempat_lahir", "Tempat lahir", tempatLahir, false)
+	v.teksWajar("alamat", "Alamat tempat tinggal", alamat, true)
+	v.teksWajar("asal_sekolah", "Asal sekolah", asalSekolah, true)
+
 	if lahir, ok := v.tanggal("tanggal_lahir", "Tanggal lahir", tanggalLahir, true); ok {
 		v.usiaWajar("tanggal_lahir", lahir)
 	}
@@ -183,6 +193,31 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	/* ---- satu NISN untuk satu pendaftar ----
+
+	   Nomornya sengaja TIDAK disebutkan pada pesan galatnya, berbeda dengan
+	   pemeriksaan nama dan tanggal lahir di atas. Alasannya: nama beserta
+	   tanggal lahir hanya diketahui orang yang memang mengenal pendaftarnya,
+	   sedangkan NISN adalah satu nomor tunggal. Kalau nomor registrasi ikut
+	   dikembalikan, formulir ini berubah menjadi alat penelusuran — cukup
+	   mencoba satu per satu NISN untuk mengetahui siapa saja yang mendaftar.
+	   Pendaftar yang memang merasa belum pernah mendaftar diarahkan ke
+	   panitia. */
+	if nisn != "" {
+		var ada bool
+		err := a.db.QueryRow(
+			`SELECT EXISTS (SELECT 1 FROM pendaftar
+			                 WHERE nisn = $1 AND tahun_ajaran = $2)`,
+			nisn, a.atur("ppdb_tahun")).Scan(&ada)
+		if err != nil {
+			a.galatServer(w, "memeriksa NISN ganda", err)
+			return
+		}
+		if ada {
+			v.tambah("nisn", "NISN ini sudah dipakai pendaftaran lain pada tahun ajaran ini. Satu NISN hanya untuk satu orang. Bila Anda merasa belum pernah mendaftar, hubungi panitia lewat halaman Kontak.")
+		}
+	}
+
 	/* ---- unggahan ---- */
 	// Berkas disimpan lebih dulu supaya galatnya bisa dilaporkan sekaligus
 	// dengan galat isian. Bila akhirnya ada galat, seluruh berkas dihapus.
@@ -265,13 +300,18 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		kosongJadiNil(sumberInfo), kosongJadiNil(isi("catatan_sumber")), alamatPemanggil(r))
 	if err != nil {
 		bereskan()
-		// Basis data punya batasan unik nama dengan tanggal lahir dan tahun
-		// ajaran. Batasan itu menjaring pendaftaran ganda yang lolos dari
-		// pemeriksaan di atas, misalnya dua kiriman yang tepat bersamaan.
+		// Basis data punya DUA batasan unik untuk tahun ajaran yang sama:
+		// nama dengan tanggal lahir, dan NISN. Keduanya menjaring pendaftaran
+		// ganda yang lolos dari pemeriksaan di atas, misalnya dua kiriman yang
+		// tepat bersamaan. Pesannya menyebut keduanya karena di sini yang
+		// tersedia hanya kode SQLSTATE, bukan nama batasan yang dilanggar —
+		// dan menebak salah satunya berarti menyuruh pendaftar membetulkan
+		// kolom yang sebenarnya sudah benar.
 		if kodeGanda(err) {
 			kirimGalat(w, http.StatusConflict,
-				"Data dengan nama dan tanggal lahir yang sama sudah terdaftar "+
-					"pada tahun ajaran ini. Gunakan menu Cek Status untuk memantaunya.")
+				"Data ini sudah terdaftar pada tahun ajaran ini: nama dengan "+
+					"tanggal lahir yang sama, atau NISN yang sama, sudah dipakai "+
+					"pendaftaran lain. Gunakan menu Cek Status untuk memantaunya.")
 			return
 		}
 		a.galatServer(w, "menyimpan pendaftaran", err)

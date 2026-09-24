@@ -716,7 +716,82 @@ Dapodik hanya terbuka bagi sekolah lewat akunnya sendiri. Kepastian itu tetap
 harus datang dari panitia yang mencocokkan nomor pada rapor atau ijazah SMP
 yang diunggah pendaftar — dan itulah sebabnya berkas itu diminta.
 
-### H. Dukungan tujuan "meningkatkan efektivitas promosi"
+**Nomor karangan yang tiga angka pertamanya sengaja dibuat cocok.** Aturan
+awalan tahun lahir di atas menjaring `0000000098` dan `9876543210`, tetapi
+tidak menjaring `0111111111`, `0110000000`, maupun `0111234567` untuk
+kelahiran 2011 — ketiganya berawalan `011` yang benar, dan seluruhnya
+diterima apa adanya. Yang diperiksa sekarang juga **polanya**: deretan yang
+seluruhnya angka sama, atau berurutan naik maupun turun satu per satu,
+ditolak. Diperiksa dua kali — kesepuluh angkanya sekaligus, dan tujuh angka
+sesudah awalan tahunnya — sebab yang bermasalah justru bagian sesudah awalan
+itu.
+
+Peluang NISN sungguhan kebetulan berpola begitu kira-kira satu berbanding
+sejuta, sedangkan nomor yang dikarang hampir selalu berbentuk salah satunya.
+Pesan penolakannya tetap menyebutkan jalan keluar lewat panitia bagi satu
+dari sejuta itu. Pemeriksaannya diletakkan **sesudah** pemeriksaan awalan
+tahun lahir, supaya nomor seperti `1111111111` tetap menerima pesan tentang
+tahun lahir yang lebih menuntun bagi pendaftar yang sekadar salah ketik —
+tetapi tetap berjalan ketika tanggal lahirnya belum terisi, sehingga tidak
+ada celah di situ. Aturan yang sama ditulis dua kali, di
+`backend/validasi_identitas.go` dan di `frontend/src/lib/identitas.ts`;
+keduanya wajib sama, sebab kabar "bentuknya benar" yang disusul penolakan
+server lebih membingungkan daripada tidak ada kabar sama sekali.
+
+**Satu NISN hanya untuk satu pendaftar per tahun ajaran** (migrasi 010).
+Sampai migrasi ini, tiga puluh kiriman dengan NISN yang sama akan tersimpan
+seluruhnya, dan panitia baru menemukannya saat memverifikasi berkas satu per
+satu. Penjaganya dua lapis: pemeriksaan di aplikasi yang memberi pesan yang
+dapat dibaca pendaftar, dan indeks unik parsial di basis data yang menjaring
+dua kiriman yang tepat bersamaan.
+
+Pesan penolakannya **tidak menyebutkan nomor registrasi** milik pendaftaran
+yang sudah ada, berbeda dengan penolakan nama-dengan-tanggal-lahir. Nama
+beserta tanggal lahir hanya diketahui orang yang memang mengenal
+pendaftarnya, sedangkan NISN satu nomor tunggal: kalau nomor registrasinya
+ikut dikembalikan, formulir ini berubah menjadi alat penelusuran — cukup
+mencoba satu per satu NISN untuk mengetahui siapa saja yang mendaftar.
+
+**Migrasi 010 melewati pembuatan indeksnya bila datanya sudah memuat NISN
+kembar**, alih-alih gagal. Migrasi dijalankan saat server menyala, dan
+migrasi yang gagal menghentikan server lalu mematikan situsnya — persis yang
+terjadi pada migrasi 008. Tetapi pelewatannya dilaporkan lewat `RAISE
+NOTICE`, dan notice PostgreSQL tidak terbawa ke log aplikasi, sehingga
+operator tidak menerima tanda apa pun. Karena itu `periksaIndeksNisn` di
+`db.go` memeriksanya **setiap kali server menyala** dan menuliskan peringatan
+beserta perintah SQL yang perlu dijalankan sesudah datanya dirapikan.
+Catatan migrasinya sendiri sudah telanjur tercatat selesai dan tidak akan
+diulang.
+
+### H. Isian asal-asalan pada formulir pendaftaran
+
+`teksWajar` di `validasi.go` menolak isian yang jelas bukan tulisan
+sungguhan: `aaaa`, `123`, `.....`. Diterapkan pada nama lengkap, nama ayah,
+nama ibu, tempat lahir, alamat, dan asal sekolah.
+
+Aturannya sengaja **sempit**, sebab salah tolak pada kolom nama jauh lebih
+merugikan daripada satu kiriman sampah yang lolos: pendaftar yang namanya
+ditolak tidak punya jalan lain selain menghubungi panitia. Yang ditolak
+hanya tiga hal yang tidak pernah ada pada nama maupun alamat orang
+Indonesia: kurang dari tiga huruf sama sekali, tidak memuat satu pun huruf
+hidup, dan tiga huruf sama berturut-turut. Huruf ganda seperti pada
+"Abdullah" tetap lolos karena yang ditolak tiga berturut-turut, bukan dua.
+
+Angka dilarang hanya pada kolom yang memang tidak pernah berangka — nama
+orang — dan tetap diizinkan pada alamat, karena alamat justru hampir selalu
+memuat nomor rumah. Contoh yang diuji dan harus tetap diterima:
+"Abdullah Syafi'i", "R.A. Kartini", "Ng Wei Ming", dan
+"Jl. Raya Pagedangan No. 12, RT 003/RW 002".
+
+Yang **belum** ada: pembatas laju kiriman per alamat IP pada
+`POST /api/ppdb/daftar`. Halaman masuk petugas punya pembatasnya, formulir
+pendaftaran tidak. Sengaja belum dipasang karena risikonya nyata ke arah
+sebaliknya: pendaftar yang mengisi formulir dari warnet atau dari
+laboratorium komputer sekolah berbagi satu alamat IP, dan pembatas yang
+terlalu rapat akan memblokir antrean yang sah pada hari terakhir
+pendaftaran. Keputusan ambangnya milik sekolah, bukan milik kode ini.
+
+### I. Dukungan tujuan "meningkatkan efektivitas promosi"
 
 Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
 
@@ -737,7 +812,7 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
    tautan yang dibagikan ke WhatsApp dan media sosial tampil dengan judul dan
    keterangan yang benar.
 
-### I. Bilah informasi berjalan
+### J. Bilah informasi berjalan
 
 Di paling atas setiap halaman publik ada bilah berisi **tiga kabar yang
 berjalan**, dan ketiganya diambil dari basis data — tidak satu pun ditulis di
@@ -775,7 +850,7 @@ bukan memuji sekolahnya: kalimat tentang mutu sekolah hanya boleh datang dari
 sekolah sendiri, dan tempatnya sudah disediakan pada semboyan dan bagian
 keunggulan.
 
-### J. Sambutan kepala sekolah di beranda
+### K. Sambutan kepala sekolah di beranda
 
 Beranda memuat sambutan kepala sekolah tepat sesudah bilah keadaan PPDB,
 mengikuti rancangan yang dikirim user: dua bidang bersebelahan. Panel biru
@@ -826,7 +901,7 @@ berbeda dari kerangka di halaman Profil:
 Begitu nama, foto, atau naskahnya diisi lewat menu Pengaturan, bagian ini
 berganti sendiri ke bentuk terisinya. Tidak ada kode yang perlu diubah.
 
-### K. Peta lokasi dan pengukur jarak
+### L. Peta lokasi dan pengukur jarak
 
 Beranda memuat peta lokasi sekolah beserta tombol yang memungkinkan
 pengunjung mengukur jarak dan waktu tempuh dari rumahnya, untuk tiga moda:
@@ -859,7 +934,7 @@ Petanya sendiri memakai `peta_embed` yang sudah ada. Bila kosong, yang tampil
 kerangka berukuran sama, dan **tombol penunjuk arahnya tetap bekerja** —
 keduanya tidak saling bergantung.
 
-### L. Alur masalah dan jawabannya di beranda
+### M. Alur masalah dan jawabannya di beranda
 
 Tepat sebelum ajakan mendaftar, beranda memuat tiga baris berpasangan: satu
 keadaan yang biasa terjadi pada pendaftaran berkas kertas, dan di sebelahnya
@@ -888,7 +963,7 @@ Sisanya bergantung bahan yang belum dimiliki sekolah: foto orang hasil studio,
 tangkapan antarmuka produk, dan baris logo "dipercaya oleh 123 merek" yang
 tidak boleh dikarang.
 
-### M. Beranda mendahulukan profil sekolah
+### N. Beranda mendahulukan profil sekolah
 
 Beranda semula dibuka dengan kartu putih besar berisi kuota PPDB, jumlah
 pendaftar, sisa kuota, dan tanggal penutupan. Angka itu menjawab pertanyaan
@@ -928,7 +1003,7 @@ kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
 
-### N. Tautan WhatsApp beserta pesan bawaannya
+### O. Tautan WhatsApp beserta pesan bawaannya
 
 Tautan `wa.me` ada di lima tempat: bilah atas, footer, halaman Kontak, tombol
 bantuan melayang, dan panel pesan panitia. Empat di antaranya dulu mengarah ke
@@ -950,7 +1025,7 @@ menuju entah ke mana lebih buruk daripada tombol yang tidak ada. Nomor telepon
 sekolah tidak dipakai sebagai gantinya, karena nomornya nomor kabel yang tidak
 punya WhatsApp.
 
-### O. Lencana status
+### P. Lencana status
 
 Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
 petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:

@@ -275,7 +275,52 @@ func (v *Validasi) periksaNisn(nisn, nik, tanggalLahir string) {
 			return
 		}
 		v.tambah("nisn", "Tiga angka pertama NISN harus sama dengan tiga angka terakhir tahun lahir. Periksa kembali NISN dan tanggal lahirnya.")
+		return
 	}
+
+	// Pola karangan yang LOLOS dari pemeriksaan tahun lahir di atas, karena
+	// tiga angka pertamanya kebetulan atau sengaja dibuat cocok: 0111111111,
+	// 0110000000, dan 0111234567 untuk kelahiran 2011 seluruhnya diterima
+	// sebelum pemeriksaan ini ada. Yang diperiksa dua-duanya — kesepuluh
+	// angkanya sekaligus, dan tujuh angka sesudah awalan tahunnya — sebab
+	// yang bermasalah justru bagian sesudah awalan itu.
+	//
+	// Diletakkan SESUDAH pemeriksaan tahun lahir supaya nomor seperti
+	// 1111111111 tetap mendapat pesan tentang tahun lahir, yang lebih
+	// menuntun bagi pendaftar yang sekadar salah ketik. Tetapi pemeriksaan
+	// ini tetap berjalan ketika tanggal lahirnya belum terisi, sehingga
+	// tidak ada celah di situ.
+	if angkaKarangan(nisn) || angkaKarangan(nisn[3:]) {
+		v.tambah("nisn", "NISN ini berpola angka yang tidak pernah dipakai nomor sungguhan: seluruhnya angka yang sama, atau berurutan naik maupun turun. Salin nomornya apa adanya dari rapor atau ijazah SMP; bila nomor pada rapor Anda memang seperti ini, hubungi panitia lewat halaman Kontak agar dicatat manual.")
+	}
+}
+
+// angkaKarangan melaporkan apakah sederet angka berpola yang tidak pernah
+// muncul pada nomor yang sungguh diterbitkan: seluruhnya angka yang sama,
+// atau berurutan naik maupun turun satu per satu.
+//
+// Peluang sebuah NISN sungguhan kebetulan berpola begitu kira-kira satu
+// berbanding sejuta, sedangkan nomor yang dikarang hampir selalu berbentuk
+// salah satu di antaranya. Karena itu menolaknya jauh lebih sering benar
+// daripada salah — dan pesan penolakannya tetap menyebutkan jalan keluar
+// lewat panitia bagi satu dari sejuta itu.
+func angkaKarangan(d string) bool {
+	if len(d) < 4 {
+		return false
+	}
+	sama, naik, turun := true, true, true
+	for i := 1; i < len(d); i++ {
+		if d[i] != d[0] {
+			sama = false
+		}
+		if d[i] != d[i-1]+1 {
+			naik = false
+		}
+		if d[i] != d[i-1]-1 {
+			turun = false
+		}
+	}
+	return sama || naik || turun
 }
 
 // nisnSesuaiTahunLahir melaporkan apakah tiga angka pertama NISN cocok dengan
