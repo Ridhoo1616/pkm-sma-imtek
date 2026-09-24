@@ -42,10 +42,7 @@ const PASANGAN = [
 
 export function MasalahJawaban() {
   return (
-    <section
-      aria-labelledby="judul-masalah"
-      className="wadah py-16 md:py-20"
-    >
+    <section aria-labelledby="judul-masalah" className="wadah py-16 md:py-20">
       <div className="max-w-3xl">
         <p className="inline-block rounded-md bg-emas px-2.5 py-1 text-xs font-bold tracking-[0.12em] text-biru-tua uppercase">
           Kenapa online
@@ -63,7 +60,7 @@ export function MasalahJawaban() {
         <p className="mt-4 leading-relaxed text-samar">
           Tiga keadaan di bawah ini biasa terjadi pada pendaftaran yang
           dikerjakan dengan berkas kertas. Di sebelahnya, apa yang dikerjakan
-          sistem ini — dan tautannya, supaya dapat Anda periksa sendiri.
+          sistem ini, dan tautannya, supaya dapat Anda periksa sendiri.
         </p>
       </div>
 

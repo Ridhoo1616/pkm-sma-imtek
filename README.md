@@ -995,6 +995,51 @@ kedua kanal. Menggantinya berarti memindahkan naskah yang sudah diisi sekolah,
 dan risiko kehilangan naskah itu lebih besar daripada untungnya nama yang lebih
 tepat. Ketidakcocokan namanya dicatat di sini dan di migrasi 014.
 
+**Alamat pengirim email dapat diatur dari panel** (migrasi 015), pada
+pengaturan `email_pengirim` dan `email_pengirim_nama`. Sekolah yang ingin
+pesannya tampak datang dari ppdb@sekolah, bukan dari akun Gmail yang dipakai
+mengirim, tidak perlu menyentuh server.
+
+**Sandinya tetap di `.env`, dan itu disengaja.** Sandi aplikasi yang disimpan
+di basis data akan ikut terbawa setiap kali basis datanya dicadangkan atau
+disalin ke komputer lain, dan cadangan basis data beredar jauh lebih bebas
+daripada berkas `.env`. Yang boleh diatur dari panel hanya alamat dan nama
+pengirimnya.
+
+Peringatan yang tercantum pada keterangan pengaturannya: Gmail MENOLAK alamat
+pengirim yang bukan akun yang dipakai masuk, atau bukan alias yang sudah
+diverifikasi di setelan Gmail. Mengisi alamat sembarangan membuat
+pengirimannya gagal, dan galatnya tercatat pada daftar notifikasi. Kosong
+berarti memakai alamat akunnya sendiri, yang selalu diterima.
+
+**Nomor WhatsApp pengirim tidak dapat diatur, dan itu bukan kelalaian.**
+Pesan WhatsApp dikirim dari akun WhatsApp panitia yang membuka tautannya, jadi
+tidak ada nomor pengirim yang dapat disetel dari panel. Bila gateway resmi
+dipakai, pengirimnya nomor gateway itu. Yang dapat diatur pengaturan
+`whatsapp`, yaitu nomor yang DITAMPILKAN kepada pengunjung pada lima tombol
+WhatsApp di situs; pengaturan itu masih kosong, dan selama kosong kelima
+tombolnya tidak muncul. Pengaturan yang tidak mengerjakan apa pun sengaja
+tidak dibuat.
+
+### Tanda pisah panjang tidak dipakai pada tulisan yang tampak
+
+Tanda pisah panjang (em dash dan en dash) tidak lagi dipakai pada seluruh
+tulisan yang dibaca pengunjung maupun panitia. Penggantinya titik dua, titik
+koma, koma, atau kalimat yang dipecah, sesuai maksudnya; rentang tanggal
+memakai tanda hubung biasa.
+
+Yang diubah HANYA tulisan yang tampak, bukan komentar di dalam kode. Cara
+mencarinya pun dari keluaran jadinya, bukan dari kodenya: teks tampak
+dikeluarkan dari HTML ke-27 halaman publik yang benar-benar disajikan, dari
+berkas JavaScript hasil build untuk teks panel admin, dan dari kolom `nilai`
+serta `keterangan` pada tabel pengaturan. Sebelas tempat ditemukan; dari 109
+baris kode yang memuat tanda itu, sisanya komentar.
+
+Satu di antaranya ada di basis data, bukan di kode: keterangan pengaturan
+`peta_koordinat` yang ditulis migrasi 008, dan tampil sebagai teks bantuan di
+panel. Diganti lewat migrasi 015, sekaligus dibetulkan di sumber migrasi 008
+supaya pemasangan baru tidak menuliskannya lagi.
+
 ### I. Dukungan tujuan "meningkatkan efektivitas promosi"
 
 Bagian inilah yang menjadi sumber data pembahasan laporan PkM:

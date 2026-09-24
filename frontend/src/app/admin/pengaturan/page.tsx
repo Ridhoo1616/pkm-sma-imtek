@@ -92,8 +92,10 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
   {
     judul: "Notifikasi & Daftar Ulang",
     keterangan:
-      "Naskah pesan yang dikirim ke orang tua lewat WhatsApp dan email. Badan pesannya sama untuk kedua kanal; email menambahkan baris perihal. Penanda dalam kurung kurawal diganti sistem: {nama}, {no_registrasi}, {sekolah}, {tahun_ajaran}, {status}, {catatan}, {jadwal_ujian}, dan untuk daftar ulang {daftar_ulang_jadwal}, {daftar_ulang_tempat}, {daftar_ulang_syarat}. Naskah yang masih bertanda kurung siku TIDAK pernah dikirim — notifikasinya tidak disusun sama sekali.",
+      "Alamat pengirim email dan naskah pesan yang dikirim ke orang tua lewat WhatsApp dan email. Badan pesannya sama untuk kedua kanal; email menambahkan baris perihal. Penanda dalam kurung kurawal diganti sistem: {nama}, {no_registrasi}, {sekolah}, {tahun_ajaran}, {status}, {catatan}, {jadwal_ujian}, dan untuk daftar ulang {daftar_ulang_jadwal}, {daftar_ulang_tempat}, {daftar_ulang_syarat}. Naskah yang masih bertanda kurung siku TIDAK pernah dikirim; notifikasinya tidak disusun sama sekali. Nomor WhatsApp pengirimnya tidak diatur di sini: pesan WhatsApp dikirim dari akun WhatsApp panitia yang membuka tautannya. Nomor WhatsApp yang ditampilkan ke pengunjung diatur pada bagian Alamat & Kontak.",
     kunci: [
+      "email_pengirim",
+      "email_pengirim_nama",
       "wa_notif_verifikasi",
       "email_subjek_verifikasi",
       "wa_notif_ujian",

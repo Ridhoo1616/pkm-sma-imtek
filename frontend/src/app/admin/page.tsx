@@ -468,7 +468,7 @@ function BagianKunjungan() {
             perayap mesin pencari tidak terhitung. Satu &ldquo;pengunjung&rdquo;
             berarti satu alamat jaringan per hari: dua orang pada satu jaringan
             terhitung satu, dan satu orang yang berganti dari Wi-Fi ke data
-            seluler terhitung dua. Alamat IP-nya sendiri tidak disimpan — yang
+            seluler terhitung dua. Alamat IP-nya sendiri tidak disimpan; yang
             disimpan sidik ringkasnya yang berganti setiap hari.
           </p>
         </>

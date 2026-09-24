@@ -306,7 +306,7 @@ function IsiHalaman() {
             </p>
             <p className="mt-1 text-xs leading-relaxed text-samar">
               Untuk halaman yang punya rumusannya sendiri, misalnya OSIS. Ini
-              bukan visi misi sekolah — yang itu diisi lewat menu Pengaturan dan
+              bukan visi misi sekolah. Yang itu diisi lewat menu Pengaturan dan
               tampil di halaman Profil Sekolah. Biarkan kosong bila halaman ini
               tidak punya, dan bagiannya tidak akan tampil.
             </p>
@@ -328,7 +328,7 @@ function IsiHalaman() {
                 nilai={isi.misi}
                 ubah={(v) => setIsi((s) => ({ ...s, misi: v }))}
                 galat={galatKolom.misi}
-                bantuan="Satu baris satu poin, tanpa perlu menomori sendiri — penomorannya dibuat situs."
+                bantuan="Satu baris satu poin, tanpa perlu menomori sendiri; penomorannya dibuat situs."
               />
             </div>
           </div>

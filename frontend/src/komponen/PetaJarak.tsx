@@ -52,7 +52,10 @@ export function PetaJarak({ pengaturan }: { pengaturan: Pengaturan }) {
     moda;
 
   return (
-    <section aria-labelledby="judul-peta" className="bg-biru-muda/50 py-16 md:py-20">
+    <section
+      aria-labelledby="judul-peta"
+      className="bg-biru-muda/50 py-16 md:py-20"
+    >
       <div className="wadah grid gap-8 lg:grid-cols-[1.15fr_1fr] lg:gap-12">
         {/* ---------- Peta ---------- */}
         <div>
@@ -106,8 +109,8 @@ export function PetaJarak({ pengaturan }: { pengaturan: Pengaturan }) {
           <p className="mt-4 text-sm leading-relaxed text-samar">
             Tekan salah satu tombol di bawah. Google Maps akan terbuka memakai
             lokasi Anda sendiri, lalu menampilkan jaraknya beserta perkiraan
-            waktu tempuhnya. Anda tidak perlu mengetik alamat rumah, dan
-            lokasi Anda tidak dikirim ke server sekolah.
+            waktu tempuhnya. Anda tidak perlu mengetik alamat rumah, dan lokasi
+            Anda tidak dikirim ke server sekolah.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2.5">
@@ -123,7 +126,7 @@ export function PetaJarak({ pengaturan }: { pengaturan: Pengaturan }) {
                     : "rounded-xl border border-biru/25 bg-white px-5 py-3 text-sm font-semibold text-biru transition hover:bg-biru-muda"
                 }
               >
-                {i === 0 ? `Hitung jarak — ${m.label}` : m.label}
+                {i === 0 ? `Hitung jarak: ${m.label}` : m.label}
               </a>
             ))}
           </div>

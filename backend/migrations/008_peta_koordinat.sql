@@ -32,5 +32,5 @@
 
 INSERT INTO pengaturan (nama_setting, nilai, keterangan) VALUES
   ('peta_koordinat', '',
-   'Koordinat lokasi sekolah, bentuk lintang,bujur — misalnya -6.301234,106.612345. Dipakai tombol penunjuk arah di beranda. Kosong berarti memakai alamatnya.')
+   'Koordinat lokasi sekolah, bentuk lintang,bujur. Contoh: -6.301234,106.612345. Dipakai tombol penunjuk arah di beranda. Kosong berarti memakai alamatnya.')
 ON CONFLICT (nama_setting) DO NOTHING;

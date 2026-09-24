@@ -76,6 +76,27 @@ func susunEmail(dari, namaDari, ke, perihal, isi string) []byte {
 	return []byte(b.String())
 }
 
+// pengirimEmail memilih alamat dan nama pengirim.
+//
+// Pengaturan di panel menang atas berkas .env, supaya sekolah dapat
+// mengubahnya tanpa menyentuh server. Yang di panel HANYA alamat dan namanya;
+// sandinya tetap di .env, sebab sandi yang disimpan di basis data akan ikut
+// terbawa setiap kali basis datanya dicadangkan atau disalin, dan cadangan
+// basis data beredar jauh lebih bebas daripada berkas .env.
+//
+// Alamat yang masih bertanda kurung siku dianggap belum diisi.
+func (a *Aplikasi) pengirimEmail() (dari, nama string) {
+	dari = strings.TrimSpace(a.atur("email_pengirim"))
+	if dari == "" || dalamKurungSiku(dari) {
+		dari = a.cfg.SmtpDari
+	}
+	nama = strings.TrimSpace(a.atur("email_pengirim_nama"))
+	if nama == "" || dalamKurungSiku(nama) {
+		nama = a.cfg.SmtpNama
+	}
+	return dari, nama
+}
+
 // kirimEmail mengirim satu pesan teks. Galat yang dikembalikan sudah berupa
 // kalimat yang pantas dicatat pada kolom galat notifikasi.
 func (a *Aplikasi) kirimEmail(ctx context.Context, ke, perihal, isi string) error {
@@ -90,6 +111,7 @@ func (a *Aplikasi) kirimEmail(ctx context.Context, ke, perihal, isi string) erro
 	}
 
 	alamat := net.JoinHostPort(a.cfg.SmtpHost, a.cfg.SmtpPorta)
+	dari, namaDari := a.pengirimEmail()
 	sambung, err := (&net.Dialer{Timeout: 15 * time.Second}).DialContext(ctx, "tcp", alamat)
 	if err != nil {
 		return fmt.Errorf("tidak dapat menghubungi server email %s: %w", alamat, err)
@@ -117,7 +139,7 @@ func (a *Aplikasi) kirimEmail(ctx context.Context, ke, perihal, isi string) erro
 		return fmt.Errorf("server email menolak nama pengguna atau sandi aplikasinya: %w", err)
 	}
 
-	if err := klien.Mail(a.cfg.SmtpDari); err != nil {
+	if err := klien.Mail(dari); err != nil {
 		return fmt.Errorf("server email menolak alamat pengirim: %w", err)
 	}
 	if err := klien.Rcpt(ke); err != nil {
@@ -127,7 +149,7 @@ func (a *Aplikasi) kirimEmail(ctx context.Context, ke, perihal, isi string) erro
 	if err != nil {
 		return fmt.Errorf("server email menolak isi pesan: %w", err)
 	}
-	if _, err := tulis.Write(susunEmail(a.cfg.SmtpDari, a.cfg.SmtpNama, ke, perihal, isi)); err != nil {
+	if _, err := tulis.Write(susunEmail(dari, namaDari, ke, perihal, isi)); err != nil {
 		return fmt.Errorf("gagal mengirim isi pesan: %w", err)
 	}
 	if err := tulis.Close(); err != nil {
