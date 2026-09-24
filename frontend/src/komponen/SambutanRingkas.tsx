@@ -108,28 +108,41 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
 
         {/* ---------- Panel naskah ---------- */}
         <div className="relative overflow-hidden p-6 md:p-9">
-          {/* Gedung sekolah bergaya garis di pojok kanan bawah. Hiasan, jadi
-              tanpa kata sama sekali dan disembunyikan dari pembaca layar. */}
-          <svg
+          {/* Gedung sekolah di pojok kanan bawah. Hiasan, jadi tanpa kata
+              sama sekali dan disembunyikan dari pembaca layar.
+
+              Sebelumnya gambar garis yang ditulis langsung sebagai SVG di
+              berkas ini. Diganti gambar kiriman user, yang berupa bidang
+              bergradasi sangat pucat — bukan garis — sehingga tidak dapat
+              ditulis sebagai jalur SVG.
+
+              Berkasnya JPEG: aslinya PNG 1774x887 sebesar 1 MB tanpa lapisan
+              tembus pandang, dan karena tidak ada yang perlu dijaga tembusnya
+              sedangkan isinya bidang bergradasi, JPEG turun ke 28 KB.
+
+              Tepi kiri dan atasnya dipudarkan lewat mask supaya ia menyatu
+              dengan kartunya alih-alih terbaca sebagai foto yang ditempelkan.
+              Sengaja TIDAK diberi opacity tambahan: gambarnya sendiri sudah
+              pucat, dan memudarkannya lagi membuat gedungnya nyaris hilang.
+
+              DI LAYAR SEMPIT hiasan pojok ini tidak dipakai. Kartunya di sana
+              hanya selebar layar, naskahnya memenuhi seluruh lebarnya, dan
+              gambar di pojok kanan bawah menimpa paragraf terakhirnya —
+              diukur, memang bertimpa pada lebar 390 piksel. Gantinya sebuah
+              pita di dasar kartu, sesudah naskahnya, sehingga tidak pernah
+              menimpa apa pun. Berkasnya sama, jadi peramban tidak mengunduh
+              dua kali. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/ilustrasi/gedung-sambutan.jpg"
+            alt=""
             aria-hidden
-            viewBox="0 0 200 140"
-            className="pointer-events-none absolute -right-4 -bottom-4 w-52 text-biru/10 md:w-64"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={3}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          >
-            <path d="M18 132h164" />
-            <path d="M40 132V70l60-34 60 34v62" />
-            <path d="M100 36V16m0 0h26v14h-26" />
-            <path d="M74 132V98h52v34" />
-            <path d="M92 98v34M108 98v34" />
-            <rect x="52" y="80" width="14" height="14" rx="2" />
-            <rect x="134" y="80" width="14" height="14" rx="2" />
-            <path d="M28 132v-26a10 10 0 0 1 12 0" />
-            <path d="M172 132v-26a10 10 0 0 0-12 0" />
-          </svg>
+            width={1000}
+            height={500}
+            className="pointer-events-none absolute right-0 -bottom-2 hidden w-64 [mask-image:linear-gradient(to_top_left,#000_38%,transparent_88%)] [-webkit-mask-image:linear-gradient(to_top_left,#000_38%,transparent_88%)] sm:block md:w-80"
+            loading="lazy"
+            decoding="async"
+          />
 
           <div className="relative">
             <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
@@ -160,9 +173,7 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
                       "text-[15px] leading-relaxed whitespace-pre-line " +
                       // Baris pertama biasanya salam pembuka, jadi ditebalkan
                       // seperti pada rancangannya.
-                      (i === 0
-                        ? "font-semibold text-biru-tua"
-                        : "text-teks")
+                      (i === 0 ? "font-semibold text-biru-tua" : "text-teks")
                     }
                   >
                     {baris}
@@ -181,10 +192,24 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
               href="/profil"
               className="mt-7 inline-flex items-center gap-2 rounded-xl bg-biru px-6 py-3 text-sm font-semibold text-white transition hover:bg-biru-tua"
             >
-              {paragraf.length > 0 ? "Lihat Profil Lengkap" : "Buka Profil Sekolah"}
+              {paragraf.length > 0
+                ? "Lihat Profil Lengkap"
+                : "Buka Profil Sekolah"}
               <span aria-hidden>→</span>
             </Link>
           </div>
+
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/ilustrasi/gedung-sambutan.jpg"
+            alt=""
+            aria-hidden
+            width={1000}
+            height={500}
+            className="pointer-events-none -mx-6 -mb-6 mt-7 block h-24 w-[calc(100%+3rem)] max-w-none object-cover object-bottom sm:hidden"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       </div>
     </section>

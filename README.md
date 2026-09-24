@@ -1188,6 +1188,38 @@ berbeda dari kerangka di halaman Profil:
 Begitu nama, foto, atau naskahnya diisi lewat menu Pengaturan, bagian ini
 berganti sendiri ke bentuk terisinya. Tidak ada kode yang perlu diubah.
 
+**Gedung sekolah di pojok kartunya berupa gambar, bukan lagi jalur SVG.**
+Semula digambar sebagai garis langsung di dalam komponennya. Gambar kiriman
+user berupa bidang bergradasi yang sangat pucat — bukan garis — sehingga tidak
+dapat ditulis sebagai jalur SVG. Berkasnya JPEG: aslinya PNG 1774×887 sebesar
+1 MB tanpa lapisan tembus pandang, dan karena tidak ada yang perlu dijaga
+tembusnya sedangkan isinya bidang bergradasi, JPEG turun ke 28 KB.
+
+Tepi kiri dan atasnya dipudarkan lewat mask supaya ia menyatu dengan kartunya
+alih-alih terbaca sebagai foto yang ditempelkan. Sengaja tidak diberi opacity
+tambahan: gambarnya sendiri sudah pucat, dan memudarkannya lagi membuat
+gedungnya nyaris hilang.
+
+Di layar sempit hiasan pojok itu **tidak dipakai**. Kartunya di sana hanya
+selebar layar, naskahnya memenuhi seluruh lebarnya, dan gambar di pojok kanan
+bawah menimpa paragraf terakhirnya — diukur, memang bertimpa pada lebar 390
+piksel. Gantinya sebuah pita setinggi 96 piksel di dasar kartu, sesudah
+naskahnya, sehingga tidak pernah menimpa apa pun. Berkasnya sama, jadi
+peramban tidak mengunduh dua kali.
+
+**`max-w-none` wajib menyertai `w-[calc(100%+3rem)]`.** Preflight Tailwind
+memasang `img { max-width: 100% }` untuk seluruh gambar, dan aturan itu
+memangkas lebar yang melebihi wadahnya kembali menjadi 100%. Akibatnya gambar
+yang seharusnya melebar melewati padding kartu berhenti selebar isi kartu:
+tepi kirinya menyentuh tepi kartu karena margin negatifnya, sedangkan tepi
+kanannya berhenti 24 piksel sebelum tepi kartu.
+
+Cacat itu ternyata sudah ada pada kartu Tenaga Pendidik dan Kalender Akademik
+sejak keduanya dibuat, dan tidak tertangkap karena yang diperiksa waktu itu
+hanya UKURAN gambarnya — 308 piksel terlihat masuk akal — bukan letak tepinya
+terhadap tepi kartu. Ketiganya sekarang diperiksa per tepi: gambar 356 piksel
+pada kartu 358 piksel, rata di kedua sisi, 9 pemeriksaan lulus.
+
 ### N. Peta lokasi dan pengukur jarak
 
 Beranda memuat peta lokasi sekolah beserta tombol yang memungkinkan

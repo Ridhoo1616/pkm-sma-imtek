@@ -84,8 +84,17 @@ export default async function HalamanTenaga() {
                  piksel di atas dasar kartu — setebal padding kartu ditambah
                  garis tepinya. Urutan kelas di sini tidak menentukan, sebab
                  Tailwind menyusun ulang keluarannya sendiri, jadi ringkasan
-                 yang saling menimpa memang tidak bisa diandalkan. */
-              className="pointer-events-none -mr-6 -mb-6 -ml-6 w-[calc(100%+3rem)] self-end object-contain object-bottom sm:-mt-7 sm:-mr-7 sm:-mb-7 sm:ml-0 sm:w-72 sm:self-stretch md:w-96"
+                 yang saling menimpa memang tidak bisa diandalkan.
+
+                 `max-w-none` WAJIB ada bersama `w-[calc(100%+3rem)]`.
+                 Preflight Tailwind memasang `img { max-width: 100% }` untuk
+                 seluruh gambar, dan aturan itu memangkas lebar yang melebihi
+                 wadahnya kembali menjadi 100%. Tanpa max-w-none, gambarnya
+                 tetap selebar isi kartu: tepi kirinya menyentuh tepi kartu
+                 karena margin negatifnya, sedangkan tepi kanannya berhenti
+                 24 piksel sebelum tepi kartu — dan lebarnya terukur 308 alih
+                 alih 358 piksel pada layar 390 piksel. */
+              className="pointer-events-none -mr-6 -mb-6 -ml-6 w-[calc(100%+3rem)] max-w-none self-end object-contain object-bottom sm:-mt-7 sm:-mr-7 sm:-mb-7 sm:ml-0 sm:w-72 sm:self-stretch md:w-96"
             />
           </section>
         </MunculNaik>

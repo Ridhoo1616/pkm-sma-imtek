@@ -78,7 +78,7 @@ export default async function HalamanKalender() {
               alt="Ilustrasi kalender meja beserta tumpukan buku dan tanaman"
               width={1671}
               height={645}
-              className="pointer-events-none -mr-6 -mb-6 -ml-6 w-[calc(100%+3rem)] self-end object-contain object-bottom sm:-mt-7 sm:-mr-7 sm:-mb-7 sm:ml-0 sm:w-72 sm:self-stretch md:w-96"
+              className="pointer-events-none -mr-6 -mb-6 -ml-6 w-[calc(100%+3rem)] max-w-none self-end object-contain object-bottom sm:-mt-7 sm:-mr-7 sm:-mb-7 sm:ml-0 sm:w-72 sm:self-stretch md:w-96"
             />
           </section>
         </MunculNaik>
