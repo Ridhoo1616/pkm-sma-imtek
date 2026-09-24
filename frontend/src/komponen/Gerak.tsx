@@ -52,27 +52,24 @@ function kurangiGerak() {
  * halamannya panjang, misalnya daftar berita.
  */
 let pengamat: IntersectionObserver | null = null;
-const penangan = new WeakMap<Element, () => void>();
+const penangan = new WeakMap<Element, (terlihat: boolean) => void>();
 
-function amati(el: Element, saatTerlihat: () => void) {
+function amati(el: Element, saatBerubah: (terlihat: boolean) => void) {
   if (typeof IntersectionObserver === "undefined") {
-    saatTerlihat();
+    saatBerubah(true);
     return () => {};
   }
   if (!pengamat) {
     pengamat = new IntersectionObserver(
       (masukan) => {
         for (const m of masukan) {
-          if (!m.isIntersecting) continue;
-          penangan.get(m.target)?.();
-          penangan.delete(m.target);
-          pengamat?.unobserve(m.target);
+          penangan.get(m.target)?.(m.isIntersecting);
         }
       },
       { threshold: 0.15, rootMargin: "0px 0px -5% 0px" },
     );
   }
-  penangan.set(el, saatTerlihat);
+  penangan.set(el, saatBerubah);
   pengamat.observe(el);
   return () => {
     penangan.delete(el);
@@ -93,7 +90,13 @@ export function MunculNaik({ children, jeda = 0, className }: Props) {
     el.classList.add("gerak-awal");
     el.style.transitionDelay = jeda ? `${jeda}s` : "";
 
-    return amati(el, () => el.classList.add("gerak-tampil"));
+    return amati(el, (terlihat) => {
+      if (terlihat) {
+        el.classList.add("gerak-tampil");
+      } else {
+        el.classList.remove("gerak-tampil");
+      }
+    });
   }, [jeda]);
 
   return (
@@ -158,8 +161,12 @@ export function BilahGerak({
     el.style.width = "0%";
     el.style.transition = `width 0.7s ease-out ${jeda}s`;
 
-    return amati(el, () => {
-      el.style.width = `${lebar}%`;
+    return amati(el, (terlihat) => {
+      if (terlihat) {
+        el.style.width = `${lebar}%`;
+      } else {
+        el.style.width = "0%";
+      }
     });
   }, [lebar, jeda]);
 

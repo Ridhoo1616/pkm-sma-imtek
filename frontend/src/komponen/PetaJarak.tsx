@@ -122,8 +122,8 @@ export function PetaJarak({ pengaturan }: { pengaturan: Pengaturan }) {
                 rel="noopener noreferrer"
                 className={
                   i === 0
-                    ? "rounded-xl bg-biru px-5 py-3 text-sm font-semibold text-white transition hover:bg-biru-tua"
-                    : "rounded-xl border border-biru/25 bg-white px-5 py-3 text-sm font-semibold text-biru transition hover:bg-biru-muda"
+                    ? "rounded-xl bg-biru px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-biru-tua hover:ring-2 hover:ring-biru-tua hover:ring-offset-2"
+                    : "rounded-xl border border-biru/25 bg-white px-5 py-3 text-sm font-semibold text-biru transition-all hover:bg-biru-muda hover:border-transparent hover:ring-2 hover:ring-biru hover:ring-offset-2"
                 }
               >
                 {i === 0 ? `Hitung jarak: ${m.label}` : m.label}

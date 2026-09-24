@@ -27,10 +27,15 @@ export default function GulirHalus() {
       // 173 milidetik setelah roda dilepas, turun dari 754 milidetik. Halusnya
       // masih terasa karena loncatan tiap klik roda tetap diperhalus, tetapi
       // rasa meluncur yang membuat situsnya terasa berat sudah hilang.
-      lerp: 0.55,
+      // Lerp diperkecil menjadi 0.08 agar efek gulir jauh lebih halus dan
+      // panjang (smooth/buttery scroll), sesuai tren landing page modern.
+      // Ini akan membuat pengunjung membaca konten perlahan karena gulirannya
+      // tidak instan berhenti melainkan meluncur pelan.
+      lerp: 0.08,
       // Gulir sentuh dibiarkan bawaan peramban. Mengambil alih gulir di ponsel
       // hampir selalu terasa lebih buruk daripada gulir asli sistemnya.
       syncTouch: false,
+      smoothWheel: true,
     });
 
     let jalan = true;

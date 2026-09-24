@@ -146,13 +146,13 @@ export default async function Beranda() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/profil"
-                  className="rounded-xl bg-emas px-6 py-3.5 font-semibold text-biru-tua transition hover:brightness-95"
+                  className="rounded-xl bg-emas px-6 py-3.5 font-semibold text-biru-tua transition-all hover:brightness-105 hover:ring-2 hover:ring-emas hover:ring-offset-2 hover:ring-offset-biru-tua"
                 >
                   Kenali Sekolah Kami
                 </Link>
                 <Link
                   href="/ppdb"
-                  className="rounded-xl bg-white/10 px-6 py-3.5 font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/20"
+                  className="rounded-xl bg-white/10 px-6 py-3.5 font-semibold text-white ring-1 ring-white/25 transition-all hover:bg-white/20 hover:ring-2 hover:ring-white hover:ring-offset-2 hover:ring-offset-biru-tua"
                 >
                   Informasi PPDB
                 </Link>
@@ -257,14 +257,14 @@ export default async function Beranda() {
           <div className="flex w-full sm:w-auto flex-wrap items-center justify-center gap-3">
             <Link
               href={profil.ppdb.dibuka ? "/ppdb/daftar" : "/ppdb"}
-              className="group flex-1 sm:flex-none relative flex items-center justify-center gap-2 rounded-xl bg-biru-tua px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl hover:bg-biru hover:ring-2 hover:ring-biru/50 hover:ring-offset-2"
+              className="group flex-1 sm:flex-none relative flex items-center justify-center gap-2 rounded-xl bg-biru-tua px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl hover:bg-biru hover:ring-2 hover:ring-biru-tua hover:ring-offset-2"
             >
               {profil.ppdb.dibuka ? "Mulai Daftar" : "Lihat Syarat"}
               <span className="transition-transform group-hover:translate-x-1 opacity-70 group-hover:opacity-100">→</span>
             </Link>
             <Link
               href="/ppdb/cek"
-              className="flex-1 sm:flex-none rounded-xl border-2 border-biru-tua/10 bg-white px-6 py-3.5 text-center text-sm font-bold text-biru-tua transition-all hover:bg-biru-muda hover:border-biru-tua/30"
+              className="flex-1 sm:flex-none rounded-xl border-2 border-biru-tua/10 bg-white px-6 py-3.5 text-center text-sm font-bold text-biru-tua transition-all hover:bg-biru-muda hover:border-transparent hover:ring-2 hover:ring-biru-tua hover:ring-offset-2"
             >
               Cek Status
             </Link>
@@ -416,7 +416,7 @@ export default async function Beranda() {
               <div className="mt-8 text-center">
                 <Link
                   href="/fasilitas"
-                  className="inline-block rounded-lg border border-garis bg-white px-5 py-2.5 text-sm font-semibold text-biru transition hover:bg-biru-muda"
+                  className="inline-block rounded-lg border border-garis bg-white px-5 py-2.5 text-sm font-semibold text-biru transition-all hover:bg-biru-muda hover:border-transparent hover:ring-2 hover:ring-biru hover:ring-offset-2"
                 >
                   Lihat semua {fasilitas.length} fasilitas
                 </Link>
@@ -483,7 +483,7 @@ export default async function Beranda() {
             <div className="mt-8 text-center">
               <Link
                 href="/berita?kategori=Prestasi"
-                className="inline-block rounded-lg bg-white/10 px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/20"
+                className="inline-block rounded-lg bg-white/10 px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-white/25 transition-all hover:bg-white/20 hover:ring-2 hover:ring-white hover:ring-offset-2 hover:ring-offset-biru-tua"
               >
                 Semua prestasi
               </Link>
@@ -534,13 +534,13 @@ export default async function Beranda() {
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               <Link
                 href={profil.ppdb.dibuka ? "/ppdb/daftar" : "/ppdb"}
-                className="rounded-xl bg-emas px-6 py-3.5 font-semibold text-biru-tua transition hover:brightness-95"
+                className="rounded-xl bg-emas px-6 py-3.5 font-semibold text-biru-tua transition-all hover:brightness-105 hover:ring-2 hover:ring-emas hover:ring-offset-2 hover:ring-offset-biru-tua"
               >
                 {profil.ppdb.dibuka ? "Isi Formulir PPDB" : "Baca Persyaratan"}
               </Link>
               <Link
                 href="/kontak"
-                className="rounded-xl bg-white/10 px-6 py-3.5 font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/20"
+                className="rounded-xl bg-white/10 px-6 py-3.5 font-semibold text-white ring-1 ring-white/25 transition-all hover:bg-white/20 hover:ring-2 hover:ring-white hover:ring-offset-2 hover:ring-offset-biru-tua"
               >
                 Tanya Panitia
               </Link>

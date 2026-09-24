@@ -228,39 +228,40 @@ export default function Navigasi({
                       ▾
                     </span>
                   </button>
-
-                  {keadaan.menu === m.jalur && (
-                    <div
-                      id={`menu-${m.label.replace(/\s+/g, "-").toLowerCase()}`}
-                      className="absolute top-full left-0 w-72 animate-[munculKabar_0.15s_ease-out] pt-2"
-                    >
-                      <ul className="overflow-hidden rounded-kartu border border-garis bg-white py-1.5 shadow-kuat">
-                        <li>
+                  <div
+                    id={`menu-${m.label.replace(/\s+/g, "-").toLowerCase()}`}
+                    className={`absolute top-full left-0 w-72 origin-top-left pt-2 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      keadaan.menu === m.jalur
+                        ? "opacity-100 translate-y-0 visible"
+                        : "opacity-0 translate-y-3 invisible"
+                    }`}
+                  >
+                    <ul className="overflow-hidden rounded-kartu border border-garis bg-white/95 backdrop-blur-md py-1.5 shadow-[0_12px_40px_rgba(15,42,74,0.12)]">
+                      <li>
+                        <Link
+                          href={m.jalur}
+                          className="block border-b border-garis px-4 py-2.5 text-xs font-bold tracking-wide text-biru uppercase transition hover:bg-biru-muda"
+                        >
+                          Ringkasan {m.label}
+                        </Link>
+                      </li>
+                      {m.anak.map((s) => (
+                        <li key={s.label}>
                           <Link
-                            href={m.jalur}
-                            className="block border-b border-garis px-4 py-2.5 text-xs font-bold tracking-wide text-biru uppercase transition hover:bg-biru-muda"
+                            href={s.jalur}
+                            className={
+                              "block px-4 py-2.5 text-sm transition hover:bg-biru-muda hover:text-biru " +
+                              (aktif(s.jalur)
+                                ? "font-bold text-biru"
+                                : "font-medium text-teks")
+                            }
                           >
-                            Ringkasan {m.label}
+                            {s.label}
                           </Link>
                         </li>
-                        {m.anak.map((s) => (
-                          <li key={s.label}>
-                            <Link
-                              href={s.jalur}
-                              className={
-                                "block px-4 py-2.5 text-sm transition hover:bg-biru-muda hover:text-biru " +
-                                (aktif(s.jalur)
-                                  ? "font-bold text-biru"
-                                  : "font-medium text-teks")
-                              }
-                            >
-                              {s.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                      ))}
+                    </ul>
+                  </div>
                 </li>
               ) : (
                 <li key={m.jalur}>
@@ -284,14 +285,14 @@ export default function Navigasi({
             {ppdbDibuka ? (
               <Link
                 href="/ppdb/daftar"
-                className="hidden rounded-[10px] bg-biru px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-biru-tua sm:inline-block"
+                className="hidden rounded-[10px] bg-biru px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-biru-tua hover:ring-2 hover:ring-biru-tua hover:ring-offset-2 sm:inline-block"
               >
                 Daftar PPDB
               </Link>
             ) : (
               <Link
                 href="/ppdb"
-                className="hidden rounded-[10px] border border-garis px-4 py-2.5 text-sm font-semibold text-samar sm:inline-block"
+                className="hidden rounded-[10px] border border-garis px-4 py-2.5 text-sm font-semibold text-samar transition-all hover:border-transparent hover:ring-2 hover:ring-biru-tua hover:ring-offset-2 sm:inline-block"
               >
                 Info PPDB
               </Link>

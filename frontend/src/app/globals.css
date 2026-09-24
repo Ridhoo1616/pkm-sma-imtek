@@ -192,16 +192,16 @@
    pada HTML dari server, supaya halaman tetap terbaca bila skripnya gagal. */
 .gerak-awal {
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(30px) scale(0.97);
   will-change: opacity, transform;
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .gerak-tampil {
   opacity: 1;
-  transform: none;
-  transition:
-    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(0) scale(1);
 }
 
 /* Sesudah gerakannya selesai, petunjuk will-change dicabut supaya peramban

@@ -222,7 +222,7 @@ export default function BantuanMelayang({
                 href={wa}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2.5 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+                className="flex items-center gap-2.5 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-green-700 hover:ring-2 hover:ring-green-600 hover:ring-offset-2 hover:ring-offset-slate-50"
               >
                 <IkonWhatsapp ukuran={18} className="shrink-0" />
                 Tanya lewat WhatsApp
@@ -273,8 +273,8 @@ export default function BantuanMelayang({
           terbuka ? "Tutup bantuan pendaftaran" : "Buka bantuan pendaftaran"
         }
         className={
-          "group flex items-center gap-2.5 rounded-full py-3.5 pr-5 pl-4 font-semibold text-white shadow-kuat transition " +
-          (terbuka ? "bg-biru-tua hover:bg-biru" : "bg-green-600 hover:bg-green-700")
+          "group flex items-center gap-2.5 rounded-full py-3.5 pr-5 pl-4 font-semibold text-white shadow-kuat transition-all hover:ring-2 hover:ring-offset-2 " +
+          (terbuka ? "bg-biru-tua hover:bg-biru hover:ring-biru-tua" : "bg-green-600 hover:bg-green-700 hover:ring-green-600")
         }
       >
         {terbuka ? (
