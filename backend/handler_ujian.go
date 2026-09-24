@@ -651,6 +651,10 @@ func (a *Aplikasi) tanganiMulaiUjian(w http.ResponseWriter, r *http.Request) {
 	// registrasi beserta tanggal lahir. Nomor saja tidak cukup, supaya orang
 	// lain tidak dapat mengerjakan ujian atas nama pendaftar dengan menebak
 	// nomor urut.
+	if !a.izinkanCobaIdentitas(w, p.NoRegistrasi) {
+		return
+	}
+
 	var pendaftarID int
 	var nama, status string
 	err = a.db.QueryRow(
@@ -659,6 +663,7 @@ func (a *Aplikasi) tanganiMulaiUjian(w http.ResponseWriter, r *http.Request) {
 		strings.TrimSpace(p.NoRegistrasi), strings.TrimSpace(p.TanggalLahir)).
 		Scan(&pendaftarID, &nama, &status)
 	if err == sql.ErrNoRows {
+		a.catatGagalIdentitas(p.NoRegistrasi)
 		kirimGalat(w, http.StatusNotFound,
 			"Data tidak ditemukan. Periksa kembali nomor registrasi dan tanggal lahir.")
 		return
@@ -667,6 +672,7 @@ func (a *Aplikasi) tanganiMulaiUjian(w http.ResponseWriter, r *http.Request) {
 		a.galatServer(w, "mencari pendaftar", err)
 		return
 	}
+	a.bersihkanGagalIdentitas(p.NoRegistrasi)
 
 	// Yang berkasnya belum diverifikasi belum tentu berhak ikut, dan yang
 	// sudah ditolak jelas tidak. Pemeriksaan ini di server, bukan hanya

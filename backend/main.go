@@ -31,6 +31,12 @@ func main() {
 	if err != nil {
 		catat.Fatalf("aplikasi gagal disiapkan: %v", err)
 	}
+	if cfg.ProksiTepercaya != "" {
+		setelProksiTepercaya(cfg.ProksiTepercaya)
+	}
+	// Catatan pembatas laju yang sudah kedaluwarsa dibuang berkala, supaya
+	// petanya tidak tumbuh selamanya.
+	app.sapuPembatasBerkala()
 
 	server := &http.Server{
 		Addr:              cfg.Alamat,
@@ -91,13 +97,15 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/profil", a.tanganiProfil)
 	// Pencatat kunjungan. Terbuka tanpa token karena yang mengirimnya peramban
 	// pengunjung biasa; isinya diperiksa dan dipangkas di penanganannya.
-	m.HandleFunc("POST /api/kunjungan", a.tanganiCatatKunjungan)
+	m.HandleFunc("POST /api/kunjungan", a.batasiIP(a.batas.kunjunganIP,
+		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiCatatKunjungan))
 	m.HandleFunc("GET /api/jurusan", a.tanganiJurusanPublik)
 	m.HandleFunc("GET /api/fasilitas", a.tanganiFasilitasPublik)
 	m.HandleFunc("GET /api/berita", a.tanganiBeritaPublik)
 	m.HandleFunc("GET /api/berita/{slug}", a.tanganiBeritaDetail)
 	m.HandleFunc("GET /api/galeri", a.tanganiGaleriPublik)
-	m.HandleFunc("POST /api/pesan", a.tanganiKirimPesan)
+	m.HandleFunc("POST /api/pesan", a.batasiIP(a.batas.pesanIP,
+		"Terlalu banyak pesan dikirim dari jaringan Anda.", a.tanganiKirimPesan))
 	m.HandleFunc("GET /api/biaya", a.tanganiBiayaPublik)
 	m.HandleFunc("GET /api/faq", a.tanganiFaqPublik)
 	m.HandleFunc("GET /api/halaman", a.tanganiHalamanPublik)
@@ -107,18 +115,28 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/kegiatan-siswa", a.tanganiKegiatanPublik)
 	m.HandleFunc("GET /api/pustaka", a.tanganiPustakaPublik)
 
-	/* ---- PPDB ---- */
-	m.HandleFunc("POST /api/ppdb/daftar", a.tanganiDaftar)
-	m.HandleFunc("POST /api/ppdb/cek", a.tanganiCekStatus)
-	m.HandleFunc("POST /api/ppdb/bukti", a.tanganiBuktiPendaftar)
-	m.HandleFunc("POST /api/ppdb/kartu", a.tanganiKartuPendaftar)
+	/* ---- PPDB ----
+	   Keempatnya dibatasi laju. Tiga yang terakhir menyerahkan data pribadi
+	   pendaftar dengan kunci nomor registrasi ditambah tanggal lahir, jadi
+	   selain pembatas per alamat IP di sini, penanganannya juga mengunci per
+	   nomor registrasi setelah sepuluh kali gagal. Keterangannya di
+	   pembatas.go. */
+	m.HandleFunc("POST /api/ppdb/daftar", a.batasiIP(a.batas.daftarIP,
+		"Terlalu banyak pendaftaran dikirim dari jaringan Anda.", a.tanganiDaftar))
+	m.HandleFunc("POST /api/ppdb/cek", a.batasiIP(a.batas.identitasIP,
+		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiCekStatus))
+	m.HandleFunc("POST /api/ppdb/bukti", a.batasiIP(a.batas.identitasIP,
+		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiBuktiPendaftar))
+	m.HandleFunc("POST /api/ppdb/kartu", a.batasiIP(a.batas.identitasIP,
+		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiKartuPendaftar))
 
 	/* ---- tes seleksi online ----
 	   Peserta tidak punya akun. Jalur /mulai memakai nomor registrasi beserta
 	   tanggal lahir, lalu menerbitkan token berperan "peserta" yang hanya
 	   berlaku untuk tiga jalur di bawahnya. */
 	m.HandleFunc("GET /api/ppdb/ujian", a.tanganiInfoUjian)
-	m.HandleFunc("POST /api/ppdb/ujian/mulai", a.tanganiMulaiUjian)
+	m.HandleFunc("POST /api/ppdb/ujian/mulai", a.batasiIP(a.batas.identitasIP,
+		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiMulaiUjian))
 	m.HandleFunc("GET /api/ppdb/ujian/soal", a.wajibPeserta(a.tanganiSoalUjian))
 	m.HandleFunc("PATCH /api/ppdb/ujian/jawab", a.wajibPeserta(a.tanganiJawabUjian))
 	m.HandleFunc("POST /api/ppdb/ujian/selesai", a.wajibPeserta(a.tanganiSelesaikanUjian))

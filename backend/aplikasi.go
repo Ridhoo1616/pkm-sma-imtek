@@ -19,6 +19,10 @@ type Aplikasi struct {
 	pembatas      *pembatasMasuk
 	kunciPembatas sync.Mutex
 
+	// batas menahan permintaan berlebihan pada rute publik, termasuk
+	// penebakan tanggal lahir pada rute yang menyerahkan data pendaftar.
+	batas *pembatasPublik
+
 	// Pengaturan berubah sangat jarang tetapi dibaca hampir di setiap
 	// permintaan, jadi disimpan di memori dan disegarkan setelah diubah.
 	pengaturan      map[string]string
@@ -26,7 +30,13 @@ type Aplikasi struct {
 }
 
 func aplikasiBaru(cfg Konfigurasi, db *sql.DB, l *log.Logger) (*Aplikasi, error) {
-	a := &Aplikasi{cfg: cfg, db: db, log: l, pembatas: pembatasBaru()}
+	a := &Aplikasi{
+		cfg:      cfg,
+		db:       db,
+		log:      l,
+		pembatas: pembatasBaru(),
+		batas:    pembatasPublikBaru(),
+	}
 	if err := a.muatPengaturan(); err != nil {
 		return nil, err
 	}
@@ -102,15 +112,46 @@ func (a *Aplikasi) galatServer(w http.ResponseWriter, saat string, err error) {
 	kirimGalat(w, http.StatusInternalServerError, pesan)
 }
 
+// alamatPemanggil mengembalikan alamat IP pemanggil.
+//
+// X-Forwarded-For HANYA dipercaya bila permintaannya datang dari jaringan
+// tepercaya, yaitu tempat proksi baliknya berada. Sebelumnya kepala itu
+// dipakai apa adanya dengan alasan "hanya untuk pembatas laju", dan justru di
+// situ salahnya: siapa pun dapat mengirim X-Forwarded-For berisi angka acak
+// pada setiap permintaan, sehingga setiap permintaan terhitung berasal dari
+// alamat yang berbeda dan SELURUH pembatas laju menjadi tidak berarti,
+// termasuk pembatas percobaan masuk panel.
+//
+// Di belakang proksi balik, r.RemoteAddr selalu alamat proksinya sendiri
+// (127.0.0.1), jadi tanpa membaca kepala itu seluruh pengunjung akan
+// terhitung sebagai satu alamat. Keduanya salah, dan yang benar membaca
+// kepalanya hanya dari pengirim yang memang berhak mengisinya.
 func alamatPemanggil(r *http.Request) string {
-	// X-Forwarded-For hanya berarti bila ada proksi tepercaya di depan
-	// aplikasi; nilainya dipakai apa adanya karena hanya untuk pembatas laju.
-	if maju := r.Header.Get("X-Forwarded-For"); maju != "" {
-		return strings.TrimSpace(strings.Split(maju, ",")[0])
-	}
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		return r.RemoteAddr
+		ip = r.RemoteAddr
+	}
+	alamat := net.ParseIP(ip)
+	if alamat == nil || !tepercaya(alamat) {
+		return ip
+	}
+	// Rantai X-Forwarded-For ditulis proksi paling belakang di paling kanan.
+	// Yang diambil yang paling kanan TETAPI di luar jaringan tepercaya, sebab
+	// bagian kiri rantainya dapat diisi pemanggil sendiri.
+	bagian := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
+	for i := len(bagian) - 1; i >= 0; i-- {
+		calon := net.ParseIP(strings.TrimSpace(bagian[i]))
+		if calon == nil {
+			continue
+		}
+		if !tepercaya(calon) {
+			return calon.String()
+		}
+	}
+	if x := strings.TrimSpace(r.Header.Get("X-Real-IP")); x != "" {
+		if calon := net.ParseIP(x); calon != nil {
+			return calon.String()
+		}
 	}
 	return ip
 }

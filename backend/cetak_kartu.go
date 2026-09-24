@@ -122,9 +122,16 @@ func (a *Aplikasi) tanganiKartuPendaftar(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	// Percobaan yang gagal dikunci per nomor registrasi; keterangannya di
+	// pembatas.go.
+	if !a.izinkanCobaIdentitas(w, noReg) {
+		return
+	}
+
 	d, err := a.ambilDataKartu("upper(p.no_registrasi) = upper($1) AND p.tanggal_lahir = $2",
 		noReg, tgl)
 	if err == sql.ErrNoRows {
+		a.catatGagalIdentitas(noReg)
 		kirimGalat(w, http.StatusNotFound,
 			"Data tidak ditemukan. Periksa kembali nomor registrasi dan tanggal lahir.")
 		return
@@ -133,6 +140,7 @@ func (a *Aplikasi) tanganiKartuPendaftar(w http.ResponseWriter, r *http.Request)
 		a.galatServer(w, "mengambil data kartu peserta", err)
 		return
 	}
+	a.bersihkanGagalIdentitas(noReg)
 	a.kirimPdfKartu(w, d)
 }
 
