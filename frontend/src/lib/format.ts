@@ -3,8 +3,18 @@ import type { JenisLencana } from "@/komponen/Bagian";
 /** Pembantu penyajian angka dan tanggal dalam kebiasaan Indonesia. */
 
 const BULAN = [
-  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
 ];
 
 /** "2027-07-05" -> "5 Juli 2027". Nilai kosong atau tidak sah dikembalikan apa adanya. */
@@ -88,6 +98,72 @@ export function keParagraf(isi: string): string[] {
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter(Boolean);
+}
+
+/**
+ * Memecah naskah panjang menjadi bagian-bagian berjudul.
+ *
+ * Aturannya satu: paragraf yang diawali "## " adalah JUDUL BAGIAN, sisanya
+ * isi bagian itu. Paragraf sebelum judul pertama menjadi pembuka yang tidak
+ * bernaung di bawah judul mana pun.
+ *
+ * Dibuat begini, bukan dengan menambah tabel bagian tersendiri, karena
+ * sekolah menulis naskahnya di satu kotak teks pada panel admin. Menambah
+ * tabel berarti panitia harus mengisi judul dan isi di dua tempat, dan
+ * halaman yang bagiannya belum lengkap akan tampil setengah jadi. Dengan
+ * penanda "## ", satu kotak teks yang sama menghasilkan naskah beserta
+ * daftar isinya sekaligus, dan halaman tanpa penanda itu tetap tampil apa
+ * adanya sebagai naskah biasa.
+ *
+ * `id` dipakai sebagai sasaran tautan di dalam halaman. Dibuat dari judulnya
+ * sendiri supaya alamatnya terbaca manusia, dan diberi nomor urut di
+ * belakangnya supaya dua judul yang sama tidak bertabrakan.
+ */
+export interface BagianNaskah {
+  judul: string;
+  id: string;
+  paragraf: string[];
+}
+
+export function bagianNaskah(isi: string): {
+  pembuka: string[];
+  bagian: BagianNaskah[];
+} {
+  const pembuka: string[] = [];
+  const bagian: BagianNaskah[] = [];
+
+  for (const p of keParagraf(isi)) {
+    const judul = p.startsWith("## ") ? p.slice(3).trim() : "";
+    if (judul) {
+      bagian.push({ judul, id: keIdJudul(judul, bagian.length), paragraf: [] });
+      continue;
+    }
+    if (bagian.length === 0) pembuka.push(p);
+    else bagian[bagian.length - 1].paragraf.push(p);
+  }
+
+  return { pembuka, bagian };
+}
+
+function keIdJudul(judul: string, urutan: number): string {
+  const dasar = judul
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `bagian-${urutan + 1}${dasar ? "-" + dasar : ""}`;
+}
+
+/** Kalimat pertama sebuah bagian, untuk dipakai sebagai keterangan singkat. */
+export function kalimatPertama(paragraf: string[], maks = 90): string {
+  const teks = (paragraf[0] ?? "").replace(/\s+/g, " ").trim();
+  if (!teks) return "";
+  const titik = teks.search(/[.!?](\s|$)/);
+  const kalimat = titik > 0 ? teks.slice(0, titik + 1) : teks;
+  return kalimat.length > maks
+    ? kalimat.slice(0, maks - 1).trimEnd() + "\u2026"
+    : kalimat;
 }
 
 /**

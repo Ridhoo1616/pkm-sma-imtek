@@ -393,6 +393,69 @@ sebagai SVG penuh, dan pada bidang sebesar itu bentuk badannya jadi seperti
 bel, bukan orang. Foto pun bukan pilihan, karena berarti memakai wajah guru
 dan siswa sungguhan tanpa izin mereka.
 
+### Halaman bernaskah panjang: OSIS, Kurikulum, Pendidikan Karakter
+
+Ketiganya satu berkas, `halaman/[slug]/page.tsx`, karena sekolah dapat
+menambah halaman profil baru dari panel admin tanpa menunggu kodenya diubah.
+Susunannya: kartu pembuka berilustrasi, daftar isi halaman, lalu naskahnya.
+
+**Sub-menu di dalam halaman diambil dari naskahnya sendiri.** Paragraf yang
+diawali `## ` menjadi judul bagian; dari judul-judul itulah deretan kartu di
+bawah kartu pembuka disusun, dan tiap kartu menaut ke judulnya. Jadi tidak
+pernah ada kartu yang menuju bagian yang belum ditulis sekolah, dan begitu
+sekolah menambah satu bagian, kartunya muncul sendiri. Naskah tanpa penanda
+`## ` tetap tampil apa adanya sebagai deretan paragraf biasa, sehingga halaman
+yang sudah ada tidak berubah.
+
+Rancangan acuan yang dikirim menampilkan empat kartu bernama tetap — Profil
+OSIS, Program Kerja, Galeri Kegiatan, Struktur Organisasi. Keempatnya TIDAK
+ditulis di dalam kode. Menuliskannya berarti membuat empat halaman baru yang
+seluruhnya kosong, atau empat tautan yang menuju entah ke mana, sedangkan
+naskah OSIS-nya sendiri belum dikirim sekolah. Dengan penanda `## `, panitia
+yang menentukan bagiannya, lewat satu kotak teks yang sudah ada di panel
+admin.
+
+**Penanda kartunya nomor urut, bukan ikon per bagian.** Judul bagiannya
+ditulis sekolah dan bisa apa saja, jadi ikon yang dipilih di sini pasti
+sekadar tempelan pada sebagian judul. Nomor selalu benar, dan sekaligus
+menerangkan urutan bacanya.
+
+**Ilustrasinya ditempatkan mutlak di separuh kanan kartu dengan tepi kiri
+dipudarkan lewat mask**, bukan sebagai kolom di samping naskah seperti pada
+halaman Tenaga Pendidik dan Kalender. Sebabnya gambar ini berlatar penuh —
+langit bergradasi, gedung sekolah, pepohonan. Sebagai kolom, tepi kirinya akan
+berupa garis tegak tempat langit berhenti mendadak, dan itu terbaca sebagai
+gambar yang ditempelkan. Di layar sempit gambarnya tidak ditumpuk di belakang
+naskah — naskah di atas gambar seramai itu sulit dibaca — melainkan turun
+menjadi pita setinggi 112 piksel di dasar kartu.
+
+Berkasnya **JPEG**, berbeda dengan tiga ilustrasi sebelumnya yang PNG tembus
+pandang. Latarnya bagian dari gambarnya, bukan bidang putih yang perlu
+dibuang: perambatan dari tepi akan merusaknya, dan median cut ke 64 warna akan
+membuat langitnya bergaris-garis. Karena tidak ada bagian tembus pandang yang
+perlu dijaga, JPEG jauh lebih kecil untuk gambar bergradasi seperti ini — 1,6
+MB menjadi 98 KB pada 1400×517. Pengubahannya lewat kanvas Chrome, sebab di
+mesin ini tidak ada Pillow maupun ImageMagick.
+
+Daftar ilustrasinya ditulis sebagai peta slug, **tidak ditebak dari nama
+slug-nya**. Menebak berarti halaman baru yang ditambahkan sekolah akan
+menunjuk gambar yang tidak ada dan berakhir sebagai kotak rusak; halaman yang
+belum punya ilustrasi tampil dengan kartu pembuka tanpa gambar, dan itu
+keadaan yang wajar.
+
+**Keadaan kosongnya dibuat mencolok dan berada di tengah**, bukan satu baris
+miring di pojok kartu: pada halaman yang naskahnya belum ada, itulah seluruh
+isi halamannya. Kalimatnya tetap diambil dari komponen `Menunggu` supaya
+susunan katanya sama dengan seluruh halaman lain yang juga menunggu naskah
+sekolah, ditambah tombol ke halaman Kontak bagi pengunjung yang memang butuh
+keterangannya sekarang.
+
+Diuji pada basis data sekali pakai `uji_osis` dengan naskah contoh berisi
+empat bagian: 10 pemeriksaan lulus — jumlah kartunya, tautannya ke id judul
+yang benar, labelnya sama dengan judul bagiannya, lebar kartu naskah sama
+dengan kartu pembuka, guliran saat kartunya diklik, dan keadaan kosong pada
+halaman Kurikulum yang naskahnya memang belum ada.
+
 ### Halaman Kalender Akademik
 
 Susunannya: kartu pembuka berilustrasi, bilah penyaring, lalu dua kolom —

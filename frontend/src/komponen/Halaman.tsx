@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { keParagraf } from "@/lib/format";
+import { bagianNaskah } from "@/lib/format";
 import { anakMenu } from "@/lib/menu";
 import { MunculNaik, KartuGerak } from "@/komponen/Gerak";
 import { kelasKartuAkhir } from "@/komponen/Bagian";
@@ -42,8 +42,8 @@ export function Menunggu({
   const keterangan = (
     <p className="text-[15px] leading-relaxed text-samar italic">
       {apa} belum tersedia. Bagian ini akan terisi setelah pihak sekolah
-      mengirimkan naskahnya, dan dapat diisi lewat menu{" "}
-      {dari ?? "Pengaturan"} di panel admin.
+      mengirimkan naskahnya, dan dapat diisi lewat menu {dari ?? "Pengaturan"}{" "}
+      di panel admin.
     </p>
   );
 
@@ -51,15 +51,43 @@ export function Menunggu({
   return <div className="kartu p-6 md:p-8">{keterangan}</div>;
 }
 
-/** Naskah panjang: dipecah menjadi paragraf, bukan satu blok rapat. */
+/**
+ * Naskah panjang: dipecah menjadi paragraf, bukan satu blok rapat.
+ *
+ * Paragraf yang diawali "## " menjadi judul bagian, dan judulnya diberi id
+ * supaya daftar isi di atas halaman dapat menautinya. Naskah tanpa penanda
+ * itu tetap tampil apa adanya sebagai deretan paragraf biasa, jadi halaman
+ * yang sudah ada tidak berubah.
+ */
 export function Naskah({ isi }: { isi: string }) {
-  const paragraf = keParagraf(isi);
+  const { pembuka, bagian } = bagianNaskah(isi);
+
+  const Paragraf = ({ teks }: { teks: string }) => (
+    <p className="text-[15px] leading-relaxed whitespace-pre-line text-teks">
+      {teks}
+    </p>
+  );
+
   return (
     <div className="space-y-4">
-      {paragraf.map((p, i) => (
-        <p key={i} className="text-[15px] leading-relaxed whitespace-pre-line text-teks">
-          {p}
-        </p>
+      {pembuka.map((p, i) => (
+        <Paragraf key={`p${i}`} teks={p} />
+      ))}
+
+      {bagian.map((b) => (
+        <section key={b.id} className="space-y-4 pt-4 first:pt-0">
+          <h2
+            id={b.id}
+            // scroll-mt menyisakan ruang untuk bilah navigasi yang menempel
+            // di atas; tanpa itu judul yang dituju tertutup bilahnya.
+            className="scroll-mt-28 text-lg font-bold text-biru-tua"
+          >
+            {b.judul}
+          </h2>
+          {b.paragraf.map((p, i) => (
+            <Paragraf key={i} teks={p} />
+          ))}
+        </section>
       ))}
     </div>
   );
