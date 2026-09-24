@@ -6,7 +6,6 @@ import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { tanggalJam } from "@/lib/format";
 import { useSesi } from "@/komponen/Sesi";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
@@ -16,14 +15,6 @@ import type { Pengguna } from "@/lib/tipe";
 const KOSONG = { nama: "", username: "", sandi: "", role: "operator" };
 
 export default function HalamanPengguna() {
-  return (
-    <KerangkaAdmin>
-      <IsiPengguna />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiPengguna() {
   const kabar = useKabar();
   const { pengguna: saya } = useSesi();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.pengguna());

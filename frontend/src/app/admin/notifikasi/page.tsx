@@ -5,7 +5,6 @@ import { api, GalatApi } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { tanggalJam } from "@/lib/format";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
@@ -31,14 +30,6 @@ const WARNA_STATUS: Record<string, JenisLencana> = {
 };
 
 export default function HalamanNotifikasi() {
-  return (
-    <KerangkaAdmin>
-      <IsiNotifikasi />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiNotifikasi() {
   const kabar = useKabar();
   const [saring, setSaring] = useState("");
   const { data, memuat, galat, muatUlang } = useMuat(

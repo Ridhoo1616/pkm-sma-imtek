@@ -5,7 +5,6 @@ import { api, urlUnggahan, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { belumTerisi } from "@/lib/format";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel } from "@/komponen/Panel";
 import { Memuat, PesanGalat } from "@/komponen/Memuat";
 import { Tombol, RingkasanGalat } from "@/komponen/Medan";
@@ -203,14 +202,6 @@ function labelDari(kunci: string): string {
 }
 
 export default function HalamanPengaturan() {
-  return (
-    <KerangkaAdmin>
-      <IsiPengaturan />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiPengaturan() {
   const kabar = useKabar();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.pengaturan());
 

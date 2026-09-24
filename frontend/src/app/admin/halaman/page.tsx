@@ -5,7 +5,6 @@ import { api, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { belumTerisi } from "@/lib/format";
 import { useKabar } from "@/komponen/Kabar";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Lencana } from "@/komponen/Bagian";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
@@ -43,14 +42,6 @@ const KOSONG = {
 };
 
 export default function HalamanProfilAdmin() {
-  return (
-    <KerangkaAdmin>
-      <IsiHalaman />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiHalaman() {
   const kabar = useKabar();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.halamanAdmin());
 

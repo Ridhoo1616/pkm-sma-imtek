@@ -21,20 +21,11 @@ import {
   warnaStatus,
 } from "@/lib/format";
 import { useSesi } from "@/komponen/Sesi";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, PesanBerhasil } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import { Pilihan, AreaTeks, Teks, Tombol } from "@/komponen/Medan";
 import type { Pendaftar } from "@/lib/tipe";
-
-export default function HalamanDetailPendaftar() {
-  return (
-    <KerangkaAdmin>
-      <IsiDetail />
-    </KerangkaAdmin>
-  );
-}
 
 /** Kelompok isian yang ditampilkan sebagai daftar istilah. */
 function Blok({
@@ -140,7 +131,7 @@ function TautanBerkas({
   );
 }
 
-function IsiDetail() {
+export default function HalamanDetailPendaftar() {
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
   const router = useRouter();

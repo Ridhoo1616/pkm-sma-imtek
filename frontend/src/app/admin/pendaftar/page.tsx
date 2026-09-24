@@ -10,7 +10,6 @@ import {
   tanggalJam,
   warnaStatus,
 } from "@/lib/format";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
@@ -19,14 +18,6 @@ import { Tombol } from "@/komponen/Medan";
 const PER_HALAMAN = 25;
 
 export default function HalamanPendaftar() {
-  return (
-    <KerangkaAdmin>
-      <IsiPendaftar />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiPendaftar() {
   const [saring, setSaring] = useState({
     status: "",
     jalur: "",

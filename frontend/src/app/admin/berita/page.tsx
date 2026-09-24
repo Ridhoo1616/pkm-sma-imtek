@@ -5,7 +5,6 @@ import { api, urlUnggahan, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { angka, tanggalJam } from "@/lib/format";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
@@ -30,14 +29,6 @@ const KOSONG = {
 };
 
 export default function HalamanBeritaAdmin() {
-  return (
-    <KerangkaAdmin>
-      <IsiBerita />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiBerita() {
   const kabar = useKabar();
   const [saring, setSaring] = useState({ cari: "", kategori: "", publish: "" });
   const kueri = (() => {

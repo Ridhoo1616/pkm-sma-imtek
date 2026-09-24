@@ -3,20 +3,11 @@
 import { useState } from "react";
 import { api, GalatApi } from "@/lib/api";
 import { useSesi } from "@/komponen/Sesi";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel } from "@/komponen/Panel";
 import { PesanGalat, PesanBerhasil } from "@/komponen/Memuat";
 import { Teks, Tombol } from "@/komponen/Medan";
 
 export default function HalamanGantiSandi() {
-  return (
-    <KerangkaAdmin>
-      <IsiGantiSandi />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiGantiSandi() {
   const { pengguna } = useSesi();
   const [lama, setLama] = useState("");
   const [baru, setBaru] = useState("");

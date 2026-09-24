@@ -12,7 +12,6 @@ import {
   tanggalPanjang,
   warnaStatus,
 } from "@/lib/format";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, KartuAngka, Tabel, BarisBilah } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { DiagramLingkaran } from "@/komponen/DiagramLingkaran";
@@ -63,14 +62,6 @@ const RENTANG: Record<
 };
 
 export default function HalamanDasbor() {
-  return (
-    <KerangkaAdmin>
-      <IsiDasbor />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiDasbor() {
   const { data, memuat, galat, muatUlang } = useMuat(() => api.dasbor());
   const [rentang, setRentang] = useState<JenisRentang>("tanggal");
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSesi } from "@/komponen/Sesi";
 import { Memuat } from "@/komponen/Memuat";
 
@@ -78,11 +78,62 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
   const jalurSekarang = usePathname();
   const router = useRouter();
   const [sidebarTerbuka, setSidebarTerbuka] = useState(false);
+  const wadahMenu = useRef<HTMLDivElement | null>(null);
+  const sudahDiungkap = useRef(false);
+
+  // Halaman masuk berada di bawah /admin, tetapi ia bukan bagian panel: tidak
+  // dibungkus sidebar, dan tidak boleh dialihkan ke dirinya sendiri.
+  const halamanMasuk = jalurSekarang === "/admin/masuk";
 
   useEffect(() => {
-    if (!memeriksa && !pengguna) router.replace("/admin/masuk");
-  }, [memeriksa, pengguna, router]);
+    if (!halamanMasuk && !memeriksa && !pengguna) {
+      router.replace("/admin/masuk");
+    }
+  }, [halamanMasuk, memeriksa, pengguna, router]);
 
+  /**
+   * Menu yang sedang terpilih dibawa ke dalam pandangan, SEKALI saja saat
+   * panel dibuka.
+   *
+   * Perpindahan antarmenu tidak lagi perlu ditolong: kerangka ini sekarang
+   * berada di layout, jadi wadah gulirnya tidak dibongkar dan posisinya
+   * terjaga dengan sendirinya. Yang masih perlu ditolong keadaan lain, yaitu
+   * panel yang dibuka langsung pada alamat halaman di dasar daftar, entah
+   * dari penanda buku entah karena halamannya disegarkan. Di situ daftarnya
+   * mulai dari puncak, dan menu yang terpilih berada di luar pandangan.
+   *
+   * Digulir hanya bila memang di luar pandangan, dan diukur dengan
+   * getBoundingClientRect, bukan offsetTop: wadahnya tidak diberi `relative`,
+   * sehingga offsetTop menghitung dari leluhur lain dan angkanya salah.
+   *
+   * Tidak memakai scrollIntoView karena ia juga menggulir jendela beserta
+   * leluhur lainnya, sedangkan yang boleh bergerak hanya daftar ini.
+   *
+   * Bergantung pada `pengguna`, bukan daftar kosong: selama sesi masih
+   * diperiksa, kerangka ini mengembalikan <Memuat /> sehingga menunya belum
+   * ada dan rujukannya masih null. Efek berdaftar kosong hanya akan berjalan
+   * pada saat itu, lalu tidak pernah lagi.
+   */
+  useEffect(() => {
+    if (sudahDiungkap.current) return;
+    const wadah = wadahMenu.current;
+    if (!wadah) return;
+    const terpilih = wadah.querySelector<HTMLElement>('[data-terpilih="ya"]');
+    if (!terpilih) return;
+    sudahDiungkap.current = true;
+
+    const kotakWadah = wadah.getBoundingClientRect();
+    const kotakMenu = terpilih.getBoundingClientRect();
+    const sudahTerlihat =
+      kotakMenu.top >= kotakWadah.top && kotakMenu.bottom <= kotakWadah.bottom;
+    if (sudahTerlihat) return;
+    wadah.scrollTop +=
+      kotakMenu.top -
+      kotakWadah.top -
+      (kotakWadah.height - kotakMenu.height) / 2;
+  }, [pengguna]);
+
+  if (halamanMasuk) return <>{children}</>;
   if (memeriksa) return <Memuat pesan="Memeriksa sesi Anda..." />;
   if (!pengguna) return <Memuat pesan="Mengalihkan ke halaman masuk..." />;
 
@@ -108,6 +159,7 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
               <li key={m.jalur}>
                 <Link
                   href={m.jalur}
+                  data-terpilih={aktif(m.jalur) ? "ya" : undefined}
                   // Sidebar layar kecil ditutup saat menunya dipilih.
                   onClick={() => setSidebarTerbuka(false)}
                   className={
@@ -139,7 +191,9 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
             PPDB &amp; Profil Sekolah
           </p>
         </div>
-        <div className="flex-1 overflow-y-auto px-3 py-4">{daftarMenu}</div>
+        <div ref={wadahMenu} className="flex-1 overflow-y-auto px-3 py-4">
+          {daftarMenu}
+        </div>
         <div className="border-t border-white/10 px-4 py-4">
           <Link
             href="/"

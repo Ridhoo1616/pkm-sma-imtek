@@ -5,7 +5,6 @@ import { api, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { tanggalJam } from "@/lib/format";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
@@ -50,14 +49,6 @@ function keInputWaktu(iso: string | null): string {
 }
 
 export default function HalamanUjian() {
-  return (
-    <KerangkaAdmin>
-      <IsiUjian />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiUjian() {
   const kabar = useKabar();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.paketUjian());
 

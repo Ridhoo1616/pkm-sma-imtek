@@ -5,7 +5,6 @@ import { api, urlUnggahan, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { tanggalPanjang } from "@/lib/format";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Teks, AreaTeks, Berkas, Tombol, RingkasanGalat } from "@/komponen/Medan";
@@ -14,14 +13,6 @@ import type { Galeri } from "@/lib/tipe";
 const KOSONG = { judul: "", kategori: "", keterangan: "" };
 
 export default function HalamanGaleriAdmin() {
-  return (
-    <KerangkaAdmin>
-      <IsiGaleri />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiGaleri() {
   const kabar = useKabar();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.galeri());
 
