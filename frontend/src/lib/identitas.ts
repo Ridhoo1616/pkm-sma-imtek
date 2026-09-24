@@ -235,6 +235,33 @@ export function periksaNik(
  * berarti menolak NISN sah milik peserta didik yang nomornya diterbitkan
  * menyusul.
  */
+/**
+ * Apakah sederet angka berpola yang tidak pernah muncul pada nomor yang
+ * sungguh diterbitkan: seluruhnya angka yang sama, atau berurutan naik
+ * maupun turun satu per satu.
+ *
+ * Kembarannya di `backend/validasi_identitas.go` bernama `angkaKarangan`.
+ * Keduanya WAJIB sama aturannya: yang di sini memberi kabar saat mengetik,
+ * yang di backend yang menolak. Kalau berbeda, pendaftar akan melihat
+ * "bentuknya benar" lalu kirimannya ditolak — dan itu lebih membingungkan
+ * daripada tidak ada kabar sama sekali.
+ */
+function angkaKarangan(d: string): boolean {
+  if (d.length < 4) return false;
+  let sama = true,
+    naik = true,
+    turun = true;
+  for (let i = 1; i < d.length; i++) {
+    if (d[i] !== d[0]) sama = false;
+    if (Number(d[i]) !== Number(d[i - 1]) + 1) naik = false;
+    if (Number(d[i]) !== Number(d[i - 1]) - 1) turun = false;
+  }
+  return sama || naik || turun;
+}
+
+const PESAN_KARANGAN =
+  "NISN ini berpola angka yang tidak pernah dipakai nomor sungguhan: seluruhnya angka yang sama, atau berurutan naik maupun turun. Salin nomornya apa adanya dari rapor atau ijazah SMP; bila nomor pada rapor Anda memang seperti ini, hubungi panitia lewat halaman Kontak.";
+
 export function periksaNisn(
   nisn: string,
   tanggalLahir: string,
@@ -287,8 +314,16 @@ export function periksaNisn(
           pesan: `Tiga angka pertama NISN harus sama dengan tiga angka terakhir tahun lahir, yaitu ${awalan}. Milik Anda ${bersih.slice(0, 3)}. Periksa kembali NISN dan tanggal lahirnya; bila keduanya sudah sesuai rapor, hubungi panitia lewat halaman Kontak.`,
         };
       }
+      if (angkaKarangan(bersih) || angkaKarangan(bersih.slice(3))) {
+        return { jenis: "salah", pesan: PESAN_KARANGAN };
+      }
       return { jenis: "benar", pesan: `Bentuknya benar, dan awalannya cocok dengan tahun lahir ${tahun}.` };
     }
+  }
+  // Tanggal lahirnya belum terisi, jadi awalannya tidak dapat diperiksa.
+  // Pemeriksaan polanya tetap berjalan supaya tidak ada celah di situ.
+  if (angkaKarangan(bersih) || angkaKarangan(bersih.slice(3))) {
+    return { jenis: "salah", pesan: PESAN_KARANGAN };
   }
   return { jenis: "benar", pesan: "Bentuknya benar, 10 angka." };
 }
