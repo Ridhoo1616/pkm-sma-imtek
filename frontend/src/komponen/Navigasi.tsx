@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Pengaturan } from "@/lib/tipe";
+import { urlUnggahan } from "@/lib/api";
 import { pesanTanyaPpdb, tautanWa } from "@/lib/format";
 import { MENU } from "@/lib/menu";
 import { IkonSurel, IkonTelepon, IkonWhatsapp } from "./Ikon";
@@ -149,11 +150,38 @@ export default function Navigasi({
       <nav className="border-b border-garis bg-white shadow-lembut">
         <div ref={bilah} className="wadah flex items-center justify-between gap-4 py-3">
           <Link href="/" className="flex items-center gap-3">
+            {/* Logo sekolah bila sudah diunggah, inisial namanya bila belum.
+
+                Pengaturan `logo` sudah ada sejak awal — tersedia di panel
+                admin dan ikut dikirim API publik — tetapi tidak pernah
+                dipakai satu tampilan pun, jadi mengunggahnya tidak mengubah
+                apa-apa. Di sinilah tempatnya dipakai.
+
+                Kotaknya tetap 44x44 pada kedua keadaan supaya tata letak
+                bilahnya tidak bergeser saat sekolah mengunggah logonya.
+                Latar birunya HANYA untuk inisial: logo sekolah ini bergaris
+                biru tua di atas latar tembus pandang, dan ditaruh di atas
+                bidang biru garisnya akan hilang. Karena itu saat ada logo,
+                yang tampil logonya saja di atas putih bilahnya. */}
             <span
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-biru text-lg font-bold text-white"
+              className={
+                "grid h-11 w-11 shrink-0 place-items-center rounded-xl " +
+                (pengaturan.logo
+                  ? ""
+                  : "bg-biru text-lg font-bold text-white")
+              }
               aria-hidden
             >
-              {(pengaturan.nama_singkat || "SI").slice(0, 2).toUpperCase()}
+              {pengaturan.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={urlUnggahan("profil", pengaturan.logo)}
+                  alt=""
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                (pengaturan.nama_singkat || "SI").slice(0, 2).toUpperCase()
+              )}
             </span>
             <span className="leading-tight">
               <strong className="block text-[19px] text-biru-tua">

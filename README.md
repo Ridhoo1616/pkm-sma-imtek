@@ -537,6 +537,23 @@ Sebelumnya isinya berupa kotak teks berisi nama berkas, padahal tidak ada cara
 mengunggah berkasnya lewat aplikasi, sehingga keduanya tidak pernah dapat
 dipakai.
 
+**Logonya dipakai di lencana pada bilah atas**, menggantikan dua huruf inisial
+nama sekolah. Sebelumnya pengaturan `logo` memang sudah ada — tersedia di
+panel admin dan ikut dikirim API publik — tetapi tidak dipakai satu tampilan
+pun, jadi mengunggahnya tidak mengubah apa-apa. Kotaknya tetap 44×44 piksel
+pada kedua keadaan supaya tata letak bilahnya tidak bergeser saat sekolah
+mengunggah logonya, dan latar birunya hanya dipasang untuk inisial: logo SMA
+IMTEK bergaris biru tua di atas latar tembus pandang, jadi di atas bidang biru
+garisnya akan hilang.
+
+Berkasnya berasal dari logo `.webp` 2048×2048 yang ada di repositori,
+dijadikan PNG 256×256. Pengubahannya lewat kanvas Chrome, sebab di mesin ini
+tidak ada Pillow maupun ImageMagick dan Go tidak membaca webp. Warnanya lalu
+dikurangi ke 48 dengan median cut — 63 KB menjadi 13 KB — tetapi **alfanya
+dibiarkan apa adanya**, tidak dibulatkan ke tiga tingkat seperti pada
+ilustrasi visi dan misi: tepi bintang pada logo ini serong, dan alfa tiga
+tingkat membuatnya bergerigi pada ukuran kecil.
+
 Halaman yang naskahnya belum dikirim sekolah tidak ditampilkan sebagai halaman
 kosong dan tidak diisi karangan: yang tampil adalah keterangan bahwa naskahnya
 belum tersedia, beserta nama menu tempat naskahnya diisi.
