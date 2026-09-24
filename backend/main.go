@@ -89,6 +89,9 @@ func (a *Aplikasi) rute() http.Handler {
 
 	/* ---- halaman publik ---- */
 	m.HandleFunc("GET /api/profil", a.tanganiProfil)
+	// Pencatat kunjungan. Terbuka tanpa token karena yang mengirimnya peramban
+	// pengunjung biasa; isinya diperiksa dan dipangkas di penanganannya.
+	m.HandleFunc("POST /api/kunjungan", a.tanganiCatatKunjungan)
 	m.HandleFunc("GET /api/jurusan", a.tanganiJurusanPublik)
 	m.HandleFunc("GET /api/fasilitas", a.tanganiFasilitasPublik)
 	m.HandleFunc("GET /api/berita", a.tanganiBeritaPublik)
@@ -127,6 +130,7 @@ func (a *Aplikasi) rute() http.Handler {
 
 	/* ---- dasbor & pendaftar ---- */
 	m.HandleFunc("GET /api/admin/dasbor", a.wajibMasuk(a.tanganiDasbor))
+	m.HandleFunc("GET /api/admin/kunjungan", a.wajibMasuk(a.tanganiKunjunganAdmin))
 	m.HandleFunc("GET /api/admin/pendaftar", a.wajibMasuk(a.tanganiDaftarPendaftar))
 	m.HandleFunc("GET /api/admin/pendaftar/ekspor", a.wajibMasuk(a.tanganiEksporPendaftar))
 	m.HandleFunc("GET /api/admin/pendaftar/{id}", a.wajibMasuk(a.tanganiDetailPendaftar))

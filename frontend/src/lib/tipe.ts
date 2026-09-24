@@ -163,6 +163,10 @@ export interface Dasbor {
   per_jalur: Cacah[];
   per_sumber: Cacah[];
   tren: Cacah[];
+  /** Tren per bulan, dua belas bulan terakhir. Label berbentuk "2026-09". */
+  tren_bulan: Cacah[];
+  /** Tren per tahun, seluruh tahun yang ada datanya. Label berbentuk "2026". */
+  tren_tahun: Cacah[];
   terbaru: RingkasPendaftar[];
 }
 
@@ -347,6 +351,21 @@ export interface Faq {
 /* ---------------- profil, akademik, dan kesiswaan ---------------- */
 
 export type KelompokHalaman = "Profil" | "Akademik" | "Kesiswaan";
+
+/** Ringkasan kunjungan situs. Label pada tiap deret berbeda bentuknya:
+ *  "2026-09-24" per hari, "2026-09" per bulan, "2026" per tahun, dan alamat
+ *  halaman pada per_halaman. */
+export interface RingkasKunjungan {
+  total_kunjungan: number;
+  total_pengunjung: number;
+  hari_ini: number;
+  pengunjung_hari_ini: number;
+  minggu_ini: number;
+  per_hari: Cacah[];
+  per_bulan: Cacah[];
+  per_tahun: Cacah[];
+  per_halaman: Cacah[];
+}
 
 export interface Halaman {
   id: number;

@@ -93,7 +93,10 @@ interface PilihanPermintaan {
   segarkanSetiap?: number;
 }
 
-async function permintaan<T>(jalur: string, p: PilihanPermintaan = {}): Promise<T> {
+async function permintaan<T>(
+  jalur: string,
+  p: PilihanPermintaan = {},
+): Promise<T> {
   const kepala: Record<string, string> = {};
   let badan: BodyInit | undefined;
 
@@ -158,13 +161,22 @@ export function urlUnggahan(subfolder: string, nama: string): string {
 
 export const api = {
   /* ---------- publik ---------- */
-  profil: () => permintaan<import("./tipe").Profil>("/api/profil", { segarkanSetiap: CACHE_PUBLIK }),
+  profil: () =>
+    permintaan<import("./tipe").Profil>("/api/profil", {
+      segarkanSetiap: CACHE_PUBLIK,
+    }),
   jurusan: () =>
-    permintaan<{ data: import("./tipe").Jurusan[] }>("/api/jurusan", { segarkanSetiap: CACHE_PUBLIK }),
+    permintaan<{ data: import("./tipe").Jurusan[] }>("/api/jurusan", {
+      segarkanSetiap: CACHE_PUBLIK,
+    }),
   fasilitas: () =>
-    permintaan<{ data: import("./tipe").Fasilitas[] }>("/api/fasilitas", { segarkanSetiap: CACHE_PUBLIK }),
+    permintaan<{ data: import("./tipe").Fasilitas[] }>("/api/fasilitas", {
+      segarkanSetiap: CACHE_PUBLIK,
+    }),
   berita: (kueri = "") =>
-    permintaan<import("./tipe").HalamanBerita>(`/api/berita${kueri}`, { segarkanSetiap: CACHE_PUBLIK }),
+    permintaan<import("./tipe").HalamanBerita>(`/api/berita${kueri}`, {
+      segarkanSetiap: CACHE_PUBLIK,
+    }),
   beritaDetail: (slug: string) =>
     permintaan<{
       data: import("./tipe").Berita;
@@ -288,11 +300,15 @@ export const api = {
 
   /* ---------- autentikasi ---------- */
   masuk: (isi: { username: string; sandi: string }) =>
-    permintaan<{ token: string; pengguna: import("./tipe").Pengguna }>("/api/masuk", {
-      metode: "POST",
-      isi,
-    }),
-  saya: () => permintaan<import("./tipe").Pengguna>("/api/saya", { token: true }),
+    permintaan<{ token: string; pengguna: import("./tipe").Pengguna }>(
+      "/api/masuk",
+      {
+        metode: "POST",
+        isi,
+      },
+    ),
+  saya: () =>
+    permintaan<import("./tipe").Pengguna>("/api/saya", { token: true }),
   gantiSandi: (isi: { sandi_lama: string; sandi_baru: string }) =>
     permintaan<{ pesan: string }>("/api/saya/sandi", {
       metode: "POST",
@@ -301,11 +317,21 @@ export const api = {
     }),
 
   /* ---------- dasbor & pendaftar ---------- */
-  dasbor: () => permintaan<import("./tipe").Dasbor>("/api/admin/dasbor", { token: true }),
-  daftarPendaftar: (kueri = "") =>
-    permintaan<import("./tipe").HalamanPendaftar>(`/api/admin/pendaftar${kueri}`, {
+  dasbor: () =>
+    permintaan<import("./tipe").Dasbor>("/api/admin/dasbor", { token: true }),
+  /** Ringkasan kunjungan situs. Alamat panel, jadi WAJIB membawa token —
+   *  tanpa itu jawabannya 401 dan bagiannya tampil sebagai galat. */
+  kunjungan: () =>
+    permintaan<import("./tipe").RingkasKunjungan>("/api/admin/kunjungan", {
       token: true,
     }),
+  daftarPendaftar: (kueri = "") =>
+    permintaan<import("./tipe").HalamanPendaftar>(
+      `/api/admin/pendaftar${kueri}`,
+      {
+        token: true,
+      },
+    ),
   detailPendaftar: (id: number) =>
     permintaan<{
       data: import("./tipe").Pendaftar;
@@ -331,7 +357,9 @@ export const api = {
 
   /* ---------- jurusan ---------- */
   jurusanAdmin: () =>
-    permintaan<{ data: import("./tipe").Jurusan[] }>("/api/admin/jurusan", { token: true }),
+    permintaan<{ data: import("./tipe").Jurusan[] }>("/api/admin/jurusan", {
+      token: true,
+    }),
   simpanJurusan: (isi: unknown) =>
     permintaan<{ pesan: string }>("/api/admin/jurusan", {
       metode: "POST",
@@ -352,7 +380,9 @@ export const api = {
 
   /* ---------- berita ---------- */
   beritaAdmin: (kueri = "") =>
-    permintaan<import("./tipe").HalamanBerita>(`/api/admin/berita${kueri}`, { token: true }),
+    permintaan<import("./tipe").HalamanBerita>(`/api/admin/berita${kueri}`, {
+      token: true,
+    }),
   simpanBerita: (formulir: FormData) =>
     permintaan<{ pesan: string; slug: string }>("/api/admin/berita", {
       metode: "POST",
@@ -411,7 +441,9 @@ export const api = {
 
   /* ---------- pesan masuk ---------- */
   pesanMasuk: (kueri = "") =>
-    permintaan<import("./tipe").HalamanPesan>(`/api/admin/pesan${kueri}`, { token: true }),
+    permintaan<import("./tipe").HalamanPesan>(`/api/admin/pesan${kueri}`, {
+      token: true,
+    }),
   tandaiPesan: (id: number, dibaca: boolean) =>
     permintaan<{ pesan: string }>(`/api/admin/pesan/${id}`, {
       metode: "PATCH",
@@ -556,9 +588,12 @@ export const api = {
       { metode: "DELETE", token: true },
     ),
   pengaturan: () =>
-    permintaan<{ data: import("./tipe").ButirPengaturan[] }>("/api/admin/pengaturan", {
-      token: true,
-    }),
+    permintaan<{ data: import("./tipe").ButirPengaturan[] }>(
+      "/api/admin/pengaturan",
+      {
+        token: true,
+      },
+    ),
   simpanPengaturan: (pengaturan: Record<string, string>) =>
     permintaan<{ pesan: string }>("/api/admin/pengaturan", {
       metode: "PUT",
@@ -708,7 +743,10 @@ export const api = {
     }),
 
   /* ---------- ruang ujian pada kartu peserta ---------- */
-  ubahRuangUjian: (id: number, isi: { ruang_ujian: string; kursi_ujian: string }) =>
+  ubahRuangUjian: (
+    id: number,
+    isi: { ruang_ujian: string; kursi_ujian: string },
+  ) =>
     permintaan<{ pesan: string }>(`/api/admin/pendaftar/${id}/ruang`, {
       metode: "PATCH",
       isi,
@@ -779,7 +817,9 @@ export async function unduhBuktiAdmin(
     cache: "no-store",
   });
   if (!jawaban.ok) {
-    throw new GalatApi(jawaban.status, { pesan: "Bukti pendaftaran gagal dibuat." });
+    throw new GalatApi(jawaban.status, {
+      pesan: "Bukti pendaftaran gagal dibuat.",
+    });
   }
   return {
     nama: `bukti-pendaftaran-${noRegistrasi}.pdf`,
@@ -807,12 +847,17 @@ export async function segarkanHalamanPublik(): Promise<void> {
 }
 
 /** Alamat unduh CSV; dibuka lewat fetch supaya token bisa disertakan. */
-export async function unduhCsv(kueri = ""): Promise<{ nama: string; blob: Blob }> {
+export async function unduhCsv(
+  kueri = "",
+): Promise<{ nama: string; blob: Blob }> {
   const t = ambilToken();
-  const jawaban = await fetch(`${ALAMAT_API}/api/admin/pendaftar/ekspor${kueri}`, {
-    headers: t ? { Authorization: `Bearer ${t}` } : {},
-    cache: "no-store",
-  });
+  const jawaban = await fetch(
+    `${ALAMAT_API}/api/admin/pendaftar/ekspor${kueri}`,
+    {
+      headers: t ? { Authorization: `Bearer ${t}` } : {},
+      cache: "no-store",
+    },
+  );
   if (!jawaban.ok) {
     throw new GalatApi(jawaban.status, { pesan: "Berkas CSV gagal dibuat." });
   }
@@ -858,7 +903,9 @@ export async function unduhKartuAdmin(
     cache: "no-store",
   });
   if (!jawaban.ok) {
-    throw new GalatApi(jawaban.status, { pesan: "Kartu peserta gagal dibuat." });
+    throw new GalatApi(jawaban.status, {
+      pesan: "Kartu peserta gagal dibuat.",
+    });
   }
   return {
     nama: `kartu-peserta-${noRegistrasi}.pdf`,

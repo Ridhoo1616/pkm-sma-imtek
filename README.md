@@ -1015,7 +1015,91 @@ hasilnya bidang rata, sehingga kartunya tampak kosong. Itu keadaan datanya,
 bukan tata letaknya; bagian ini akan tampil sebagaimana mestinya begitu
 sekolah mengunggah foto yang sungguhan.
 
-### K. Bilah informasi berjalan
+### K. Diagram lingkaran dan angka kunjungan situs di panel
+
+**Waktu pendaftaran masuk digambar sebagai diagram lingkaran**, dengan tiga
+tombol rentang: Tanggal, Bulan, Tahun. Sebelumnya berupa grafik bilah per hari,
+dan pada data sekolah sekarang — dua belas formulir yang seluruhnya masuk pada
+satu hari — yang tergambar cuma satu batang tunggal.
+
+Yang perlu dicatat terus terang: **diagram lingkaran tidak memperlihatkan arah
+naik-turunnya.** Ia menjawab pertanyaan komposisi — dari seluruh formulir yang
+masuk, berapa bagian datang pada tanggal, bulan, atau tahun mana — bukan
+pertanyaan tren. Untuk melihat apakah pendaftaran sedang ramai atau sepi,
+bentuk bilah lebih menjawab, dan itu masih ada pada bagian Peminatan serta
+Kanal Promosi di sebelahnya.
+
+Ketiga rentangnya dihitung **terpisah di basis data**, bukan dari satu deret
+harian yang dijumlahkan ulang di peramban: deret harian hanya memuat tiga
+puluh hari, sehingga angka per tahun yang dihitung darinya akan salah.
+
+Diagramnya digambar sebagai SVG di `komponen/DiagramLingkaran.tsx`, **tanpa
+pustaka grafik**. Yang dibutuhkan cuma satu bentuk — busur dengan panjang
+tertentu pada satu lingkaran — dan itu satu atribut CSS, `stroke-dasharray`.
+Jari-jarinya 15,9155, yaitu 100/(2π), sehingga kelilingnya tepat 100 dan
+panjang tiap busur dapat dituliskan langsung sebagai persennya; tidak ada
+perhitungan keliling yang bisa salah. Komponennya tidak memakai satu baris
+JavaScript pun, jadi dapat dipakai di komponen server dan tetap tergambar utuh
+pada HTML yang dikirim server.
+
+**Warnanya satu rona**, biru sekolah dengan kepekatan menurun dari irisan
+terbesar ke terkecil, dibatasi 0,22 agar irisan terkecil masih terbaca. Diagram
+lingkaran memang menuntut irisannya dapat dibedakan — di sini ia tidak bisa
+seragam sepenuhnya seperti deretan angka di halaman lain — tetapi membedakan
+dengan kepekatan, bukan dengan rona yang berbeda-beda, membuatnya tetap satu
+keluarga warna dengan seluruh situs, dan urutan kepekatannya sendiri bermakna.
+
+**Angka kunjungan situs (migrasi 013).** Tabel `statistik_kunjungan` sudah ada
+sejak skema pertama, terbawa dari versi PHP, tetapi **tidak pernah ditulis satu
+baris pun** oleh aplikasi Go: tidak ada satu kueri pun yang menyentuhnya, dan
+di pemasangan sekolah isinya nol baris. Jadi angka kunjungan memang belum
+pernah ada, bukan sekadar belum ditampilkan.
+
+Pencatatannya dijalankan **dari peramban pengunjung**, bukan dihitung di
+server, karena halaman publik disajikan sebagai halaman statis yang disimpan
+cache — kunjungan tidak selalu sampai ke server, jadi tidak ada tempat di sisi
+server yang dapat menghitungnya. Komponen `PencatatKunjungan` dipasang di tata
+letak publik dan memantau `usePathname`, sebab perpindahan halaman di Next
+tidak memuat ulang tata letaknya; tanpa itu hanya halaman pertama yang
+terhitung. Gagalnya pengiriman diabaikan dengan sengaja: pencatat kunjungan
+tidak boleh menjadi sebab halaman terasa rusak di sisi pengunjung.
+
+**Alamat IP pengunjung TIDAK disimpan.** Kolom `ip` diganti nama menjadi
+`penanda`, dan isinya enam belas huruf pertama SHA-256 atas gabungan rahasia
+server, alamat IP, dan tanggalnya. Menyimpan alamat IP berarti menyimpan data
+pribadi orang yang sekadar membuka halaman sekolah — termasuk calon peserta
+didik dan orang tuanya — padahal yang dibutuhkan sekolah cuma jumlahnya. Karena
+tanggalnya ikut menjadi bahan sidiknya, sidik orang yang sama pun berbeda dari
+hari ke hari, sehingga riwayat kunjungan seseorang tidak dapat dirangkai dari
+tabel ini. Namanya diganti, bukan dibiarkan `ip` dengan isi berbeda, supaya
+siapa pun yang membaca skemanya nanti tidak menyangka tabel ini memuat alamat
+IP.
+
+Kolom `halaman` diisi **nama bagian situs**, bukan alamat lengkapnya. Alamat
+yang segmen keduanya berupa satu butir isi dipangkas — `/berita/{slug}` menjadi
+`/berita` — sedangkan halaman yang memang bernama dua segmen dibiarkan utuh,
+misalnya `/profil/visi-misi`. Dua sebabnya: daftar bagian yang paling dibuka
+jadi berisi bagian situs, bukan judul berita satu per satu; dan jumlah barisnya
+tidak tumbuh mengikuti banyaknya berita maupun banyaknya alamat yang bisa
+dikarang orang. Halaman panel panitia tidak dihitung sama sekali.
+
+**Keterbatasannya disebutkan apa adanya di panel**, di bawah angkanya: angka
+ini tidak sebanding dengan Google Analytics; pengunjung yang mematikan
+JavaScript dan sebagian besar perayap mesin pencari tidak terhitung; dan satu
+"pengunjung" berarti satu alamat jaringan per hari, sehingga dua orang pada
+satu jaringan sekolah terhitung satu sedangkan satu orang yang berganti dari
+Wi-Fi ke data seluler terhitung dua. Angka yang tidak diterangkan batasnya
+lebih menyesatkan daripada tidak ada angka.
+
+Diuji pada basis data sekali pakai `uji_013`: alamat panel ditolak, alamat
+karangan ditolak, `/PROFIL` dinormalkan menjadi `/profil`, tiga alamat berita
+berbeda menyatu menjadi satu baris `/berita`, tidak satu baris pun berisi
+bentuk alamat IP, dan panjang penandanya tepat enam belas huruf. Tampilannya
+diperiksa lewat protokol DevTools, 14 pemeriksaan lulus. Satu bug nyata
+ditemukan ujinya: `api.kunjungan()` semula tidak membawa token sehingga
+jawabannya 401 dan bagiannya tampil sebagai galat.
+
+### L. Bilah informasi berjalan
 
 Di paling atas setiap halaman publik ada bilah berisi **tiga kabar yang
 berjalan**, dan ketiganya diambil dari basis data — tidak satu pun ditulis di
@@ -1053,7 +1137,7 @@ bukan memuji sekolahnya: kalimat tentang mutu sekolah hanya boleh datang dari
 sekolah sendiri, dan tempatnya sudah disediakan pada semboyan dan bagian
 keunggulan.
 
-### L. Sambutan kepala sekolah di beranda
+### M. Sambutan kepala sekolah di beranda
 
 Beranda memuat sambutan kepala sekolah tepat sesudah bilah keadaan PPDB,
 mengikuti rancangan yang dikirim user: dua bidang bersebelahan. Panel biru
@@ -1104,7 +1188,7 @@ berbeda dari kerangka di halaman Profil:
 Begitu nama, foto, atau naskahnya diisi lewat menu Pengaturan, bagian ini
 berganti sendiri ke bentuk terisinya. Tidak ada kode yang perlu diubah.
 
-### M. Peta lokasi dan pengukur jarak
+### N. Peta lokasi dan pengukur jarak
 
 Beranda memuat peta lokasi sekolah beserta tombol yang memungkinkan
 pengunjung mengukur jarak dan waktu tempuh dari rumahnya, untuk tiga moda:
@@ -1137,7 +1221,7 @@ Petanya sendiri memakai `peta_embed` yang sudah ada. Bila kosong, yang tampil
 kerangka berukuran sama, dan **tombol penunjuk arahnya tetap bekerja** —
 keduanya tidak saling bergantung.
 
-### N. Alur masalah dan jawabannya di beranda
+### O. Alur masalah dan jawabannya di beranda
 
 Tepat sebelum ajakan mendaftar, beranda memuat tiga baris berpasangan: satu
 keadaan yang biasa terjadi pada pendaftaran berkas kertas, dan di sebelahnya
@@ -1166,7 +1250,7 @@ Sisanya bergantung bahan yang belum dimiliki sekolah: foto orang hasil studio,
 tangkapan antarmuka produk, dan baris logo "dipercaya oleh 123 merek" yang
 tidak boleh dikarang.
 
-### O. Beranda mendahulukan profil sekolah
+### P. Beranda mendahulukan profil sekolah
 
 Beranda semula dibuka dengan kartu putih besar berisi kuota PPDB, jumlah
 pendaftar, sisa kuota, dan tanggal penutupan. Angka itu menjawab pertanyaan
@@ -1206,7 +1290,7 @@ kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
 
-### P. Tautan WhatsApp beserta pesan bawaannya
+### Q. Tautan WhatsApp beserta pesan bawaannya
 
 Tautan `wa.me` ada di lima tempat: bilah atas, footer, halaman Kontak, tombol
 bantuan melayang, dan panel pesan panitia. Empat di antaranya dulu mengarah ke
@@ -1228,7 +1312,7 @@ menuju entah ke mana lebih buruk daripada tombol yang tidak ada. Nomor telepon
 sekolah tidak dipakai sebagai gantinya, karena nomornya nomor kabel yang tidak
 punya WhatsApp.
 
-### Q. Lencana status
+### R. Lencana status
 
 Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
 petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:

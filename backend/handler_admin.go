@@ -128,10 +128,30 @@ func (a *Aplikasi) tanganiDasbor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Tiga tingkat rentang, karena diagram di panel dapat dibaca per tanggal,
+	// per bulan, atau per tahun. Ketiganya dihitung di basis data, bukan satu
+	// deret harian yang lalu dijumlahkan ulang di peramban: deret harian
+	// hanya memuat tiga puluh hari, sehingga tidak mungkin menghasilkan angka
+	// per tahun yang benar.
 	tren, err := a.cacahKan(`SELECT to_char(created_at, 'YYYY-MM-DD'), COUNT(*) FROM pendaftar
 	     WHERE created_at >= current_date - interval '29 days' GROUP BY 1 ORDER BY 1`)
 	if err != nil {
 		a.galatServer(w, "menghitung tren pendaftaran", err)
+		return
+	}
+
+	trenBulan, err := a.cacahKan(`SELECT to_char(created_at, 'YYYY-MM'), COUNT(*) FROM pendaftar
+	     WHERE created_at >= date_trunc('month', current_date) - interval '11 months'
+	     GROUP BY 1 ORDER BY 1`)
+	if err != nil {
+		a.galatServer(w, "menghitung tren bulanan pendaftaran", err)
+		return
+	}
+
+	trenTahun, err := a.cacahKan(`SELECT to_char(created_at, 'YYYY'), COUNT(*) FROM pendaftar
+	     GROUP BY 1 ORDER BY 1`)
+	if err != nil {
+		a.galatServer(w, "menghitung tren tahunan pendaftaran", err)
 		return
 	}
 
@@ -155,6 +175,8 @@ func (a *Aplikasi) tanganiDasbor(w http.ResponseWriter, r *http.Request) {
 		"per_jalur":    perJalur,
 		"per_sumber":   perSumber,
 		"tren":         tren,
+		"tren_bulan":   trenBulan,
+		"tren_tahun":   trenTahun,
 		"terbaru":      terbaru.Data,
 	})
 }

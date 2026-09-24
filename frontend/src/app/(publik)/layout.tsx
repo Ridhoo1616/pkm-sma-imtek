@@ -3,6 +3,7 @@ import Footer from "@/komponen/Footer";
 import GulirHalus from "@/komponen/GulirHalus";
 import BantuanMelayang from "@/komponen/BantuanMelayang";
 import { TeksBerjalan } from "@/komponen/TeksBerjalan";
+import { PencatatKunjungan } from "@/komponen/PencatatKunjungan";
 import { api } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
 import type { Berita } from "@/lib/tipe";
@@ -21,14 +22,18 @@ export default async function TataLetakPublik({ children }: LayoutProps<"/">) {
   return (
     <>
       <GulirHalus />
+      <PencatatKunjungan />
       <TeksBerjalan profil={profil} berita={berita} />
-      <Navigasi pengaturan={profil.pengaturan} ppdbDibuka={profil.ppdb.dibuka} />
+      <Navigasi
+        pengaturan={profil.pengaturan}
+        ppdbDibuka={profil.ppdb.dibuka}
+      />
 
       {gagal && (
         <div className="bg-amber-50 text-amber-900">
           <p className="wadah py-2.5 text-center text-sm">
-            Sebagian data belum dapat dimuat karena server belum merespons.
-            Muat ulang halaman ini beberapa saat lagi.
+            Sebagian data belum dapat dimuat karena server belum merespons. Muat
+            ulang halaman ini beberapa saat lagi.
           </p>
         </div>
       )}
