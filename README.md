@@ -920,6 +920,81 @@ laboratorium komputer sekolah berbagi satu alamat IP, dan pembatas yang
 terlalu rapat akan memblokir antrean yang sah pada hari terakhir
 pendaftaran. Keputusan ambangnya milik sekolah, bukan milik kode ini.
 
+### H2. Notifikasi diterima dan daftar ulang, lewat WhatsApp dan email
+
+Begitu administrator menetapkan status seorang pendaftar menjadi **Diterima**,
+sistem menyusun pesan berjenis `daftar_ulang` — satu baris untuk WhatsApp dan
+satu untuk email — yang sekaligus mengabarkan hasilnya dan menerangkan langkah
+daftar ulangnya.
+
+Jenisnya sendiri, bukan memakai `kelulusan` yang sudah ada. Satu pesan yang
+menjawab "diterima" dan "lalu saya harus apa" sekaligus lebih berguna daripada
+dua pesan berurutan yang setengah-setengah, dan pertanyaan berikutnya orang tua
+yang anaknya diterima memang selalu yang kedua itu. `kelulusan` tetap dipakai
+untuk Ditolak dan Cadangan.
+
+**Satu baris notifikasi per kanal yang benar-benar punya tujuan.** Pendaftar
+yang mengisi nomor dan email menerima dua-duanya; yang hanya mengisi nomor
+menerima WhatsApp saja. Nomor orang tua dipakai lebih dulu daripada nomor
+pendaftarnya: yang mengurus daftar ulang dan pembayaran pada umumnya orang
+tuanya.
+
+**Rincian daftar ulangnya pengaturan tersendiri** — `daftar_ulang_jadwal`,
+`daftar_ulang_tempat`, `daftar_ulang_syarat` — bukan dituliskan di dalam naskah
+pesannya. Sekolah dapat mengubah jadwalnya tanpa menyentuh susunan kalimatnya,
+dan rincian yang sama dapat dipakai di halaman publik nanti. Yang masih
+bertanda kurung siku diganti kosong, bukan dikirim sebagai kalimat contoh.
+
+**Email dikirim server; WhatsApp tidak.** Di situlah bedanya, dan itu
+menentukan cara panel menerangkannya. Untuk WhatsApp, tombol kirim membuka
+WhatsApp panitia dengan pesan terisi penuh — tidak berbiaya, dan nomor sekolah
+tidak berisiko diblokir. Untuk email tidak ada tautan semacam itu: server yang
+mengirim, jadi bila SMTP belum disetel pengirimannya memang tidak mungkin dan
+panel mengatakannya apa adanya beserta nama variabel yang perlu diisi.
+
+Keduanya tetap **menunggu peninjauan** panitia, tidak terkirim otomatis. Pesan
+yang salah tidak dapat ditarik kembali, baik dari WhatsApp maupun dari email.
+
+**Pengirimannya memakai `net/smtp` dari pustaka baku**, tanpa pustaka luar —
+yang dibutuhkan cuma menyambung ke satu server, masuk dengan sandi aplikasi,
+lalu mengirim satu pesan teks. Tidak memakai `smtp.SendMail` meski itu satu
+baris: fungsi itu tidak menerima context dan tidak punya batas waktu sama
+sekali, sehingga server SMTP yang menggantung akan menggantungkan penanganan
+HTTP di panel. Penyambungannya dibuat sendiri dengan `DialTimeout` 15 detik.
+
+STARTTLS **diwajibkan**: bila server tidak mendukungnya, pengiriman dibatalkan
+alih-alih diteruskan tanpa enkripsi. Sandi aplikasi tidak boleh melintas
+terbuka. Perihalnya disandikan MIME karena judul berbahasa Indonesia dapat
+memuat huruf di luar ASCII, dan badannya base64 supaya baris panjang maupun
+tanda baca tidak merusak bentuk pesannya.
+
+Diuji dengan **server SMTP tiruan yang ditulis sendiri** — `smtpd` sudah
+dibuang dari Python 3.12 dan `aiosmtpd` bukan pustaka baku — yang mendukung
+STARTTLS dan AUTH PLAIN lalu menyimpan pesannya ke berkas. Dengan begitu yang
+dibuktikan bukan "baris notifikasi ditandai terkirim", melainkan pesan lengkap
+beserta kepala dan badan yang benar-benar diterima server email.
+
+Dua hal ditemukan justru karena diuji sampai ke situ:
+
+1. **Verifikasi TLS memang berjalan.** Sertifikat uji pertama ditolak Go
+   karena hanya punya Common Name tanpa SAN, dan galatnya tercatat pada kolom
+   `galat` notifikasi dalam kalimat yang dapat dibaca panitia.
+2. **`susunPesan` melumat baris baru.** Penutupnya
+   `strings.Join(strings.Fields(hasil), " ")` meratakan SELURUH spasi putih,
+   termasuk baris baru, sehingga naskah daftar ulang yang memuat jadwal,
+   tempat, dan daftar berkas berbaris-baris tiba sebagai satu paragraf rapat
+   sepanjang lima ratus huruf. Cacat itu sudah ada sejak notifikasi pertama
+   dibuat dan mengenai seluruh jenis pesannya; tidak pernah terlihat karena
+   yang diperiksa selama ini isi kolom `pesan`, bukan pesan yang diterima.
+   Perapiannya sekarang **per baris**: spasi berlebih di dalam satu baris
+   diratakan, pemisah barisnya tetap, dan dua baris kosong atau lebih
+   dirapatkan menjadi satu. Dijaga oleh `notifikasi_test.go`.
+
+**Awalan `wa_notif_` pada kunci naskah dipertahankan** meski sekarang dipakai
+kedua kanal. Menggantinya berarti memindahkan naskah yang sudah diisi sekolah,
+dan risiko kehilangan naskah itu lebih besar daripada untungnya nama yang lebih
+tepat. Ketidakcocokan namanya dicatat di sini dan di migrasi 014.
+
 ### I. Dukungan tujuan "meningkatkan efektivitas promosi"
 
 Bagian inilah yang menjadi sumber data pembahasan laporan PkM:

@@ -723,6 +723,7 @@ export const api = {
       halaman: number;
       per_halaman: number;
       gateway_aktif: boolean;
+      email_aktif: boolean;
       pilihan_status: string[];
     }>(`/api/admin/notifikasi${kueri}`, { token: true }),
   buatNotifikasi: (isi: unknown) =>

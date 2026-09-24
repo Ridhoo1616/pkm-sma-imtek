@@ -39,7 +39,8 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
   },
   {
     judul: "Alamat & Kontak",
-    keterangan: "Dipakai pada bar atas, halaman Kontak, dan bagian bawah situs.",
+    keterangan:
+      "Dipakai pada bar atas, halaman Kontak, dan bagian bawah situs.",
     kunci: [
       "alamat",
       "kelurahan",
@@ -64,7 +65,7 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
   {
     judul: "Pendaftaran (PPDB)",
     keterangan:
-      "Mengatur buka-tutup pendaftaran. Status \"tutup\" menutup formulirnya sekaligus, bukan hanya menyembunyikan tombolnya.",
+      'Mengatur buka-tutup pendaftaran. Status "tutup" menutup formulirnya sekaligus, bukan hanya menyembunyikan tombolnya.',
     kunci: [
       "ppdb_status",
       "ppdb_tahun",
@@ -86,6 +87,24 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
       "tautan_jadwal",
       "jadwal_keterangan",
       "perpustakaan_keterangan",
+    ],
+  },
+  {
+    judul: "Notifikasi & Daftar Ulang",
+    keterangan:
+      "Naskah pesan yang dikirim ke orang tua lewat WhatsApp dan email. Badan pesannya sama untuk kedua kanal; email menambahkan baris perihal. Penanda dalam kurung kurawal diganti sistem: {nama}, {no_registrasi}, {sekolah}, {tahun_ajaran}, {status}, {catatan}, {jadwal_ujian}, dan untuk daftar ulang {daftar_ulang_jadwal}, {daftar_ulang_tempat}, {daftar_ulang_syarat}. Naskah yang masih bertanda kurung siku TIDAK pernah dikirim — notifikasinya tidak disusun sama sekali.",
+    kunci: [
+      "wa_notif_verifikasi",
+      "email_subjek_verifikasi",
+      "wa_notif_ujian",
+      "email_subjek_ujian",
+      "wa_notif_kelulusan",
+      "email_subjek_kelulusan",
+      "wa_notif_daftar_ulang",
+      "email_subjek_daftar_ulang",
+      "daftar_ulang_jadwal",
+      "daftar_ulang_tempat",
+      "daftar_ulang_syarat",
     ],
   },
   {
@@ -112,7 +131,8 @@ const KUNCI_GAMBAR: { kunci: string; label: string; bantuan: string }[] = [
   {
     kunci: "foto_depan",
     label: "Foto halaman depan",
-    bantuan: "Foto mendatar, perbandingan sisi 16:9, paling tidak 1600 piksel lebarnya.",
+    bantuan:
+      "Foto mendatar, perbandingan sisi 16:9, paling tidak 1600 piksel lebarnya.",
   },
   {
     kunci: "foto_kepsek",
@@ -218,7 +238,9 @@ function IsiPengaturan() {
   // Hanya yang benar-benar berubah yang dikirim, agar riwayat perubahan
   // di sisi server tidak dipenuhi penulisan nilai yang sama. Suntingan yang
   // ternyata kembali ke nilai asalnya juga tidak dihitung sebagai perubahan.
-  const berubah = Object.keys(suntingan).filter((k) => suntingan[k] !== awal[k]);
+  const berubah = Object.keys(suntingan).filter(
+    (k) => suntingan[k] !== awal[k],
+  );
 
   // Kunci gambar ditangani bagian unggahan, jadi tidak boleh ikut muncul
   // sebagai kotak teks, termasuk lewat kelompok "Lainnya".
@@ -332,14 +354,10 @@ function IsiPengaturan() {
                       >
                         {labelDari(k)}
                         {menunggu && (
-                          <Lencana jenis="emas">
-                            belum terisi
-                          </Lencana>
+                          <Lencana jenis="emas">belum terisi</Lencana>
                         )}
                         {isi[k] !== awal[k] && (
-                          <Lencana jenis="terang">
-                            diubah
-                          </Lencana>
+                          <Lencana jenis="terang">diubah</Lencana>
                         )}
                       </label>
 
@@ -350,8 +368,12 @@ function IsiPengaturan() {
                           onChange={(e) => setNilai(k, e.target.value)}
                           className="w-full rounded-lg border border-garis bg-white px-3.5 py-2.5 text-[15px] focus:border-biru focus:ring-2 focus:ring-biru/20"
                         >
-                          <option value="buka">buka (formulir dapat diisi)</option>
-                          <option value="tutup">tutup (formulir ditutup)</option>
+                          <option value="buka">
+                            buka (formulir dapat diisi)
+                          </option>
+                          <option value="tutup">
+                            tutup (formulir ditutup)
+                          </option>
                         </select>
                       ) : areaTeks ? (
                         <textarea
@@ -378,10 +400,14 @@ function IsiPengaturan() {
                       )}
 
                       {g ? (
-                        <p className="mt-1 text-xs font-medium text-red-700">{g}</p>
+                        <p className="mt-1 text-xs font-medium text-red-700">
+                          {g}
+                        </p>
                       ) : (
                         keterangan[k] && (
-                          <p className="mt-1 text-xs text-samar">{keterangan[k]}</p>
+                          <p className="mt-1 text-xs text-samar">
+                            {keterangan[k]}
+                          </p>
                         )
                       )}
                     </div>
@@ -397,7 +423,11 @@ function IsiPengaturan() {
 
       {/* Tombol simpan kedua di bawah, karena halaman ini panjang. */}
       <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-garis pt-6">
-        <Tombol type="submit" sedangJalan={menyimpan} disabled={berubah.length === 0}>
+        <Tombol
+          type="submit"
+          sedangJalan={menyimpan}
+          disabled={berubah.length === 0}
+        >
           {menyimpan ? "Menyimpan..." : "Simpan Perubahan"}
         </Tombol>
         {berubah.length > 0 && (
@@ -471,8 +501,7 @@ function BagianGambar({
     } catch (e) {
       setGalat((g) => ({
         ...g,
-        [kunci]:
-          e instanceof GalatApi ? e.message : "Gambar gagal dihapus.",
+        [kunci]: e instanceof GalatApi ? e.message : "Gambar gagal dihapus.",
       }));
     } finally {
       setSibuk(null);
@@ -498,11 +527,7 @@ function BagianGambar({
             <div key={g.kunci} className="rounded-lg border border-garis p-5">
               <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-teks">
                 {g.label}
-                {!nama && (
-                  <Lencana jenis="emas">
-                    belum ada
-                  </Lencana>
-                )}
+                {!nama && <Lencana jenis="emas">belum ada</Lencana>}
               </p>
 
               {nama ? (
@@ -518,7 +543,9 @@ function BagianGambar({
                 </div>
               )}
 
-              <p className="mt-2 text-xs leading-relaxed text-samar">{g.bantuan}</p>
+              <p className="mt-2 text-xs leading-relaxed text-samar">
+                {g.bantuan}
+              </p>
 
               <input
                 id={`gambar-${g.kunci}`}

@@ -92,7 +92,11 @@ func (a *Aplikasi) tanganiDaftarNotifikasi(w http.ResponseWriter, r *http.Reques
 		"per_halaman": perHalaman,
 		// Frontend memakai ini untuk memilih kata pada tombolnya: "Kirim"
 		// bila gateway aktif, "Buka WhatsApp" bila panitia mengirim sendiri.
-		"gateway_aktif":  a.gatewayDisetel(),
+		"gateway_aktif": a.gatewayDisetel(),
+		// Kanal email dikirim server, jadi panel perlu tahu apakah SMTP sudah
+		// disetel — tanpa itu tombol kirimnya pasti gagal, dan lebih baik
+		// panitia diberi tahu sebabnya lebih dulu.
+		"email_aktif":    a.emailDisetel(),
 		"pilihan_status": StatusNotifikasi,
 	})
 }
@@ -165,6 +169,43 @@ func (a *Aplikasi) tanganiKirimNotifikasi(w http.ResponseWriter, r *http.Request
 	}
 
 	saya := penggunaDari(r)
+
+	// Kanal Email dikirim SERVER, bukan dibuka di aplikasi lain. Di situlah
+	// bedanya dengan WhatsApp: tidak ada tautan yang bisa dibuka panitia
+	// untuk mengirim email, jadi kalau SMTP belum disetel pengirimannya
+	// memang tidak mungkin dan itu dikatakan apa adanya.
+	if n.Kanal == "Email" {
+		if !a.emailDisetel() {
+			kirimGalat(w, http.StatusServiceUnavailable,
+				"Pengiriman email belum disetel di server. Isi SMTP_HOST, SMTP_USER, "+
+					"SMTP_PASS, dan SMTP_DARI pada berkas .env, lalu nyalakan ulang server.")
+			return
+		}
+		perihal := a.perihalUntuk(n.Jenis)
+		if perihal == "" {
+			kirimGalat(w, http.StatusUnprocessableEntity,
+				"Baris perihal email untuk jenis pesan ini belum diisi di menu Pengaturan.")
+			return
+		}
+		if err := a.kirimEmail(r.Context(), n.Tujuan, perihal, pesan); err != nil {
+			if errTandai := a.tandaiGagal(id, err.Error()); errTandai != nil {
+				a.log.Printf("gagal menandai notifikasi gagal: %v", errTandai)
+			}
+			a.log.Printf("pengiriman email notifikasi %d gagal: %v", id, err)
+			kirimGalat(w, http.StatusBadGateway,
+				"Email gagal dikirim. Keterangannya tercatat pada daftar notifikasi.")
+			return
+		}
+		if err := a.tandaiTerkirim(id, saya.ID); err != nil {
+			a.galatServer(w, "menandai notifikasi terkirim", err)
+			return
+		}
+		kirimJSON(w, http.StatusOK, map[string]any{
+			"pesan":      "Email berhasil dikirim.",
+			"dikirim_ke": n.Tujuan,
+		})
+		return
+	}
 
 	// Tanpa gateway, server tidak mengirim apa pun. Yang dilakukan hanya
 	// mencatat bahwa panitia sudah mengirimnya, dan mengembalikan tautannya.

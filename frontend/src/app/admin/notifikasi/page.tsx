@@ -11,7 +11,7 @@ import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import type { JenisLencana } from "@/komponen/Bagian";
 import { AreaTeks, Pilihan, Tombol, RingkasanGalat } from "@/komponen/Medan";
-import { IkonWhatsapp } from "@/komponen/Ikon";
+import { IkonSurel, IkonWhatsapp } from "@/komponen/Ikon";
 import type { Notifikasi } from "@/lib/tipe";
 
 /**
@@ -96,8 +96,8 @@ function IsiNotifikasi() {
   return (
     <>
       <KepalaPanel
-        judul="Notifikasi WhatsApp"
-        keterangan="Pesan disusun otomatis saat status pendaftar diubah, lalu menunggu di sini untuk ditinjau. Pesan yang sudah terkirim tidak dapat diubah, supaya catatannya tetap bisa dipakai bila ada sengketa dengan orang tua."
+        judul="Notifikasi"
+        keterangan="Pesan disusun otomatis saat status pendaftar diubah, satu untuk WhatsApp dan satu untuk email, lalu menunggu di sini untuk ditinjau. Pesan yang sudah terkirim tidak dapat diubah, supaya catatannya tetap bisa dipakai bila ada sengketa dengan orang tua."
       />
 
       <div className="mb-5 rounded-lg border border-garis bg-slate-50 px-5 py-4 text-sm leading-relaxed text-samar">
@@ -108,12 +108,46 @@ function IsiNotifikasi() {
           </>
         ) : (
           <>
-            <strong className="text-teks">Pengiriman lewat WhatsApp panitia.</strong>{" "}
+            <strong className="text-teks">
+              Pengiriman lewat WhatsApp panitia.
+            </strong>{" "}
             Menekan tombol kirim membuka WhatsApp dengan pesan yang sudah terisi
-            penuh; panitia tinggal menekan kirim di sana. Cara ini tidak berbiaya
-            dan tidak berisiko nomor sekolah diblokir. Untuk otomatis penuh,
-            setel <code className="rounded bg-white px-1">WA_GATEWAY_URL</code>{" "}
-            ke WhatsApp Business API resmi.
+            penuh; panitia tinggal menekan kirim di sana. Cara ini tidak
+            berbiaya dan tidak berisiko nomor sekolah diblokir. Untuk otomatis
+            penuh, setel{" "}
+            <code className="rounded bg-white px-1">WA_GATEWAY_URL</code> ke
+            WhatsApp Business API resmi.
+          </>
+        )}
+      </div>
+
+      {/* Keadaan kanal email diterangkan tersendiri. Bedanya dengan WhatsApp
+          menentukan: email dikirim SERVER, jadi kalau SMTP belum disetel
+          pengirimannya memang tidak mungkin — tidak ada tautan yang bisa
+          dibuka panitia sebagai gantinya. */}
+      <div className="mb-5 rounded-lg border border-garis bg-slate-50 px-5 py-4 text-sm leading-relaxed text-samar">
+        {data?.email_aktif ? (
+          <>
+            <strong className="text-teks">Pengiriman email aktif.</strong>{" "}
+            Notifikasi berkanal Email dikirim langsung dari server begitu tombol
+            kirim ditekan. Baris perihalnya diambil dari menu Pengaturan, per
+            jenis pesan.
+          </>
+        ) : (
+          <>
+            <strong className="text-teks">
+              Pengiriman email belum disetel.
+            </strong>{" "}
+            Notifikasi berkanal Email tetap tersusun dan tercatat, tetapi belum
+            dapat dikirim. Isi{" "}
+            <code className="rounded bg-white px-1">SMTP_HOST</code>,{" "}
+            <code className="rounded bg-white px-1">SMTP_USER</code>,{" "}
+            <code className="rounded bg-white px-1">SMTP_PASS</code>, dan{" "}
+            <code className="rounded bg-white px-1">SMTP_DARI</code> pada berkas{" "}
+            <code className="rounded bg-white px-1">.env</code> di server, lalu
+            nyalakan ulang. Untuk Gmail, SMTP_PASS adalah{" "}
+            <strong className="text-teks">sandi aplikasi</strong>, bukan sandi
+            akunnya.
           </>
         )}
       </div>
@@ -139,7 +173,17 @@ function IsiNotifikasi() {
           keterangan="Notifikasi tersusun sendiri begitu status seorang pendaftar diubah di menu Pendaftar."
         />
       ) : (
-        <Tabel kepala={["Waktu", "Pendaftar", "Jenis", "Tujuan", "Keadaan", ""]}>
+        <Tabel
+          kepala={[
+            "Waktu",
+            "Pendaftar",
+            "Kanal",
+            "Jenis",
+            "Tujuan",
+            "Keadaan",
+            "",
+          ]}
+        >
           {data.data.map((n) => (
             <tr key={n.id} className="hover:bg-slate-50">
               <td className="px-4 py-3 text-xs whitespace-nowrap text-samar">
@@ -149,16 +193,39 @@ function IsiNotifikasi() {
                 <p className="font-medium">{n.nama_pendaftar || "-"}</p>
                 <p className="text-xs text-samar">{n.no_registrasi}</p>
               </td>
-              <td className="px-4 py-3 text-samar capitalize">{n.jenis}</td>
+              <td className="px-4 py-3">
+                <span
+                  className={
+                    "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-bold " +
+                    (n.kanal === "Email"
+                      ? "bg-biru-muda text-biru"
+                      : "bg-green-50 text-green-700")
+                  }
+                >
+                  {n.kanal === "Email" ? (
+                    <IkonSurel ukuran={13} />
+                  ) : (
+                    <IkonWhatsapp ukuran={13} />
+                  )}
+                  {n.kanal}
+                </span>
+              </td>
+              <td className="px-4 py-3 text-samar capitalize">
+                {n.jenis.replace(/_/g, " ")}
+              </td>
               <td className="px-4 py-3 text-xs whitespace-nowrap tabular-nums">
                 {n.tujuan}
               </td>
               <td className="px-4 py-3">
-                <Lencana jenis={WARNA_STATUS[n.status] ?? WARNA_STATUS.Dibatalkan}>
+                <Lencana
+                  jenis={WARNA_STATUS[n.status] ?? WARNA_STATUS.Dibatalkan}
+                >
                   {n.status}
                 </Lencana>
                 {n.galat && (
-                  <p className="mt-1 max-w-xs text-xs text-red-700">{n.galat}</p>
+                  <p className="mt-1 max-w-xs text-xs text-red-700">
+                    {n.galat}
+                  </p>
                 )}
               </td>
               <td className="px-4 py-3 text-right whitespace-nowrap">
@@ -187,7 +254,9 @@ function IsiNotifikasi() {
       <Jendela
         terbuka={tinjau !== null}
         tutup={() => setTinjau(null)}
-        judul={tinjau?.status === "Terkirim" ? "Pesan terkirim" : "Tinjau pesan"}
+        judul={
+          tinjau?.status === "Terkirim" ? "Pesan terkirim" : "Tinjau pesan"
+        }
       >
         <div className="space-y-5">
           {ringkasan.length > 0 && <RingkasanGalat daftar={ringkasan} />}
@@ -202,7 +271,9 @@ function IsiNotifikasi() {
             {tinjau?.dikirim_pada && (
               <>
                 <dt className="text-samar">Dikirim</dt>
-                <dd className="font-semibold">{tanggalJam(tinjau.dikirim_pada)}</dd>
+                <dd className="font-semibold">
+                  {tanggalJam(tinjau.dikirim_pada)}
+                </dd>
               </>
             )}
           </dl>
@@ -222,7 +293,11 @@ function IsiNotifikasi() {
                 bantuan="Boleh diperbaiki sebelum dikirim. Naskah otomatis tidak selalu pas untuk keadaan tertentu."
               />
               <div className="flex justify-end gap-3 border-t border-garis pt-5">
-                <Tombol type="button" jenis="kedua" onClick={() => setTinjau(null)}>
+                <Tombol
+                  type="button"
+                  jenis="kedua"
+                  onClick={() => setTinjau(null)}
+                >
                   Tutup
                 </Tombol>
                 <Tombol type="button" sedangJalan={sedangKirim} onClick={kirim}>
