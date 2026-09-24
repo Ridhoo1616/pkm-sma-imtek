@@ -489,8 +489,16 @@ func (a *Aplikasi) tanganiUbahStatus(w http.ResponseWriter, r *http.Request) {
 	//
 	// Kegagalannya tidak membatalkan perubahan status: status pendaftar lebih
 	// penting daripada pesan pengantarnya.
+	// Diterima mendapat jenisnya sendiri, `daftar_ulang`, BUKAN `kelulusan`.
+	// Satu pesan yang sekaligus mengabarkan hasilnya dan menerangkan langkah
+	// daftar ulangnya lebih berguna daripada dua pesan berurutan yang
+	// setengah-setengah: pendaftar yang diterima pertanyaan berikutnya selalu
+	// "lalu saya harus apa". Ditolak dan Cadangan tetap memakai `kelulusan`.
 	jenis := "verifikasi"
-	if p.Status == "Diterima" || p.Status == "Ditolak" || p.Status == "Cadangan" {
+	switch p.Status {
+	case "Diterima":
+		jenis = "daftar_ulang"
+	case "Ditolak", "Cadangan":
 		jenis = "kelulusan"
 	}
 	if err := a.buatNotifikasi(id, jenis, map[string]string{

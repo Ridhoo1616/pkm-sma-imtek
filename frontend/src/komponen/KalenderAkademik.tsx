@@ -30,12 +30,32 @@ import type { Agenda } from "@/lib/tipe";
  */
 
 const BULAN = [
-  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
 ];
 const BULAN_SINGKAT = [
-  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-  "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mei",
+  "Jun",
+  "Jul",
+  "Agu",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Des",
 ];
 const HARI = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
@@ -87,12 +107,12 @@ function rentang(mulai: string, selesai: string): string {
   }
   const b = dariIso(selesai);
   if (a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()) {
-    return `${a.getDate()} – ${b.getDate()} ${BULAN_SINGKAT[b.getMonth()]} ${b.getFullYear()}`;
+    return `${a.getDate()}-${b.getDate()} ${BULAN_SINGKAT[b.getMonth()]} ${b.getFullYear()}`;
   }
   if (a.getFullYear() === b.getFullYear()) {
-    return `${a.getDate()} ${BULAN_SINGKAT[a.getMonth()]} – ${b.getDate()} ${BULAN_SINGKAT[b.getMonth()]} ${b.getFullYear()}`;
+    return `${a.getDate()} ${BULAN_SINGKAT[a.getMonth()]} - ${b.getDate()} ${BULAN_SINGKAT[b.getMonth()]} ${b.getFullYear()}`;
   }
-  return `${a.getDate()} ${BULAN_SINGKAT[a.getMonth()]} ${a.getFullYear()} – ${b.getDate()} ${BULAN_SINGKAT[b.getMonth()]} ${b.getFullYear()}`;
+  return `${a.getDate()} ${BULAN_SINGKAT[a.getMonth()]} ${a.getFullYear()} - ${b.getDate()} ${BULAN_SINGKAT[b.getMonth()]} ${b.getFullYear()}`;
 }
 
 /** Kepala bagian: label kecil di atas, judulnya di bawah. Dideklarasikan di
@@ -278,7 +298,11 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
     for (const a of terpakai) {
       const mulai = dariIso(a.mulai);
       const selesai = dariIso(a.selesai || a.mulai);
-      for (const d = new Date(mulai); d <= selesai; d.setDate(d.getDate() + 1)) {
+      for (
+        const d = new Date(mulai);
+        d <= selesai;
+        d.setDate(d.getDate() + 1)
+      ) {
         const k = keIso(d);
         const isi = peta.get(k);
         if (isi) isi.push(a);
@@ -396,10 +420,7 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
           ditaruh sesudah yang ringkas. */}
       <div className="grid gap-6 lg:grid-cols-[1fr_23rem] lg:items-start">
         {/* ---------- lajur waktu ---------- */}
-        <section
-          aria-labelledby="judul-lajur"
-          className="order-2 lg:order-1"
-        >
+        <section aria-labelledby="judul-lajur" className="order-2 lg:order-1">
           <div className="kartu p-4 sm:p-6">
             <div id="judul-lajur">
               <Judul atas="Rangkaian kegiatan" judul="Kalender Akademik" />
@@ -438,12 +459,7 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
                       </h3>
                       <ol className="mt-3 space-y-3">
                         {lewat.map((a, i) => (
-                          <BarisAgenda
-                            key={a.id}
-                            agenda={a}
-                            urutan={i}
-                            pudar
-                          />
+                          <BarisAgenda key={a.id} agenda={a} urutan={i} pudar />
                         ))}
                       </ol>
                     </div>
@@ -454,8 +470,7 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
                         onClick={() => setTampilLewat(true)}
                         className="rounded-lg border border-garis bg-white px-5 py-2.5 text-sm font-semibold text-biru transition hover:border-biru hover:bg-biru-muda"
                       >
-                        Tampilkan {lewat.length} kegiatan yang sudah
-                        berlangsung
+                        Tampilkan {lewat.length} kegiatan yang sudah berlangsung
                       </button>
                     </div>
                   ))}
@@ -468,7 +483,10 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
         <div className="order-1 space-y-6 lg:order-2 lg:sticky lg:top-24">
           <MunculNaik>
             <section aria-labelledby="judul-petak" className="kartu p-4 sm:p-5">
-              <div id="judul-petak" className="flex items-start justify-between gap-3">
+              <div
+                id="judul-petak"
+                className="flex items-start justify-between gap-3"
+              >
                 <Judul atas="Satu bulan" judul="Kalender" />
                 <div className="flex shrink-0 items-center gap-1">
                   <button
@@ -510,7 +528,10 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
 
               <div className="mt-4 grid grid-cols-7 gap-1 text-center">
                 {HARI.map((h) => (
-                  <div key={h} className="py-1.5 text-[11px] font-bold text-samar">
+                  <div
+                    key={h}
+                    className="py-1.5 text-[11px] font-bold text-samar"
+                  >
                     {h}
                   </div>
                 ))}
@@ -529,7 +550,9 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
                       onClick={() => setPilihHari(dipilih ? "" : iso)}
                       aria-pressed={dipilih}
                       aria-label={`${tanggal.getDate()} ${BULAN[tanggal.getMonth()]} ${tanggal.getFullYear()}${
-                        bisa ? `, ${isi.length} kegiatan` : ", tidak ada kegiatan"
+                        bisa
+                          ? `, ${isi.length} kegiatan`
+                          : ", tidak ada kegiatan"
                       }`}
                       // Tinggi 44 piksel: itu ukuran sasaran sentuh terkecil
                       // yang nyaman di ponsel, dan petak ini memang dipakai
@@ -541,8 +564,12 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
                           : bulanIni
                             ? "text-teks"
                             : "text-samar/45") +
-                        (bisa && !dipilih ? " font-bold hover:bg-biru-muda" : "") +
-                        (ini && !dipilih ? " ring-2 ring-biru/45 ring-inset" : "") +
+                        (bisa && !dipilih
+                          ? " font-bold hover:bg-biru-muda"
+                          : "") +
+                        (ini && !dipilih
+                          ? " ring-2 ring-biru/45 ring-inset"
+                          : "") +
                         (!bisa ? " cursor-default" : "")
                       }
                     >
@@ -583,10 +610,7 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
 
           {kegiatanTerpilih.length > 0 && (
             <MunculNaik>
-              <section
-                aria-live="polite"
-                className="kartu p-4 sm:p-5"
-              >
+              <section aria-live="polite" className="kartu p-4 sm:p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-base font-bold text-biru-tua">
                     {(() => {

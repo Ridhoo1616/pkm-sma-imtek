@@ -126,7 +126,7 @@ export default async function Beranda() {
               <p className="mt-4 max-w-xl leading-relaxed text-white/75">
                 Di halaman ini tersedia profil sekolah, peminatan yang dibuka,
                 sarana belajar, kegiatan siswa, beserta pendaftaran peserta
-                didik baru yang seluruhnya dikerjakan online — mengisi formulir,
+                didik baru yang seluruhnya dikerjakan online: mengisi formulir,
                 mengunggah dokumen, sampai memantau hasil verifikasinya.
               </p>
 
@@ -208,7 +208,7 @@ export default async function Beranda() {
                 ))}
                 <div className="px-3 py-4">
                   <dd className="text-2xl font-bold text-biru-tua">
-                    {p.akreditasi || "–"}
+                    {p.akreditasi || "-"}
                   </dd>
                   <dt className="mt-0.5 text-xs font-semibold text-samar">
                     Akreditasi

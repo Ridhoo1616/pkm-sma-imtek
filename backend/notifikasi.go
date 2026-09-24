@@ -62,12 +62,34 @@ type Notifikasi struct {
 
 // JenisNotifikasi memetakan jenis pesan ke kunci pengaturan naskahnya.
 var JenisNotifikasi = map[string]string{
-	"verifikasi": "wa_notif_verifikasi",
-	"ujian":      "wa_notif_ujian",
-	"kelulusan":  "wa_notif_kelulusan",
+	"verifikasi":   "wa_notif_verifikasi",
+	"ujian":        "wa_notif_ujian",
+	"kelulusan":    "wa_notif_kelulusan",
+	"daftar_ulang": "wa_notif_daftar_ulang",
+}
+
+// PerihalEmail memetakan jenis pesan ke kunci pengaturan baris perihalnya.
+//
+// Badan pesannya sama dengan yang dikirim lewat WhatsApp -- naskahnya sudah
+// berupa kalimat utuh yang pantas dibaca di kedua kanal -- tetapi email
+// menuntut baris perihal, dan perihal yang baik berbeda per jenis pesannya.
+//
+// Awalan wa_notif_ pada kunci badan pesan di atas dipertahankan meski
+// sekarang dipakai kedua kanal. Menggantinya berarti memindahkan naskah yang
+// sudah diisi sekolah, dan risiko kehilangan naskah itu lebih besar daripada
+// untungnya nama yang lebih tepat.
+var PerihalEmail = map[string]string{
+	"verifikasi":   "email_subjek_verifikasi",
+	"ujian":        "email_subjek_ujian",
+	"kelulusan":    "email_subjek_kelulusan",
+	"daftar_ulang": "email_subjek_daftar_ulang",
 }
 
 var polaPenanda = regexp.MustCompile(`\{([a-z_]+)\}`)
+
+// polaBarisKosong menangkap tiga baris baru berurutan atau lebih, yaitu dua
+// baris kosong atau lebih.
+var polaBarisKosong = regexp.MustCompile(`\n{3,}`)
 
 // susunPesan mengganti penanda dalam kurung kurawal pada naskah.
 //
@@ -82,8 +104,25 @@ func susunPesan(naskah string, nilai map[string]string) string {
 		}
 		return cocok
 	})
-	// Penanda yang nilainya kosong meninggalkan spasi ganda.
-	return strings.Join(strings.Fields(hasil), " ")
+	// Penanda yang nilainya kosong meninggalkan spasi ganda, dan itu yang
+	// dirapikan di sini. BARIS BARUNYA DIPERTAHANKAN.
+	//
+	// Semula seluruh spasi putih diratakan sekaligus dengan
+	// strings.Fields, dan itu ikut melumat baris barunya: naskah daftar
+	// ulang yang memuat jadwal, tempat, dan daftar berkas berbaris-baris
+	// tiba sebagai satu paragraf rapat sepanjang lima ratus huruf. Terlihat
+	// saat memeriksa email yang benar-benar diterima server, bukan dari
+	// membaca kodenya.
+	//
+	// Jadi perapiannya PER BARIS: spasi berlebih di dalam satu baris
+	// diratakan, sedangkan pemisah barisnya tetap. Dua baris kosong atau
+	// lebih dirapatkan menjadi satu, sebab penanda yang nilainya kosong dan
+	// berdiri sendiri pada satu baris meninggalkan baris kosong.
+	baris := strings.Split(hasil, "\n")
+	for i, b := range baris {
+		baris[i] = strings.Join(strings.Fields(b), " ")
+	}
+	return strings.TrimSpace(polaBarisKosong.ReplaceAllString(strings.Join(baris, "\n"), "\n\n"))
 }
 
 // nomorWaKirim membersihkan nomor telepon menjadi bentuk yang diterima
@@ -126,22 +165,23 @@ func (a *Aplikasi) buatNotifikasi(pendaftarID int, jenis string, tambahan map[st
 		return nil
 	}
 
-	var nama, noReg, noHpOrtu, noHp string
+	var nama, noReg, noHpOrtu, noHp, email string
 	err := a.db.QueryRow(
-		`SELECT nama_lengkap, no_registrasi, COALESCE(no_hp_ortu, ''), COALESCE(no_hp, '')
-		 FROM pendaftar WHERE id = $1`, pendaftarID).
-		Scan(&nama, &noReg, &noHpOrtu, &noHp)
+		`SELECT nama_lengkap, no_registrasi, COALESCE(no_hp_ortu, ''),
+		        COALESCE(no_hp, ''), COALESCE(email, '')
+		   FROM pendaftar WHERE id = $1`, pendaftarID).
+		Scan(&nama, &noReg, &noHpOrtu, &noHp, &email)
 	if err != nil {
 		return err
 	}
 
-	tujuan := nomorWaKirim(noHpOrtu)
-	if tujuan == "" {
-		tujuan = nomorWaKirim(noHp)
+	// Nomor orang tua lebih dulu: yang mengurus daftar ulang dan pembayaran
+	// pada umumnya orang tuanya, bukan calon peserta didiknya.
+	nomor := nomorWaKirim(noHpOrtu)
+	if nomor == "" {
+		nomor = nomorWaKirim(noHp)
 	}
-	if tujuan == "" {
-		return nil // tidak ada nomor yang bisa dihubungi
-	}
+	email = strings.TrimSpace(email)
 
 	nilai := map[string]string{
 		"nama":          nama,
@@ -152,15 +192,61 @@ func (a *Aplikasi) buatNotifikasi(pendaftarID int, jenis string, tambahan map[st
 		"status":        "",
 		"jadwal_ujian":  "",
 	}
+	// Rincian daftar ulang dibaca dari pengaturan, bukan dituliskan di dalam
+	// naskah pesannya, supaya sekolah dapat mengubah jadwalnya tanpa
+	// menyentuh susunan kalimatnya. Yang masih penanda dibiarkan kosong,
+	// bukan diisi kalimat contoh.
+	for _, k := range []string{"daftar_ulang_jadwal", "daftar_ulang_tempat", "daftar_ulang_syarat"} {
+		v := strings.TrimSpace(a.atur(k))
+		if dalamKurungSiku(v) {
+			v = ""
+		}
+		nilai[k] = v
+	}
 	for k, v := range tambahan {
 		nilai[k] = v
 	}
 
-	_, err = a.db.Exec(
-		`INSERT INTO notifikasi (pendaftar_id, kanal, tujuan, jenis, pesan, status)
-		 VALUES ($1, 'WhatsApp', $2, $3, $4, 'Menunggu')`,
-		pendaftarID, tujuan, jenis, susunPesan(naskah, nilai))
-	return err
+	pesan := susunPesan(naskah, nilai)
+
+	// Satu baris per kanal yang benar-benar punya tujuan. Pendaftar yang
+	// mengisi keduanya menerima dua-duanya; yang hanya mengisi nomor tetap
+	// menerima WhatsApp saja, dan sebaliknya.
+	tujuan := []struct{ kanal, alamat string }{}
+	if nomor != "" {
+		tujuan = append(tujuan, struct{ kanal, alamat string }{"WhatsApp", nomor})
+	}
+	if email != "" {
+		tujuan = append(tujuan, struct{ kanal, alamat string }{"Email", email})
+	}
+	if len(tujuan) == 0 {
+		return nil // tidak ada yang bisa dihubungi
+	}
+
+	for _, t := range tujuan {
+		if _, err := a.db.Exec(
+			`INSERT INTO notifikasi (pendaftar_id, kanal, tujuan, jenis, pesan, status)
+			 VALUES ($1, $2, $3, $4, $5, 'Menunggu')`,
+			pendaftarID, t.kanal, t.alamat, jenis, pesan); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// perihalUntuk mengembalikan baris perihal email bagi sebuah jenis pesan.
+// String kosong berarti sekolah belum mengisinya, dan pengirimannya ditolak
+// dengan keterangan -- bukan dikirim tanpa perihal.
+func (a *Aplikasi) perihalUntuk(jenis string) string {
+	kunci, ada := PerihalEmail[jenis]
+	if !ada {
+		return ""
+	}
+	p := strings.TrimSpace(a.atur(kunci))
+	if dalamKurungSiku(p) {
+		return ""
+	}
+	return p
 }
 
 /* ---------- pengiriman ---------- */

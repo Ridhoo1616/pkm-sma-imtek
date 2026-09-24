@@ -920,6 +920,126 @@ laboratorium komputer sekolah berbagi satu alamat IP, dan pembatas yang
 terlalu rapat akan memblokir antrean yang sah pada hari terakhir
 pendaftaran. Keputusan ambangnya milik sekolah, bukan milik kode ini.
 
+### H2. Notifikasi diterima dan daftar ulang, lewat WhatsApp dan email
+
+Begitu administrator menetapkan status seorang pendaftar menjadi **Diterima**,
+sistem menyusun pesan berjenis `daftar_ulang` — satu baris untuk WhatsApp dan
+satu untuk email — yang sekaligus mengabarkan hasilnya dan menerangkan langkah
+daftar ulangnya.
+
+Jenisnya sendiri, bukan memakai `kelulusan` yang sudah ada. Satu pesan yang
+menjawab "diterima" dan "lalu saya harus apa" sekaligus lebih berguna daripada
+dua pesan berurutan yang setengah-setengah, dan pertanyaan berikutnya orang tua
+yang anaknya diterima memang selalu yang kedua itu. `kelulusan` tetap dipakai
+untuk Ditolak dan Cadangan.
+
+**Satu baris notifikasi per kanal yang benar-benar punya tujuan.** Pendaftar
+yang mengisi nomor dan email menerima dua-duanya; yang hanya mengisi nomor
+menerima WhatsApp saja. Nomor orang tua dipakai lebih dulu daripada nomor
+pendaftarnya: yang mengurus daftar ulang dan pembayaran pada umumnya orang
+tuanya.
+
+**Rincian daftar ulangnya pengaturan tersendiri** — `daftar_ulang_jadwal`,
+`daftar_ulang_tempat`, `daftar_ulang_syarat` — bukan dituliskan di dalam naskah
+pesannya. Sekolah dapat mengubah jadwalnya tanpa menyentuh susunan kalimatnya,
+dan rincian yang sama dapat dipakai di halaman publik nanti. Yang masih
+bertanda kurung siku diganti kosong, bukan dikirim sebagai kalimat contoh.
+
+**Email dikirim server; WhatsApp tidak.** Di situlah bedanya, dan itu
+menentukan cara panel menerangkannya. Untuk WhatsApp, tombol kirim membuka
+WhatsApp panitia dengan pesan terisi penuh — tidak berbiaya, dan nomor sekolah
+tidak berisiko diblokir. Untuk email tidak ada tautan semacam itu: server yang
+mengirim, jadi bila SMTP belum disetel pengirimannya memang tidak mungkin dan
+panel mengatakannya apa adanya beserta nama variabel yang perlu diisi.
+
+Keduanya tetap **menunggu peninjauan** panitia, tidak terkirim otomatis. Pesan
+yang salah tidak dapat ditarik kembali, baik dari WhatsApp maupun dari email.
+
+**Pengirimannya memakai `net/smtp` dari pustaka baku**, tanpa pustaka luar —
+yang dibutuhkan cuma menyambung ke satu server, masuk dengan sandi aplikasi,
+lalu mengirim satu pesan teks. Tidak memakai `smtp.SendMail` meski itu satu
+baris: fungsi itu tidak menerima context dan tidak punya batas waktu sama
+sekali, sehingga server SMTP yang menggantung akan menggantungkan penanganan
+HTTP di panel. Penyambungannya dibuat sendiri dengan `DialTimeout` 15 detik.
+
+STARTTLS **diwajibkan**: bila server tidak mendukungnya, pengiriman dibatalkan
+alih-alih diteruskan tanpa enkripsi. Sandi aplikasi tidak boleh melintas
+terbuka. Perihalnya disandikan MIME karena judul berbahasa Indonesia dapat
+memuat huruf di luar ASCII, dan badannya base64 supaya baris panjang maupun
+tanda baca tidak merusak bentuk pesannya.
+
+Diuji dengan **server SMTP tiruan yang ditulis sendiri** — `smtpd` sudah
+dibuang dari Python 3.12 dan `aiosmtpd` bukan pustaka baku — yang mendukung
+STARTTLS dan AUTH PLAIN lalu menyimpan pesannya ke berkas. Dengan begitu yang
+dibuktikan bukan "baris notifikasi ditandai terkirim", melainkan pesan lengkap
+beserta kepala dan badan yang benar-benar diterima server email.
+
+Dua hal ditemukan justru karena diuji sampai ke situ:
+
+1. **Verifikasi TLS memang berjalan.** Sertifikat uji pertama ditolak Go
+   karena hanya punya Common Name tanpa SAN, dan galatnya tercatat pada kolom
+   `galat` notifikasi dalam kalimat yang dapat dibaca panitia.
+2. **`susunPesan` melumat baris baru.** Penutupnya
+   `strings.Join(strings.Fields(hasil), " ")` meratakan SELURUH spasi putih,
+   termasuk baris baru, sehingga naskah daftar ulang yang memuat jadwal,
+   tempat, dan daftar berkas berbaris-baris tiba sebagai satu paragraf rapat
+   sepanjang lima ratus huruf. Cacat itu sudah ada sejak notifikasi pertama
+   dibuat dan mengenai seluruh jenis pesannya; tidak pernah terlihat karena
+   yang diperiksa selama ini isi kolom `pesan`, bukan pesan yang diterima.
+   Perapiannya sekarang **per baris**: spasi berlebih di dalam satu baris
+   diratakan, pemisah barisnya tetap, dan dua baris kosong atau lebih
+   dirapatkan menjadi satu. Dijaga oleh `notifikasi_test.go`.
+
+**Awalan `wa_notif_` pada kunci naskah dipertahankan** meski sekarang dipakai
+kedua kanal. Menggantinya berarti memindahkan naskah yang sudah diisi sekolah,
+dan risiko kehilangan naskah itu lebih besar daripada untungnya nama yang lebih
+tepat. Ketidakcocokan namanya dicatat di sini dan di migrasi 014.
+
+**Alamat pengirim email dapat diatur dari panel** (migrasi 015), pada
+pengaturan `email_pengirim` dan `email_pengirim_nama`. Sekolah yang ingin
+pesannya tampak datang dari ppdb@sekolah, bukan dari akun Gmail yang dipakai
+mengirim, tidak perlu menyentuh server.
+
+**Sandinya tetap di `.env`, dan itu disengaja.** Sandi aplikasi yang disimpan
+di basis data akan ikut terbawa setiap kali basis datanya dicadangkan atau
+disalin ke komputer lain, dan cadangan basis data beredar jauh lebih bebas
+daripada berkas `.env`. Yang boleh diatur dari panel hanya alamat dan nama
+pengirimnya.
+
+Peringatan yang tercantum pada keterangan pengaturannya: Gmail MENOLAK alamat
+pengirim yang bukan akun yang dipakai masuk, atau bukan alias yang sudah
+diverifikasi di setelan Gmail. Mengisi alamat sembarangan membuat
+pengirimannya gagal, dan galatnya tercatat pada daftar notifikasi. Kosong
+berarti memakai alamat akunnya sendiri, yang selalu diterima.
+
+**Nomor WhatsApp pengirim tidak dapat diatur, dan itu bukan kelalaian.**
+Pesan WhatsApp dikirim dari akun WhatsApp panitia yang membuka tautannya, jadi
+tidak ada nomor pengirim yang dapat disetel dari panel. Bila gateway resmi
+dipakai, pengirimnya nomor gateway itu. Yang dapat diatur pengaturan
+`whatsapp`, yaitu nomor yang DITAMPILKAN kepada pengunjung pada lima tombol
+WhatsApp di situs; pengaturan itu masih kosong, dan selama kosong kelima
+tombolnya tidak muncul. Pengaturan yang tidak mengerjakan apa pun sengaja
+tidak dibuat.
+
+### Tanda pisah panjang tidak dipakai pada tulisan yang tampak
+
+Tanda pisah panjang (em dash dan en dash) tidak lagi dipakai pada seluruh
+tulisan yang dibaca pengunjung maupun panitia. Penggantinya titik dua, titik
+koma, koma, atau kalimat yang dipecah, sesuai maksudnya; rentang tanggal
+memakai tanda hubung biasa.
+
+Yang diubah HANYA tulisan yang tampak, bukan komentar di dalam kode. Cara
+mencarinya pun dari keluaran jadinya, bukan dari kodenya: teks tampak
+dikeluarkan dari HTML ke-27 halaman publik yang benar-benar disajikan, dari
+berkas JavaScript hasil build untuk teks panel admin, dan dari kolom `nilai`
+serta `keterangan` pada tabel pengaturan. Sebelas tempat ditemukan; dari 109
+baris kode yang memuat tanda itu, sisanya komentar.
+
+Satu di antaranya ada di basis data, bukan di kode: keterangan pengaturan
+`peta_koordinat` yang ditulis migrasi 008, dan tampil sebagai teks bantuan di
+panel. Diganti lewat migrasi 015, sekaligus dibetulkan di sumber migrasi 008
+supaya pemasangan baru tidak menuliskannya lagi.
+
 ### I. Dukungan tujuan "meningkatkan efektivitas promosi"
 
 Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
@@ -1188,12 +1308,45 @@ berbeda dari kerangka di halaman Profil:
 Begitu nama, foto, atau naskahnya diisi lewat menu Pengaturan, bagian ini
 berganti sendiri ke bentuk terisinya. Tidak ada kode yang perlu diubah.
 
-**Gedung sekolah di pojok kartunya berupa gambar, bukan lagi jalur SVG.**
-Semula digambar sebagai garis langsung di dalam komponennya. Gambar kiriman
-user berupa bidang bergradasi yang sangat pucat — bukan garis — sehingga tidak
-dapat ditulis sebagai jalur SVG. Berkasnya JPEG: aslinya PNG 1774×887 sebesar
-1 MB tanpa lapisan tembus pandang, dan karena tidak ada yang perlu dijaga
-tembusnya sedangkan isinya bidang bergradasi, JPEG turun ke 28 KB.
+**Gedung sekolah menjadi LATAR SEPENUH PANEL, dengan naskahnya di atasnya.**
+Semula jalur SVG bergaya garis di pojok, lalu sempat menjadi gambar kecil di
+pojok kanan bawah; keduanya terlalu kecil sehingga gedungnya nyaris tidak
+terbaca. `object-right-bottom` menentukan bagian mana yang tersisa saat
+dipotong: gambarnya berbanding 2:1 sedangkan panelnya jauh lebih jangkung,
+jadi `object-cover` pasti memotong, dan gedungnya berada di sisi kanan bawah
+gambar.
+
+Yang menjaga naskah tetap terbaca **peredam di atas gambarnya**, bukan
+kepucatan gambarnya sendiri. Dua bentuk, karena letak naskahnya berbeda: mulai
+ambang `sm` naskahnya di kolom kiri sedangkan gedungnya di kanan, jadi
+peredamnya bergradasi mendatar — hampir pekat di kiri tempat hurufnya,
+menipis ke kanan supaya gedungnya tetap terlihat; di layar sempit naskahnya
+memenuhi seluruh lebar panel sehingga peredamnya rata.
+
+**Keterbacaannya diukur, bukan dikira.** Tiap petak teks dipotret sendiri
+dengan seluruh tulisan di panel disembunyikan lebih dulu, sehingga yang
+terpotret murni latarnya; warna paling gelap pada petak itu diambil, lalu
+nisbah kontrasnya terhadap warna huruf dihitung menurut rumus WCAG. Hasil
+akhirnya judul 8,49:1 dan naskah 11,82:1 di layar lebar, 10,38:1 dan 12,81:1
+di ponsel — jauh di atas ambang 4,5 untuk teks isi.
+
+Pengukuran itu menemukan satu masalah nyata: naskahnya semula `text-samar`
+(#6b7280) dan di atas gambar latar turun ke **3,67:1**, di bawah ambang.
+Bahkan di atas putih bersih abu-abu itu cuma 4,83:1. Karena itu naskah di
+panel ini dinaikkan ke `text-teks`.
+
+Tiga kekeliruan pengukuran ikut dibetulkan sebelum angkanya dipercaya:
+`clip` pada `Page.captureScreenshot` memakai koordinat halaman sedangkan
+`getBoundingClientRect()` memberi koordinat jendela, sehingga tanpa menambah
+geseran gulir yang terpotret petak lain sama sekali; menyaring piksel huruf
+menurut kedekatan warna ikut meloloskan piksel tepi huruf yang dihaluskan dan
+membuat latar terbaca jauh lebih gelap daripada sebenarnya; dan tombol yang
+punya latar penuh warnanya sendiri tidak boleh dinilai dengan cara ini, sebab
+menyembunyikannya untuk mengukur latar justru salah sasaran.
+
+**Berkas gambarnya JPEG, bukan PNG.** Aslinya PNG 1774×887 sebesar 1 MB tanpa
+lapisan tembus pandang, dan karena tidak ada yang perlu dijaga tembusnya
+sedangkan isinya bidang bergradasi, JPEG turun ke 28 KB.
 
 Tepi kiri dan atasnya dipudarkan lewat mask supaya ia menyatu dengan kartunya
 alih-alih terbaca sebagai foto yang ditempelkan. Sengaja tidak diberi opacity

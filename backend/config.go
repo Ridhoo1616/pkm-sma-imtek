@@ -30,6 +30,20 @@ type Konfigurasi struct {
 	// yang berbeda, jadi dibuat dapat disetel tanpa mengubah kode.
 	WaMedanTujuan string
 	WaMedanPesan  string
+
+	// Pengiriman email notifikasi. Kosong berarti kanal email tidak aktif:
+	// notifikasinya tetap dicatat, tetapi tidak dapat dikirim, dan panel
+	// menerangkan hal itu kepada panitia.
+	//
+	// SmtpSandi untuk Gmail adalah SANDI APLIKASI, bukan sandi akunnya.
+	// Nilainya rahasia dan hanya boleh berada di berkas .env yang tidak ikut
+	// ke repositori — repositori ini publik.
+	SmtpHost     string
+	SmtpPorta    string
+	SmtpPengguna string
+	SmtpSandi    string
+	SmtpDari     string
+	SmtpNama     string
 }
 
 // muatBerkasEnv membaca berkas .env di sebelah program dan menyetel
@@ -150,7 +164,14 @@ func muatKonfigurasi() Konfigurasi {
 		WaGatewayToken: lingkungan("WA_GATEWAY_TOKEN", ""),
 		WaMedanTujuan:  lingkungan("WA_MEDAN_TUJUAN", "to"),
 		WaMedanPesan:   lingkungan("WA_MEDAN_PESAN", "message"),
-		Produksi:       produksi,
+
+		SmtpHost:     lingkungan("SMTP_HOST", ""),
+		SmtpPorta:    lingkungan("SMTP_PORT", "587"),
+		SmtpPengguna: lingkungan("SMTP_USER", ""),
+		SmtpSandi:    lingkungan("SMTP_PASS", ""),
+		SmtpDari:     lingkungan("SMTP_DARI", lingkungan("SMTP_USER", "")),
+		SmtpNama:     lingkungan("SMTP_NAMA", ""),
+		Produksi:     produksi,
 	}
 }
 

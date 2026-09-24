@@ -4,19 +4,10 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { angka, namaBulan, persen } from "@/lib/format";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, KartuAngka, Tabel, BarisBilah } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { MunculNaik } from "@/komponen/Gerak";
 import type { Cacah } from "@/lib/tipe";
-
-export default function HalamanLaporan() {
-  return (
-    <KerangkaAdmin>
-      <IsiLaporan />
-    </KerangkaAdmin>
-  );
-}
 
 function Bagian({
   judul,
@@ -69,7 +60,7 @@ function Bagian({
   );
 }
 
-function IsiLaporan() {
+export default function HalamanLaporan() {
   const [tahun, setTahun] = useState("");
   const { data, memuat, galat, muatUlang } = useMuat(
     () => api.laporan(tahun),

@@ -5,7 +5,6 @@ import { api, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { belumTerisi } from "@/lib/format";
 import { useKabar } from "@/komponen/Kabar";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Lencana } from "@/komponen/Bagian";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
@@ -43,14 +42,6 @@ const KOSONG = {
 };
 
 export default function HalamanProfilAdmin() {
-  return (
-    <KerangkaAdmin>
-      <IsiHalaman />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiHalaman() {
   const kabar = useKabar();
   const { data, memuat, galat, muatUlang } = useMuat(() => api.halamanAdmin());
 
@@ -306,7 +297,7 @@ function IsiHalaman() {
             </p>
             <p className="mt-1 text-xs leading-relaxed text-samar">
               Untuk halaman yang punya rumusannya sendiri, misalnya OSIS. Ini
-              bukan visi misi sekolah — yang itu diisi lewat menu Pengaturan dan
+              bukan visi misi sekolah. Yang itu diisi lewat menu Pengaturan dan
               tampil di halaman Profil Sekolah. Biarkan kosong bila halaman ini
               tidak punya, dan bagiannya tidak akan tampil.
             </p>
@@ -328,7 +319,7 @@ function IsiHalaman() {
                 nilai={isi.misi}
                 ubah={(v) => setIsi((s) => ({ ...s, misi: v }))}
                 galat={galatKolom.misi}
-                bantuan="Satu baris satu poin, tanpa perlu menomori sendiri — penomorannya dibuat situs."
+                bantuan="Satu baris satu poin, tanpa perlu menomori sendiri; penomorannya dibuat situs."
               />
             </div>
           </div>

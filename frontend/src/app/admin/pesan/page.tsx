@@ -5,7 +5,6 @@ import { api, GalatApi } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { angka, tanggalJam, nomorWa, tautanWa } from "@/lib/format";
-import KerangkaAdmin from "@/komponen/KerangkaAdmin";
 import { KepalaPanel, KartuAngka, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
@@ -13,14 +12,6 @@ import { Tombol } from "@/komponen/Medan";
 import type { Pesan } from "@/lib/tipe";
 
 export default function HalamanPesanAdmin() {
-  return (
-    <KerangkaAdmin>
-      <IsiPesan />
-    </KerangkaAdmin>
-  );
-}
-
-function IsiPesan() {
   const kabar = useKabar();
   const [saring, setSaring] = useState({ dibaca: "", cari: "" });
   const kueri = (() => {
