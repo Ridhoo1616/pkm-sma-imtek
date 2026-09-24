@@ -115,6 +115,18 @@ export default async function HalamanVisiMisi() {
                   membulatnya. Naskahnya tidak pernah bertemu gambar karena
                   keduanya kolom yang berbeda, bukan karena diberi jarak.
 
+                  LEBAR KOLOMNYA BERTINGKAT EMPAT, dan angkanya diukur, bukan
+                  dikira-kira. Yang menentukan bukan lebar layar melainkan
+                  lebar KARTU, dan kartu tersempit justru muncul di 1024
+                  piksel: di situ petaknya baru berubah menjadi dua kolom,
+                  sehingga tiap kartu cuma 472 piksel. Pada kolom gambar
+                  selebar 208 piksel, kolom naskahnya tinggal 207 piksel —
+                  gambarnya memakan separuh kartu. Karena itu di ambang md
+                  kolomnya 192 piksel, dan baru melebar menjadi 224 piksel di
+                  ambang xl ketika kartunya sudah 564 piksel. Hasilnya gambar
+                  yang lebih besar daripada sebelumnya di layar lebar tanpa
+                  menghimpit naskah di laptop.
+
                   SUSUNANNYA SAMA DI SEMUA LEBAR, dan gambarnya selalu utuh.
                   Sempat dicoba bertumpuk di layar sempit dengan gambar melebar
                   penuh memakai object-cover, supaya kotaknya terisi habis.
@@ -135,7 +147,7 @@ export default async function HalamanVisiMisi() {
                 alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis"
                 width={384}
                 height={426}
-                className="pointer-events-none -my-6 -mr-6 w-32 self-stretch object-contain object-bottom sm:w-36 md:-my-7 md:-mr-7 md:w-44"
+                className="pointer-events-none -my-6 -mr-6 w-36 self-stretch object-contain object-bottom sm:w-40 md:-my-7 md:-mr-7 md:w-48 xl:w-56"
               />
             </section>
           </MunculNaik>
@@ -181,7 +193,7 @@ export default async function HalamanVisiMisi() {
                 alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar"
                 width={314}
                 height={434}
-                className="pointer-events-none -my-6 -mr-6 w-32 self-stretch object-contain object-bottom sm:w-36 md:-my-7 md:-mr-7 md:w-44"
+                className="pointer-events-none -my-6 -mr-6 w-36 self-stretch object-contain object-bottom sm:w-40 md:-my-7 md:-mr-7 md:w-48 xl:w-56"
               />
             </section>
           </MunculNaik>
