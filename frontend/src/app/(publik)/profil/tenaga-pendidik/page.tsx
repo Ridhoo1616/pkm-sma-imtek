@@ -77,7 +77,15 @@ export default async function HalamanTenaga() {
               alt="Ilustrasi lima guru dan siswa berdiri di depan gedung sekolah"
               width={1487}
               height={709}
-              className="pointer-events-none -mx-6 -mb-6 w-[calc(100%+3rem)] self-end object-contain object-bottom sm:-my-7 sm:-mr-7 sm:mx-0 sm:mb-0 sm:w-72 sm:self-stretch md:w-96"
+              /* Margin ditulis PER SISI di kedua ambang, bukan memakai
+                 ringkasan `-my`/`-mx` lalu dibatalkan sebagian. Percobaan
+                 pertama memakai `sm:-my-7 ... sm:mb-0`, dan `mb-0` itu ikut
+                 membatalkan tarikan ke bawahnya: gambarnya berhenti 29
+                 piksel di atas dasar kartu — setebal padding kartu ditambah
+                 garis tepinya. Urutan kelas di sini tidak menentukan, sebab
+                 Tailwind menyusun ulang keluarannya sendiri, jadi ringkasan
+                 yang saling menimpa memang tidak bisa diandalkan. */
+              className="pointer-events-none -mr-6 -mb-6 -ml-6 w-[calc(100%+3rem)] self-end object-contain object-bottom sm:-mt-7 sm:-mr-7 sm:-mb-7 sm:ml-0 sm:w-72 sm:self-stretch md:w-96"
             />
           </section>
         </MunculNaik>
