@@ -41,8 +41,11 @@ func (a *Aplikasi) ambilHalaman(kelompok string, hanyaAktif bool) ([]Halaman, er
 		arg = append(arg, kelompok)
 	}
 
-	baris, err := a.db.Query(`SELECT id, slug, judul, ringkasan, COALESCE(gambar, ''),
-	                                 kelompok, urutan, aktif, updated_at
+	// Naskahnya sengaja TIDAK ikut pada daftar — bisa puluhan ribu huruf per
+	// halaman — tetapi visi dan misi ikut, sebab formulir ubah di panel admin
+	// mengisi kolomnya dari daftar ini dan keduanya pendek.
+	baris, err := a.db.Query(`SELECT id, slug, judul, ringkasan, visi, misi,
+	                                 COALESCE(gambar, ''), kelompok, urutan, aktif, updated_at
 	                            FROM halaman WHERE `+strings.Join(syarat, " AND ")+`
 	                           ORDER BY kelompok, urutan, id`, arg...)
 	if err != nil {
@@ -53,8 +56,8 @@ func (a *Aplikasi) ambilHalaman(kelompok string, hanyaAktif bool) ([]Halaman, er
 	hasil := []Halaman{}
 	for baris.Next() {
 		var h Halaman
-		if err := baris.Scan(&h.ID, &h.Slug, &h.Judul, &h.Ringkasan, &h.Gambar,
-			&h.Kelompok, &h.Urutan, &h.Aktif, &h.Diubah); err != nil {
+		if err := baris.Scan(&h.ID, &h.Slug, &h.Judul, &h.Ringkasan, &h.Visi, &h.Misi,
+			&h.Gambar, &h.Kelompok, &h.Urutan, &h.Aktif, &h.Diubah); err != nil {
 			return nil, err
 		}
 		hasil = append(hasil, h)
@@ -79,11 +82,11 @@ func (a *Aplikasi) tanganiHalamanDetail(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var h Halaman
-	err := a.db.QueryRow(`SELECT id, slug, judul, ringkasan, isi, COALESCE(gambar, ''),
-	                             kelompok, urutan, aktif, updated_at
+	err := a.db.QueryRow(`SELECT id, slug, judul, ringkasan, isi, visi, misi,
+	                             COALESCE(gambar, ''), kelompok, urutan, aktif, updated_at
 	                        FROM halaman WHERE slug = $1 AND aktif = true`, slug).
-		Scan(&h.ID, &h.Slug, &h.Judul, &h.Ringkasan, &h.Isi, &h.Gambar,
-			&h.Kelompok, &h.Urutan, &h.Aktif, &h.Diubah)
+		Scan(&h.ID, &h.Slug, &h.Judul, &h.Ringkasan, &h.Isi, &h.Visi, &h.Misi,
+			&h.Gambar, &h.Kelompok, &h.Urutan, &h.Aktif, &h.Diubah)
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Halaman tidak ditemukan.")
 		return
@@ -131,38 +134,54 @@ func (a *Aplikasi) tanganiHalamanAdmin(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// bacaHalaman membaca isian formulir halaman sekaligus memeriksanya.
-func bacaIsianHalaman(r *http.Request) (slug, judul, ringkasan, isi, kelompok string, urutan int, aktif bool, v *Validasi) {
+// bacaIsianHalaman membaca isian formulir halaman sekaligus memeriksanya.
+//
+// Mengembalikan struct, bukan deretan nilai berurutan. Sebelumnya berupa
+// delapan nilai — slug, judul, ringkasan, isi, kelompok, urutan, aktif, v —
+// dan penambahan visi beserta misi akan menjadikannya sepuluh. Sepuluh nilai
+// berurutan pada tiga tempat pemanggilan hanya menunggu dua di antaranya
+// tertukar, dan keduanya bertipe string sehingga penyusun kode pun tidak akan
+// menegur. Bentuknya sekarang sama dengan bacaIsianTenaga di berkas ini.
+func bacaIsianHalaman(r *http.Request) (h Halaman, v *Validasi) {
 	ambil := func(k string) string { return strings.TrimSpace(r.FormValue(k)) }
 	v = validasiBaru()
 
-	judul = v.wajib("judul", "Judul halaman", ambil("judul"))
-	v.panjangMaks("judul", "Judul halaman", judul, 180)
+	h.Judul = v.wajib("judul", "Judul halaman", ambil("judul"))
+	v.panjangMaks("judul", "Judul halaman", h.Judul, 180)
 
-	slug = strings.ToLower(ambil("slug"))
-	if slug == "" {
-		slug = buatSlug(judul)
+	h.Slug = strings.ToLower(ambil("slug"))
+	if h.Slug == "" {
+		h.Slug = buatSlug(h.Judul)
 	}
-	if !polaSlug.MatchString(slug) || len(slug) > 120 {
+	if !polaSlug.MatchString(h.Slug) || len(h.Slug) > 120 {
 		v.tambah("slug",
 			"Alamat halaman hanya boleh huruf kecil, angka, dan tanda hubung, misalnya kurikulum-merdeka.")
 	}
 
-	ringkasan = ambil("ringkasan")
-	v.panjangMaks("ringkasan", "Ringkasan", ringkasan, 400)
-	isi = strings.TrimSpace(r.FormValue("isi"))
-	if len([]rune(isi)) > 60000 {
+	h.Ringkasan = ambil("ringkasan")
+	v.panjangMaks("ringkasan", "Ringkasan", h.Ringkasan, 400)
+	h.Isi = strings.TrimSpace(r.FormValue("isi"))
+	if len([]rune(h.Isi)) > 60000 {
 		v.tambah("isi", "Naskah halaman terlalu panjang.")
 	}
 
-	kelompok = ambil("kelompok")
-	if kelompok == "" {
-		kelompok = "Profil"
-	}
-	v.pilihan("kelompok", "Kelompok menu", kelompok, KelompokHalaman)
+	// Visi dan misi milik halaman ini sendiri, keduanya tidak wajib. Batasnya
+	// jauh lebih kecil daripada naskahnya: rumusan visi satu sampai dua
+	// kalimat, dan misi beberapa poin. Batas yang longgar hanya mengundang
+	// naskah panjang masuk ke tempat yang tata letaknya tidak untuk itu.
+	h.Visi = strings.TrimSpace(r.FormValue("visi"))
+	v.panjangMaks("visi", "Visi", h.Visi, 600)
+	h.Misi = strings.TrimSpace(r.FormValue("misi"))
+	v.panjangMaks("misi", "Misi", h.Misi, 2000)
 
-	urutan = bilanganKueri(ambil("urutan"), 0, 0, 1000)
-	aktif = bolean(r, "aktif")
+	h.Kelompok = ambil("kelompok")
+	if h.Kelompok == "" {
+		h.Kelompok = "Profil"
+	}
+	v.pilihan("kelompok", "Kelompok menu", h.Kelompok, KelompokHalaman)
+
+	h.Urutan = bilanganKueri(ambil("urutan"), 0, 0, 1000)
+	h.Aktif = bolean(r, "aktif")
 	return
 }
 
@@ -172,7 +191,7 @@ func (a *Aplikasi) tanganiSimpanHalaman(w http.ResponseWriter, r *http.Request) 
 	}
 	defer r.MultipartForm.RemoveAll()
 
-	slug, judul, ringkasan, isi, kelompok, urutan, aktif, v := bacaIsianHalaman(r)
+	h, v := bacaIsianHalaman(r)
 	gambar, errG := a.ambilUnggahan(r.MultipartForm, "gambar", "profil", TipeGambar)
 	if errG != nil && !errors.Is(errG, GalatTanpaBerkas) {
 		v.tambah("gambar", "Gambar: "+errG.Error()+".")
@@ -184,14 +203,16 @@ func (a *Aplikasi) tanganiSimpanHalaman(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var id int
-	err := a.db.QueryRow(`INSERT INTO halaman (slug, judul, ringkasan, isi, gambar, kelompok, urutan, aktif)
-	                      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-		slug, judul, ringkasan, isi, kosongJadiNil(gambar), kelompok, urutan, aktif).Scan(&id)
+	err := a.db.QueryRow(`INSERT INTO halaman
+	        (slug, judul, ringkasan, isi, visi, misi, gambar, kelompok, urutan, aktif)
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+		h.Slug, h.Judul, h.Ringkasan, h.Isi, h.Visi, h.Misi,
+		kosongJadiNil(gambar), h.Kelompok, h.Urutan, h.Aktif).Scan(&id)
 	if err != nil {
 		a.hapusUnggahan("profil", gambar)
 		if kodeGanda(err) {
 			kirimGalat(w, http.StatusConflict,
-				"Alamat halaman "+slug+" sudah dipakai halaman lain.")
+				"Alamat halaman "+h.Slug+" sudah dipakai halaman lain.")
 			return
 		}
 		a.galatServer(w, "menyimpan halaman", err)
@@ -221,7 +242,7 @@ func (a *Aplikasi) tanganiUbahHalaman(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slug, judul, ringkasan, isi, kelompok, urutan, aktif, v := bacaIsianHalaman(r)
+	h, v := bacaIsianHalaman(r)
 	gambarBaru, errG := a.ambilUnggahan(r.MultipartForm, "gambar", "profil", TipeGambar)
 	if errG != nil && !errors.Is(errG, GalatTanpaBerkas) {
 		v.tambah("gambar", "Gambar: "+errG.Error()+".")
@@ -239,15 +260,16 @@ func (a *Aplikasi) tanganiUbahHalaman(w http.ResponseWriter, r *http.Request) {
 		gambarDipakai = ""
 	}
 
-	if _, err := a.db.Exec(`UPDATE halaman SET slug = $1, judul = $2, ringkasan = $3, isi = $4,
-	                               gambar = $5, kelompok = $6, urutan = $7, aktif = $8
-	                         WHERE id = $9`,
-		slug, judul, ringkasan, isi, kosongJadiNil(gambarDipakai),
-		kelompok, urutan, aktif, id); err != nil {
+	if _, err := a.db.Exec(`UPDATE halaman SET slug = $1, judul = $2, ringkasan = $3,
+	                               isi = $4, visi = $5, misi = $6, gambar = $7,
+	                               kelompok = $8, urutan = $9, aktif = $10
+	                         WHERE id = $11`,
+		h.Slug, h.Judul, h.Ringkasan, h.Isi, h.Visi, h.Misi,
+		kosongJadiNil(gambarDipakai), h.Kelompok, h.Urutan, h.Aktif, id); err != nil {
 		a.hapusUnggahan("profil", gambarBaru)
 		if kodeGanda(err) {
 			kirimGalat(w, http.StatusConflict,
-				"Alamat halaman "+slug+" sudah dipakai halaman lain.")
+				"Alamat halaman "+h.Slug+" sudah dipakai halaman lain.")
 			return
 		}
 		a.galatServer(w, "memperbarui halaman", err)

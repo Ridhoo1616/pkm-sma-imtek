@@ -34,6 +34,8 @@ const KOSONG = {
   judul: "",
   ringkasan: "",
   isi: "",
+  visi: "",
+  misi: "",
   kelompok: "Profil",
   urutan: 0,
   aktif: true,
@@ -76,6 +78,8 @@ function IsiHalaman() {
         judul: h.judul,
         ringkasan: h.ringkasan,
         isi: h.isi,
+        visi: h.visi,
+        misi: h.misi,
         kelompok: h.kelompok,
         urutan: h.urutan,
         aktif: h.aktif,
@@ -99,6 +103,8 @@ function IsiHalaman() {
     fd.append("judul", isi.judul);
     fd.append("ringkasan", isi.ringkasan);
     fd.append("isi", isi.isi);
+    fd.append("visi", isi.visi);
+    fd.append("misi", isi.misi);
     fd.append("kelompok", isi.kelompok);
     fd.append("urutan", String(isi.urutan));
     fd.append("aktif", isi.aktif ? "1" : "0");
@@ -136,7 +142,9 @@ function IsiHalaman() {
       muatUlang();
       segarkanHalamanPublik();
     } catch (e) {
-      setRingkasan([e instanceof GalatApi ? e.message : "Halaman gagal dihapus."]);
+      setRingkasan([
+        e instanceof GalatApi ? e.message : "Halaman gagal dihapus.",
+      ]);
       setHapusTarget(null);
     } finally {
       setMenghapus(false);
@@ -161,14 +169,26 @@ function IsiHalaman() {
           keterangan="Tambahkan halaman agar menu Profil Sekolah, Akademik, atau Kesiswaan memiliki isi."
         />
       ) : (
-        <Tabel kepala={["Urut", "Judul", "Kelompok", "Alamat", "Naskah", "Tampil", ""]}>
+        <Tabel
+          kepala={[
+            "Urut",
+            "Judul",
+            "Kelompok",
+            "Alamat",
+            "Naskah",
+            "Tampil",
+            "",
+          ]}
+        >
           {data.data.map((h) => (
             <tr key={h.id} className="hover:bg-slate-50">
               <td className="px-4 py-3 text-samar tabular-nums">{h.urutan}</td>
               <td className="px-4 py-3">
                 <p className="font-medium">{h.judul}</p>
                 {h.ringkasan && (
-                  <p className="mt-0.5 max-w-sm text-xs text-samar">{h.ringkasan}</p>
+                  <p className="mt-0.5 max-w-sm text-xs text-samar">
+                    {h.ringkasan}
+                  </p>
                 )}
               </td>
               <td className="px-4 py-3">
@@ -176,7 +196,9 @@ function IsiHalaman() {
                   {h.kelompok}
                 </span>
               </td>
-              <td className="px-4 py-3 font-mono text-xs text-samar">/{h.slug}</td>
+              <td className="px-4 py-3 font-mono text-xs text-samar">
+                /{h.slug}
+              </td>
               <td className="px-4 py-3">
                 {/* Naskah bertanda kurung siku berarti masih berupa kerangka
                     yang menunggu naskah dari sekolah, bukan naskah jadi. */}
@@ -190,7 +212,9 @@ function IsiHalaman() {
               </td>
               <td className="px-4 py-3">
                 {h.aktif ? (
-                  <span className="text-xs font-semibold text-green-700">Ya</span>
+                  <span className="text-xs font-semibold text-green-700">
+                    Ya
+                  </span>
                 ) : (
                   <span className="text-xs text-samar">Tidak</span>
                 )}
@@ -266,8 +290,45 @@ function IsiHalaman() {
             nilai={isi.isi}
             ubah={(v) => setIsi((s) => ({ ...s, isi: v }))}
             galat={galatKolom.isi}
-            bantuan="Satu baris kosong memisahkan paragraf. Naskahnya hanya boleh berasal dari sekolah."
+            bantuan="Satu baris kosong memisahkan paragraf. Baris yang diawali ## menjadi judul bagian, dan tiap judul bagian otomatis menjadi satu kartu penunjuk di atas naskah. Naskahnya hanya boleh berasal dari sekolah."
           />
+
+          {/* Visi dan misi MILIK HALAMAN INI, bukan milik sekolah. Dipakai
+              halaman seperti OSIS yang punya rumusannya sendiri. Dikosongkan
+              berarti bagian itu tidak tampil sama sekali di situs publik —
+              keadaan yang benar bagi Kurikulum maupun Pendidikan Karakter. */}
+          <div className="rounded-lg border border-garis bg-slate-50 px-5 py-4">
+            <p className="text-sm font-semibold text-teks">
+              Visi dan misi halaman ini
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-samar">
+              Untuk halaman yang punya rumusannya sendiri, misalnya OSIS. Ini
+              bukan visi misi sekolah — yang itu diisi lewat menu Pengaturan dan
+              tampil di halaman Profil Sekolah. Biarkan kosong bila halaman ini
+              tidak punya, dan bagiannya tidak akan tampil.
+            </p>
+
+            <div className="mt-4 space-y-5">
+              <AreaTeks
+                nama="visi"
+                label="Visi"
+                baris={3}
+                nilai={isi.visi}
+                ubah={(v) => setIsi((s) => ({ ...s, visi: v }))}
+                galat={galatKolom.visi}
+                bantuan="Satu sampai dua kalimat."
+              />
+              <AreaTeks
+                nama="misi"
+                label="Misi"
+                baris={5}
+                nilai={isi.misi}
+                ubah={(v) => setIsi((s) => ({ ...s, misi: v }))}
+                galat={galatKolom.misi}
+                bantuan="Satu baris satu poin, tanpa perlu menomori sendiri — penomorannya dibuat situs."
+              />
+            </div>
+          </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Pilihan
@@ -300,7 +361,11 @@ function IsiHalaman() {
 
           {gambarLama && !gambar && (
             <div className="rounded-lg border border-garis bg-slate-50 px-5 py-4">
-              <Centang nama="hapus_gambar" nilai={hapusGambar} ubah={setHapusGambar}>
+              <Centang
+                nama="hapus_gambar"
+                nilai={hapusGambar}
+                ubah={setHapusGambar}
+              >
                 Hapus gambar yang sekarang.
               </Centang>
             </div>
@@ -317,7 +382,11 @@ function IsiHalaman() {
           </div>
 
           <div className="flex flex-wrap justify-end gap-2 border-t border-garis pt-5">
-            <Tombol jenis="kedua" type="button" onClick={() => setJendela(false)}>
+            <Tombol
+              jenis="kedua"
+              type="button"
+              onClick={() => setJendela(false)}
+            >
               Batal
             </Tombol>
             <Tombol type="submit" sedangJalan={menyimpan}>

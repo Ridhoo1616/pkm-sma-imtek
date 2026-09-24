@@ -443,6 +443,32 @@ menunjuk gambar yang tidak ada dan berakhir sebagai kotak rusak; halaman yang
 belum punya ilustrasi tampil dengan kartu pembuka tanpa gambar, dan itu
 keadaan yang wajar.
 
+**Halaman dapat memuat visi dan misi MILIKNYA SENDIRI** (migrasi 011). Halaman
+OSIS perlu memuat visi misi OSIS, dan itu bukan visi misi sekolah: yang di
+menu Pengaturan milik sekolah dan tampil pada halaman Profil Sekolah. Memakai
+ulang yang itu berarti halaman OSIS menampilkan rumusan yang bukan miliknya.
+
+Kolomnya ditaruh di tabel `halaman`, bukan sebagai pengaturan bernama
+`osis_visi` dan `osis_misi`. Dua alasannya: halaman naskah dapat ditambah
+sekolah sendiri, sehingga pengaturan bernama khusus OSIS tidak menolong begitu
+besok mereka membuat halaman Pramuka atau Rohis yang juga punya rumusan
+sendiri; dan panitia mengisinya di formulir yang sama dengan naskah
+halamannya, bukan berpindah ke menu Pengaturan untuk satu bagian dari halaman
+yang sedang dikerjakannya.
+
+Keduanya tidak wajib. Kosong berarti bagiannya tidak tampil sama sekali — dan
+itu keadaan yang benar bagi Kurikulum maupun Pendidikan Karakter. Halaman OSIS
+diberi penanda `[kurung siku]` oleh migrasinya supaya panitia melihat bagian
+itu ada dan tahu bentuk isinya, sedangkan pengunjung melihat keterangan "belum
+tersedia", bukan kalimat karangan. Misinya ditulis satu baris satu poin,
+mengikuti cara pengaturan `misi` dan `keunggulan` yang sudah ada.
+
+`bacaIsianHalaman` sekalian diubah mengembalikan struct, bukan deretan nilai
+berurutan. Sebelumnya delapan nilai, dan penambahan visi beserta misi akan
+menjadikannya sepuluh; sepuluh nilai berurutan pada tiga tempat pemanggilan
+hanya menunggu dua di antaranya tertukar, dan keduanya bertipe string sehingga
+penyusun kode pun tidak akan menegur.
+
 **Keadaan kosongnya dibuat mencolok dan berada di tengah**, bukan satu baris
 miring di pojok kartu: pada halaman yang naskahnya belum ada, itulah seluruh
 isi halamannya. Kalimatnya tetap diambil dari komponen `Menunggu` supaya

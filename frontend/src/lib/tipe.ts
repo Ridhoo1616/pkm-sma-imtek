@@ -355,6 +355,10 @@ export interface Halaman {
   ringkasan: string;
   /** Naskah lengkap. Kosong pada daftar halaman publik, terisi pada detail. */
   isi: string;
+  /** Visi milik halaman ini sendiri, misalnya visi OSIS — bukan visi sekolah. */
+  visi: string;
+  /** Misi halaman ini, satu baris satu poin. Kosong berarti bagiannya tak tampil. */
+  misi: string;
   gambar: string;
   kelompok: KelompokHalaman;
   urutan: number;

@@ -185,16 +185,21 @@ func sumberSah(s string) bool { return adaDalam(SumberInformasi, s) }
 // Halaman adalah satu halaman bernaskah panjang: Kurikulum, OSIS,
 // Pendidikan Karakter, dan halaman lain yang ditambahkan sekolah kemudian.
 type Halaman struct {
-	ID        int       `json:"id"`
-	Slug      string    `json:"slug"`
-	Judul     string    `json:"judul"`
-	Ringkasan string    `json:"ringkasan"`
-	Isi       string    `json:"isi"`
-	Gambar    string    `json:"gambar"`
-	Kelompok  string    `json:"kelompok"`
-	Urutan    int       `json:"urutan"`
-	Aktif     bool      `json:"aktif"`
-	Diubah    time.Time `json:"diubah"`
+	ID        int    `json:"id"`
+	Slug      string `json:"slug"`
+	Judul     string `json:"judul"`
+	Ringkasan string `json:"ringkasan"`
+	Isi       string `json:"isi"`
+	// Visi dan misi milik halaman ini sendiri — misalnya visi misi OSIS,
+	// yang bukan visi misi sekolah. Kosong berarti bagiannya tidak tampil.
+	// Misi ditulis satu baris satu poin, seperti pengaturan misi sekolah.
+	Visi     string    `json:"visi"`
+	Misi     string    `json:"misi"`
+	Gambar   string    `json:"gambar"`
+	Kelompok string    `json:"kelompok"`
+	Urutan   int       `json:"urutan"`
+	Aktif    bool      `json:"aktif"`
+	Diubah   time.Time `json:"diubah"`
 }
 
 type Tenaga struct {

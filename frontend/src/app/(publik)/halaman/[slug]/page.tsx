@@ -1,5 +1,10 @@
 import { api, urlUnggahan } from "@/lib/api";
-import { bagianNaskah, belumTerisi, kalimatPertama } from "@/lib/format";
+import {
+  bagianNaskah,
+  belumTerisi,
+  kalimatPertama,
+  kePoinTerisi,
+} from "@/lib/format";
 import { KepalaHalaman } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
 import { Menunggu, Naskah } from "@/komponen/Halaman";
@@ -87,6 +92,15 @@ export default async function HalamanNaskah(
   // kartu yang menuju bagian yang belum ditulis sekolah, dan begitu sekolah
   // menambah satu bagian, kartunya muncul sendiri.
   const { bagian } = bagianNaskah(adaNaskah ? h.isi : "");
+
+  // Visi dan misi MILIK HALAMAN INI — misalnya visi misi OSIS — bukan milik
+  // sekolah. Bagiannya ditampilkan begitu salah satu kolomnya berisi, termasuk
+  // ketika isinya masih penanda [kurung siku]: penandanya memang dipasang
+  // supaya panitia melihat bagian itu ada dan tahu bentuk isinya, sedangkan
+  // pengunjung melihat keterangan "belum tersedia", bukan kalimat karangan.
+  // Halaman yang kolomnya kosong sama sekali tidak menampilkan bagian ini.
+  const adaBagianVisiMisi = h.visi.trim() !== "" || h.misi.trim() !== "";
+  const misi = kePoinTerisi(h.misi);
 
   return (
     <>
@@ -199,6 +213,87 @@ export default async function HalamanNaskah(
               </MunculNaik>
             ))}
           </nav>
+        )}
+
+        {adaBagianVisiMisi && (
+          <div className="mt-6 grid auto-rows-fr gap-4 lg:grid-cols-2">
+            <MunculNaik>
+              <section
+                aria-labelledby="judul-visi-halaman"
+                className="kartu h-full border-l-4 border-l-emas p-5 sm:p-6"
+              >
+                <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
+                  Arah
+                </p>
+                <h2
+                  id="judul-visi-halaman"
+                  className="mt-1.5 text-xl font-bold text-biru-tua"
+                >
+                  Visi {h.judul}
+                </h2>
+                <span
+                  aria-hidden
+                  className="mt-3 block h-1 w-12 rounded-full bg-emas"
+                />
+                {belumTerisi(h.visi) ? (
+                  <div className="mt-4">
+                    <Menunggu
+                      apa={`Rumusan visi ${h.judul}`}
+                      dari="Halaman Profil"
+                      polos
+                    />
+                  </div>
+                ) : (
+                  <p className="mt-4 text-[15px] leading-relaxed font-semibold text-biru-tua">
+                    {h.visi}
+                  </p>
+                )}
+              </section>
+            </MunculNaik>
+
+            <MunculNaik jeda={0.08}>
+              <section
+                aria-labelledby="judul-misi-halaman"
+                className="kartu h-full p-5 sm:p-6"
+              >
+                <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
+                  Langkah
+                </p>
+                <h2
+                  id="judul-misi-halaman"
+                  className="mt-1.5 text-xl font-bold text-biru-tua"
+                >
+                  Misi {h.judul}
+                </h2>
+                <span
+                  aria-hidden
+                  className="mt-3 block h-1 w-12 rounded-full bg-emas"
+                />
+                {misi.length === 0 ? (
+                  <div className="mt-4">
+                    <Menunggu
+                      apa={`Rumusan misi ${h.judul}`}
+                      dari="Halaman Profil"
+                      polos
+                    />
+                  </div>
+                ) : (
+                  <ol className="mt-3 divide-y divide-garis">
+                    {misi.map((m, i) => (
+                      <li key={i} className="flex gap-3 py-3">
+                        <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-biru-muda text-xs font-bold text-biru tabular-nums">
+                          {i + 1}
+                        </span>
+                        <span className="text-[15px] leading-relaxed text-teks">
+                          {m}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </section>
+            </MunculNaik>
+          </div>
         )}
 
         <MunculNaik>
