@@ -364,6 +364,94 @@ export function IkonFasilitas({ nama, ukuran = 22, className }: Props & { nama?:
   return <Bungkus ukuran={ukuran} className={className} isi={isi} />;
 }
 
+/* ---------- Kalender akademik ----------
+
+   Ikon per kategori agenda. Kategorinya dibedakan oleh BENTUK, bukan warna:
+   rancangan acuan memberi tiap kategori rona sendiri — biru, hijau, kuning,
+   ungu, merah — dan yang diminta warnanya seragam. Kalau warnanya disamakan
+   tanpa pengganti, pembedanya hilang sama sekali. Bentuk ikonnya yang
+   mengambil alih tugas itu, dan namanya tetap tertulis di sebelahnya. */
+
+export function IkonKalender(p: Props) {
+  return (
+    <Bungkus
+      {...p}
+      isi={
+        <>
+          <rect x="3.2" y="5" width="17.6" height="15.8" rx="2.4" />
+          <path d="M3.2 9.6h17.6M8 3.2v3.6M16 3.2v3.6" />
+        </>
+      }
+    />
+  );
+}
+
+export function IkonBendera(p: Props) {
+  return (
+    <Bungkus
+      {...p}
+      isi={
+        <>
+          <path d="M5.4 21V3.6" />
+          <path d="M5.4 4.4h11.2l-2.2 3.8 2.2 3.8H5.4" />
+        </>
+      }
+    />
+  );
+}
+
+export function IkonNaskah(p: Props) {
+  return (
+    <Bungkus
+      {...p}
+      isi={
+        <>
+          <path d="M6 2.8h7.4L18.6 8v13.2H6z" />
+          <path d="M13.2 2.8V8h5.4" />
+          <path d="M9 13.4h6.2M9 17h4.4" />
+        </>
+      }
+    />
+  );
+}
+
+export function IkonMatahari(p: Props) {
+  return (
+    <Bungkus
+      {...p}
+      isi={
+        <>
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2.6v2.4M12 19v2.4M2.6 12H5M19 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3L17 7M7 17l-1.7 1.7" />
+        </>
+      }
+    />
+  );
+}
+
+export function IkonFormulir(p: Props) {
+  return (
+    <Bungkus
+      {...p}
+      isi={
+        <>
+          <rect x="4.6" y="4.4" width="14.8" height="16.4" rx="2.2" />
+          <path d="M9 4.4V3.2h6v1.2" />
+          <path d="M8.6 11.4h6.8M8.6 15.4h4.4" />
+        </>
+      }
+    />
+  );
+}
+
+export function IkonPanahKiri(p: Props) {
+  return <Bungkus {...p} isi={<path d="M14.6 5.4L8 12l6.6 6.6" />} />;
+}
+
+export function IkonPanahKanan(p: Props) {
+  return <Bungkus {...p} isi={<path d="M9.4 5.4L16 12l-6.6 6.6" />} />;
+}
+
 /**
  * Pilihan ikon untuk panel panitia. Sebelumnya kolom ini berupa ketikan
  * bebas dengan contoh "bi-flask", padahal nama itu tidak pernah digambar

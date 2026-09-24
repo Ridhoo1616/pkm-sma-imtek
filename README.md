@@ -204,7 +204,7 @@ pemeriksaan formulir demo (`demo-baru/js/05-ppdb.js`).
 Tanya Jawab | `/admin/faq` | Kelola pertanyaan, kategori, urutan, dan penanda sorot |
 | Halaman Profil | `/admin/halaman` | Naskah halaman Kurikulum, OSIS, Pendidikan Karakter, dan halaman profil baru |
 | Tenaga Pendidik | `/admin/tenaga` | Guru dan tenaga kependidikan beserta foto, jabatan, mata pelajaran, dan kelas yang diampunya sebagai wali kelas |
-| Kalender Akademik | `/admin/kalender` | Tanggal kegiatan, ujian, hari libur, dan jadwal PPDB |
+| Kalender Akademik | `/admin/kalender` | Tanggal kegiatan, ujian, hari libur, dan jadwal PPDB; inilah satu-satunya sumber isi halaman publiknya |
 | Kegiatan Siswa | `/admin/kegiatan` | Ekstrakurikuler, OSIS, dan pembinaan beserta pembina dan jadwalnya |
 | Perpustakaan | `/admin/pustaka` | Katalog koleksi digital: berkas unggahan atau tautan ke layanan lain |
 | Pengguna | `/admin/pengguna` | Kelola akun petugas dan perannya |
@@ -392,6 +392,82 @@ Percobaan sebelumnya yang dibuang: satu adegan ruang kelas digambar sendiri
 sebagai SVG penuh, dan pada bidang sebesar itu bentuk badannya jadi seperti
 bel, bukan orang. Foto pun bukan pilihan, karena berarti memakai wajah guru
 dan siswa sungguhan tanpa izin mereka.
+
+### Halaman Kalender Akademik
+
+Susunannya: kartu pembuka berilustrasi, bilah penyaring, lalu dua kolom —
+lajur waktu kegiatan di kiri, petak satu bulan beserta rincian harinya di
+kanan.
+
+**Pemilih tahun ajarannya TIDAK di kepala halaman.** Pada rancangan acuan ia
+menempel di sebelah judul; di sini ia turun ke bilah penyaring tersendiri di
+bawah kartu pembuka, bersama penyaring kategori, sehingga kepala halamannya
+hanya berisi judul dan keterangannya.
+
+**Tahun ajaran dihitung Juli sampai Juni, bukan Januari sampai Desember.**
+Memakai tahun kalender begitu saja akan memotong satu tahun ajaran menjadi
+dua: 20 Desember 2026 dan 5 Januari 2027 ada pada tahun ajaran yang sama,
+2026/2027, dan libur semester satu yang melintasi pergantian tahun akan
+terlempar ke tahun yang keliru. Pilihan tahunnya hanya memuat tahun ajaran
+yang benar-benar ada isinya.
+
+**Warnanya seragam, pembedanya bentuk ikon.** Rancangan acuan memberi tiap
+kategori rona sendiri — biru, hijau, kuning, ungu, merah — pada ikon, titik
+penanda tanggal, dan lencananya. Semuanya kini biru sekolah di atas biru
+muda. Tetapi menyamakan warna tanpa pengganti berarti membuang pembedanya,
+jadi tugas itu diambil alih **bentuk ikonnya**: bendera untuk Kegiatan,
+lembar naskah untuk Ujian, matahari untuk Libur, formulir untuk PPDB, dan
+sosok berkumpul untuk Rapat. Namanya tetap tertulis di sebelahnya, jadi
+pembedanya tidak bergantung pada kemampuan membedakan bentuk kecil.
+
+**Kegiatan berhari-hari menandai seluruh hari dalam rentangnya** pada petak
+bulan, bukan hari mulainya saja — libur semester yang berjalan dua minggu
+memang dua minggu, dan pengunjung yang mengetuk tanggal di tengah rentang itu
+harus menemukan kegiatannya.
+
+**Rincian harinya sudah terbuka sejak halaman dibuka**, pada hari ini bila ada
+kegiatannya, kalau tidak pada kegiatan pertama bulan yang tampil. Kolom kanan
+yang menunggu diketuk lebih dulu terbaca sebagai kotak kosong. Berpindah bulan
+mengembalikannya ke bawaan bulan yang baru, sebab rincian milik bulan lalu di
+sebelah petak bulan ini akan menyesatkan.
+
+**Yang sudah berlangsung dipisah dan disembunyikan di balik tombol.** Pada
+tahun ajaran yang sedang berjalan separuh daftarnya bisa sudah lewat, dan di
+layar ponsel itu ratusan piksel gulir yang jarang dibaca. Halaman berisi 13
+kegiatan turun dari 4.673 piksel menjadi 4.309 piksel di ponsel, dan dari
+3.021 menjadi 2.599 piksel di layar lebar.
+
+**Disusun untuk jempol.** Di ponsel petak bulannya naik ke atas lajur waktu
+lewat `order` — ia ringkasan satu bulan dalam satu layar, sedangkan lajur
+waktunya panjang. Tiap sel tanggal setinggi 44 piksel, ukuran sasaran sentuh
+terkecil yang nyaman, dan tanggal tanpa kegiatan memang tidak dapat ditekan
+sehingga tidak ada ketukan yang tidak berakibat apa-apa. Kolom tanggal pada
+lajur waktu hilang di bawah ambang `sm` dan tanggalnya pindah ke dalam
+kartunya: kolom selebar 6,5 rem memakan hampir sepertiga lebar layar ponsel.
+
+**Gerak masuknya memakai MunculNaik yang sudah ada**, memudar naik begitu
+tergulir sampai terlihat, dengan jeda bertingkat 0,05 detik yang dipatok
+delapan baris — lebih dari itu, baris terbawah menunggu terlalu lama dan
+terbaca sebagai halaman yang lambat. Yang dikirim server tetap terbaca utuh
+bila JavaScript gagal dimuat, dan permintaan "kurangi gerakan" membatalkan
+penyembunyiannya sama sekali; keduanya diperiksa ulang pada halaman ini.
+
+**Tanggalnya diurai sendiri, bukan lewat `new Date(teks)`.** Bentuk
+`"2026-05-01"` dibaca sebagai tengah malam UTC, sehingga di sebelah barat
+Greenwich tanggalnya mundur satu hari — dan kalender yang meleset satu hari
+lebih buruk daripada tidak ada kalender.
+
+**Tidak ada satu tanggal pun yang ditulis di dalam kodenya.** Seluruh isinya
+dari menu Kalender Akademik di panel admin. Bila sekolah belum mengisi apa
+pun, petak bulannya tetap tergambar dan lajur waktunya menerangkan bahwa
+isinya belum ada — bukan halaman kosong, dan bukan tanggal karangan. Keadaan
+itulah yang tampil sekarang, karena tabel agenda di pemasangan sekolah masih
+kosong.
+
+Ilustrasinya datang dari user dalam bentuk yang sama dengan tiga sebelumnya:
+berkas `.svg` yang isinya satu elemen `<image>` berisi PNG base64, 1536×1024.
+Alatnya pun sama — perambatan dari tepi lalu median cut ke 64 warna, 988 KB
+menjadi 61 KB, 1671×645.
 
 ### Halaman Tenaga Pendidik dan Kependidikan
 
