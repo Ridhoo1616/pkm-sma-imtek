@@ -1,0 +1,16 @@
+# Pasang ke /etc/systemd/system/pkm-cadangan.timer, lalu:
+#   systemctl enable --now pkm-cadangan.timer
+
+[Unit]
+Description=Jalankan cadangan setiap hari pukul 01.30
+
+[Timer]
+OnCalendar=*-*-* 01:30:00
+# Bila server sedang mati pada jadwalnya, cadangannya dijalankan begitu
+# server hidup kembali, bukan dilewatkan sampai besok.
+Persistent=true
+# Agar tidak beberapa server menabrak jadwal yang sama persis.
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

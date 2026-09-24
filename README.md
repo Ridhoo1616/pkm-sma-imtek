@@ -117,6 +117,23 @@ Porta 8090 perlu disetel publik karena peramban pengunjung memanggil API
 secara langsung. Codespace berhenti sendiri setelah menganggur, jadi untuk
 dipakai sekolah sungguhan tetap diperlukan hosting.
 
+### Memasang di server sungguhan
+
+Langkah lengkapnya di [`deploy/README.md`](deploy/README.md), beserta berkas
+yang siap dipakai: dua unit systemd, Caddyfile untuk HTTPS otomatis, serta
+skrip cadangan beserta timer-nya.
+
+Yang paling sering terlewat dan membuat pemasangan pertama gagal: pada VPS
+2 GB, **swap wajib dibuat lebih dulu**. `next build` memuncak di 1.671 MB
+(terukur, bukan dikira), dan tanpa swap prosesnya dihentikan kernel di tengah
+jalan. Node.js juga tidak boleh dari `apt install nodejs`, sebab Ubuntu 24.04
+membawa Node 18 sedangkan Next 16 menuntut yang lebih baru.
+
+Berkas systemd dan Caddyfile itu belum pernah dijalankan pada server
+sungguhan; ditulis dari pengukuran di komputer pengembang. Yang sudah diuji
+sungguhan `cadangan.sh`, termasuk memulihkan hasilnya ke basis data kosong dan
+memeriksa isinya kembali utuh.
+
 ---
 
 ## Ringkasan Fitur
@@ -1591,14 +1608,129 @@ Seluruh warnanya lulus rasio kontras 4,5:1 terhadap tulisan putih.
 | XSS | Isi berita ditampilkan sebagai teks, bukan HTML, sehingga naskah dari basis data tidak dapat menyisipkan skrip |
 | Kata sandi | bcrypt; tidak pernah disimpan polos maupun dikirim balik |
 | Token masuk | JWT HS256 berlaku 8 jam; tanda tangannya dibandingkan dalam bentuk teks agar token yang karakter terakhirnya diubah tetap tertolak |
-| Brute force | Maksimal lima percobaan masuk gagal per sepuluh menit per alamat IP |
+| Brute force masuk panel | Maksimal lima percobaan masuk gagal per sepuluh menit per alamat IP |
+| Pembatas laju rute publik | Tujuh rute publik dibatasi per alamat IP. Rute yang menyerahkan data pendaftar juga DIKUNCI PER NOMOR REGISTRASI sesudah sepuluh kegagalan dalam sejam, sehingga tanggal lahirnya tidak dapat ditebak habis dari banyak alamat IP sekaligus |
+| Alamat pemanggil | `X-Forwarded-For` hanya dipercaya bila permintaannya datang dari jaringan tepercaya, dan yang diambil entri terkanan di luar jaringan itu; tanpa itu kepala karangan membuat seluruh pembatas laju tidak berarti |
 | Pembatasan peran | `admin` mengelola pengaturan, peminatan, pengguna, dan penghapusan pendaftar; `operator` hanya mengelola pendaftar dan isi situs. Dijaga di backend, bukan hanya disembunyikan dari menu |
 | Unggahan berkas | Ekstensi **dan** beberapa bita pertama isinya diperiksa, sehingga skrip bernama `.jpg` tertolak. Batas 2 MB, nama berkas diacak |
 | Dokumen pendaftar | Kartu Keluarga, akta, dan ijazah hanya dapat diunduh dengan token petugas, dan tidak disimpan di cache bersama |
 | Cek status | Nomor registrasi saja tidak cukup; tanggal lahir menjadi pasangan kunci agar data orang lain tidak terbuka dengan menebak nomor |
 | Spam | Kolom perangkap tersembunyi pada formulir pendaftaran dan kontak |
 | CORS | Asal yang diizinkan disebutkan satu per satu, bukan `*`, karena permintaannya membawa token |
+| Kepala keamanan HTTP | CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, dan HSTS saat produksi. Dipasang pada halaman Next maupun jawaban API, dengan isi yang berbeda sesuai apa yang dilayani masing-masing |
+| Cadangan | Basis data dicadangkan harian (disimpan 14 hari) dan dokumen pendaftar pekanan (4 pekan) lewat systemd timer. Hasilnya diperiksa, bukan dianggap berhasil begitu `pg_dump` selesai |
 | Kredensial | Seluruhnya dibaca dari variabel lingkungan. `JWT_SECRET` wajib diisi saat `APP_ENV=produksi`, dan berkas `.env` tidak ikut ke repositori |
+
+### Pembatas laju pada rute publik
+
+Yang dilindungi bukan hanya beban server. Tiga rute publik menyerahkan data
+pribadi pendaftar dengan kunci nomor registrasi ditambah tanggal lahir: cek
+status, bukti pendaftaran, dan kartu peserta. Nomor registrasinya berurutan
+dan tercetak pada bukti pendaftaran, sedangkan tanggal lahir anak seusia calon
+peserta didik SMA hanya sekitar seribu kemungkinan. Tanpa pembatas, seluruh
+kemungkinan itu dapat dicoba satu per satu sampai ketemu.
+
+Pembatasnya dua lapis, dan lapis keduanya yang menutup celah itu:
+
+| Rute | Per alamat IP | Per nomor registrasi (kegagalan) |
+|---|---|---|
+| `POST /api/ppdb/cek` | 60 / 10 menit | 10 / jam |
+| `POST /api/ppdb/bukti` | 60 / 10 menit | 10 / jam |
+| `POST /api/ppdb/kartu` | 60 / 10 menit | 10 / jam |
+| `POST /api/ppdb/ujian/mulai` | 60 / 10 menit | 10 / jam |
+| `POST /api/ppdb/daftar` | 20 / jam | - |
+| `POST /api/pesan` | 10 / jam | - |
+| `POST /api/kunjungan` | 300 / 10 menit | - |
+
+Pembatas per alamat IP sengaja LONGGAR, sebab satu sekolah, satu warnet, atau
+satu kampung bisa berbagi satu alamat IP publik, dan pembatas yang ketat di
+situ akan memblokir pendaftar yang tidak bersalah. Yang ketat justru pembatas
+per nomor registrasi, dan itu hanya menghitung KEGAGALAN: pendaftar yang tahu
+tanggal lahirnya sendiri tidak pernah gagal sepuluh kali, dan hitungannya
+dinolkan begitu berhasil sekali.
+
+Akibat yang diterima dengan sadar: sesudah sepuluh kegagalan, nomor itu
+terkunci sejam bagi siapa pun, termasuk pemiliknya yang datang kemudian dengan
+tanggal lahir yang benar. Itu memang harganya; membiarkan percobaan yang benar
+lolos berarti membiarkan tebakan yang berhasil lolos juga, dan tebakan yang
+berhasil itulah yang mau dicegah. Panitia tetap dapat membuka datanya dari
+panel.
+
+Jawabannya 429 beserta kepala `Retry-After`, dan pesannya menyebut lama
+menunggu dalam kalimat Indonesia.
+
+**`X-Forwarded-For` sebelumnya dipercaya apa adanya**, dengan alasan yang
+tertulis di kodenya: "hanya untuk pembatas laju". Justru di situ salahnya.
+Siapa pun dapat mengirim kepala itu berisi angka acak pada setiap permintaan,
+sehingga setiap permintaan terhitung berasal dari alamat yang berbeda dan
+SELURUH pembatas laju menjadi tidak berarti, termasuk pembatas percobaan masuk
+panel yang sudah ada sejak awal. Sekarang kepala itu hanya dipercaya bila
+permintaannya datang dari jaringan tepercaya (bawaannya loopback beserta
+jaringan lokal, dapat diganti lewat `TRUSTED_PROXIES`), dan yang diambil entri
+terkanan di luar jaringan itu, sebab bagian kirinya dapat diisi pemanggil
+sendiri.
+
+Hitungannya disimpan di memori, bukan di basis data maupun Redis: aplikasi ini
+berjalan sebagai satu proses pada satu server, jadi hitungan di memori sudah
+tepat. Catatan yang kedaluwarsa disapu setiap lima menit, supaya membanjiri
+dari banyak alamat palsu tidak menghabiskan memorinya.
+
+Sepuluh uji satuan mengunci perilakunya, termasuk empat uji khusus untuk
+`X-Forwarded-For`. Diuji juga dari ujung ke ujung pada basis data sekali pakai:
+sebelas percobaan tanggal lahir yang salah untuk satu nomor, yang ke-11
+dijawab 429 dengan `Retry-After: 3600`; nomor lain tidak terpengaruh; dan
+kepala karangan yang ditambahi alamat sebenarnya oleh proksi tetap terhitung
+satu pengunjung.
+
+### Kepala keamanan HTTP
+
+Sebelumnya tidak ada satu pun, jadi peramban tidak diberi tahu apa pun tentang
+batasan situs ini: boleh dibingkai situs lain, boleh menebak jenis berkas dari
+isinya, dan boleh memuat skrip dari mana saja.
+
+Dipasang di DUA tempat, dengan isi yang berbeda, sebab yang dilayani berbeda.
+
+**Halaman Next** (`next.config.ts`): CSP `default-src 'self'` beserta
+`frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`,
+`object-src 'self' blob:`, ditambah `X-Content-Type-Options: nosniff`,
+`X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`,
+`Permissions-Policy` yang mematikan kamera, mikrofon, lokasi, pembayaran, dan
+USB, serta HSTS setahun pada build produksi.
+
+Alamat API ikut disebut pada `connect-src` dan `img-src` karena backend berada
+di asal yang berbeda: porta lain saat di komputer sendiri, subdomain lain di
+server. Tanpa itu seluruh permintaan data dan seluruh foto yang dilayani
+backend akan diblokir peramban. Nilainya dibaca dari `NEXT_PUBLIC_API_URL`
+saat build, jadi tidak perlu disunting saat pindah ke server.
+
+**Jawaban API** (lapisan `kepalaKeamanan`): CSP paling sempit yang mungkin,
+`default-src 'none'`, sebab jawaban API tidak pernah boleh memuat apa pun.
+`Referrer-Policy: no-referrer`, bukan strict-origin, karena alamat API memuat
+nomor registrasi dan id pendaftar pada jalurnya dan itu tidak boleh ikut
+terkirim ke situs lain. `nosniff` di sini penting tersendiri: dokumen
+pendaftar diunggah orang luar, dan tanpa kepala itu berkas yang isinya HTML
+dapat terbaca sebagai halaman pada asal backend.
+
+Yang TIDAK diperketat sekarang, dan alasannya, supaya tidak terbaca sebagai
+kelalaian:
+
+- `script-src` masih memuat `'unsafe-inline'`. Next menyisipkan skrip sebaris
+  untuk hidrasi, dan tanpa izin itu seluruh halaman berhenti bekerja. Yang
+  benar nonce per permintaan, dan itu menuntut middleware Next tersendiri.
+  Pekerjaan berikutnya, bukan sesuatu yang dilupakan.
+- `style-src` juga, sebab React menulis gaya sebaris pada beberapa komponen,
+  misalnya pergeseran karusel berita.
+- `blob:` diizinkan pada `object-src`, `frame-src`, dan `media-src`. Bukti
+  pendaftaran, kartu peserta, dan dokumen pendaftar diminta lewat fetch
+  (alamatnya POST, atau memerlukan token petugas) lalu dibuka sebagai blob.
+  Dokumen blob mewarisi CSP halaman yang membuatnya, jadi tanpa izin itu tab
+  PDF-nya tampil kosong.
+
+Diuji lewat peramban sungguhan dengan pendengar `securitypolicyviolation`
+terpasang: nol pelanggaran pada 16 halaman publik, nol pada 21 halaman panel,
+nol pada alur cek status termasuk unduh bukti PDF, dan nol saat dokumen PDF
+pendaftar dibuka dari panel sebagai blob. Tidak ada satu pun gambar yang gagal
+dimuat.
 
 ---
 

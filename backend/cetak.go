@@ -133,10 +133,17 @@ func (a *Aplikasi) tanganiBuktiPendaftar(w http.ResponseWriter, r *http.Request)
 
 	// Nomor registrasi saja tidak cukup, sama seperti halaman Cek Status.
 	// Tanpa pasangan tanggal lahir, bukti pendaftaran orang lain bisa
-	// diunduh hanya dengan menebak nomornya.
+	// diunduh hanya dengan menebak nomornya. Tanggal lahirnya sendiri pun
+	// dapat ditebak habis, karena itu percobaan yang gagal dikunci per nomor
+	// registrasi; keterangannya di pembatas.go.
+	if !a.izinkanCobaIdentitas(w, p.NoRegistrasi) {
+		return
+	}
+
 	d, err := a.ambilDataBukti("p.no_registrasi = $1 AND p.tanggal_lahir = $2",
 		strings.ToUpper(p.NoRegistrasi), strings.TrimSpace(p.TanggalLahir))
 	if err == sql.ErrNoRows {
+		a.catatGagalIdentitas(p.NoRegistrasi)
 		kirimGalat(w, http.StatusNotFound,
 			"Data tidak ditemukan. Periksa kembali nomor registrasi dan tanggal lahir.")
 		return
@@ -145,6 +152,7 @@ func (a *Aplikasi) tanganiBuktiPendaftar(w http.ResponseWriter, r *http.Request)
 		a.galatServer(w, "mengambil data bukti pendaftaran", err)
 		return
 	}
+	a.bersihkanGagalIdentitas(p.NoRegistrasi)
 	a.kirimPdfBukti(w, d)
 }
 

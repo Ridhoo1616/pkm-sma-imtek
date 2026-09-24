@@ -1,0 +1,48 @@
+# Pasang ke /etc/caddy/Caddyfile, ganti nama domainnya, lalu:
+#   systemctl reload caddy
+#
+# Caddy menerbitkan dan memperbarui sertifikat HTTPS sendiri dari Let's
+# Encrypt, jadi tidak ada certbot yang perlu disetel. Yang dibutuhkan hanya
+# porta 80 dan 443 terbuka, serta domainnya sudah mengarah ke IP server ini.
+#
+# X-Forwarded-For: Caddy MENAMBAHKAN alamat pemanggil ke ujung kanan rantai,
+# tidak menggantinya. Itu yang diandalkan backend: kepala yang dikarang
+# pemanggil tetap berada di kiri, sedangkan alamat sebenarnya di kanan, dan
+# backend mengambil yang terkanan di luar jaringan tepercaya. Jangan
+# menggantinya dengan header_up yang MENIMPA X-Forwarded-For.
+
+smaimtek.sch.id, www.smaimtek.sch.id {
+	encode zstd gzip
+
+	# Pembatas ukuran kiriman. Formulir PPDB mengunggah enam dokumen, masing-
+	# masing dibatasi 2 MB oleh backend, jadi 20 MB sudah sangat lapang.
+	request_body {
+		max_size 20MB
+	}
+
+	reverse_proxy 127.0.0.1:3000
+
+	log {
+		output file /var/log/caddy/situs.log {
+			roll_size 10MB
+			roll_keep 5
+		}
+	}
+}
+
+api.smaimtek.sch.id {
+	encode zstd gzip
+
+	request_body {
+		max_size 20MB
+	}
+
+	reverse_proxy 127.0.0.1:8090
+
+	log {
+		output file /var/log/caddy/api.log {
+			roll_size 10MB
+			roll_keep 5
+		}
+	}
+}

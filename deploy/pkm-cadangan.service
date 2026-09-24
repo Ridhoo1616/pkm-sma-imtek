@@ -1,0 +1,20 @@
+# Pasang ke /etc/systemd/system/pkm-cadangan.service
+
+[Unit]
+Description=Cadangan basis data dan dokumen pendaftar
+Documentation=https://github.com/Ridhoo1616/pkm-sma-imtek
+After=postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=oneshot
+User=pkm
+Group=pkm
+Environment=DB_NAME=sma_imtek
+Environment=DB_USER=pkm
+Environment=UPLOAD_DIR=/srv/pkm/backend/data/unggahan
+Environment=BACKUP_DIR=/var/backups/pkm
+ExecStart=/srv/pkm/deploy/cadangan.sh
+# Keluarannya masuk journal; periksa dengan: journalctl -u pkm-cadangan
+StandardOutput=journal
+StandardError=journal

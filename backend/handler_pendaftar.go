@@ -408,6 +408,11 @@ func (a *Aplikasi) tanganiCekStatus(w http.ResponseWriter, r *http.Request) {
 		kirimGalatValidasi(w, v)
 		return
 	}
+	// Penebakan tanggal lahir dikunci per nomor registrasi. Keterangannya di
+	// pembatas.go.
+	if !a.izinkanCobaIdentitas(w, p.NoRegistrasi) {
+		return
+	}
 
 	var (
 		noReg, nama, jalur, status, tahun string
@@ -425,6 +430,7 @@ func (a *Aplikasi) tanganiCekStatus(w http.ResponseWriter, r *http.Request) {
 	).Scan(&noReg, &nama, &jalur, &status, &tahun, &namaJurusan, &catatan, &dibuat)
 
 	if err == sql.ErrNoRows {
+		a.catatGagalIdentitas(p.NoRegistrasi)
 		kirimGalat(w, http.StatusNotFound,
 			"Data tidak ditemukan. Periksa kembali nomor registrasi dan tanggal lahir.")
 		return
@@ -433,6 +439,7 @@ func (a *Aplikasi) tanganiCekStatus(w http.ResponseWriter, r *http.Request) {
 		a.galatServer(w, "mencari status pendaftar", err)
 		return
 	}
+	a.bersihkanGagalIdentitas(p.NoRegistrasi)
 
 	jawab := map[string]any{
 		"no_registrasi": noReg,

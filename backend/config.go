@@ -38,6 +38,11 @@ type Konfigurasi struct {
 	// SmtpSandi untuk Gmail adalah SANDI APLIKASI, bukan sandi akunnya.
 	// Nilainya rahasia dan hanya boleh berada di berkas .env yang tidak ikut
 	// ke repositori — repositori ini publik.
+	// ProksiTepercaya adalah daftar CIDR yang X-Forwarded-For dari sana boleh
+	// dipercaya. Kosong berarti memakai bawaan, yaitu loopback beserta
+	// jaringan lokal. Diisi hanya bila proksi baliknya ada di mesin lain.
+	ProksiTepercaya string
+
 	SmtpHost     string
 	SmtpPorta    string
 	SmtpPengguna string
@@ -164,6 +169,8 @@ func muatKonfigurasi() Konfigurasi {
 		WaGatewayToken: lingkungan("WA_GATEWAY_TOKEN", ""),
 		WaMedanTujuan:  lingkungan("WA_MEDAN_TUJUAN", "to"),
 		WaMedanPesan:   lingkungan("WA_MEDAN_PESAN", "message"),
+
+		ProksiTepercaya: lingkungan("TRUSTED_PROXIES", ""),
 
 		SmtpHost:     lingkungan("SMTP_HOST", ""),
 		SmtpPorta:    lingkungan("SMTP_PORT", "587"),
