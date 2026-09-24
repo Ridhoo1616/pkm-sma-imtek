@@ -9,10 +9,11 @@ import { KepalaHalaman } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
 import { Menunggu, Naskah } from "@/komponen/Halaman";
 import { JejakMenu } from "@/komponen/JejakMenu";
+import PetakGaleri from "@/komponen/Galeri";
 import { IkonNaskah, IkonPanahKanan } from "@/komponen/Ikon";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import type { Halaman } from "@/lib/tipe";
+import type { Galeri, Halaman } from "@/lib/tipe";
 import type { Metadata } from "next";
 
 /**
@@ -105,6 +106,30 @@ export default async function HalamanNaskah(
   // Halaman yang kolomnya kosong sama sekali tidak menampilkan bagian ini.
   const adaBagianVisiMisi = h.visi.trim() !== "" || h.misi.trim() !== "";
   const misi = kePoinTerisi(h.misi);
+
+  /**
+   * Foto dokumentasi halaman ini: foto pada menu Galeri yang kategorinya sama
+   * dengan penunjuk `galeri_kategori`.
+   *
+   * Fotonya TIDAK disimpan tersendiri. Tabel galeri sudah ada beserta menu
+   * unggahnya, jadi satu foto yang diunggah panitia muncul di dua tempat
+   * sekaligus — halaman Galeri dan halaman ini. Tempat penyimpanan yang
+   * kedua hanya akan membuat panitia harus mengingat foto mana diunggah ke
+   * mana, dan membuat halaman Galeri kehilangan foto yang sebenarnya
+   * dokumentasi kegiatan sekolah juga.
+   *
+   * Penyaringannya di sini, bukan lewat parameter kueri ke API, karena
+   * jawaban /api/galeri dipakai bersama seluruh halaman publik dan disimpan
+   * cache selama 30 detik; menambah parameter berarti menyimpan satu salinan
+   * cache per halaman untuk data yang sama.
+   */
+  const kategoriGaleri = h.galeri_kategori.trim();
+  const fotoDokumentasi = kategoriGaleri
+    ? await api
+        .galeri()
+        .then((g) => g.data.filter((f) => f.kategori === kategoriGaleri))
+        .catch((): Galeri[] => [])
+    : [];
 
   return (
     <>
@@ -357,6 +382,45 @@ export default async function HalamanNaskah(
             )}
           </article>
         </MunculNaik>
+
+        {/* Dokumentasi kegiatan. Hanya muncul bila halaman ini memang
+            menunjuk sebuah kategori galeri. Petak fotonya memakai komponen
+            yang sama dengan halaman Galeri — termasuk tampilan besar saat
+            diklik — jadi cara memakainya sama di kedua tempat, dan tidak ada
+            penampil foto kedua yang harus dirawat sendiri. Penyaring kategori
+            di dalamnya tidak ditampilkan (daftar kategorinya dikirim kosong),
+            sebab di sini seluruh fotonya memang satu kategori. */}
+        {kategoriGaleri && (
+          <section aria-labelledby="judul-dokumentasi" className="mt-10">
+            <div id="judul-dokumentasi">
+              <p className="text-xs font-bold tracking-[0.16em] text-biru uppercase">
+                Dokumentasi
+              </p>
+              <h2 className="mt-1 text-lg font-bold text-biru-tua sm:text-xl">
+                Foto Kegiatan {h.judul}
+              </h2>
+              <span
+                aria-hidden
+                className="mt-3 block h-1 w-12 rounded-full bg-emas"
+              />
+            </div>
+
+            <div className="mt-5">
+              {fotoDokumentasi.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-garis px-5 py-6 text-center text-sm leading-relaxed text-samar">
+                  Belum ada foto dokumentasi. Fotonya diunggah lewat menu Galeri
+                  di panel admin, dengan kategori{" "}
+                  <span className="font-semibold text-teks">
+                    {kategoriGaleri}
+                  </span>
+                  . Foto yang diunggah di sana juga tampil di halaman Galeri.
+                </p>
+              ) : (
+                <PetakGaleri foto={fotoDokumentasi} kategori={[]} />
+              )}
+            </div>
+          </section>
+        )}
       </div>
     </>
   );

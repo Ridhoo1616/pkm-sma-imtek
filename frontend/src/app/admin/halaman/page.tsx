@@ -36,6 +36,7 @@ const KOSONG = {
   isi: "",
   visi: "",
   misi: "",
+  galeri_kategori: "",
   kelompok: "Profil",
   urutan: 0,
   aktif: true,
@@ -80,6 +81,7 @@ function IsiHalaman() {
         isi: h.isi,
         visi: h.visi,
         misi: h.misi,
+        galeri_kategori: h.galeri_kategori,
         kelompok: h.kelompok,
         urutan: h.urutan,
         aktif: h.aktif,
@@ -105,6 +107,7 @@ function IsiHalaman() {
     fd.append("isi", isi.isi);
     fd.append("visi", isi.visi);
     fd.append("misi", isi.misi);
+    fd.append("galeri_kategori", isi.galeri_kategori);
     fd.append("kelompok", isi.kelompok);
     fd.append("urutan", String(isi.urutan));
     fd.append("aktif", isi.aktif ? "1" : "0");
@@ -329,6 +332,21 @@ function IsiHalaman() {
               />
             </div>
           </div>
+
+          {/* Penunjuk ke kategori pada menu Galeri. Fotonya TIDAK diunggah
+              di sini: tabel galeri sudah punya menunya sendiri, dan foto yang
+              diunggah di sana muncul di dua tempat sekaligus — halaman Galeri
+              dan halaman ini. */}
+          <Teks
+            nama="galeri_kategori"
+            label="Kategori galeri yang ditampilkan"
+            maks={60}
+            nilai={isi.galeri_kategori}
+            ubah={(v) => setIsi((s) => ({ ...s, galeri_kategori: v }))}
+            galat={galatKolom.galeri_kategori}
+            contoh="OSIS"
+            bantuan="Foto dari menu Galeri yang kategorinya sama akan tampil sebagai dokumentasi di halaman ini. Tulis nama kategorinya persis sama dengan yang dipakai saat mengunggah. Kosongkan bila halaman ini tidak perlu galeri."
+          />
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Pilihan

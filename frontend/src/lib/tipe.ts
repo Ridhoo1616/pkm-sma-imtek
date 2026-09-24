@@ -359,6 +359,8 @@ export interface Halaman {
   visi: string;
   /** Misi halaman ini, satu baris satu poin. Kosong berarti bagiannya tak tampil. */
   misi: string;
+  /** Kategori pada menu Galeri yang fotonya ditampilkan halaman ini. */
+  galeri_kategori: string;
   gambar: string;
   kelompok: KelompokHalaman;
   urutan: number;

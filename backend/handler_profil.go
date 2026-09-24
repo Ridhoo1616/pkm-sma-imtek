@@ -45,7 +45,8 @@ func (a *Aplikasi) ambilHalaman(kelompok string, hanyaAktif bool) ([]Halaman, er
 	// halaman — tetapi visi dan misi ikut, sebab formulir ubah di panel admin
 	// mengisi kolomnya dari daftar ini dan keduanya pendek.
 	baris, err := a.db.Query(`SELECT id, slug, judul, ringkasan, visi, misi,
-	                                 COALESCE(gambar, ''), kelompok, urutan, aktif, updated_at
+	                                 galeri_kategori, COALESCE(gambar, ''),
+	                                 kelompok, urutan, aktif, updated_at
 	                            FROM halaman WHERE `+strings.Join(syarat, " AND ")+`
 	                           ORDER BY kelompok, urutan, id`, arg...)
 	if err != nil {
@@ -57,7 +58,8 @@ func (a *Aplikasi) ambilHalaman(kelompok string, hanyaAktif bool) ([]Halaman, er
 	for baris.Next() {
 		var h Halaman
 		if err := baris.Scan(&h.ID, &h.Slug, &h.Judul, &h.Ringkasan, &h.Visi, &h.Misi,
-			&h.Gambar, &h.Kelompok, &h.Urutan, &h.Aktif, &h.Diubah); err != nil {
+			&h.GaleriKategori, &h.Gambar, &h.Kelompok, &h.Urutan, &h.Aktif,
+			&h.Diubah); err != nil {
 			return nil, err
 		}
 		hasil = append(hasil, h)
@@ -83,10 +85,11 @@ func (a *Aplikasi) tanganiHalamanDetail(w http.ResponseWriter, r *http.Request) 
 
 	var h Halaman
 	err := a.db.QueryRow(`SELECT id, slug, judul, ringkasan, isi, visi, misi,
-	                             COALESCE(gambar, ''), kelompok, urutan, aktif, updated_at
+	                             galeri_kategori, COALESCE(gambar, ''),
+	                             kelompok, urutan, aktif, updated_at
 	                        FROM halaman WHERE slug = $1 AND aktif = true`, slug).
 		Scan(&h.ID, &h.Slug, &h.Judul, &h.Ringkasan, &h.Isi, &h.Visi, &h.Misi,
-			&h.Gambar, &h.Kelompok, &h.Urutan, &h.Aktif, &h.Diubah)
+			&h.GaleriKategori, &h.Gambar, &h.Kelompok, &h.Urutan, &h.Aktif, &h.Diubah)
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Halaman tidak ditemukan.")
 		return
@@ -174,6 +177,13 @@ func bacaIsianHalaman(r *http.Request) (h Halaman, v *Validasi) {
 	h.Misi = strings.TrimSpace(r.FormValue("misi"))
 	v.panjangMaks("misi", "Misi", h.Misi, 2000)
 
+	// Nama kategori pada menu Galeri yang fotonya ditampilkan halaman ini.
+	// Tidak dicocokkan ke daftar kategori yang ada: panitia boleh menyiapkan
+	// penunjuknya lebih dulu, lalu mengunggah fotonya kemudian. Kategori yang
+	// belum ada isinya menampilkan keterangan, bukan galat.
+	h.GaleriKategori = ambil("galeri_kategori")
+	v.panjangMaks("galeri_kategori", "Kategori galeri", h.GaleriKategori, 60)
+
 	h.Kelompok = ambil("kelompok")
 	if h.Kelompok == "" {
 		h.Kelompok = "Profil"
@@ -204,9 +214,10 @@ func (a *Aplikasi) tanganiSimpanHalaman(w http.ResponseWriter, r *http.Request) 
 
 	var id int
 	err := a.db.QueryRow(`INSERT INTO halaman
-	        (slug, judul, ringkasan, isi, visi, misi, gambar, kelompok, urutan, aktif)
-	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-		h.Slug, h.Judul, h.Ringkasan, h.Isi, h.Visi, h.Misi,
+	        (slug, judul, ringkasan, isi, visi, misi, galeri_kategori, gambar,
+	         kelompok, urutan, aktif)
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+		h.Slug, h.Judul, h.Ringkasan, h.Isi, h.Visi, h.Misi, h.GaleriKategori,
 		kosongJadiNil(gambar), h.Kelompok, h.Urutan, h.Aktif).Scan(&id)
 	if err != nil {
 		a.hapusUnggahan("profil", gambar)
@@ -261,10 +272,11 @@ func (a *Aplikasi) tanganiUbahHalaman(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := a.db.Exec(`UPDATE halaman SET slug = $1, judul = $2, ringkasan = $3,
-	                               isi = $4, visi = $5, misi = $6, gambar = $7,
-	                               kelompok = $8, urutan = $9, aktif = $10
-	                         WHERE id = $11`,
-		h.Slug, h.Judul, h.Ringkasan, h.Isi, h.Visi, h.Misi,
+	                               isi = $4, visi = $5, misi = $6,
+	                               galeri_kategori = $7, gambar = $8,
+	                               kelompok = $9, urutan = $10, aktif = $11
+	                         WHERE id = $12`,
+		h.Slug, h.Judul, h.Ringkasan, h.Isi, h.Visi, h.Misi, h.GaleriKategori,
 		kosongJadiNil(gambarDipakai), h.Kelompok, h.Urutan, h.Aktif, id); err != nil {
 		a.hapusUnggahan("profil", gambarBaru)
 		if kodeGanda(err) {

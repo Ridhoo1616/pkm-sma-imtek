@@ -437,6 +437,39 @@ perlu dijaga, JPEG jauh lebih kecil untuk gambar bergradasi seperti ini — 1,6
 MB menjadi 98 KB pada 1400×517. Pengubahannya lewat kanvas Chrome, sebab di
 mesin ini tidak ada Pillow maupun ImageMagick.
 
+**Halaman dapat menampilkan foto dokumentasi dari menu Galeri** (migrasi 012).
+Yang ditambahkan hanya PENUNJUKNYA: kolom `galeri_kategori`, berisi nama
+kategori galeri yang fotonya ditampilkan halaman itu. Fotonya sendiri tetap di
+tabel `galeri` yang sudah ada beserta menu unggahnya, jadi satu foto yang
+diunggah panitia muncul di dua tempat sekaligus — halaman Galeri dan halaman
+ini. Tempat penyimpanan foto yang kedua hanya akan membuat panitia harus
+mengingat foto mana diunggah ke mana, dan membuat halaman Galeri kehilangan
+foto yang sebenarnya dokumentasi kegiatan sekolah juga.
+
+Ditulis sebagai kolom, **bukan dicocokkan diam-diam dengan judul halamannya**,
+karena pencocokan diam-diam tidak terlihat oleh siapa pun: panitia tidak akan
+tahu bahwa kategori galeri harus dinamai persis sama dengan judul halaman, dan
+kalau satu hurufnya berbeda tidak ada yang menerangkan kenapa fotonya tidak
+muncul. Sebagai kolom, ia tampil sebagai isian di formulir halaman beserta
+keterangannya. Migrasinya mengarahkan halaman OSIS ke kategori `OSIS`;
+halaman lain dibiarkan kosong, dan bagiannya tidak tampil.
+
+Petak fotonya memakai komponen `PetakGaleri` yang sama dengan halaman Galeri,
+termasuk tampilan besar saat diklik, jadi cara memakainya sama di kedua tempat
+dan tidak ada penampil foto kedua yang harus dirawat sendiri. Penyaring
+kategori di dalamnya tidak ditampilkan — daftar kategorinya dikirim kosong —
+sebab di sini seluruh fotonya memang satu kategori. Penyaringan fotonya
+dikerjakan di halaman, bukan lewat parameter kueri ke API, karena jawaban
+`/api/galeri` dipakai bersama seluruh halaman publik dan disimpan cache 30
+detik; menambah parameter berarti menyimpan satu salinan cache per halaman
+untuk data yang sama.
+
+Diuji pada basis data sekali pakai `uji_012` dengan empat foto contoh, tiga
+berkategori OSIS dan satu berkategori lain: 7 pemeriksaan lulus — hanya yang
+berkategori OSIS yang tampil, yang lain tidak ikut, penyaring kategorinya
+tidak muncul, tampilan besarnya terbuka saat foto diklik, dan halaman
+Kurikulum yang penunjuknya kosong memang tidak menampilkan bagian itu.
+
 Sampai sekarang yang punya ilustrasi dua halaman: OSIS dan Pendidikan
 Karakter. Keduanya berasal dari berkas `.svg` kiriman user yang isinya PNG
 base64 berlatar penuh, dan keduanya diolah dengan cara yang sama — 1,6 MB
@@ -920,6 +953,29 @@ mendaftar di bawah, dan itu disengaja: bagian ini memecah deretan bagian
 berlatar terang di tengah halaman, sekaligus membuat foto beritanya menonjol.
 Latarnya foto yang sedang di tengah, diburamkan dan digelapkan, sehingga warna
 seluruh bagian ini mengikuti fotonya.
+
+**Seluruh berita berjajar pada satu rel, dan yang berpindah posisi relnya.**
+Sebelumnya hanya foto tengahnya yang ditukar sumbernya, sehingga
+perpindahannya berkedip tanpa arah. Perhitungan geserannya memakai satuan
+`cqw`, bukan persen dan bukan piksel hasil pengukuran JavaScript: pada
+`transform`, persen dihitung dari lebar elemen yang digeser — yaitu seluruh
+relnya — bukan dari lebar jendela pandangnya, sedangkan mengukur dengan
+JavaScript berarti lebarnya baru diketahui sesudah halaman terpasang sehingga
+yang dikirim server tampil kacau sekejap. `cqw` dihitung dari lebar wadah yang
+ditandai `@container`, jadi seluruhnya selesai di CSS dan benar sejak lukisan
+pertama.
+
+Relnya memuat **dua penutup ujung**: salinan butir terakhir di kepala dan
+salinan butir pertama di ekor. Gunanya supaya tetangga yang mengintip selalu
+ada di kedua sisi — tanpa itu, pada butir pertama sisi kirinya kosong dan pada
+butir terakhir sisi kanannya kosong, dan karena tombolnya berputar ke ujung
+yang lain kekosongan itu terbaca sebagai cacat, bukan sebagai tanda "sudah di
+ujung". Keduanya semata hiasan: disembunyikan dari pembaca layar, dilepas dari
+urutan papan ketik, dan tidak dapat ditekan.
+
+Latar buramnya pun dirender keenam sekaligus lalu yang aktif saja yang dibuat
+tampak, supaya pergantiannya memudar alih-alih berkedip. Alamatnya sama dengan
+foto di relnya, jadi peramban memakai berkas yang sudah diambilnya.
 
 **Karuselnya TIDAK berjalan sendiri.** Karusel yang berpindah otomatis
 memindahkan bacaan orang yang sedang membacanya, dan pengunjung yang memakai

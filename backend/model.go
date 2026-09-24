@@ -193,13 +193,16 @@ type Halaman struct {
 	// Visi dan misi milik halaman ini sendiri — misalnya visi misi OSIS,
 	// yang bukan visi misi sekolah. Kosong berarti bagiannya tidak tampil.
 	// Misi ditulis satu baris satu poin, seperti pengaturan misi sekolah.
-	Visi     string    `json:"visi"`
-	Misi     string    `json:"misi"`
-	Gambar   string    `json:"gambar"`
-	Kelompok string    `json:"kelompok"`
-	Urutan   int       `json:"urutan"`
-	Aktif    bool      `json:"aktif"`
-	Diubah   time.Time `json:"diubah"`
+	Visi string `json:"visi"`
+	Misi string `json:"misi"`
+	// Nama kategori pada tabel galeri yang fotonya ditampilkan halaman ini.
+	// Kosong berarti halaman itu tidak menampilkan galeri sama sekali.
+	GaleriKategori string    `json:"galeri_kategori"`
+	Gambar         string    `json:"gambar"`
+	Kelompok       string    `json:"kelompok"`
+	Urutan         int       `json:"urutan"`
+	Aktif          bool      `json:"aktif"`
+	Diubah         time.Time `json:"diubah"`
 }
 
 type Tenaga struct {
