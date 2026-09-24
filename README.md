@@ -1021,6 +1021,60 @@ WhatsApp di situs; pengaturan itu masih kosong, dan selama kosong kelima
 tombolnya tidak muncul. Pengaturan yang tidak mengerjakan apa pun sengaja
 tidak dibuat.
 
+### H3. Membalas pesan masuk dari dalam panel
+
+Menu Pesan Masuk dulu hanya memasang dua tautan: `wa.me` dan `mailto:`. Yang
+`wa.me` bekerja, tetapi yang `mailto:` TIDAK MELAKUKAN APA PUN di komputer
+yang tidak punya aplikasi email terpasang, dan itulah keadaan sebagian besar
+komputer sekolah. Panitia melihat tombol yang tidak dapat diklik. Itu yang
+dilaporkan user, dan memang bukan dugaan: tautan `mailto:` menyerahkan
+pekerjaannya kepada aplikasi email yang belum tentu ada.
+
+Sekarang balasannya diarang di dalam panel:
+
+- **Tombol Balas** pada setiap pesan membuka jendela berisi kanal, alamat
+  tujuan, perihal, dan naskah balasan. Perihal beserta naskah awalnya sudah
+  tersusun, menyapa pengirimnya dan menyebut pertanyaannya, sehingga panitia
+  tinggal menuliskan jawabannya.
+- **Alamat tujuannya dapat diubah.** Tidak dipaksa sama dengan yang tertulis
+  pada pesannya: pengunjung kadang salah menulis alamatnya sendiri, dan yang
+  harus dijawab kadang orang tuanya. Pesan yang pengirimnya tidak mencantumkan
+  email maupun nomor pun tetap dapat dibalas, alamatnya diisi panitia.
+- **Email dikirim server** lewat SMTP yang sama dengan notifikasi PPDB, dari
+  alamat pengirim yang disetel di menu Pengaturan. Bila SMTP belum disetel,
+  tombolnya dimatikan dan sebabnya diterangkan di tempat itu, bukan dibiarkan
+  gagal saat ditekan.
+- **WhatsApp tidak dikirim server**, sebab pengiriman otomatis hanya sah lewat
+  WhatsApp Business API resmi. Tombolnya membuka WhatsApp dengan pesan yang
+  sudah terisi; panitia menekan kirim dari akunnya sendiri. Sama dengan
+  kebiasaan notifikasi PPDB, jadi panitia tidak menghadapi dua cara berbeda.
+  Sengaja elemen `<a>`, bukan `<button>`: tautannya dibuka oleh ketukan
+  panitia sendiri sehingga tidak pernah dihadang penghalang jendela sembulan.
+- **Setiap balasan dicatat** di tabel `notifikasi`, satu tempat dengan pesan
+  PPDB, beserta isinya. Barisnya tidak berpendaftar, jadi kolom pendaftarnya
+  diberi keterangan "Pesan masuk".
+- **Pesannya ditandai sudah dibalas** (`pesan.dibalas_pada` dan
+  `dibalas_oleh`, migrasi 016), dan sekaligus sudah dibaca. Dibaca bukan
+  dijawab: panitia yang bergantian jaga perlu tahu pertanyaan mana yang masih
+  menganggur.
+
+Migrasi 016 juga menambah `notifikasi.perihal`. Perihal balasan diketik
+panitia saat itu dan tidak ada pengaturannya, jadi harus ikut tersimpan pada
+barisnya; dengan begitu balasan yang gagal dapat dicoba ulang dari menu
+Notifikasi dengan perihal yang sama. Notifikasi PPDB sengaja MEMBIARKANNYA
+KOSONG, dan perihalnya dibaca dari pengaturan pada saat dikirim, supaya
+sekolah yang membetulkan naskah perihalnya sesudah pesannya tersusun tetap
+terpakai perbaikannya.
+
+Yang diuji, memakai basis data sekali pakai beserta server SMTP tiruan:
+email yang benar-benar tiba di server SMTP lengkap dengan pengirim, tujuan,
+perihal, dan badan yang barisnya utuh; catatannya di tabel notifikasi;
+penandaan sudah dibalas; nomor WhatsApp yang dinormalkan ke awalan 62; tujuh
+penolakan isian yang salah; balasan yang gagal saat server email mati, yang
+tercatat beserta sebabnya lalu berhasil dikirim ulang dari menu Notifikasi
+dengan perihal tersimpan; dan penolakan 503 tanpa mencatat apa pun ketika
+SMTP belum disetel sama sekali.
+
 ### Tanda pisah panjang tidak dipakai pada tulisan yang tampak
 
 Tanda pisah panjang (em dash dan en dash) tidak lagi dipakai pada seluruh

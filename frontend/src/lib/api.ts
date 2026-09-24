@@ -455,6 +455,26 @@ export const api = {
       metode: "DELETE",
       token: true,
     }),
+  /**
+   * Mengirim balasan panitia atas satu pesan masuk.
+   *
+   * Kanal Email dikirim server lewat SMTP. Kanal WhatsApp tidak dikirim
+   * server: yang kembali `tautan_wa` berisi pesan yang sudah terisi, dan
+   * panitia yang menekan kirim dari akun WhatsApp-nya sendiri.
+   */
+  balasPesan: (
+    id: number,
+    isi: {
+      kanal: "Email" | "WhatsApp";
+      tujuan: string;
+      perihal?: string;
+      isi: string;
+    },
+  ) =>
+    permintaan<{ pesan: string; tautan_wa?: string; dikirim_ke: string }>(
+      `/api/admin/pesan/${id}/balas`,
+      { metode: "POST", isi, token: true },
+    ),
 
   /* ---------- profil, akademik, dan kesiswaan ---------- */
   halamanAdmin: () =>

@@ -181,7 +181,12 @@ export default function HalamanNotifikasi() {
                 {tanggalJam(n.dibuat)}
               </td>
               <td className="px-4 py-3">
-                <p className="font-medium">{n.nama_pendaftar || "-"}</p>
+                {/* Balasan pesan masuk tidak berasal dari pendaftar mana
+                    pun, jadi kolomnya diberi keterangan, bukan tanda
+                    hubung yang tidak menerangkan apa-apa. */}
+                <p className="font-medium">
+                  {n.nama_pendaftar || (n.pendaftar_id ? "-" : "Pesan masuk")}
+                </p>
                 <p className="text-xs text-samar">{n.no_registrasi}</p>
               </td>
               <td className="px-4 py-3">
@@ -255,8 +260,16 @@ export default function HalamanNotifikasi() {
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
             <dt className="text-samar">Pendaftar</dt>
             <dd className="font-semibold">
-              {tinjau?.nama_pendaftar} · {tinjau?.no_registrasi}
+              {tinjau?.nama_pendaftar
+                ? `${tinjau.nama_pendaftar} · ${tinjau.no_registrasi}`
+                : "Balasan atas pesan masuk"}
             </dd>
+            {tinjau?.perihal && (
+              <>
+                <dt className="text-samar">Perihal</dt>
+                <dd className="font-semibold">{tinjau.perihal}</dd>
+              </>
+            )}
             <dt className="text-samar">Nomor tujuan</dt>
             <dd className="font-semibold tabular-nums">{tinjau?.tujuan}</dd>
             {tinjau?.dikirim_pada && (

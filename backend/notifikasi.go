@@ -43,18 +43,22 @@ import (
    ================================================================== */
 
 type Notifikasi struct {
-	ID            int     `json:"id"`
-	PendaftarID   *int    `json:"pendaftar_id"`
-	NamaPendaftar string  `json:"nama_pendaftar,omitempty"`
-	NoRegistrasi  string  `json:"no_registrasi,omitempty"`
-	Kanal         string  `json:"kanal"`
-	Tujuan        string  `json:"tujuan"`
-	Jenis         string  `json:"jenis"`
-	Pesan         string  `json:"pesan"`
-	Status        string  `json:"status"`
-	Galat         string  `json:"galat,omitempty"`
-	DikirimPada   *string `json:"dikirim_pada"`
-	Dibuat        string  `json:"dibuat"`
+	ID            int    `json:"id"`
+	PendaftarID   *int   `json:"pendaftar_id"`
+	NamaPendaftar string `json:"nama_pendaftar,omitempty"`
+	NoRegistrasi  string `json:"no_registrasi,omitempty"`
+	Kanal         string `json:"kanal"`
+	Tujuan        string `json:"tujuan"`
+	Jenis         string `json:"jenis"`
+	// Perihal hanya terisi pada balasan pesan masuk, yang perihalnya diketik
+	// panitia. Notifikasi PPDB membiarkannya kosong dan perihalnya dibaca
+	// dari pengaturan pada saat dikirim.
+	Perihal     string  `json:"perihal,omitempty"`
+	Pesan       string  `json:"pesan"`
+	Status      string  `json:"status"`
+	Galat       string  `json:"galat,omitempty"`
+	DikirimPada *string `json:"dikirim_pada"`
+	Dibuat      string  `json:"dibuat"`
 	// TautanWa adalah alamat wa.me berisi pesan yang sudah terisi, dipakai
 	// tombol kirim pada panel bila gateway tidak disetel.
 	TautanWa string `json:"tautan_wa,omitempty"`
@@ -328,13 +332,13 @@ func (a *Aplikasi) ambilNotifikasi(id int) (Notifikasi, error) {
 	var nama, noReg sql.NullString
 	err := a.db.QueryRow(
 		`SELECT n.id, n.pendaftar_id, p.nama_lengkap, p.no_registrasi,
-		        n.kanal, n.tujuan, n.jenis, n.pesan, n.status, n.galat,
-		        n.dikirim_pada, n.created_at
+		        n.kanal, n.tujuan, n.jenis, n.perihal, n.pesan, n.status,
+		        n.galat, n.dikirim_pada, n.created_at
 		 FROM notifikasi n
 		 LEFT JOIN pendaftar p ON p.id = n.pendaftar_id
 		 WHERE n.id = $1`, id).
 		Scan(&n.ID, &n.PendaftarID, &nama, &noReg, &n.Kanal, &n.Tujuan,
-			&n.Jenis, &n.Pesan, &n.Status, &n.Galat, &dikirim, &n.Dibuat)
+			&n.Jenis, &n.Perihal, &n.Pesan, &n.Status, &n.Galat, &dikirim, &n.Dibuat)
 	if err != nil {
 		return n, err
 	}

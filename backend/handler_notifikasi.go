@@ -50,7 +50,7 @@ func (a *Aplikasi) tanganiDaftarNotifikasi(w http.ResponseWriter, r *http.Reques
 	nilai = append(nilai, perHalaman, (halaman-1)*perHalaman)
 	baris, err := a.db.Query(
 		`SELECT n.id, n.pendaftar_id, COALESCE(p.nama_lengkap, ''), COALESCE(p.no_registrasi, ''),
-		        n.kanal, n.tujuan, n.jenis, n.pesan, n.status, n.galat,
+		        n.kanal, n.tujuan, n.jenis, n.perihal, n.pesan, n.status, n.galat,
 		        n.dikirim_pada, n.created_at
 		 FROM notifikasi n
 		 LEFT JOIN pendaftar p ON p.id = n.pendaftar_id
@@ -68,7 +68,7 @@ func (a *Aplikasi) tanganiDaftarNotifikasi(w http.ResponseWriter, r *http.Reques
 		var n Notifikasi
 		var dikirim sql.NullTime
 		if err := baris.Scan(&n.ID, &n.PendaftarID, &n.NamaPendaftar, &n.NoRegistrasi,
-			&n.Kanal, &n.Tujuan, &n.Jenis, &n.Pesan, &n.Status, &n.Galat,
+			&n.Kanal, &n.Tujuan, &n.Jenis, &n.Perihal, &n.Pesan, &n.Status, &n.Galat,
 			&dikirim, &n.Dibuat); err != nil {
 			a.galatServer(w, "membaca notifikasi", err)
 			return
@@ -181,7 +181,15 @@ func (a *Aplikasi) tanganiKirimNotifikasi(w http.ResponseWriter, r *http.Request
 					"SMTP_PASS, dan SMTP_DARI pada berkas .env, lalu nyalakan ulang server.")
 			return
 		}
-		perihal := a.perihalUntuk(n.Jenis)
+		// Perihal yang tersimpan pada barisnya menang: itu yang diketik
+		// panitia pada balasan pesan masuk, yang tidak punya pengaturan.
+		// Notifikasi PPDB membiarkannya kosong dan perihalnya dibaca dari
+		// pengaturan di sini, supaya perbaikan naskah perihal sesudah
+		// pesannya tersusun tetap terpakai.
+		perihal := strings.TrimSpace(n.Perihal)
+		if perihal == "" {
+			perihal = a.perihalUntuk(n.Jenis)
+		}
 		if perihal == "" {
 			kirimGalat(w, http.StatusUnprocessableEntity,
 				"Baris perihal email untuk jenis pesan ini belum diisi di menu Pengaturan.")

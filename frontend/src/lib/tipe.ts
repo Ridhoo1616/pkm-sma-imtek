@@ -72,6 +72,8 @@ export interface Pesan {
   isi: string;
   dibaca: boolean;
   dibuat: string;
+  /** Kosong berarti belum dibalas dari panel. Dibaca bukan dijawab. */
+  dibalas_pada: string | null;
 }
 
 export interface Pengguna {
@@ -232,6 +234,8 @@ export interface HalamanPesan {
   belum_dibaca: number;
   halaman: number;
   per_halaman: number;
+  /** false berarti SMTP belum disetel di server, jadi balasan email pasti gagal. */
+  email_aktif: boolean;
 }
 
 /* ---------- rincian biaya ---------- */
@@ -327,6 +331,8 @@ export interface Notifikasi {
   kanal: string;
   tujuan: string;
   jenis: string;
+  /** Hanya terisi pada balasan pesan masuk, yang perihalnya diketik panitia. */
+  perihal?: string;
   pesan: string;
   status: string;
   galat?: string;

@@ -202,6 +202,7 @@ func (a *Aplikasi) rute() http.Handler {
 	/* ---- pesan masuk ---- */
 	m.HandleFunc("GET /api/admin/pesan", a.wajibMasuk(a.tanganiDaftarPesan))
 	m.HandleFunc("PATCH /api/admin/pesan/{id}", a.wajibMasuk(a.tanganiTandaiPesan))
+	m.HandleFunc("POST /api/admin/pesan/{id}/balas", a.wajibMasuk(a.tanganiBalasPesan))
 	m.HandleFunc("DELETE /api/admin/pesan/{id}", a.wajibMasuk(a.tanganiHapusPesan))
 
 	/* ---- pengaturan & pengguna ---- */

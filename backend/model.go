@@ -65,6 +65,9 @@ type Pesan struct {
 	Isi    string    `json:"isi"`
 	Dibaca bool      `json:"dibaca"`
 	Dibuat time.Time `json:"dibuat"`
+	// DibalasPada kosong berarti pesannya belum dibalas dari panel. Dibaca
+	// bukan dijawab: panitia yang bergantian jaga perlu tahu bedanya.
+	DibalasPada *time.Time `json:"dibalas_pada"`
 }
 
 // Pendaftar memuat seluruh kolom formulir PPDB. Nama kolom JSON mengikuti

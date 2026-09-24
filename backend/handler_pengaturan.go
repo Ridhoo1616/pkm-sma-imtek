@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -47,7 +48,7 @@ func (a *Aplikasi) tanganiDaftarPesan(w http.ResponseWriter, r *http.Request) {
 
 	argHal := append(append([]any{}, arg...), perHalaman, (halaman-1)*perHalaman)
 	baris, err := a.db.Query(`SELECT id, nama, COALESCE(email, ''), COALESCE(no_hp, ''),
-	                                 COALESCE(subjek, ''), isi, dibaca, created_at
+	                                 COALESCE(subjek, ''), isi, dibaca, created_at, dibalas_pada
 	                            FROM pesan`+dimana+` ORDER BY created_at DESC LIMIT `+n.berikut()+` OFFSET `+n.berikut(), argHal...)
 	if err != nil {
 		a.galatServer(w, "mengambil pesan", err)
@@ -58,10 +59,15 @@ func (a *Aplikasi) tanganiDaftarPesan(w http.ResponseWriter, r *http.Request) {
 	daftar := []Pesan{}
 	for baris.Next() {
 		var p Pesan
+		var dibalas sql.NullTime
 		if err := baris.Scan(&p.ID, &p.Nama, &p.Email, &p.NoHP, &p.Subjek, &p.Isi,
-			&p.Dibaca, &p.Dibuat); err != nil {
+			&p.Dibaca, &p.Dibuat, &dibalas); err != nil {
 			a.galatServer(w, "membaca pesan", err)
 			return
+		}
+		if dibalas.Valid {
+			t := dibalas.Time
+			p.DibalasPada = &t
 		}
 		daftar = append(daftar, p)
 	}
@@ -73,6 +79,9 @@ func (a *Aplikasi) tanganiDaftarPesan(w http.ResponseWriter, r *http.Request) {
 	kirimJSON(w, http.StatusOK, map[string]any{
 		"data": daftar, "total": total, "belum_dibaca": belum,
 		"halaman": halaman, "per_halaman": perHalaman,
+		// Panel perlu tahu sebelum panitia mengarang balasan panjang: tanpa
+		// SMTP, kanal email pasti gagal, dan lebih baik dikatakan lebih dulu.
+		"email_aktif": a.emailDisetel(),
 	})
 }
 
@@ -100,6 +109,176 @@ func (a *Aplikasi) tanganiTandaiPesan(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	kirimJSON(w, http.StatusOK, map[string]string{"pesan": "Tanda baca pesan diperbarui."})
+}
+
+type permintaanBalasPesan struct {
+	Kanal   string `json:"kanal"`
+	Tujuan  string `json:"tujuan"`
+	Perihal string `json:"perihal"`
+	Isi     string `json:"isi"`
+}
+
+/*
+tanganiBalasPesan mengirim balasan panitia atas satu pesan masuk.
+
+Sebelum ini panel hanya memasang tautan mailto:, dan tautan mailto: tidak
+melakukan apa pun di komputer yang tidak punya aplikasi email terpasang.
+Sekarang balasannya diarang di dalam panel dan dikirim server lewat SMTP yang
+sama dengan notifikasi PPDB.
+
+Alamat tujuannya DAPAT DIUBAH panitia, tidak dipaksa sama dengan yang tertulis
+pada pesannya. Pengunjung kadang salah menulis alamatnya sendiri, dan yang
+harus dijawab kadang orang tuanya, bukan pengirimnya.
+
+Dua kanal, dan keduanya tidak setara:
+
+  - Email dikirim server. Bila SMTP belum disetel, pengirimannya memang tidak
+    mungkin, dan itu dijawab apa adanya SEBELUM apa pun dicatat.
+  - WhatsApp tidak dikirim server, sebab pengiriman otomatis hanya sah lewat
+    WhatsApp Business API resmi. Yang dilakukan di sini hanya mencatat, lalu
+    mengembalikan tautan wa.me berisi pesan yang sudah terisi; panitia yang
+    menekan kirim dari akun WhatsApp-nya sendiri. Sama seperti notifikasi
+    PPDB, jadi panitia tidak menghadapi dua kebiasaan yang berbeda.
+
+Setiap balasan dicatat di tabel notifikasi, satu tempat dengan pesan PPDB,
+supaya panitia dapat menunjukkan persis apa yang dikirim bila ada sengketa.
+*/
+func (a *Aplikasi) tanganiBalasPesan(w http.ResponseWriter, r *http.Request) {
+	id, ok := idJalur(w, r)
+	if !ok {
+		return
+	}
+	var p permintaanBalasPesan
+	if !bacaJSON(w, r, &p) {
+		return
+	}
+
+	var nama string
+	err := a.db.QueryRow("SELECT nama FROM pesan WHERE id = $1", id).Scan(&nama)
+	if err == sql.ErrNoRows {
+		kirimGalat(w, http.StatusNotFound, "Pesan tidak ditemukan.")
+		return
+	}
+	if err != nil {
+		a.galatServer(w, "mengambil pesan", err)
+		return
+	}
+
+	p.Kanal = strings.TrimSpace(p.Kanal)
+	v := validasiBaru()
+	p.Isi = v.wajib("isi", "Isi balasan", p.Isi)
+	// Batas yang sama dengan notifikasi PPDB, yaitu batas satu pesan
+	// WhatsApp. Email sanggup jauh lebih panjang, tetapi satu batas untuk
+	// kedua kanal membuat naskah yang sama dapat dikirim ke dua-duanya.
+	v.panjangMaks("isi", "Isi balasan", p.Isi, 4000)
+
+	switch p.Kanal {
+	case "Email":
+		p.Tujuan = v.wajib("tujuan", "Alamat email tujuan", p.Tujuan)
+		v.panjangMaks("tujuan", "Alamat email tujuan", p.Tujuan, 120)
+		v.email("tujuan", p.Tujuan)
+		p.Perihal = v.wajib("perihal", "Perihal", p.Perihal)
+		v.panjangMaks("perihal", "Perihal", p.Perihal, 200)
+	case "WhatsApp":
+		p.Tujuan = v.wajib("tujuan", "Nomor WhatsApp tujuan", p.Tujuan)
+		v.telepon("tujuan", "Nomor WhatsApp tujuan", p.Tujuan, false)
+		// Perihal tidak dipakai WhatsApp; kalau ikut terkirim, dibuang saja
+		// daripada tersimpan sebagai catatan yang menyesatkan.
+		p.Perihal = ""
+	default:
+		v.tambah("kanal", "Kanal balasan tidak dikenal. Pilih Email atau WhatsApp.")
+	}
+	if v.bermasalah() {
+		kirimGalatValidasi(w, v)
+		return
+	}
+
+	saya := penggunaDari(r)
+
+	if p.Kanal == "Email" {
+		if !a.emailDisetel() {
+			kirimGalat(w, http.StatusServiceUnavailable,
+				"Pengiriman email belum disetel di server. Isi SMTP_HOST, SMTP_USER, "+
+					"SMTP_PASS, dan SMTP_DARI pada berkas .env, lalu nyalakan ulang server.")
+			return
+		}
+		if err := a.kirimEmail(r.Context(), p.Tujuan, p.Perihal, p.Isi); err != nil {
+			// Yang gagal tetap dicatat beserta sebabnya. Panitia perlu tahu
+			// bahwa percobaannya ada dan mengapa tidak sampai, bukan
+			// menghadapi daftar yang bersih seolah tidak pernah dicoba.
+			if _, errCatat := a.catatBalasan(id, "Email", p.Tujuan, p.Perihal, p.Isi,
+				"Gagal", err.Error(), 0); errCatat != nil {
+				a.log.Printf("gagal mencatat balasan gagal untuk pesan %d: %v", id, errCatat)
+			}
+			a.log.Printf("balasan email untuk pesan %d gagal: %v", id, err)
+			kirimGalat(w, http.StatusBadGateway,
+				"Balasan gagal dikirim. Keterangannya tercatat pada menu Notifikasi.")
+			return
+		}
+		if _, err := a.catatBalasan(id, "Email", p.Tujuan, p.Perihal, p.Isi,
+			"Terkirim", "", saya.ID); err != nil {
+			a.galatServer(w, "mencatat balasan", err)
+			return
+		}
+		if err := a.tandaiPesanDibalas(id, saya.ID); err != nil {
+			a.galatServer(w, "menandai pesan sudah dibalas", err)
+			return
+		}
+		kirimJSON(w, http.StatusOK, map[string]any{
+			"pesan":      "Balasan terkirim lewat email ke " + p.Tujuan + ".",
+			"dikirim_ke": p.Tujuan,
+		})
+		return
+	}
+
+	nomor := nomorWaKirim(p.Tujuan)
+	if _, err := a.catatBalasan(id, "WhatsApp", nomor, "", p.Isi,
+		"Terkirim", "", saya.ID); err != nil {
+		a.galatServer(w, "mencatat balasan", err)
+		return
+	}
+	if err := a.tandaiPesanDibalas(id, saya.ID); err != nil {
+		a.galatServer(w, "menandai pesan sudah dibalas", err)
+		return
+	}
+	kirimJSON(w, http.StatusOK, map[string]any{
+		"pesan":      "Balasan dicatat. WhatsApp terbuka dengan pesan yang sudah terisi.",
+		"tautan_wa":  tautanWa(nomor, p.Isi),
+		"dikirim_ke": nomor,
+	})
+}
+
+// catatBalasan menyimpan satu balasan ke tabel notifikasi. pendaftar_id
+// dibiarkan kosong: balasan pesan masuk tidak berasal dari pendaftar mana pun.
+// olehID nol berarti belum ada yang berhasil mengirimnya.
+func (a *Aplikasi) catatBalasan(pesanID int, kanal, tujuan, perihal, isi, status, galat string, olehID int) (int, error) {
+	var id int
+	var oleh any
+	var dikirim any
+	if status == "Terkirim" && olehID > 0 {
+		oleh = olehID
+		dikirim = time.Now()
+	}
+	err := a.db.QueryRow(
+		`INSERT INTO notifikasi (pendaftar_id, kanal, tujuan, jenis, perihal, pesan,
+		                         status, galat, dikirim_pada, dikirim_oleh)
+		 VALUES (NULL, $1, $2, 'balasan_pesan', $3, $4, $5, $6, $7, $8)
+		 RETURNING id`,
+		kanal, tujuan, perihal, isi, status, potong(galat, 1000), dikirim, oleh).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("mencatat balasan pesan %d: %w", pesanID, err)
+	}
+	return id, nil
+}
+
+// tandaiPesanDibalas menandai pesannya sudah dijawab, dan sekaligus sudah
+// dibaca: membalas tanpa membaca tidak mungkin, dan pesan yang sudah dibalas
+// tetapi masih bertanda "belum dibaca" hanya membingungkan panitia berikutnya.
+func (a *Aplikasi) tandaiPesanDibalas(pesanID, olehID int) error {
+	_, err := a.db.Exec(
+		`UPDATE pesan SET dibaca = true, dibalas_pada = now(), dibalas_oleh = $1
+		 WHERE id = $2`, olehID, pesanID)
+	return err
 }
 
 func (a *Aplikasi) tanganiHapusPesan(w http.ResponseWriter, r *http.Request) {
