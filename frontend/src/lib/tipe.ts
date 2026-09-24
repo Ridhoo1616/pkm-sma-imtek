@@ -97,6 +97,11 @@ export interface RingkasPendaftar {
   jenis_kelamin: "L" | "P";
   tanggal_lahir: string;
   asal_sekolah: string;
+  /**
+   * Hasil pencocokan sekolah asal ke daftar rujukan PADA SAAT mengirim.
+   * false berarti perlu diperiksa manual dari ijazah.
+   */
+  asal_sekolah_terdaftar: boolean;
   no_hp: string;
   email: string;
   nilai_rata2: number | null;
@@ -442,4 +447,31 @@ export interface Pustaka {
   berkas: string;
   urutan: number;
   aktif: boolean;
+}
+
+/* ---------- daftar rujukan sekolah asal ---------- */
+
+export interface SekolahRujukan {
+  npsn: string;
+  nama: string;
+  bentuk?: string;
+  status?: string;
+  kecamatan?: string;
+  kabupaten?: string;
+  provinsi?: string;
+}
+
+export interface HasilCariSekolah {
+  data: SekolahRujukan[];
+  /** false berarti panitia belum mengimpor daftar sekolah, jadi tidak ada yang dituntut. */
+  aktif: boolean;
+}
+
+export interface HalamanSekolah {
+  data: SekolahRujukan[];
+  total: number;
+  /** Jumlah seluruh sekolah dalam daftar, tanpa memperhitungkan pencarian. */
+  semua: number;
+  halaman: number;
+  per_halaman: number;
 }

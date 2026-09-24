@@ -37,6 +37,7 @@ const KELOMPOK: {
       { jalur: "/admin/ujian", label: "Tes Seleksi", khususAdmin: false },
       { jalur: "/admin/biaya", label: "Rincian Biaya", khususAdmin: true },
       { jalur: "/admin/jurusan", label: "Peminatan", khususAdmin: true },
+      { jalur: "/admin/sekolah", label: "Sekolah Asal", khususAdmin: false },
     ],
   },
   {

@@ -115,6 +115,12 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/kegiatan-siswa", a.tanganiKegiatanPublik)
 	m.HandleFunc("GET /api/pustaka", a.tanganiPustakaPublik)
 
+	// Pencarian sekolah asal untuk formulir pendaftaran. Terbuka tanpa token
+	// karena yang memakainya calon pendaftar; isinya data sekolah yang memang
+	// publik, tanpa data pribadi sama sekali.
+	m.HandleFunc("GET /api/sekolah", a.batasiIP(a.batas.cariSekolahIP,
+		"Terlalu banyak pencarian dari jaringan Anda.", a.tanganiCariSekolah))
+
 	/* ---- PPDB ----
 	   Keempatnya dibatasi laju. Tiga yang terakhir menyerahkan data pribadi
 	   pendaftar dengan kunci nomor registrasi ditambah tanggal lahir, jadi
@@ -218,6 +224,11 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("PATCH /api/admin/notifikasi/{id}/batal", a.wajibMasuk(a.tanganiBatalkanNotifikasi))
 
 	/* ---- pesan masuk ---- */
+	/* ---- daftar rujukan sekolah asal ---- */
+	m.HandleFunc("GET /api/admin/sekolah", a.wajibMasuk(a.tanganiDaftarSekolahAdmin))
+	m.HandleFunc("POST /api/admin/sekolah/impor", a.wajibAdmin(a.tanganiImporSekolah))
+	m.HandleFunc("DELETE /api/admin/sekolah/{npsn}", a.wajibAdmin(a.tanganiHapusSekolah))
+
 	m.HandleFunc("GET /api/admin/pesan", a.wajibMasuk(a.tanganiDaftarPesan))
 	m.HandleFunc("PATCH /api/admin/pesan/{id}", a.wajibMasuk(a.tanganiTandaiPesan))
 	m.HandleFunc("POST /api/admin/pesan/{id}/balas", a.wajibMasuk(a.tanganiBalasPesan))

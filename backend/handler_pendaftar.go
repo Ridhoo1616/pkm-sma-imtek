@@ -128,8 +128,18 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		v.tambah("kode_pos", "Kode pos harus lima angka.")
 	}
 	// NPSN sekolah selalu delapan angka, sama seperti NPSN pada Data Sekolah.
-	if npsnSekolah != "" && !polaNpsn.MatchString(npsnSekolah) {
+	npsnBentuknyaBenar := polaNpsn.MatchString(npsnSekolah)
+	if npsnSekolah != "" && !npsnBentuknyaBenar {
 		v.tambah("npsn_sekolah", "NPSN sekolah asal harus delapan angka. Nomor ini tercantum pada ijazah atau dapat dicari di laman Referensi Kemendikbud.")
+	}
+
+	// Sekolah asalnya dicocokkan ke daftar rujukan yang diimpor panitia.
+	// Selama daftarnya kosong, pemeriksaan ini tidak menolak apa pun.
+	// Keterangannya di sekolah.go.
+	sekolahTerdaftar := false
+	if npsnBentuknyaBenar {
+		sekolahTerdaftar = a.periksaAsalSekolah(v, asalSekolah, npsnSekolah,
+			isi("sekolah_tidak_terdaftar") == "1")
 	}
 
 	nilaiRata2 := v.desimalRentang("nilai_rata2", "Nilai rata-rata", isi("nilai_rata2"), 0, 100)
@@ -280,9 +290,9 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		nama_ayah, pekerjaan_ayah, pendidikan_ayah, nama_ibu, pekerjaan_ibu, pendidikan_ibu,
 		penghasilan, no_hp_ortu, nama_wali,
 		file_foto, file_ijazah, file_kk, file_akta, file_raport, file_prestasi,
-		sumber_informasi, catatan_sumber, ip_pendaftar
+		sumber_informasi, catatan_sumber, ip_pendaftar, asal_sekolah_terdaftar
 	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26,
-	          $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44)`,
+	          $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45)`,
 		noReg, tahunAjaran, jalur, jurusanID,
 		namaLengkap, kosongJadiNil(nisn), kosongJadiNil(nik), jenisKelamin,
 		tempatLahir, tanggalLahir, agama,
@@ -297,7 +307,8 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		nilBerkas(tersimpan, "file_foto"), nilBerkas(tersimpan, "file_ijazah"),
 		nilBerkas(tersimpan, "file_kk"), nilBerkas(tersimpan, "file_akta"),
 		nilBerkas(tersimpan, "file_raport"), nilBerkas(tersimpan, "file_prestasi"),
-		kosongJadiNil(sumberInfo), kosongJadiNil(isi("catatan_sumber")), alamatPemanggil(r))
+		kosongJadiNil(sumberInfo), kosongJadiNil(isi("catatan_sumber")), alamatPemanggil(r),
+		sekolahTerdaftar)
 	if err != nil {
 		bereskan()
 		// Basis data punya DUA batasan unik untuk tahun ajaran yang sama:

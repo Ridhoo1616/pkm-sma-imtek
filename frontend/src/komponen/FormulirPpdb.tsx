@@ -13,6 +13,7 @@ import {
   Tombol,
   RingkasanGalat,
 } from "@/komponen/Medan";
+import { PilihSekolah } from "@/komponen/PilihSekolah";
 import {
   AGAMA,
   JENIS_KELAMIN,
@@ -210,6 +211,10 @@ export default function FormulirPpdb({
   const [isi, setIsi] = useState<Isian>(ISIAN_AWAL);
   const [berkas, setBerkas] = useState(BERKAS_AWAL);
   const [pernyataan, setPernyataan] = useState(false);
+  // Pernyataan bahwa sekolah asalnya tidak ada dalam daftar rujukan panitia.
+  // Dipisah dari `isi` karena bentuknya boolean, sedangkan `isi` seluruhnya
+  // teks yang langsung dikirim sebagai FormData.
+  const [sekolahTidakTerdaftar, setSekolahTidakTerdaftar] = useState(false);
   const [langkah, setLangkah] = useState(0);
   const [galat, setGalat] = useState<Record<string, string>>({});
   const [ringkasan, setRingkasan] = useState<string[]>([]);
@@ -265,6 +270,7 @@ export default function FormulirPpdb({
       if (f) data.append(k, f);
     }
     if (pernyataan) data.append("pernyataan", "1");
+    if (sekolahTidakTerdaftar) data.append("sekolah_tidak_terdaftar", "1");
     data.append("website", ""); // perangkap spam, selalu kosong dari manusia
 
     try {
@@ -631,23 +637,15 @@ export default function FormulirPpdb({
                   <div className="space-y-5">
                     <h3 className="text-base">Sekolah Asal</h3>
                     <div className="grid gap-5 sm:grid-cols-2">
-                      <Teks
-                        nama="asal_sekolah"
-                        label="Nama SMP / MTs asal"
-                        wajib
-                        maks={140}
-                        nilai={isi.asal_sekolah}
-                        ubah={ubah("asal_sekolah")}
-                        galat={galat.asal_sekolah}
-                      />
-                      <Teks
-                        nama="npsn_sekolah"
-                        label="NPSN sekolah asal"
-                        wajib
-                        maks={20}
-                        nilai={isi.npsn_sekolah}
-                        ubah={ubah("npsn_sekolah")}
-                        galat={galat.npsn_sekolah}
+                      <PilihSekolah
+                        nama={isi.asal_sekolah}
+                        npsn={isi.npsn_sekolah}
+                        ubahNama={ubah("asal_sekolah")}
+                        ubahNpsn={ubah("npsn_sekolah")}
+                        galatNama={galat.asal_sekolah}
+                        galatNpsn={galat.npsn_sekolah}
+                        tidakTerdaftar={sekolahTidakTerdaftar}
+                        ubahTidakTerdaftar={setSekolahTidakTerdaftar}
                       />
                       <Teks
                         nama="tahun_lulus"

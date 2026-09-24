@@ -439,6 +439,28 @@ export const api = {
       token: true,
     }),
 
+  /* ---------- daftar rujukan sekolah asal ---------- */
+  cariSekolah: (cari: string) =>
+    permintaan<import("./tipe").HasilCariSekolah>(
+      `/api/sekolah?cari=${encodeURIComponent(cari)}`,
+    ),
+  sekolahAdmin: (kueri = "") =>
+    permintaan<import("./tipe").HalamanSekolah>(`/api/admin/sekolah${kueri}`, {
+      token: true,
+    }),
+  imporSekolah: (isi: { csv: string; ganti: boolean }) =>
+    permintaan<{
+      pesan: string;
+      masuk: number;
+      semua: number;
+      dilewati: string[];
+    }>("/api/admin/sekolah/impor", { metode: "POST", isi, token: true }),
+  hapusSekolah: (npsn: string) =>
+    permintaan<{ pesan: string }>(`/api/admin/sekolah/${npsn}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
   /* ---------- pesan masuk ---------- */
   pesanMasuk: (kueri = "") =>
     permintaan<import("./tipe").HalamanPesan>(`/api/admin/pesan${kueri}`, {

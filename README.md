@@ -1616,6 +1616,7 @@ Seluruh warnanya lulus rasio kontras 4,5:1 terhadap tulisan putih.
 | Dokumen pendaftar | Kartu Keluarga, akta, dan ijazah hanya dapat diunduh dengan token petugas, dan tidak disimpan di cache bersama |
 | Cek status | Nomor registrasi saja tidak cukup; tanggal lahir menjadi pasangan kunci agar data orang lain tidak terbuka dengan menebak nomor |
 | Spam | Kolom perangkap tersembunyi pada formulir pendaftaran dan kontak |
+| Sekolah asal | Dicocokkan ke daftar rujukan yang diimpor panitia; yang tidak cocok ditolak, kecuali pendaftar menyatakannya dan panitia memeriksa manual |
 | CORS | Asal yang diizinkan disebutkan satu per satu, bukan `*`, karena permintaannya membawa token |
 | Kepala keamanan HTTP | CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, dan HSTS saat produksi. Dipasang pada halaman Next maupun jawaban API, dengan isi yang berbeda sesuai apa yang dilayani masing-masing |
 | Cadangan | Basis data dicadangkan harian (disimpan 14 hari) dan dokumen pendaftar pekanan (4 pekan) lewat systemd timer. Hasilnya diperiksa, bukan dianggap berhasil begitu `pg_dump` selesai |
@@ -1681,6 +1682,76 @@ sebelas percobaan tanggal lahir yang salah untuk satu nomor, yang ke-11
 dijawab 429 dengan `Retry-After: 3600`; nomor lain tidak terpengaruh; dan
 kepala karangan yang ditambahi alamat sebenarnya oleh proksi tetap terhitung
 satu pengunjung.
+
+### S. Sekolah asal harus ada, bukan sekolah khayalan
+
+Nama SMP asal dulu diketik bebas. Yang diperiksa hanya kewajaran tulisannya
+(lihat `teksWajar` pada `validasi.go`): huruf yang berulang tiga kali, tanpa
+huruf hidup, dan sejenisnya. Itu menangkap "aaaa" dan "asdasd", tetapi TIDAK
+menangkap "SMP Negeri 99 Antartika", yang tulisannya wajar tetapi sekolahnya
+tidak ada.
+
+**Yang perlu diluruskan lebih dulu, sebab menentukan bentuk seluruh
+rancangannya: tidak ada API resmi yang dapat dipanggil untuk memastikan sebuah
+sekolah benar-benar ada.** Laman Referensi Kemendikbud memuat seluruh NPSN
+tetapi tidak menyediakan API yang boleh dipakai program lain; Dapodik hanya
+terbuka bagi sekolah lewat akunnya sendiri; dan API pihak ketiga yang tidak
+resmi tidak dapat dijadikan tumpuan sistem penerimaan sekolah, sebab ia bisa
+mati kapan saja, tepat pada masa PPDB.
+
+Karena itu rujukannya disimpan sendiri di tabel `sekolah_referensi`, diisi
+sekolah dari data resmi yang mereka unduh untuk wilayahnya, lewat menu
+**Sekolah Asal** di panel.
+
+**Selama daftar itu kosong, pemeriksaannya tidak berjalan sama sekali** dan
+formulirnya bekerja seperti sebelumnya. Itu disengaja: memaksa pencocokan ke
+daftar yang belum diisi berarti menolak seluruh pendaftar.
+
+Pada formulir, kolom nama sekolah mencari sambil diketik. Memilih dari daftar
+mengisi nama DAN NPSN sekaligus dari satu baris data yang sama, sehingga
+keduanya tidak mungkin saling tidak cocok; mengetik keduanya sendiri hampir
+selalu menghasilkan salah satu yang salah.
+
+Lima keadaan saat formulir dikirim, dan masing-masing menghasilkan pesan yang
+menyebut apa yang harus dibetulkan:
+
+| Keadaan | Hasil |
+|---|---|
+| Daftar rujukan kosong | Diterima, tidak ada yang diperiksa |
+| NPSN ada, namanya cocok | Diterima, ditandai cocok |
+| NPSN ada, namanya lain | Ditolak, pesannya MENYEBUTKAN nama yang terdaftar untuk NPSN itu |
+| Nama ada, NPSN-nya tidak | Ditolak pada kolom NPSN, pesannya menyebutkan NPSN yang benar |
+| Dua-duanya tidak ada | Ditolak, kecuali pendaftar menyatakan sekolahnya tidak terdaftar |
+
+Pernyataan pada keadaan terakhir itu perlu, dan bukan kelonggaran yang asal:
+daftar rujukan tidak akan pernah lengkap. Ada sekolah baru, ada pendaftar dari
+luar wilayah, dan ada yang dari pendidikan kesetaraan. Yang menyatakan begitu
+tetap diterima, tetapi ditandai `asal_sekolah_terdaftar = false`, dan
+penandanya tampil pada rincian pendaftar sebagai "Tidak, periksa manual dari
+ijazah". Jadi yang memutuskan tetap panitia, dengan ijazah yang sudah diunggah
+di tangan.
+
+Nama yang sama sering ditulis berbeda-beda, dan itu ikut diurus:
+"SMP Negeri 1 Legok", "SMPN 1 Legok", "SMP N 1 Legok", dan "Sekolah Menengah
+Pertama Negeri 1 Legok" dianggap satu sekolah, sedangkan "SMP Negeri 1 Legok"
+dan "SMP Negeri 2 Legok" tetap berbeda. Sepuluh uji satuan mengunci perilaku
+itu.
+
+Impornya menerima TEMPELAN TEKS, bukan unggahan berkas, dan itu pilihan yang
+sadar: panitia menyalin dari Excel atau dari laman Referensi Kemendikbud, dan
+menempel jauh lebih mudah daripada menyimpan berkas lalu mengunggahnya.
+Pemisahnya dikenali sendiri (titik koma, tab, atau koma), baris kepala tabel
+dilewati, dan baris yang salah tidak menghentikan impor: yang salah
+dilaporkan beserta nomor barisnya, sebab satu baris rusak di tengah berkas
+tidak boleh membuang sembilan ratus baris yang benar.
+
+Diuji dari ujung ke ujung pada basis data sekali pakai: kelima keadaan di atas
+lewat pengiriman formulir yang sungguhan beserta berkas unggahannya; impor
+dengan dua baris rusak yang dilaporkan beserta nomornya; dan pencarian yang
+diam selama kata kuncinya kurang dari tiga huruf. Antarmukanya diuji lewat
+peramban, sebelas pemeriksaan: saran yang muncul, pengisian nama beserta NPSN
+sekaligus, centang pernyataan yang hanya ditawarkan bila memang perlu, dan
+pemilihan lewat panah bawah beserta Enter. Panelnya tujuh pemeriksaan.
 
 ### Diagram lingkaran: tepi yang terpotong, dan nilai saat disorot
 
@@ -1788,7 +1859,7 @@ terpasang beserta petaknya, diperiksa lewat tangkapan layar.
 
 ---
 
-## Basis Data (21 tabel)
+## Basis Data (22 tabel)
 
 | Tabel | Fungsi |
 |---|---|

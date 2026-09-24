@@ -319,6 +319,16 @@ export default function HalamanDetailPendaftar() {
             judul="Sekolah Asal"
             butir={[
               { k: "Nama sekolah", v: p.asal_sekolah },
+              {
+                k: "Cocok daftar sekolah",
+                // Penanda ini yang memberi tahu panitia mana yang perlu
+                // dicocokkan manual ke ijazah. false bisa berarti sekolahnya
+                // memang tidak ada di daftar, atau daftarnya masih kosong
+                // ketika pendaftar ini mengirim formulirnya.
+                v: p.asal_sekolah_terdaftar
+                  ? "Ya, cocok dengan daftar rujukan"
+                  : "Tidak, periksa manual dari ijazah",
+              },
               { k: "NPSN", v: p.npsn_sekolah },
               { k: "Alamat sekolah", v: p.alamat_sekolah },
               { k: "Tahun lulus", v: p.tahun_lulus },
