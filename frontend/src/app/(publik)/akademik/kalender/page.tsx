@@ -1,10 +1,9 @@
 import { api } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
-import { tanggalPanjang } from "@/lib/format";
-import { KepalaHalaman, Lencana, type JenisLencana } from "@/komponen/Bagian";
+import { KepalaHalaman } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
-import { TanpaData } from "@/komponen/Memuat";
 import { JejakMenu } from "@/komponen/JejakMenu";
+import KalenderAkademik from "@/komponen/KalenderAkademik";
 import type { Agenda } from "@/lib/tipe";
 import type { Metadata } from "next";
 
@@ -12,27 +11,6 @@ export const metadata: Metadata = {
   title: "Kalender Akademik",
   description: "Tanggal kegiatan, ujian, hari libur, dan jadwal PPDB sekolah.",
 };
-
-/** Warna lencana per kategori, supaya kalender terbaca dalam sekali pandang. */
-const WARNA: Record<string, JenisLencana> = {
-  Ujian: "emas",
-  Libur: "merah",
-  PPDB: "biru",
-  Rapat: "abu",
-  Kegiatan: "hijau",
-};
-
-/** "2026-05-01" + "2026-05-06" -> satu baris tanggal yang enak dibaca. */
-function rentang(mulai: string, selesai: string): string {
-  if (!selesai || selesai === mulai) return tanggalPanjang(mulai);
-  const a = new Date(mulai);
-  const b = new Date(selesai);
-  // Bulan dan tahun yang sama tidak perlu diulang dua kali.
-  if (a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()) {
-    return `${a.getDate()} – ${tanggalPanjang(selesai)}`;
-  }
-  return `${tanggalPanjang(mulai)} – ${tanggalPanjang(selesai)}`;
-}
 
 export default async function HalamanKalender() {
   const [hasil, { profil }] = await Promise.all([
@@ -42,39 +20,6 @@ export default async function HalamanKalender() {
     })),
     muatProfil(),
   ]);
-
-  const hariIni = new Date();
-  hariIni.setHours(0, 0, 0, 0);
-
-  // Kegiatan yang sudah lewat tetap ditampilkan, tetapi dipisah ke bawah:
-  // orang tua kadang perlu memastikan tanggal yang sudah berjalan.
-  const akhir = (a: Agenda) => new Date(a.selesai || a.mulai);
-  const mendatang = hasil.data.filter((a) => akhir(a) >= hariIni);
-  const lewat = hasil.data.filter((a) => akhir(a) < hariIni).reverse();
-
-  const Baris = ({ a, pudar }: { a: Agenda; pudar?: boolean }) => (
-    <li
-      className={
-        "grid gap-2 px-6 py-4 sm:grid-cols-[13rem_1fr] sm:gap-5 " +
-        (pudar ? "opacity-65" : "")
-      }
-    >
-      <p className="text-sm font-semibold text-biru-tua tabular-nums">
-        {rentang(a.mulai, a.selesai)}
-      </p>
-      <div className="min-w-0">
-        <p className="flex flex-wrap items-center gap-2 text-[15px] font-semibold text-teks">
-          {a.judul}
-          <Lencana jenis={WARNA[a.kategori] ?? "abu"}>{a.kategori}</Lencana>
-        </p>
-        {a.keterangan && (
-          <p className="mt-1 text-sm leading-relaxed whitespace-pre-line text-samar">
-            {a.keterangan}
-          </p>
-        )}
-      </div>
-    </li>
-  );
 
   return (
     <>
@@ -87,51 +32,60 @@ export default async function HalamanKalender() {
       <div className="wadah py-14">
         <JejakMenu induk="/akademik" jalur="/akademik/kalender" />
 
-        {hasil.data.length === 0 ? (
-          <div className="mt-8">
-            <TanpaData
-              judul="Kalender akademik belum diisi"
-              keterangan="Tanggal kegiatan diisi lewat menu Kalender Akademik di panel admin. Tanggalnya hanya boleh berasal dari keputusan sekolah."
-            />
-          </div>
-        ) : (
-          <div className="mt-8 max-w-4xl space-y-10">
-            <MunculNaik>
-              <section className="kartu overflow-hidden">
-                <h2 className="border-b border-garis bg-biru-muda px-6 py-4 text-base">
-                  Kegiatan mendatang
-                </h2>
-                {mendatang.length === 0 ? (
-                  <p className="px-6 py-5 text-sm leading-relaxed text-samar">
-                    Tidak ada kegiatan mendatang yang tercatat. Kegiatan yang
-                    sudah berlangsung dapat dilihat di bawah.
-                  </p>
-                ) : (
-                  <ul className="divide-y divide-garis">
-                    {mendatang.map((a) => (
-                      <Baris key={a.id} a={a} />
-                    ))}
-                  </ul>
-                )}
-              </section>
-            </MunculNaik>
+        {/* Kartu pembuka, susunannya sama dengan kartu Visi & Misi dan kartu
+            Tenaga Pendidik: naskah di kolom kiri, ilustrasi di kolom kanan
+            setinggi kartunya, menempel tepi lewat margin negatif per sisi.
 
-            {lewat.length > 0 && (
-              <MunculNaik>
-                <section className="kartu overflow-hidden">
-                  <h2 className="border-b border-garis bg-slate-50 px-6 py-4 text-base text-samar">
-                    Sudah berlangsung
-                  </h2>
-                  <ul className="divide-y divide-garis">
-                    {lewat.map((a) => (
-                      <Baris key={a.id} a={a} pudar />
-                    ))}
-                  </ul>
-                </section>
-              </MunculNaik>
-            )}
-          </div>
-        )}
+            Margin ditulis per sisi di kedua ambang, bukan memakai ringkasan
+            `-my`/`-mx` lalu dibatalkan sebagian: cara itu sudah terbukti
+            membuat gambarnya menggantung 29 piksel di atas dasar kartu pada
+            halaman Tenaga Pendidik, sebab Tailwind menyusun ulang urutan
+            keluarannya sendiri sehingga kelas yang saling menimpa tidak bisa
+            diandalkan.
+
+            TIDAK ADA PEMILIH TAHUN AJARAN DI SINI. Pada rancangan acuan ia
+            menempel di kepala halaman; di sini ia turun ke bilah penyaring
+            di bawah kartu ini, sehingga kepala halamannya hanya berisi judul
+            beserta keterangannya. */}
+        <MunculNaik>
+          <section
+            aria-labelledby="judul-pembuka-kalender"
+            className="mt-8 flex flex-col gap-5 overflow-hidden rounded-kartu border border-garis bg-gradient-to-br from-biru-muda via-biru-muda to-white p-6 shadow-lembut sm:flex-row sm:items-stretch sm:gap-6 sm:p-7"
+          >
+            <div className="min-w-0 flex-1 sm:self-center">
+              <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
+                Akademik
+              </p>
+              <h2
+                id="judul-pembuka-kalender"
+                className="mt-2 text-2xl leading-tight font-bold text-biru-tua md:text-3xl"
+              >
+                Kalender Akademik
+              </h2>
+              <span
+                aria-hidden
+                className="mt-3 block h-1 w-16 rounded-full bg-emas"
+              />
+              <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-teks">
+                Rangkaian kegiatan pembelajaran, penilaian, dan agenda penting
+                sekolah yang disusun berdasarkan tahun ajaran.
+              </p>
+            </div>
+
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/ilustrasi/kalender.png"
+              alt="Ilustrasi kalender meja beserta tumpukan buku dan tanaman"
+              width={1671}
+              height={645}
+              className="pointer-events-none -mr-6 -mb-6 -ml-6 w-[calc(100%+3rem)] self-end object-contain object-bottom sm:-mt-7 sm:-mr-7 sm:-mb-7 sm:ml-0 sm:w-72 sm:self-stretch md:w-96"
+            />
+          </section>
+        </MunculNaik>
+
+        <div className="mt-6">
+          <KalenderAkademik agenda={hasil.data} />
+        </div>
       </div>
     </>
   );
