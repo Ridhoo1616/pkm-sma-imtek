@@ -84,7 +84,7 @@ export function TeksBerjalan({
       aria-label="Informasi terbaru"
       className="berjalan border-b border-white/10 bg-biru-tua text-sm text-white/90"
     >
-      <div className="berjalan-bingkai wadah overflow-hidden py-2.5">
+      <div className="berjalan-bingkai w-full px-4 overflow-hidden py-2.5">
         <div className="berjalan-isi flex w-max">
           {daftar(false)}
           {daftar(true)}

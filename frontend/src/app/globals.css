@@ -57,6 +57,22 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    overflow-y: overlay;
+  }
+
+  /* Kustomisasi Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-biru);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-biru-tua);
   }
 
   body {
