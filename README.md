@@ -901,7 +901,58 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
    tautan yang dibagikan ke WhatsApp dan media sosial tampil dengan judul dan
    keterangan yang benar.
 
-### J. Bilah informasi berjalan
+### J. Berita dan pengumuman sebagai karusel foto
+
+Bagian Berita & Pengumuman di beranda berupa karusel berlatar gelap: satu foto
+besar di tengah, tetangganya mengintip di kiri dan kanan, tombol panah pada
+kedua tepi foto tengahnya, judul beserta tanggalnya di bawah, lalu titik
+penanda. Sebelumnya tiga kartu berjajar.
+
+Ia satu-satunya bagian beranda berlatar gelap selain sorotan atas dan ajakan
+mendaftar di bawah, dan itu disengaja: bagian ini memecah deretan bagian
+berlatar terang di tengah halaman, sekaligus membuat foto beritanya menonjol.
+Latarnya foto yang sedang di tengah, diburamkan dan digelapkan, sehingga warna
+seluruh bagian ini mengikuti fotonya.
+
+**Karuselnya TIDAK berjalan sendiri.** Karusel yang berpindah otomatis
+memindahkan bacaan orang yang sedang membacanya, dan pengunjung yang memakai
+pembaca layar maupun yang lambat membaca paling dirugikan. Perpindahannya
+karena ditekan: tombol panah, titik penanda, tombol panah papan ketik, atau
+geseran jari sejauh lebih dari 48 piksel — cukup jauh untuk membedakan geseran
+dari ketukan yang jarinya sedikit bergerak.
+
+**Tetangga yang mengintip diberi aria-hidden dan tidak dapat ditekan.** Ia
+hiasan yang menerangkan bahwa daftarnya bisa digeser; isi yang sungguhan —
+judul, tanggal, dan tautannya — hanya satu, milik foto yang sedang di tengah.
+Dengan begitu pembaca layar tidak membacakan tiga berita sekaligus dan papan
+ketik tidak berhenti di tautan yang tidak terlihat. Keterangannya diberi
+aria-live supaya berita yang baru muncul ikut disuarakan. Di bawah ambang lg
+tetangganya tidak ditampilkan sama sekali: selebar seperlima layar ponsel ia
+tidak terbaca sebagai foto, hanya sebagai pita berwarna yang menyempitkan yang
+utama.
+
+Yang diambil enam berita, bukan tiga seperti sebelumnya: tiga titik penanda
+terbaca seperti daftar yang belum selesai dimuat. Berita tanpa gambar tetap
+masuk karusel, dengan bidang biru bertuliskan kategorinya — bukan kotak
+kosong, dan bukan foto karangan.
+
+Diuji lewat protokol DevTools, 10 pemeriksaan lulus: jumlah titiknya,
+perpindahan maju dan mundur, lompatan dari butir pertama ke butir terakhir,
+penekanan titik penanda, pengganti bagi berita tanpa gambar, dan di lebar
+ponsel tetangganya benar-benar tidak ditampilkan tanpa menimbulkan gulir
+mendatar. Dua kegagalan yang sempat muncul salah pengujinya, bukan kodenya:
+keenam titik ditekan di dalam satu panggilan sehingga React belum merender
+ulang saat dibaca, dan pemeriksaan tetangga ikut menghitung lapisan latar yang
+juga ber-aria-hidden tetapi memang harus terlihat.
+
+**Catatan tentang tampilannya di pemasangan sekolah sekarang:** ketujuh gambar
+berita yang ada berukuran 409 bita dan isinya identik — satu JPEG mungil
+berwarna rata, sisa pengujian. Ia termuat, tetapi direntangkan sebesar kartu
+hasilnya bidang rata, sehingga kartunya tampak kosong. Itu keadaan datanya,
+bukan tata letaknya; bagian ini akan tampil sebagaimana mestinya begitu
+sekolah mengunggah foto yang sungguhan.
+
+### K. Bilah informasi berjalan
 
 Di paling atas setiap halaman publik ada bilah berisi **tiga kabar yang
 berjalan**, dan ketiganya diambil dari basis data — tidak satu pun ditulis di
@@ -939,7 +990,7 @@ bukan memuji sekolahnya: kalimat tentang mutu sekolah hanya boleh datang dari
 sekolah sendiri, dan tempatnya sudah disediakan pada semboyan dan bagian
 keunggulan.
 
-### K. Sambutan kepala sekolah di beranda
+### L. Sambutan kepala sekolah di beranda
 
 Beranda memuat sambutan kepala sekolah tepat sesudah bilah keadaan PPDB,
 mengikuti rancangan yang dikirim user: dua bidang bersebelahan. Panel biru
@@ -990,7 +1041,7 @@ berbeda dari kerangka di halaman Profil:
 Begitu nama, foto, atau naskahnya diisi lewat menu Pengaturan, bagian ini
 berganti sendiri ke bentuk terisinya. Tidak ada kode yang perlu diubah.
 
-### L. Peta lokasi dan pengukur jarak
+### M. Peta lokasi dan pengukur jarak
 
 Beranda memuat peta lokasi sekolah beserta tombol yang memungkinkan
 pengunjung mengukur jarak dan waktu tempuh dari rumahnya, untuk tiga moda:
@@ -1023,7 +1074,7 @@ Petanya sendiri memakai `peta_embed` yang sudah ada. Bila kosong, yang tampil
 kerangka berukuran sama, dan **tombol penunjuk arahnya tetap bekerja** —
 keduanya tidak saling bergantung.
 
-### M. Alur masalah dan jawabannya di beranda
+### N. Alur masalah dan jawabannya di beranda
 
 Tepat sebelum ajakan mendaftar, beranda memuat tiga baris berpasangan: satu
 keadaan yang biasa terjadi pada pendaftaran berkas kertas, dan di sebelahnya
@@ -1052,7 +1103,7 @@ Sisanya bergantung bahan yang belum dimiliki sekolah: foto orang hasil studio,
 tangkapan antarmuka produk, dan baris logo "dipercaya oleh 123 merek" yang
 tidak boleh dikarang.
 
-### N. Beranda mendahulukan profil sekolah
+### O. Beranda mendahulukan profil sekolah
 
 Beranda semula dibuka dengan kartu putih besar berisi kuota PPDB, jumlah
 pendaftar, sisa kuota, dan tanggal penutupan. Angka itu menjawab pertanyaan
@@ -1092,7 +1143,7 @@ kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
 
-### O. Tautan WhatsApp beserta pesan bawaannya
+### P. Tautan WhatsApp beserta pesan bawaannya
 
 Tautan `wa.me` ada di lima tempat: bilah atas, footer, halaman Kontak, tombol
 bantuan melayang, dan panel pesan panitia. Empat di antaranya dulu mengarah ke
@@ -1114,7 +1165,7 @@ menuju entah ke mana lebih buruk daripada tombol yang tidak ada. Nomor telepon
 sekolah tidak dipakai sebagai gantinya, karena nomornya nomor kabel yang tidak
 punya WhatsApp.
 
-### P. Lencana status
+### Q. Lencana status
 
 Seluruh status dalam sistem ini, baik status pendaftar, keadaan PPDB, peran
 petugas, maupun keadaan notifikasi, memakai satu komponen yang sama:

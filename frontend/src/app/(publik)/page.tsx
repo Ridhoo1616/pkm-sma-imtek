@@ -8,16 +8,12 @@ import {
   belumTerisi,
   kePoinTerisi,
 } from "@/lib/format";
-import {
-  JudulBagian,
-  GambarKosong,
-  Lencana,
-  kelasKartuAkhir,
-} from "@/komponen/Bagian";
+import { JudulBagian, Lencana, kelasKartuAkhir } from "@/komponen/Bagian";
 import { MunculNaik, MunculLangsung, KartuGerak } from "@/komponen/Gerak";
 import { MasalahJawaban } from "@/komponen/MasalahJawaban";
 import { SambutanRingkas } from "@/komponen/SambutanRingkas";
 import { PetaJarak } from "@/komponen/PetaJarak";
+import KaruselBerita from "@/komponen/KaruselBerita";
 import type { Berita, Fasilitas, Jurusan } from "@/lib/tipe";
 import { IkonFasilitas, IkonCentang, IkonLokasi } from "@/komponen/Ikon";
 
@@ -46,9 +42,20 @@ export default async function Beranda() {
 
   // Kegagalan satu bagian tidak boleh mengosongkan seluruh beranda.
   const [jurusan, fasilitas, berita, prestasi] = await Promise.all([
-    api.jurusan().then((h) => h.data).catch((): Jurusan[] => []),
-    api.fasilitas().then((h) => h.data).catch((): Fasilitas[] => []),
-    api.berita("?per_halaman=3").then((h) => h.data).catch((): Berita[] => []),
+    api
+      .jurusan()
+      .then((h) => h.data)
+      .catch((): Jurusan[] => []),
+    api
+      .fasilitas()
+      .then((h) => h.data)
+      .catch((): Fasilitas[] => []),
+    // Enam, bukan tiga: bagian ini kini karusel, dan tiga titik penanda
+    // terbaca seperti daftar yang belum selesai dimuat.
+    api
+      .berita("?per_halaman=6")
+      .then((h) => h.data)
+      .catch((): Berita[] => []),
     api
       .berita("?kategori=Prestasi&per_halaman=3")
       .then((h) => h.data)
@@ -119,9 +126,8 @@ export default async function Beranda() {
               <p className="mt-4 max-w-xl leading-relaxed text-white/75">
                 Di halaman ini tersedia profil sekolah, peminatan yang dibuka,
                 sarana belajar, kegiatan siswa, beserta pendaftaran peserta
-                didik baru yang seluruhnya dikerjakan online — mengisi
-                formulir, mengunggah dokumen, sampai memantau hasil
-                verifikasinya.
+                didik baru yang seluruhnya dikerjakan online — mengisi formulir,
+                mengunggah dokumen, sampai memantau hasil verifikasinya.
               </p>
 
               {/* Keterangan tempat, disusun dari data alamat yang sudah ada.
@@ -179,7 +185,10 @@ export default async function Beranda() {
                     <p className="mx-auto mt-1.5 max-w-xs text-xs leading-relaxed text-biru/70">
                       Foto mendatar, perbandingan sisi 4:3, paling tidak 1600
                       piksel lebarnya. Diunggah sebagai
-                      <span className="font-semibold"> Foto halaman depan </span>
+                      <span className="font-semibold">
+                        {" "}
+                        Foto halaman depan{" "}
+                      </span>
                       lewat menu Pengaturan di panel admin.
                     </p>
                   </div>
@@ -480,64 +489,18 @@ export default async function Beranda() {
         </section>
       )}
 
-      {/* ---------------- Berita ---------------- */}
-      {berita.length > 0 && (
-        <section className="wadah py-16 md:py-20">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <JudulBagian
-              atas="Kabar Sekolah"
-              judul="Berita & Pengumuman"
-              keterangan="Kegiatan, prestasi, dan pengumuman terbaru."
-            />
-            <Link
-              href="/berita"
-              className="mb-8 shrink-0 rounded-lg border border-garis px-4 py-2 text-sm font-semibold text-biru transition hover:bg-biru-muda"
-            >
-              Semua berita
-            </Link>
-          </div>
+      {/* ---------------- Berita ----------------
+          Karusel foto berlatar gelap, mengikuti rancangan yang diminta.
+          Satu-satunya bagian beranda yang berlatar gelap selain sorotan
+          atas dan ajakan mendaftar di bawah, dan itu disengaja: ia memecah
+          deretan bagian berlatar terang di tengah halaman, sekaligus
+          membuat foto beritanya menonjol.
 
-          <div className="grid auto-rows-fr gap-6 md:grid-cols-3">
-            {berita.map((b, i) => (
-              <MunculNaik key={b.id} jeda={i * 0.08}>
-                <KartuGerak className="kartu h-full overflow-hidden">
-                  <Link href={`/berita/${b.slug}`} className="block h-full">
-                    {b.gambar ? (
-                      // Gambar berasal dari server API, bukan dari daftar
-                      // domain yang dikenal next/image, jadi memakai <img>.
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={urlUnggahan("berita", b.gambar)}
-                        alt={b.judul}
-                        className="h-48 w-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <GambarKosong label={b.kategori} />
-                    )}
-                    <div className="p-5">
-                      <div className="mb-2.5 flex items-center gap-2">
-                        <Lencana>{b.kategori}</Lencana>
-                        <span className="text-xs text-samar">
-                          {tanggalPanjang(b.dibuat)}
-                        </span>
-                      </div>
-                      <h3 className="text-base leading-snug text-balance">
-                        {b.judul}
-                      </h3>
-                      {b.ringkasan && (
-                        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-samar">
-                          {b.ringkasan}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                </KartuGerak>
-              </MunculNaik>
-            ))}
-          </div>
-        </section>
-      )}
+          Komponennya klien karena perpindahan karuselnya bekerja tanpa
+          memuat ulang halaman. Yang dikirim server tetap memuat berita
+          pertama beserta judul dan tautannya, jadi halaman ini tetap
+          terbaca — dan tetap terindeks — walau JavaScript gagal dimuat. */}
+      {berita.length > 0 && <KaruselBerita daftar={berita} />}
 
       {/* ---------------- Masalah dan jawabannya ----------------
           Ditaruh tepat sebelum ajakan mendaftar: yang dibaca lebih dulu
