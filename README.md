@@ -1725,12 +1725,28 @@ kelalaian:
   (alamatnya POST, atau memerlukan token petugas) lalu dibuka sebagai blob.
   Dokumen blob mewarisi CSP halaman yang membuatnya, jadi tanpa izin itu tab
   PDF-nya tampil kosong.
+- `frame-src` juga memuat `https://maps.google.com` dan
+  `https://www.google.com`, sebab peta lokasi sekolah disematkan sebagai
+  iframe Google Maps dari pengaturan `peta_embed`. Yang diizinkan HANYA kedua
+  tuan rumah itu, dan itu sekaligus membatasi akibatnya bila kode sematan yang
+  ditempel panitia ternyata menunjuk ke tempat lain. Kode sematan dari
+  penyedia peta yang lain akan diblokir sampai tuan rumahnya ditambahkan di
+  sini.
 
-Diuji lewat peramban sungguhan dengan pendengar `securitypolicyviolation`
-terpasang: nol pelanggaran pada 16 halaman publik, nol pada 21 halaman panel,
-nol pada alur cek status termasuk unduh bukti PDF, dan nol saat dokumen PDF
-pendaftar dibuka dari panel sebagai blob. Tidak ada satu pun gambar yang gagal
-dimuat.
+**Kepala ini sempat mematikan peta lokasi di beranda**, dan uji CSP yang
+pertama tidak menangkapnya. Pendengar `securitypolicyviolation` waktu itu
+dipasang dengan `document.addEventListener` SESUDAH halaman dimuat, lalu
+halamannya dimuat ulang; berpindah halaman membuang seluruh pendengar,
+sehingga pelanggaran yang terjadi saat memuat tidak pernah tertangkap dan
+ujinya melaporkan nol pelanggaran padahal kotak petanya kosong. Uji yang
+sekarang memasang pendengarnya lewat `Page.addScriptToEvaluateOnNewDocument`,
+yang dijalankan peramban sebelum skrip halaman pada setiap dokumen baru.
+
+Dengan uji yang benar itu: nol pelanggaran pada 17 halaman publik, nol pada 22
+halaman panel, nol pada alur cek status termasuk unduh bukti PDF, dan nol saat
+dokumen PDF pendaftar dibuka dari panel sebagai blob. Tidak ada satu pun
+gambar yang gagal dimuat, dan peta di beranda maupun di halaman Kontak
+terpasang beserta petaknya, diperiksa lewat tangkapan layar.
 
 ---
 

@@ -47,7 +47,12 @@ function csp(): string {
     "font-src 'self'",
     `connect-src 'self' ${ALAMAT_API}`,
     "object-src 'self' blob:",
-    "frame-src 'self' blob:",
+    // Peta lokasi sekolah disematkan sebagai iframe Google Maps, dari
+    // pengaturan `peta_embed`. Tanpa kedua tuan rumah ini, kotak petanya
+    // tampil kosong di beranda. Yang diizinkan HANYA Google Maps, bukan
+    // sembarang tuan rumah, dan itu sekaligus membatasi akibatnya bila kode
+    // sematan yang ditempel panitia ternyata menunjuk ke tempat lain.
+    "frame-src 'self' blob: https://maps.google.com https://www.google.com",
     "media-src 'self' blob:",
     "base-uri 'self'",
     "form-action 'self'",
