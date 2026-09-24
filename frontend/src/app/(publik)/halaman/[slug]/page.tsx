@@ -52,6 +52,10 @@ const ILUSTRASI: Record<string, { berkas: string; alt: string }> = {
     berkas: "/ilustrasi/halaman/osis.jpg",
     alt: "Ilustrasi empat siswa berseragam putih berbincang di halaman sekolah",
   },
+  "pendidikan-karakter": {
+    berkas: "/ilustrasi/halaman/pendidikan-karakter.jpg",
+    alt: "Ilustrasi empat siswa berseragam putih membawa buku di halaman sekolah",
+  },
 };
 
 async function ambil(slug: string): Promise<Halaman | null> {

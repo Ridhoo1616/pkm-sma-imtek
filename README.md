@@ -437,6 +437,13 @@ perlu dijaga, JPEG jauh lebih kecil untuk gambar bergradasi seperti ini — 1,6
 MB menjadi 98 KB pada 1400×517. Pengubahannya lewat kanvas Chrome, sebab di
 mesin ini tidak ada Pillow maupun ImageMagick.
 
+Sampai sekarang yang punya ilustrasi dua halaman: OSIS dan Pendidikan
+Karakter. Keduanya berasal dari berkas `.svg` kiriman user yang isinya PNG
+base64 berlatar penuh, dan keduanya diolah dengan cara yang sama — 1,6 MB
+menjadi 98 KB pada 1400×517 untuk OSIS, dan 1,9 MB menjadi 126 KB pada
+1400×473 untuk Pendidikan Karakter. Halaman Kurikulum belum punya, dan kartu
+pembukanya tampil tanpa gambar.
+
 Daftar ilustrasinya ditulis sebagai peta slug, **tidak ditebak dari nama
 slug-nya**. Menebak berarti halaman baru yang ditambahkan sekolah akan
 menunjuk gambar yang tidak ada dan berakhir sebagai kotak rusak; halaman yang
