@@ -164,12 +164,25 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
                   // Sidebar layar kecil ditutup saat menunya dipilih.
                   onClick={() => setSidebarTerbuka(false)}
                   className={
-                    "block rounded-lg px-4 py-2.5 text-sm font-semibold transition " +
+                    "relative block rounded-lg px-4 py-2.5 text-sm font-semibold transition " +
                     (aktif(m.jalur)
                       ? "bg-biru text-white"
                       : "text-white/75 hover:bg-white/10 hover:text-white")
                   }
                 >
+                  {/* Penanda emas di tepi kiri menu yang terpilih.
+                      Bedanya latar menu terpilih dengan latar sidebar hanya
+                      selisih kepekatan, dan selisih kepekatan pada warna yang
+                      sudah gelap memang tipis. Penanda ini membuat menu yang
+                      sedang dibuka terbaca dari bentuknya, bukan dari
+                      warnanya saja, sehingga tetap jelas bagi yang sukar
+                      membedakan warna maupun pada layar yang murah. */}
+                  {aktif(m.jalur) && (
+                    <span
+                      aria-hidden
+                      className="absolute top-1.5 bottom-1.5 left-0 w-1 rounded-r-full bg-emas"
+                    />
+                  )}
                   {m.label}
                 </Link>
               </li>

@@ -6,7 +6,18 @@
    ============================================================ */
 @theme {
   --color-biru: #0f2a4a;
-  --color-biru-tua: #0f2a4a;
+  /* biru-tua WAJIB lebih gelap daripada biru, dan bukan kembarannya.
+     Keduanya sempat bernilai sama, dan akibatnya tidak kelihatan sebagai
+     salah warna melainkan sebagai fitur yang hilang: latar menu terpilih di
+     panel memakai `bg-biru` sedangkan sidebar-nya `bg-biru-tua`, jadi menu
+     yang sedang dibuka melebur ke latarnya dan tidak terlihat sama sekali.
+     Lima belas tombol yang memakai `hover:bg-biru-tua` juga berhenti
+     menanggapi kursor.
+
+     Nilai di bawah rona dan kepekatan yang sama dengan `--color-biru`, hanya
+     lebih gelap: hsl(212, 66%, 17,5%) menjadi hsl(212, 66%, 11,5%). Jadi
+     warna utamanya tetap milik Adam, yang dikembalikan hanya selisihnya. */
+  --color-biru-tua: #0a1c31;
   --color-biru-muda: #e8f1fa;
   --color-emas: #f59e0b;
   --color-teks: #1f2937;

@@ -1683,6 +1683,34 @@ dijawab 429 dengan `Retry-After: 3600`; nomor lain tidak terpengaruh; dan
 kepala karangan yang ditambahi alamat sebenarnya oleh proksi tetap terhitung
 satu pengunjung.
 
+### Menu terpilih di panel tidak terlihat: dua warna yang bernilai sama
+
+`--color-biru` dan `--color-biru-tua` sempat bernilai sama, `#0f2a4a`.
+Akibatnya tidak tampak sebagai salah warna, melainkan sebagai fitur yang
+hilang: latar menu terpilih di panel memakai `bg-biru` sedangkan sidebar-nya
+`bg-biru-tua`, jadi menu yang sedang dibuka melebur ke latarnya dan tidak
+terlihat sama sekali. Lima belas tombol yang memakai `hover:bg-biru-tua` juga
+berhenti menanggapi kursor.
+
+`--color-biru-tua` sekarang `#0a1c31`: rona dan kepekatan yang sama, hanya
+lebih gelap, hsl(212, 66%, 17,5%) menjadi hsl(212, 66%, 11,5%). Warna utamanya
+tetap seperti yang dipilih, yang dikembalikan hanya selisihnya.
+
+Selisih kepekatan pada warna yang sudah gelap memang tipis: terukur 1,19:1,
+atau ΔL* 6,8. Itu terlihat, tetapi tidak boleh menjadi satu-satunya penanda.
+Karena itu menu terpilih juga diberi **penanda emas di tepi kirinya**,
+sehingga terbaca dari bentuknya dan bukan dari warnanya saja: tetap jelas bagi
+yang sukar membedakan warna, dan pada layar murah yang kontrasnya rendah.
+
+Diperiksa ulang lewat peramban: latar menu terpilih benar-benar berbeda dari
+latar sidebar, penanda emasnya ada dan hanya satu di seluruh sidebar, tombol
+biru berubah warna saat disorot kursor, dan tidak ada satu pun tulisan
+berkontras rendah di atas kesebelas bidang berlatar `biru-tua` pada beranda.
+Pengukuran kontrasnya menggambar warna ke kanvas lalu membaca pikselnya, bukan
+mengurai teks warnanya: `getComputedStyle` mengembalikan `oklab(...)` untuk
+kelas seperti `text-white/90`, dan warna beralfa harus ditumpuk dulu di atas
+latarnya.
+
 ### S. Sekolah asal harus ada, bukan sekolah khayalan
 
 Nama SMP asal dulu diketik bebas. Yang diperiksa hanya kewajaran tulisannya
