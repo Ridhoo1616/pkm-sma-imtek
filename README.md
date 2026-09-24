@@ -1188,12 +1188,45 @@ berbeda dari kerangka di halaman Profil:
 Begitu nama, foto, atau naskahnya diisi lewat menu Pengaturan, bagian ini
 berganti sendiri ke bentuk terisinya. Tidak ada kode yang perlu diubah.
 
-**Gedung sekolah di pojok kartunya berupa gambar, bukan lagi jalur SVG.**
-Semula digambar sebagai garis langsung di dalam komponennya. Gambar kiriman
-user berupa bidang bergradasi yang sangat pucat — bukan garis — sehingga tidak
-dapat ditulis sebagai jalur SVG. Berkasnya JPEG: aslinya PNG 1774×887 sebesar
-1 MB tanpa lapisan tembus pandang, dan karena tidak ada yang perlu dijaga
-tembusnya sedangkan isinya bidang bergradasi, JPEG turun ke 28 KB.
+**Gedung sekolah menjadi LATAR SEPENUH PANEL, dengan naskahnya di atasnya.**
+Semula jalur SVG bergaya garis di pojok, lalu sempat menjadi gambar kecil di
+pojok kanan bawah; keduanya terlalu kecil sehingga gedungnya nyaris tidak
+terbaca. `object-right-bottom` menentukan bagian mana yang tersisa saat
+dipotong: gambarnya berbanding 2:1 sedangkan panelnya jauh lebih jangkung,
+jadi `object-cover` pasti memotong, dan gedungnya berada di sisi kanan bawah
+gambar.
+
+Yang menjaga naskah tetap terbaca **peredam di atas gambarnya**, bukan
+kepucatan gambarnya sendiri. Dua bentuk, karena letak naskahnya berbeda: mulai
+ambang `sm` naskahnya di kolom kiri sedangkan gedungnya di kanan, jadi
+peredamnya bergradasi mendatar — hampir pekat di kiri tempat hurufnya,
+menipis ke kanan supaya gedungnya tetap terlihat; di layar sempit naskahnya
+memenuhi seluruh lebar panel sehingga peredamnya rata.
+
+**Keterbacaannya diukur, bukan dikira.** Tiap petak teks dipotret sendiri
+dengan seluruh tulisan di panel disembunyikan lebih dulu, sehingga yang
+terpotret murni latarnya; warna paling gelap pada petak itu diambil, lalu
+nisbah kontrasnya terhadap warna huruf dihitung menurut rumus WCAG. Hasil
+akhirnya judul 8,49:1 dan naskah 11,82:1 di layar lebar, 10,38:1 dan 12,81:1
+di ponsel — jauh di atas ambang 4,5 untuk teks isi.
+
+Pengukuran itu menemukan satu masalah nyata: naskahnya semula `text-samar`
+(#6b7280) dan di atas gambar latar turun ke **3,67:1**, di bawah ambang.
+Bahkan di atas putih bersih abu-abu itu cuma 4,83:1. Karena itu naskah di
+panel ini dinaikkan ke `text-teks`.
+
+Tiga kekeliruan pengukuran ikut dibetulkan sebelum angkanya dipercaya:
+`clip` pada `Page.captureScreenshot` memakai koordinat halaman sedangkan
+`getBoundingClientRect()` memberi koordinat jendela, sehingga tanpa menambah
+geseran gulir yang terpotret petak lain sama sekali; menyaring piksel huruf
+menurut kedekatan warna ikut meloloskan piksel tepi huruf yang dihaluskan dan
+membuat latar terbaca jauh lebih gelap daripada sebenarnya; dan tombol yang
+punya latar penuh warnanya sendiri tidak boleh dinilai dengan cara ini, sebab
+menyembunyikannya untuk mengukur latar justru salah sasaran.
+
+**Berkas gambarnya JPEG, bukan PNG.** Aslinya PNG 1774×887 sebesar 1 MB tanpa
+lapisan tembus pandang, dan karena tidak ada yang perlu dijaga tembusnya
+sedangkan isinya bidang bergradasi, JPEG turun ke 28 KB.
 
 Tepi kiri dan atasnya dipudarkan lewat mask supaya ia menyatu dengan kartunya
 alih-alih terbaca sebagai foto yang ditempelkan. Sengaja tidak diberi opacity

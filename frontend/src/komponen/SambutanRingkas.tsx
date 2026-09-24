@@ -108,30 +108,24 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
 
         {/* ---------- Panel naskah ---------- */}
         <div className="relative overflow-hidden p-6 md:p-9">
-          {/* Gedung sekolah di pojok kanan bawah. Hiasan, jadi tanpa kata
-              sama sekali dan disembunyikan dari pembaca layar.
+          {/* Gedung sekolah sebagai LATAR SEPENUH PANEL, dengan naskahnya
+              di atasnya. Hiasan, jadi tanpa kata sama sekali dan
+              disembunyikan dari pembaca layar.
 
-              Sebelumnya gambar garis yang ditulis langsung sebagai SVG di
-              berkas ini. Diganti gambar kiriman user, yang berupa bidang
-              bergradasi sangat pucat — bukan garis — sehingga tidak dapat
-              ditulis sebagai jalur SVG.
+              Sebelumnya gambar garis yang ditulis sebagai jalur SVG di berkas
+              ini, lalu sempat menjadi gambar kecil di pojok kanan bawah.
+              Keduanya terlalu kecil: gedungnya nyaris tidak terbaca.
 
-              Berkasnya JPEG: aslinya PNG 1774x887 sebesar 1 MB tanpa lapisan
-              tembus pandang, dan karena tidak ada yang perlu dijaga tembusnya
-              sedangkan isinya bidang bergradasi, JPEG turun ke 28 KB.
+              Berkasnya JPEG. Aslinya PNG 1774x887 sebesar 1 MB tanpa lapisan
+              tembus pandang, dan karena isinya bidang bergradasi yang sangat
+              pucat, JPEG turun ke 28 KB.
 
-              Tepi kiri dan atasnya dipudarkan lewat mask supaya ia menyatu
-              dengan kartunya alih-alih terbaca sebagai foto yang ditempelkan.
-              Sengaja TIDAK diberi opacity tambahan: gambarnya sendiri sudah
-              pucat, dan memudarkannya lagi membuat gedungnya nyaris hilang.
-
-              DI LAYAR SEMPIT hiasan pojok ini tidak dipakai. Kartunya di sana
-              hanya selebar layar, naskahnya memenuhi seluruh lebarnya, dan
-              gambar di pojok kanan bawah menimpa paragraf terakhirnya —
-              diukur, memang bertimpa pada lebar 390 piksel. Gantinya sebuah
-              pita di dasar kartu, sesudah naskahnya, sehingga tidak pernah
-              menimpa apa pun. Berkasnya sama, jadi peramban tidak mengunduh
-              dua kali. */}
+              `object-right-bottom` menentukan bagian mana yang tersisa saat
+              dipotong. Gambarnya berbanding 2:1 sedangkan panel ini jauh
+              lebih jangkung, jadi object-cover pasti memotong — dan gedungnya
+              berada di sisi kanan bawah gambar, sehingga di situlah jangkarnya
+              ditaruh. Tanpa itu, yang tersisa justru langit kosong di sisi
+              kirinya. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/ilustrasi/gedung-sambutan.jpg"
@@ -139,9 +133,29 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
             aria-hidden
             width={1000}
             height={500}
-            className="pointer-events-none absolute right-0 -bottom-2 hidden w-64 [mask-image:linear-gradient(to_top_left,#000_38%,transparent_88%)] [-webkit-mask-image:linear-gradient(to_top_left,#000_38%,transparent_88%)] sm:block md:w-80"
+            className="pointer-events-none absolute inset-0 h-full w-full max-w-none object-cover object-right-bottom"
             loading="lazy"
             decoding="async"
+          />
+
+          {/* Peredam di atas gambarnya, di bawah naskahnya. INILAH yang
+              menjaga naskah tetap terbaca; gambarnya sendiri pucat, tetapi
+              pucat saja tidak cukup — huruf abu-abu di atas dedaunan hijau
+              tetap berat dibaca.
+
+              Dua bentuk, karena letak naskahnya berbeda. Mulai ambang sm
+              naskahnya di kolom kiri sedangkan gedungnya di kanan, jadi
+              peredamnya bergradasi mendatar: hampir pekat di kiri tempat
+              hurufnya, menipis ke kanan supaya gedungnya tetap terlihat. Di
+              layar sempit naskahnya memenuhi seluruh lebar panel, jadi tidak
+              ada sisi yang boleh dibiarkan bening; peredamnya rata. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-white/90 sm:hidden"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-white via-white/95 to-white/55 sm:block"
           />
 
           <div className="relative">
@@ -154,8 +168,12 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
             >
               Kepala Sekolah
             </h2>
+            {/* Naskah di panel ini memakai text-teks, bukan text-samar. Di
+                atas gambar latar, abu-abu samar #6b7280 turun ke 3,67:1 — di
+                bawah ambang 4,5 untuk teks isi, dan itu terukur, bukan
+                dikira. Bahkan di atas putih bersih ia cuma 4,83:1. */}
             {adaSemboyan && (
-              <p className="mt-2 max-w-xl leading-relaxed text-samar">
+              <p className="mt-2 max-w-xl leading-relaxed text-teks">
                 {p.tagline}
               </p>
             )}
@@ -181,7 +199,7 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
                 ))}
               </div>
             ) : (
-              <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-samar">
+              <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-teks">
                 Sambutan kepala sekolah akan dimuat di bagian ini. Sementara
                 itu, profil sekolah beserta arah dan langkah yang dituju dapat
                 dibaca lebih dulu di halaman Profil Sekolah.
@@ -198,18 +216,6 @@ export function SambutanRingkas({ pengaturan }: { pengaturan: Pengaturan }) {
               <span aria-hidden>→</span>
             </Link>
           </div>
-
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/ilustrasi/gedung-sambutan.jpg"
-            alt=""
-            aria-hidden
-            width={1000}
-            height={500}
-            className="pointer-events-none -mx-6 -mb-6 mt-7 block h-24 w-[calc(100%+3rem)] max-w-none object-cover object-bottom sm:hidden"
-            loading="lazy"
-            decoding="async"
-          />
         </div>
       </div>
     </section>
