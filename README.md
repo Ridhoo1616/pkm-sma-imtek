@@ -1600,6 +1600,7 @@ Seluruh warnanya lulus rasio kontras 4,5:1 terhadap tulisan putih.
 | Cek status | Nomor registrasi saja tidak cukup; tanggal lahir menjadi pasangan kunci agar data orang lain tidak terbuka dengan menebak nomor |
 | Spam | Kolom perangkap tersembunyi pada formulir pendaftaran dan kontak |
 | CORS | Asal yang diizinkan disebutkan satu per satu, bukan `*`, karena permintaannya membawa token |
+| Kepala keamanan HTTP | CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, dan HSTS saat produksi. Dipasang pada halaman Next maupun jawaban API, dengan isi yang berbeda sesuai apa yang dilayani masing-masing |
 | Kredensial | Seluruhnya dibaca dari variabel lingkungan. `JWT_SECRET` wajib diisi saat `APP_ENV=produksi`, dan berkas `.env` tidak ikut ke repositori |
 
 ### Pembatas laju pada rute publik
@@ -1662,6 +1663,56 @@ sebelas percobaan tanggal lahir yang salah untuk satu nomor, yang ke-11
 dijawab 429 dengan `Retry-After: 3600`; nomor lain tidak terpengaruh; dan
 kepala karangan yang ditambahi alamat sebenarnya oleh proksi tetap terhitung
 satu pengunjung.
+
+### Kepala keamanan HTTP
+
+Sebelumnya tidak ada satu pun, jadi peramban tidak diberi tahu apa pun tentang
+batasan situs ini: boleh dibingkai situs lain, boleh menebak jenis berkas dari
+isinya, dan boleh memuat skrip dari mana saja.
+
+Dipasang di DUA tempat, dengan isi yang berbeda, sebab yang dilayani berbeda.
+
+**Halaman Next** (`next.config.ts`): CSP `default-src 'self'` beserta
+`frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`,
+`object-src 'self' blob:`, ditambah `X-Content-Type-Options: nosniff`,
+`X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`,
+`Permissions-Policy` yang mematikan kamera, mikrofon, lokasi, pembayaran, dan
+USB, serta HSTS setahun pada build produksi.
+
+Alamat API ikut disebut pada `connect-src` dan `img-src` karena backend berada
+di asal yang berbeda: porta lain saat di komputer sendiri, subdomain lain di
+server. Tanpa itu seluruh permintaan data dan seluruh foto yang dilayani
+backend akan diblokir peramban. Nilainya dibaca dari `NEXT_PUBLIC_API_URL`
+saat build, jadi tidak perlu disunting saat pindah ke server.
+
+**Jawaban API** (lapisan `kepalaKeamanan`): CSP paling sempit yang mungkin,
+`default-src 'none'`, sebab jawaban API tidak pernah boleh memuat apa pun.
+`Referrer-Policy: no-referrer`, bukan strict-origin, karena alamat API memuat
+nomor registrasi dan id pendaftar pada jalurnya dan itu tidak boleh ikut
+terkirim ke situs lain. `nosniff` di sini penting tersendiri: dokumen
+pendaftar diunggah orang luar, dan tanpa kepala itu berkas yang isinya HTML
+dapat terbaca sebagai halaman pada asal backend.
+
+Yang TIDAK diperketat sekarang, dan alasannya, supaya tidak terbaca sebagai
+kelalaian:
+
+- `script-src` masih memuat `'unsafe-inline'`. Next menyisipkan skrip sebaris
+  untuk hidrasi, dan tanpa izin itu seluruh halaman berhenti bekerja. Yang
+  benar nonce per permintaan, dan itu menuntut middleware Next tersendiri.
+  Pekerjaan berikutnya, bukan sesuatu yang dilupakan.
+- `style-src` juga, sebab React menulis gaya sebaris pada beberapa komponen,
+  misalnya pergeseran karusel berita.
+- `blob:` diizinkan pada `object-src`, `frame-src`, dan `media-src`. Bukti
+  pendaftaran, kartu peserta, dan dokumen pendaftar diminta lewat fetch
+  (alamatnya POST, atau memerlukan token petugas) lalu dibuka sebagai blob.
+  Dokumen blob mewarisi CSP halaman yang membuatnya, jadi tanpa izin itu tab
+  PDF-nya tampil kosong.
+
+Diuji lewat peramban sungguhan dengan pendengar `securitypolicyviolation`
+terpasang: nol pelanggaran pada 16 halaman publik, nol pada 21 halaman panel,
+nol pada alur cek status termasuk unduh bukti PDF, dan nol saat dokumen PDF
+pendaftar dibuka dari panel sebagai blob. Tidak ada satu pun gambar yang gagal
+dimuat.
 
 ---
 

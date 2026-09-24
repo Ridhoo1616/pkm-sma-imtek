@@ -158,6 +158,45 @@ func alamatPemanggil(r *http.Request) string {
 
 /* ---------------- lapisan tengah ---------------- */
 
+/*
+kepalaKeamanan memasang kepala keamanan pada setiap jawaban API.
+
+Sebelumnya tidak ada satu pun. Yang dipasang di sini untuk JAWABAN API, dan
+sengaja berbeda dari kepala pada halaman Next: yang keluar dari sini JSON, PDF,
+dan berkas unggahan, bukan halaman yang menjalankan skrip.
+
+  - nosniff menutup tebak-menebak jenis berkas. Dokumen pendaftar diunggah
+    orang luar; tanpa kepala ini, berkas yang isinya HTML dapat terbaca sebagai
+    halaman dan berjalan pada asal backend.
+  - Kerangka CSP-nya paling sempit yang mungkin: jawaban API tidak pernah boleh
+    memuat apa pun. object-src dan frame-src TIDAK dilonggarkan di sini, sebab
+    PDF-nya tidak pernah dibuka langsung dari asal ini; frontend memintanya
+    lewat fetch lalu membukanya sebagai blob pada asalnya sendiri.
+  - X-Frame-Options DENY beserta frame-ancestors 'none': tidak ada jawaban API
+    yang pantas dibingkai halaman lain.
+  - Referrer-Policy no-referrer, bukan strict-origin: alamat API memuat nomor
+    registrasi dan id pendaftar pada jalurnya, dan itu tidak boleh ikut
+    terkirim ke situs lain.
+  - HSTS hanya saat produksi. Pada http ia diabaikan peramban, dan menyetelnya
+    saat di komputer sendiri membuat peramban menolak http://localhost sesudah
+    sekali menerimanya.
+*/
+func (a *Aplikasi) kepalaKeamanan(berikut http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h := w.Header()
+		h.Set("X-Content-Type-Options", "nosniff")
+		h.Set("X-Frame-Options", "DENY")
+		h.Set("Referrer-Policy", "no-referrer")
+		h.Set("Content-Security-Policy",
+			"default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
+		h.Set("Cross-Origin-Resource-Policy", "cross-origin")
+		if a.cfg.Produksi {
+			h.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+		}
+		berikut.ServeHTTP(w, r)
+	})
+}
+
 type kunciKonteks string
 
 const kunciPengguna kunciKonteks = "pengguna"

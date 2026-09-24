@@ -268,7 +268,7 @@ func (a *Aplikasi) rute() http.Handler {
 		kirimGalat(w, http.StatusNotFound, "Alamat "+r.URL.Path+" tidak tersedia.")
 	})
 
-	return a.catatPermintaan(a.lintasAsal(m))
+	return a.catatPermintaan(a.kepalaKeamanan(a.lintasAsal(m)))
 }
 
 // sajikanUnggahan melayani berkas unggahan. Dokumen pendaftar bersifat
