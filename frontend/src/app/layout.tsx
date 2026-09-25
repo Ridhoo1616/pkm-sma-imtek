@@ -39,10 +39,21 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+import { ClickSpark } from "@/komponen/ClickSpark";
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="id" className="h-full antialiased">
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <ClickSpark 
+          sparkColor="#F59E0B" 
+          sparkSize={12} 
+          sparkRadius={20} 
+          sparkCount={8} 
+          duration={500} 
+        />
+        {children}
+      </body>
     </html>
   );
 }
