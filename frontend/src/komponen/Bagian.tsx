@@ -145,7 +145,8 @@ export type JenisLencana =
   | "emas"
   | "abu"
   | "terang"
-  | "putih";
+  | "putih"
+  | "kaca";
 
 const GAYA_LENCANA: Record<JenisLencana, string> = {
   biru: "bg-biru-tua text-white",
@@ -157,6 +158,11 @@ const GAYA_LENCANA: Record<JenisLencana, string> = {
   // dan tahap pembayaran. Keduanya tetap berisian padat, hanya lebih terang.
   terang: "bg-biru-muda text-biru-tua",
   putih: "bg-white text-biru-tua",
+  // "kaca" HANYA untuk di atas bidang gelap, misalnya hero beranda. Isiannya
+  // putih 15 persen, jadi kontras tulisannya datang dari latar di belakangnya,
+  // bukan dari isian lencananya sendiri; di atas latar terang ia tidak
+  // terbaca. Itu sebabnya ia satu-satunya jenis di sini yang kontrasnya tidak
+  // dapat dijamin oleh daftar ini.
   kaca: "bg-white/15 text-white ring-1 ring-white/20 backdrop-blur-md",
 };
 

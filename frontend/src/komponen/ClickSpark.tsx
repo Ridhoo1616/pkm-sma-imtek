@@ -39,6 +39,17 @@ export function ClickSpark({
   const sparksRef = useRef<Spark[]>([]);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  /**
+   * Gelung animasinya memanggil dirinya sendiri lewat ref ini, bukan lewat
+   * namanya sendiri.
+   *
+   * Semula `drawSparks` memanggil `drawSparks` di dalam dirinya, dan penyusun
+   * React menolaknya. Bukan sekadar cerewet: gelung yang sedang berjalan
+   * memegang versi fungsi dari saat ia dimulai, jadi perubahan prop di
+   * tengah animasi tidak pernah sampai. Lewat ref, setiap rangka berikutnya
+   * memanggil versi yang terbaru.
+   */
+  const gambarRef = useRef<(t: number) => void>(() => {});
 
   const drawSparks = useCallback(
     (timestamp: number) => {
@@ -88,7 +99,7 @@ export function ClickSpark({
       });
 
       if (!allDead && progress < 1) {
-        animationRef.current = requestAnimationFrame(drawSparks);
+        animationRef.current = requestAnimationFrame((t) => gambarRef.current(t));
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         sparksRef.current = [];
@@ -98,10 +109,19 @@ export function ClickSpark({
     [duration, sparkColor, sparkRadius, sparkSize, extraScale]
   );
 
+  useEffect(() => {
+    gambarRef.current = drawSparks;
+  }, [drawSparks]);
+
   const handleClick = useCallback(
     (e: MouseEvent) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
+      // Yang meminta gerak dikurangi tidak diberi animasi sama sekali.
+      // Seluruh gerak lain di situs ini sudah menghormati setelan itu, dan
+      // percikan yang meletus di setiap ketukan justru yang paling
+      // mengganggu bagi yang peka terhadap gerak.
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -131,9 +151,9 @@ export function ClickSpark({
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
-      animationRef.current = requestAnimationFrame(drawSparks);
+      animationRef.current = requestAnimationFrame((t) => gambarRef.current(t));
     },
-    [sparkCount, drawSparks]
+    [sparkCount]
   );
 
   useEffect(() => {
