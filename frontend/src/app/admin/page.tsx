@@ -13,7 +13,12 @@ import {
   warnaStatus,
 } from "@/lib/format";
 import { KepalaPanel, KartuAngka, Tabel, BarisBilah } from "@/komponen/Panel";
-import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
+import {
+  PesanGalat,
+  TanpaData,
+  KerangkaAngka,
+  Kerangka,
+} from "@/komponen/Memuat";
 import { DiagramLingkaran } from "@/komponen/DiagramLingkaran";
 import { Lencana } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
@@ -65,7 +70,28 @@ export default function HalamanDasbor() {
   const { data, memuat, galat, muatUlang } = useMuat(() => api.dasbor());
   const [rentang, setRentang] = useState<JenisRentang>("tanggal");
 
-  if (memuat) return <Memuat />;
+  // Kerangka muat menahan bentuk dasbornya: kepala halaman, empat kartu
+  // angka, lalu dua kartu grafik. Tanpa itu, halamannya melompat dari satu
+  // bulatan berputar menjadi halaman penuh begitu datanya tiba.
+  if (memuat)
+    return (
+      <>
+        <KepalaPanel
+          judul="Dasbor"
+          keterangan="Memuat ringkasan pendaftaran..."
+        />
+        <KerangkaAngka jumlah={4} />
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          {[0, 1].map((i) => (
+            <div key={i} className="kartu p-6">
+              <Kerangka className="h-4 w-40" />
+              <Kerangka className="mt-2 h-3 w-56" />
+              <Kerangka className="mt-6 h-40 w-40 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </>
+    );
   if (galat) return <PesanGalat pesan={galat} ulangi={muatUlang} />;
   if (!data) return null;
 
@@ -375,7 +401,7 @@ function BagianKunjungan() {
       </div>
 
       {memuat ? (
-        <Memuat />
+        <KerangkaAngka jumlah={4} />
       ) : galat ? (
         <PesanGalat pesan={galat} ulangi={muatUlang} />
       ) : !data ? null : (

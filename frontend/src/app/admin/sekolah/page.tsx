@@ -7,7 +7,7 @@ import { useKabar } from "@/komponen/Kabar";
 import { useSesi } from "@/komponen/Sesi";
 import { angka } from "@/lib/format";
 import { KepalaPanel, KartuAngka, Tabel, Konfirmasi } from "@/komponen/Panel";
-import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
+import { PesanGalat, TanpaData, KerangkaTabel } from "@/komponen/Memuat";
 import { AreaTeks, Centang, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import type { SekolahRujukan } from "@/lib/tipe";
 
@@ -23,6 +23,9 @@ import type { SekolahRujukan } from "@/lib/tipe";
  * Selama daftar ini kosong, formulir pendaftaran bekerja seperti sebelumnya
  * dan tidak menolak nama sekolah mana pun.
  */
+/** Dipakai bersama oleh kerangka muat dan tabel sesungguhnya. */
+const KEPALA_TABEL = ["NPSN", "Nama sekolah", "Kecamatan", "Kabupaten", ""];
+
 export default function HalamanSekolahAsal() {
   const kabar = useKabar();
   const { pengguna } = useSesi();
@@ -209,7 +212,7 @@ export default function HalamanSekolahAsal() {
       </div>
 
       {memuat ? (
-        <Memuat />
+        <KerangkaTabel kepala={KEPALA_TABEL} baris={8} />
       ) : galat ? (
         <PesanGalat pesan={galat} ulangi={muatUlang} />
       ) : !data || data.data.length === 0 ? (
@@ -226,7 +229,7 @@ export default function HalamanSekolahAsal() {
           }
         />
       ) : (
-        <Tabel kepala={["NPSN", "Nama sekolah", "Kecamatan", "Kabupaten", ""]}>
+        <Tabel kepala={KEPALA_TABEL}>
           {data.data.map((s) => (
             <tr key={s.npsn} className="border-t border-garis">
               <td className="px-5 py-3 text-sm font-semibold tabular-nums">

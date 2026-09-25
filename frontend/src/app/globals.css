@@ -24,8 +24,8 @@
   --color-samar: #6b7280;
   --color-garis: #e5e7eb;
 
-  --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial,
-    sans-serif;
+  --font-sans:
+    "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 
   /* Huruf tulisan tangan, dipakai satu tempat: semboyan sekolah pada bagian
      sambutan kepala sekolah. Berkasnya ada di public/font, bukan dimuat dari
@@ -55,9 +55,10 @@
   font-weight: 400 700;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
-    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
 }
 
 /* Aturan dasar WAJIB berada di dalam @layer base. Aturan CSS yang ditulis
@@ -347,6 +348,53 @@
 
    `:focus-within` disertakan supaya pengguna papan ketik mendapat tanggapan
    yang sama saat berpindah ke dalam kartunya. */
+/* Kerangka muat. Denyutnya memakai opacity, bukan latar yang bergeser:
+   opacity tidak menyentuh tata letak maupun penggambaran ulang, jadi tetap
+   ringan pada ponsel murah.
+
+   Pada setelan "kurangi gerak" denyutnya berhenti dan kerangkanya diam;
+   bentuknya sendiri sudah menyampaikan bahwa ada yang sedang dimuat. */
+@keyframes kerangkaBerdenyut {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.kerangka {
+  background-color: var(--color-garis);
+  animation: kerangkaBerdenyut 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kerangka {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+/* Bilah kemajuan unggahan.
+
+   Yang digerakkan scaleX, bukan width: mengubah lebar memaksa peramban
+   menghitung ulang tata letak pada setiap rangka, dan pada ponsel murah itu
+   tersendat justru ketika sedang mengunggah.
+
+   Pada setelan "kurangi gerak", bilahnya TETAP bergerak -- ia keterangan,
+   bukan hiasan -- yang dihilangkan hanya kehalusan peralihannya, sehingga
+   angkanya melompat langsung ke tempatnya. */
+.bilah-kemajuan {
+  transition: transform 0.25s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bilah-kemajuan {
+    transition: none;
+  }
+}
+
 /* Irisan diagram lingkaran pada panel dasbor.
 
    Sorotannya diatur React lewat atribut, bukan lewat `:hover` di sini, sebab

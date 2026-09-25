@@ -11,11 +11,39 @@ import {
   warnaStatus,
 } from "@/lib/format";
 import { KepalaPanel, Tabel } from "@/komponen/Panel";
-import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
+import {
+  PesanGalat,
+  TanpaData,
+  KerangkaTabel,
+  Kerangka,
+} from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import { Tombol } from "@/komponen/Medan";
 
 const PER_HALAMAN = 25;
+
+/**
+ * Kepala tabel, dipakai BERSAMA oleh kerangka muat dan tabel sesungguhnya.
+ * Satu sumber supaya jumlah kolom keduanya tidak mungkin berbeda.
+ *
+ * Status ditaruh tepat sesudah nama, bukan di kolom kesembilan: tabelnya
+ * punya sebelas kolom dan selalu lebih lebar daripada jendela, jadi kolom
+ * mana pun di ujung kanan menuntut penggeseran mendatar lebih dulu. Status
+ * justru kolom yang paling sering dilihat panitia.
+ */
+const KEPALA_TABEL = [
+  "No. Registrasi",
+  "Nama",
+  "Status",
+  "L/P",
+  "Peminatan",
+  "Jalur",
+  "Asal Sekolah",
+  "Nilai",
+  "Sumber Info",
+  "Waktu",
+  "",
+];
 
 export default function HalamanPendaftar() {
   const [saring, setSaring] = useState({
@@ -107,7 +135,11 @@ export default function HalamanPendaftar() {
             [
               { k: "status", label: "Status", opsi: data?.pilihan.status ?? [] },
               { k: "jalur", label: "Jalur", opsi: data?.pilihan.jalur ?? [] },
-              { k: "sumber", label: "Sumber info", opsi: data?.pilihan.sumber ?? [] },
+              {
+                k: "sumber",
+                label: "Sumber info",
+                opsi: data?.pilihan.sumber ?? [],
+              },
               {
                 k: "tahun_ajaran",
                 label: "Tahun ajaran",
@@ -162,7 +194,13 @@ export default function HalamanPendaftar() {
       </div>
 
       {memuat ? (
-        <Memuat />
+        <>
+          {/* Baris "Menampilkan N dari M" di atas tabelnya ikut
+              dikerangkakan; tanpa itu tata letaknya masih melompat
+              setinggi baris tersebut ketika datanya tiba. */}
+          <Kerangka className="mb-4 h-3.5 w-64" />
+          <KerangkaTabel kepala={KEPALA_TABEL} baris={8} />
+        </>
       ) : galat ? (
         <PesanGalat pesan={galat} ulangi={muatUlang} />
       ) : !data || data.data.length === 0 ? (
@@ -180,26 +218,7 @@ export default function HalamanPendaftar() {
             .
           </p>
 
-          <Tabel
-            // Status ditaruh tepat sesudah nama, bukan di kolom kesembilan.
-            // Tabelnya punya sebelas kolom dan selalu lebih lebar daripada
-            // jendela, jadi kolom apa pun yang ada di ujung kanan menuntut
-            // penggeseran mendatar lebih dulu. Status justru kolom yang
-            // paling sering dilihat panitia, dan kini tampil tanpa digeser.
-            kepala={[
-              "No. Registrasi",
-              "Nama",
-              "Status",
-              "L/P",
-              "Peminatan",
-              "Jalur",
-              "Asal Sekolah",
-              "Nilai",
-              "Sumber Info",
-              "Waktu",
-              "",
-            ]}
-          >
+          <Tabel kepala={KEPALA_TABEL}>
             {data.data.map((p) => (
               <tr key={p.id} className="hover:bg-slate-50">
                 <td className="px-4 py-3 font-semibold whitespace-nowrap">
@@ -215,13 +234,17 @@ export default function HalamanPendaftar() {
                   <Lencana jenis={warnaStatus(p.status)}>{p.status}</Lencana>
                 </td>
                 <td className="px-4 py-3 text-samar">{p.jenis_kelamin}</td>
-                <td className="px-4 py-3 text-samar">{p.nama_jurusan || "-"}</td>
+                <td className="px-4 py-3 text-samar">
+                  {p.nama_jurusan || "-"}
+                </td>
                 <td className="px-4 py-3 text-samar">{p.jalur}</td>
                 <td className="px-4 py-3 text-samar">{p.asal_sekolah}</td>
                 <td className="px-4 py-3 text-right tabular-nums">
                   {formatNilai(p.nilai_rata2)}
                 </td>
-                <td className="px-4 py-3 text-samar">{p.sumber_informasi || "-"}</td>
+                <td className="px-4 py-3 text-samar">
+                  {p.sumber_informasi || "-"}
+                </td>
                 <td className="px-4 py-3 whitespace-nowrap text-samar">
                   {tanggalJam(p.dibuat)}
                 </td>

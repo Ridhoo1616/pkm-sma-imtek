@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { api, unduhBukti, GalatApi } from "@/lib/api";
+import type { KemajuanUnggahan } from "@/lib/api";
 import { bukaBlob } from "@/lib/berkas";
 import {
   Teks,
@@ -14,6 +15,7 @@ import {
   RingkasanGalat,
 } from "@/komponen/Medan";
 import { PilihSekolah } from "@/komponen/PilihSekolah";
+import { KemajuanKirim } from "@/komponen/Memuat";
 import {
   AGAMA,
   JENIS_KELAMIN,
@@ -219,6 +221,7 @@ export default function FormulirPpdb({
   const [galat, setGalat] = useState<Record<string, string>>({});
   const [ringkasan, setRingkasan] = useState<string[]>([]);
   const [mengirim, setMengirim] = useState(false);
+  const [kemajuan, setKemajuan] = useState<KemajuanUnggahan | null>(null);
   const [sukses, setSukses] = useState<{ no: string; tahun: string } | null>(null);
   const [mengunduhBukti, setMengunduhBukti] = useState(false);
   const puncak = useRef<HTMLDivElement>(null);
@@ -274,7 +277,7 @@ export default function FormulirPpdb({
     data.append("website", ""); // perangkap spam, selalu kosong dari manusia
 
     try {
-      const hasil = await api.daftar(data);
+      const hasil = await api.daftar(data, setKemajuan);
       setSukses({ no: hasil.no_registrasi, tahun: hasil.tahun_ajaran });
     } catch (e) {
       if (e instanceof GalatApi) {
@@ -290,6 +293,7 @@ export default function FormulirPpdb({
       }
     } finally {
       setMengirim(false);
+      setKemajuan(null);
     }
   }
 
@@ -876,6 +880,16 @@ export default function FormulirPpdb({
                 </div>
               )}
           </div>
+
+          {/* Kemajuan unggahan. Enam dokumen, masing-masing sampai 2 MB, jadi
+              seluruhnya bisa 12 MB. Di data seluler yang lambat itu satu menit
+              penuh, dan tanpa tanda apa pun pendaftar akan menekan kirim lagi
+              atau menutup halamannya di tengah jalan. */}
+          {kemajuan && (
+            <div className="mt-8">
+              <KemajuanKirim {...kemajuan} />
+            </div>
+          )}
 
           {/* Navigasi langkah */}
           <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-garis pt-6">

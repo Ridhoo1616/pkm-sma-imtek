@@ -1683,6 +1683,74 @@ dijawab 429 dengan `Retry-After: 3600`; nomor lain tidak terpengaruh; dan
 kepala karangan yang ditambahi alamat sebenarnya oleh proksi tetap terhitung
 satu pengunjung.
 
+### T. Dua gerak yang menyampaikan keadaan, bukan menghias
+
+Situs ini sudah cukup banyak gerak hiasan: muncul-naik saat digulir di 26
+halaman, gulir halus Lenis, kartu terangkat saat disorot, karusel berita, dan
+percikan klik. Dua yang ditambahkan di sini jenis lain, yaitu gerak yang
+memberi tahu keadaan.
+
+**Bilah kemajuan saat mengunggah dokumen.** Formulir PPDB mengirim sampai enam
+dokumen, masing-masing dibatasi 2 MB, jadi seluruhnya bisa 12 MB. Sebelum ini
+tombolnya hanya berputar tanpa keterangan; di data seluler yang lambat itu
+satu menit penuh, dan yang paling sering terjadi bukan pendaftar menunggu,
+melainkan menekan kirim lagi atau menutup halamannya.
+
+Sekarang tampil persennya beserta bita yang sudah terkirim dari totalnya.
+Sesudah bita terakhir terkirim, tahapnya berganti sendiri menjadi "Menyimpan
+di server" — sebab pada saat itu server masih menyimpan berkasnya dan
+menerbitkan nomor registrasi, dan bilah yang berhenti di 100 persen tanpa
+keterangan terbaca sebagai macet.
+
+Pengirimannya karena itu memakai `XMLHttpRequest`, bukan `fetch`, dan itu
+bukan pilihan gaya: **fetch tidak dapat melaporkan kemajuan unggahan sama
+sekali.** Yang tersedia di fetch hanya kemajuan unduhan. Penanganan galatnya
+disamakan dengan `permintaan()`, sehingga galat per kolom tetap menyorot
+kolom yang bermasalah seperti sebelumnya.
+
+**Kerangka muat pengganti bulatan berputar.** Daftar dan tabel di panel
+sebelumnya menampilkan satu bulatan berputar di tengah ruang kosong, lalu
+tata letaknya melompat begitu datanya tiba. Kerangka muat menahan bentuknya:
+kepala tabel sudah terbaca, dan kotak abu berdenyut menempati tempat yang akan
+diisi datanya.
+
+Dipasang di enam tempat yang bentuknya sudah diketahui: dasbor, Pendaftar,
+Notifikasi, Pengguna, Sekolah Asal, dan Pesan Masuk. Kepala tabelnya dijadikan
+satu tetapan yang dipakai BERSAMA oleh kerangka dan tabel sesungguhnya,
+sehingga jumlah kolom keduanya tidak mungkin berbeda. Halaman lain masih
+memakai bulatan berputar; bentuknya belum tentu satu tabel, jadi kerangkanya
+akan menipu kalau dipaksakan.
+
+Dua hal teknis yang menentukan keduanya tetap ringan di ponsel murah:
+
+- Bilah kemajuannya digerakkan dengan `transform: scaleX`, bukan `width`.
+  Mengubah lebar memaksa peramban menghitung ulang tata letak pada setiap
+  rangka, dan itu tersendat justru ketika sedang mengunggah.
+- Denyut kerangkanya memakai `opacity`, bukan latar yang bergeser.
+
+Keduanya menghormati setelan "kurangi gerak", tetapi TIDAK dengan cara yang
+sama. Denyut kerangka berhenti sepenuhnya: bentuknya sendiri sudah
+menyampaikan bahwa ada yang dimuat. Bilah kemajuan tetap bergerak, sebab ia
+keterangan dan bukan hiasan; yang dihilangkan hanya kehalusan peralihannya,
+sehingga angkanya melompat langsung ke tempatnya.
+
+Diuji lewat peramban sungguhan. Bilah kemajuannya pada basis data sekali pakai
+beserta salinan frontend tersendiri, bukan pada pemasangan user: formulir
+diisi lengkap, lima berkas 1,7 MB dipasang lewat protokol DevTools, unggahannya
+diperlambat ke 400 kB/s, lalu bilahnya terekam 139 kali dari "1%, 48 KB dari
+8,3 MB" sampai 100 persen, berganti ke tahap "Menyimpan di server", dan
+berakhir pada nomor registrasi yang benar-benar terbit. Kerangka muatnya pada
+pemasangan user tetapi hanya dengan permintaan GET, jaringannya diperlambat
+supaya keadaan muatnya dapat ditangkap: empat belas pemeriksaan pada lima
+halaman, termasuk bahwa kepala tabelnya sudah terbaca saat memuat dan tidak
+ada lagi bulatan berputar.
+
+Tinggi halaman saat memuat dan sesudah datanya tiba diukur juga, sebab itu
+inti gunanya: selisihnya 0 piksel pada Notifikasi dan Pengguna, 34 pada
+Sekolah Asal, 59 pada Pendaftar, dan 402 pada Pesan Masuk. Yang terakhir
+memang tidak dapat dibuat tepat: panjang badan pesan tidak diketahui sebelum
+pesannya datang.
+
 ### Menu terpilih di panel tidak terlihat: dua warna yang bernilai sama
 
 `--color-biru` dan `--color-biru-tua` sempat bernilai sama, `#0f2a4a`.

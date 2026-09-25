@@ -263,3 +263,21 @@ export function alamatLengkap(alamat?: string, kodePos?: string): string {
 export function rupiah(jumlah: number): string {
   return "Rp" + Math.round(jumlah).toLocaleString("id-ID");
 }
+
+/**
+ * Ukuran berkas dalam satuan yang enak dibaca: "1,4 MB".
+ *
+ * Pembaginya 1024, bukan 1000, mengikuti yang ditampilkan sistem operasi
+ * pada berkas yang sama, supaya angkanya tidak berbeda dari yang dilihat
+ * pendaftar di ponselnya.
+ */
+export function ukuranBerkas(bita: number): string {
+  if (!Number.isFinite(bita) || bita <= 0) return "0 KB";
+  if (bita < 1024) return `${bita} B`;
+  const kb = bita / 1024;
+  if (kb < 1024) return `${Math.round(kb)} KB`;
+  return `${(kb / 1024).toLocaleString("id-ID", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })} MB`;
+}
