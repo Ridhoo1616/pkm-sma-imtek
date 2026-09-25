@@ -102,6 +102,8 @@ export interface RingkasPendaftar {
    * false berarti perlu diperiksa manual dari ijazah.
    */
   asal_sekolah_terdaftar: boolean;
+  /** Nama petugas yang memasukkan data ini dari panel; kosong berarti pendaftar sendiri. */
+  ditambahkan_oleh?: string;
   no_hp: string;
   email: string;
   nilai_rata2: number | null;

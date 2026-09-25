@@ -101,35 +101,38 @@ type Pendaftar struct {
 	// mengirim. false berarti panitia perlu memeriksanya manual dari ijazah,
 	// entah karena sekolahnya memang tidak ada di daftar, entah karena
 	// daftarnya masih kosong ketika pendaftar ini mengirim formulirnya.
-	AsalSekolahTerdaftar bool     `json:"asal_sekolah_terdaftar"`
-	NPSNSekolah          string   `json:"npsn_sekolah"`
-	AlamatSekolah        string   `json:"alamat_sekolah"`
-	TahunLulus           string   `json:"tahun_lulus"`
-	NilaiRata2           *float64 `json:"nilai_rata2"`
-	NamaAyah             string   `json:"nama_ayah"`
-	PekerjaanAyah        string   `json:"pekerjaan_ayah"`
-	PendidikanAyah       string   `json:"pendidikan_ayah"`
-	NamaIbu              string   `json:"nama_ibu"`
-	PekerjaanIbu         string   `json:"pekerjaan_ibu"`
-	PendidikanIbu        string   `json:"pendidikan_ibu"`
-	Penghasilan          string   `json:"penghasilan"`
-	NoHPOrtu             string   `json:"no_hp_ortu"`
-	NamaWali             string   `json:"nama_wali"`
-	FileFoto             string   `json:"file_foto"`
-	FileIjazah           string   `json:"file_ijazah"`
-	FileKK               string   `json:"file_kk"`
-	FileAkta             string   `json:"file_akta"`
-	FileRaport           string   `json:"file_raport"`
-	FilePrestasi         string   `json:"file_prestasi"`
-	SumberInfo           string   `json:"sumber_informasi"`
-	CatatanSumber        string   `json:"catatan_sumber"`
-	Status               string   `json:"status"`
-	CatatanAdmin         string   `json:"catatan_admin"`
-	DiverifikasiOleh     *int     `json:"diverifikasi_oleh"`
-	NamaVerifikator      string   `json:"nama_verifikator"`
-	IPPendaftar          string   `json:"ip_pendaftar,omitempty"`
-	Dibuat               string   `json:"dibuat"` // created_at, sudah diformat
-	Diubah               string   `json:"diubah"` // updated_at, sudah diformat
+	AsalSekolahTerdaftar bool `json:"asal_sekolah_terdaftar"`
+	// DitambahkanOleh berisi nama petugas yang memasukkan data ini dari
+	// panel. Kosong berarti pendaftar mengisi formulir publik sendiri.
+	DitambahkanOleh  string   `json:"ditambahkan_oleh,omitempty"`
+	NPSNSekolah      string   `json:"npsn_sekolah"`
+	AlamatSekolah    string   `json:"alamat_sekolah"`
+	TahunLulus       string   `json:"tahun_lulus"`
+	NilaiRata2       *float64 `json:"nilai_rata2"`
+	NamaAyah         string   `json:"nama_ayah"`
+	PekerjaanAyah    string   `json:"pekerjaan_ayah"`
+	PendidikanAyah   string   `json:"pendidikan_ayah"`
+	NamaIbu          string   `json:"nama_ibu"`
+	PekerjaanIbu     string   `json:"pekerjaan_ibu"`
+	PendidikanIbu    string   `json:"pendidikan_ibu"`
+	Penghasilan      string   `json:"penghasilan"`
+	NoHPOrtu         string   `json:"no_hp_ortu"`
+	NamaWali         string   `json:"nama_wali"`
+	FileFoto         string   `json:"file_foto"`
+	FileIjazah       string   `json:"file_ijazah"`
+	FileKK           string   `json:"file_kk"`
+	FileAkta         string   `json:"file_akta"`
+	FileRaport       string   `json:"file_raport"`
+	FilePrestasi     string   `json:"file_prestasi"`
+	SumberInfo       string   `json:"sumber_informasi"`
+	CatatanSumber    string   `json:"catatan_sumber"`
+	Status           string   `json:"status"`
+	CatatanAdmin     string   `json:"catatan_admin"`
+	DiverifikasiOleh *int     `json:"diverifikasi_oleh"`
+	NamaVerifikator  string   `json:"nama_verifikator"`
+	IPPendaftar      string   `json:"ip_pendaftar,omitempty"`
+	Dibuat           string   `json:"dibuat"` // created_at, sudah diformat
+	Diubah           string   `json:"diubah"` // updated_at, sudah diformat
 }
 
 var StatusPendaftar = []string{

@@ -99,9 +99,19 @@ export default function HalamanPendaftar() {
         judul="Data Pendaftar"
         keterangan="Verifikasi berkas, ubah status, dan unduh rekap pendaftar."
         aksi={
-          <Tombol jenis="kedua" onClick={unduh} sedangJalan={mengunduh}>
-            {mengunduh ? "Menyiapkan..." : "Unduh CSV"}
-          </Tombol>
+          <div className="flex flex-wrap gap-2">
+            <Tombol jenis="kedua" onClick={unduh} sedangJalan={mengunduh}>
+              {mengunduh ? "Menyiapkan..." : "Unduh CSV"}
+            </Tombol>
+            {/* Untuk pendaftar yang datang langsung ke sekolah. Tetap
+                dapat dipakai meski pendaftaran online sudah ditutup. */}
+            <Link
+              href="/admin/pendaftar/baru"
+              className="inline-flex items-center justify-center rounded-lg bg-biru px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-biru-tua"
+            >
+              Tambah Pendaftar
+            </Link>
+          </div>
         }
       />
 

@@ -540,6 +540,18 @@ export const api = {
       token: true,
     }),
 
+  /**
+   * Menambah pendaftar dari panel.
+   *
+   * Tetap berjalan meski PPDB sudah ditutup; itu seluruh gunanya. Tanpa
+   * berkas unggahan, sebab dokumennya diterima petugas dalam bentuk kertas.
+   */
+  tambahPendaftar: (isi: Record<string, string>) =>
+    permintaan<{ pesan: string; no_registrasi: string; tahun_ajaran: string }>(
+      "/api/admin/pendaftar",
+      { metode: "POST", isi, token: true },
+    ),
+
   /* ---------- daftar rujukan sekolah asal ---------- */
   cariSekolah: (cari: string) =>
     permintaan<import("./tipe").HasilCariSekolah>(

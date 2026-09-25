@@ -403,11 +403,12 @@ func (a *Aplikasi) tanganiDetailPendaftar(w http.ResponseWriter, r *http.Request
 		       COALESCE(p.file_akta, ''), COALESCE(p.file_raport, ''), COALESCE(p.file_prestasi, ''),
 		       COALESCE(p.sumber_informasi, ''), COALESCE(p.catatan_sumber, ''),
 		       p.status, COALESCE(p.catatan_admin, ''), p.diverifikasi_oleh, COALESCE(u.nama, ''),
-		       COALESCE(p.ip_pendaftar, ''),
+		       COALESCE(p.ip_pendaftar, ''), COALESCE(t.nama, ''),
 		       to_char(p.created_at, 'YYYY-MM-DD HH24:MI'), to_char(p.updated_at, 'YYYY-MM-DD HH24:MI')
 		  FROM pendaftar p
 		  LEFT JOIN jurusan j ON j.id = p.jurusan_id
 		  LEFT JOIN users u ON u.id = p.diverifikasi_oleh
+		  LEFT JOIN users t ON t.id = p.dibuat_oleh
 		 WHERE p.id = $1`, id).Scan(
 		&p.ID, &p.NoRegistrasi, &p.TahunAjaran, &p.Jalur, &p.JurusanID, &p.NamaJurusan,
 		&p.NamaLengkap, &p.NISN, &p.NIK, &p.JenisKelamin,
@@ -422,7 +423,7 @@ func (a *Aplikasi) tanganiDetailPendaftar(w http.ResponseWriter, r *http.Request
 		&p.FileFoto, &p.FileIjazah, &p.FileKK, &p.FileAkta, &p.FileRaport, &p.FilePrestasi,
 		&p.SumberInfo, &p.CatatanSumber,
 		&p.Status, &p.CatatanAdmin, &p.DiverifikasiOleh, &p.NamaVerifikator,
-		&p.IPPendaftar, &p.Dibuat, &p.Diubah)
+		&p.IPPendaftar, &p.DitambahkanOleh, &p.Dibuat, &p.Diubah)
 
 	if err == sql.ErrNoRows {
 		kirimGalat(w, http.StatusNotFound, "Data pendaftar tidak ditemukan.")

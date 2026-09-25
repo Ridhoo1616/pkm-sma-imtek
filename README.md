@@ -1683,6 +1683,59 @@ dijawab 429 dengan `Retry-After: 3600`; nomor lain tidak terpengaruh; dan
 kepala karangan yang ditambahi alamat sebenarnya oleh proksi tetap terhitung
 satu pengunjung.
 
+### U. Menambah pendaftar dari panel, meski PPDB sudah ditutup
+
+Keadaan yang sangat lazim dan sebelumnya tidak tertangani: ada calon yang
+datang langsung ke sekolah SESUDAH pendaftaran ditutup, lalu kepala sekolah
+memutuskan menerimanya. Formulir publik ditolak backend ketika PPDB tutup,
+jadi satu-satunya jalan adalah membuka kembali PPDB untuk SEMUA ORANG,
+memasukkan satu data, lalu menutupnya lagi. Selama jendela itu terbuka,
+siapa pun di internet dapat mendaftar.
+
+Sekarang ada menu **Pendaftar → Tambah Pendaftar**, satu halaman panjang yang
+**tetap bekerja meski PPDB sudah ditutup**. Bentuknya bukan lima langkah
+seperti formulir publik: yang mengisi petugas yang sudah hafal isinya dan
+sedang menghadapi orang di meja pendaftaran.
+
+Tiga hal yang berbeda dari formulir publik, dan masing-masing ada sebabnya:
+
+| Beda | Sebabnya |
+|---|---|
+| Tidak memeriksa apakah PPDB dibuka | Itu seluruh gunanya |
+| Tanpa unggahan berkas | Dokumennya diterima petugas dalam bentuk kertas; memaksa lima unggahan di meja pendaftaran membuat fiturnya tidak terpakai |
+| Tanpa centang pernyataan kebenaran data | Yang menandatangani pernyataan itu pendaftarnya sendiri, dan petugas tidak dapat menandatanganinya atas nama orang lain |
+| Sekolah di luar daftar rujukan tidak ditolak | Petugas memasukkan data dengan ijazahnya di tangan, jadi ia tahu lebih banyak daripada daftar rujukannya |
+
+Pemeriksaan lain SELURUHNYA sama: NISN, NIK beserta pencocokan silangnya,
+kewajaran tulisan, kode pos, NPSN, dan kedua penjaga pendaftaran ganda. Data
+yang masuk lewat pintu ini tidak boleh lebih rendah mutunya.
+
+Akibat yang diterima dengan sadar, dan dikatakan apa adanya di halamannya:
+pendaftar yang dimasukkan dari sini **tidak punya berkas apa pun di sistem**,
+jadi verifikasinya harus dicocokkan dari kertas. Karena itu rincian
+pendaftar mendapat baris baru, **"Cara mendaftar"**, yang berbunyi
+"Dimasukkan panitia: <nama petugas>" atau "Mengisi formulir online sendiri".
+Penandanya dari kolom `pendaftar.dibuat_oleh` (migrasi 018); kosong berarti
+pendaftar mengisi sendiri.
+
+**Pemeriksaan isian kedua jalur kini SATU FUNGSI** (`periksaIsianPendaftar`
+pada `pendaftar_isian.go`), begitu pula penyimpanannya (`simpanPendaftar`).
+Alasannya konkret, bukan kerapian: dua jalur yang memeriksa isian yang sama
+dengan kode yang berbeda pasti menyimpang satu sama lain. Contohnya sudah
+terjadi di proyek ini — daftar dokumen di halaman Info PPDB menyebut Akta
+Kelahiran dan Rapor bersifat **opsional** padahal backend mewajibkan
+keduanya, sehingga halaman itu menjanjikan yang tidak benar dan pendaftar
+yang mengikutinya akan ditolak formulirnya. Daftar itu ikut dibetulkan di
+sini, dan diberi catatan bahwa isinya harus sama dengan `berkasPendaftar`.
+
+Diuji pada basis data sekali pakai dengan PPDB DITUTUP: penambahan dari panel
+berhasil (201) pada saat yang sama formulir publik ditolak (409); tanpa token
+401; isian kosong ditolak dengan 21 galat per kolom; NIK yang jenis
+kelaminnya bertentangan ditolak; pendaftaran ganda ditolak beserta nomor
+registrasi yang sudah ada; dan `dibuat_oleh` tercatat. Formulir publik diuji
+ulang sesudah penyatuan itu, lengkap dengan lima berkas unggahan, dan tetap
+berhasil. Antarmukanya sembilan pemeriksaan lewat peramban.
+
 ### T. Dua gerak yang menyampaikan keadaan, bukan menghias
 
 Situs ini sudah cukup banyak gerak hiasan: muncul-naik saat digulir di 26

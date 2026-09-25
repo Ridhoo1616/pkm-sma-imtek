@@ -156,6 +156,9 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/admin/dasbor", a.wajibMasuk(a.tanganiDasbor))
 	m.HandleFunc("GET /api/admin/kunjungan", a.wajibMasuk(a.tanganiKunjunganAdmin))
 	m.HandleFunc("GET /api/admin/pendaftar", a.wajibMasuk(a.tanganiDaftarPendaftar))
+	// Menambah pendaftar dari panel. SENGAJA tidak memeriksa apakah PPDB
+	// sedang dibuka; keterangannya di pendaftar_isian.go.
+	m.HandleFunc("POST /api/admin/pendaftar", a.wajibMasuk(a.tanganiTambahPendaftar))
 	m.HandleFunc("GET /api/admin/pendaftar/ekspor", a.wajibMasuk(a.tanganiEksporPendaftar))
 	m.HandleFunc("GET /api/admin/pendaftar/{id}", a.wajibMasuk(a.tanganiDetailPendaftar))
 	m.HandleFunc("PATCH /api/admin/pendaftar/{id}/status", a.wajibMasuk(a.tanganiUbahStatus))
