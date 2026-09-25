@@ -2,6 +2,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
 import { angka, persen, rupiah, tanggalPanjang, belumTerisi } from "@/lib/format";
+import { kataKeadaanPpdb } from "@/lib/ppdb";
 import { KepalaHalaman, JudulBagian, Lencana } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
 import type { Metadata } from "next";
@@ -67,6 +68,7 @@ export default async function HalamanPpdb() {
     .filter(Boolean);
 
   const sisa = Math.max(profil.ppdb.kuota - profil.ppdb.terisi, 0);
+  const kataPpdb = kataKeadaanPpdb(profil.ppdb, p);
 
   return (
     <>
@@ -75,14 +77,10 @@ export default async function HalamanPpdb() {
         keterangan="Seluruh tahap pendaftaran dilakukan secara online. Bacalah persyaratan dan jadwal berikut sebelum mengisi formulir."
         anak={
           <div className="flex flex-wrap items-center gap-3">
-            <Lencana
-              jenis={
-                profil.ppdb.dibuka
-                  ? "hijau"
-                  : "abu"
-              }
-            >
-              {profil.ppdb.dibuka ? "Pendaftaran dibuka" : "Pendaftaran belum dibuka"}
+            {/* Lencananya membedakan "belum dibuka" dari "sudah ditutup";
+                kalimatnya disusun di lib/ppdb.ts. */}
+            <Lencana jenis={kataPpdb.dibuka ? "hijau" : "abu"}>
+              {kataPpdb.lencana}
             </Lencana>
             {profil.ppdb.dibuka ? (
               <Link

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
-import { tanggalPanjang } from "@/lib/format";
+import { kataKeadaanPpdb } from "@/lib/ppdb";
 import { KepalaHalaman } from "@/komponen/Bagian";
 import FormulirPpdb from "@/komponen/FormulirPpdb";
 import type { Metadata } from "next";
@@ -21,10 +21,11 @@ export default async function HalamanDaftar() {
   // Pendaftaran yang tertutup ditolak backend juga, jadi halaman ini tidak
   // menampilkan formulirnya sama sekali agar tidak memberi harapan keliru.
   if (!profil.ppdb.dibuka) {
+    const kataPpdb = kataKeadaanPpdb(profil.ppdb, p);
     return (
       <>
         <KepalaHalaman
-          judul="Pendaftaran Belum Dibuka"
+          judul={kataPpdb.lencana}
           keterangan="Formulir pendaftaran hanya dapat diisi selama masa pendaftaran berlangsung."
         />
 
@@ -32,23 +33,12 @@ export default async function HalamanDaftar() {
 
         <div className="wadah py-14">
           <div className="kartu mx-auto max-w-2xl p-7 text-center">
+            {/* Kalimatnya menyesuaikan sebab tertutupnya: belum mulai,
+                sudah selesai, atau ditutup panitia. Sebelumnya ketiganya
+                mendapat kalimat yang sama, "dibuka mulai {tanggal}", dan
+                pada dua keadaan terakhir tanggal itu sudah berlalu. */}
             <p className="text-[15px] leading-relaxed text-teks">
-              {p.ppdb_mulai ? (
-                <>
-                  Pendaftaran peserta didik baru Tahun Ajaran{" "}
-                  <strong>{p.ppdb_tahun}</strong> dibuka mulai{" "}
-                  <strong>{tanggalPanjang(p.ppdb_mulai)}</strong>
-                  {p.ppdb_selesai && (
-                    <>
-                      {" "}
-                      sampai <strong>{tanggalPanjang(p.ppdb_selesai)}</strong>
-                    </>
-                  )}
-                  .
-                </>
-              ) : (
-                "Jadwal pendaftaran akan diumumkan sekolah melalui halaman berita."
-              )}
+              {kataPpdb.kalimat}
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               <Link

@@ -8,6 +8,7 @@ import {
   belumTerisi,
   kePoinTerisi,
 } from "@/lib/format";
+import { kataKeadaanPpdb } from "@/lib/ppdb";
 import { JudulBagian, Lencana, kelasKartuAkhir } from "@/komponen/Bagian";
 import { MunculNaik, MunculLangsung, KartuGerak } from "@/komponen/Gerak";
 import { MasalahJawaban } from "@/komponen/MasalahJawaban";
@@ -63,6 +64,12 @@ export default async function Beranda() {
   ]);
 
   const sisaKuota = Math.max(profil.ppdb.kuota - profil.ppdb.terisi, 0);
+  // Keadaan PPDB ada empat, bukan dua: dibuka, belum mulai, sudah selesai,
+  // dan ditutup panitia. Kalimatnya disusun di lib/ppdb.ts supaya sama di
+  // seluruh halaman. Lihat keterangannya di sana.
+  const kataPpdb = kataKeadaanPpdb(profil.ppdb, p);
+  const keadaanPpdb =
+    profil.ppdb.keadaan ?? (profil.ppdb.dibuka ? "dibuka" : "belum_mulai");
   const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
   // Diperiksa per baris, bukan sekali untuk seluruh nilainya: bila sekolah
   // baru mengisi sebagian poinnya, yang sudah diisi tetap tampil.
@@ -226,15 +233,22 @@ export default async function Beranda() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-600 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
               </span>
-              {profil.ppdb.dibuka ? "Pendaftaran Dibuka" : "Segera Dibuka"}
+              {kataPpdb.lencana}
             </div>
             <p className="text-[15px] font-medium leading-relaxed text-teks">
               Tahun Ajaran <span className="font-bold text-biru-tua">{p.ppdb_tahun || "-"}</span>
               {profil.ppdb.dibuka && p.ppdb_selesai && (
                 <> · Ditutup <span className="font-semibold">{tanggalPanjang(p.ppdb_selesai)}</span></>
               )}
-              {!profil.ppdb.dibuka && p.ppdb_mulai && (
+              {/* Tanggal mulai hanya disebut bila pendaftarannya memang
+                  BELUM mulai. Pada pendaftaran yang sudah lewat atau yang
+                  ditutup panitia, tanggal itu sudah berlalu dan menyebutnya
+                  justru menyesatkan. */}
+              {keadaanPpdb === "belum_mulai" && p.ppdb_mulai && (
                 <> · Mulai {tanggalPanjang(p.ppdb_mulai)}</>
+              )}
+              {keadaanPpdb === "sudah_selesai" && p.ppdb_selesai && (
+                <> · Ditutup {tanggalPanjang(p.ppdb_selesai)}</>
               )}
               {profil.ppdb.kuota > 0 && (
                 <>
@@ -518,12 +532,8 @@ export default async function Beranda() {
             </h2>
             <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-white/80">
               {profil.ppdb.dibuka
-                ? `Isi formulir dan unggah dokumen dari mana saja. Nomor registrasi diterbitkan seketika, dan status verifikasi dapat dipantau kapan pun.`
-                : `Formulir akan terbuka pada ${
-                    p.ppdb_mulai
-                      ? tanggalPanjang(p.ppdb_mulai)
-                      : "jadwal yang diumumkan sekolah"
-                  }. Persyaratannya dapat dibaca lebih dahulu di halaman informasi PPDB.`}
+                ? "Isi formulir dan unggah dokumen dari mana saja. Nomor registrasi diterbitkan seketika, dan status verifikasi dapat dipantau kapan pun."
+                : `${kataPpdb.kalimat} Persyaratannya dapat dibaca lebih dahulu di halaman informasi PPDB.`}
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               <Link

@@ -1683,6 +1683,57 @@ dijawab 429 dengan `Retry-After: 3600`; nomor lain tidak terpengaruh; dan
 kepala karangan yang ditambahi alamat sebenarnya oleh proksi tetap terhitung
 satu pengunjung.
 
+### V. Tiga macam "tutup", tiga kalimat yang berbeda
+
+Keadaan PPDB ditentukan tiga syarat: saklar `ppdb_status`, tanggal
+`ppdb_mulai`, dan tanggal `ppdb_selesai`. Satu saja gagal, pendaftarannya
+tertutup. Tetapi yang disediakan API hanya boolean `dibuka`, dan halaman
+publik memakai SATU kalimat untuk ketiga sebab tertutupnya: "Segera Dibuka,
+mulai {ppdb_mulai}".
+
+Akibatnya pada dua dari tiga keadaan itu kalimatnya menjanjikan tanggal yang
+sudah berlalu. Terlihat saat mematikan PPDB dari panel: judul halamannya
+"Pendaftaran Belum Dibuka", sedangkan bilah berjalan di atasnya pada layar
+yang sama berbunyi "dibuka mulai 1 September 2026" — tanggal yang sudah lewat
+tiga minggu.
+
+API sekarang mengirim `ppdb.keadaan` dengan empat nilai, dan kalimatnya
+menyesuaikan:
+
+| Keadaan | Lencana | Kalimat |
+|---|---|---|
+| `dibuka` | Pendaftaran Dibuka | "sedang dibuka sampai {selesai}" |
+| `belum_mulai` | Segera Dibuka | "dibuka mulai {mulai} sampai {selesai}" |
+| `sudah_selesai` | Pendaftaran Ditutup | "sudah ditutup pada {selesai}" |
+| `ditutup` | Pendaftaran Ditutup | "sedang tidak dibuka. Perhatikan pengumuman sekolah untuk jadwal berikutnya." |
+
+Yang terakhir SENGAJA tidak menyebut tanggal sama sekali: pendaftaran yang
+ditutup panitia di tengah masa pendaftaran tidak punya tanggal yang dapat
+dijanjikan.
+
+Urutan pemeriksaannya juga ditentukan dengan sengaja: **tanggal diperiksa
+lebih dulu daripada saklar.** Sekolah yang lupa menutup saklarnya sesudah
+tanggal selesai tetap mendapat kalimat "sudah ditutup pada ...", bukan "sedang
+tidak dibuka", sebab tanggal lebih menerangkan bagi yang membaca.
+
+Kalimatnya disusun di satu tempat, `lib/ppdb.ts`, sebab dipakai di empat
+tempat: bilah berjalan, lencana beranda, kartu ajakan beranda, dan halaman
+Info PPDB beserta halaman formulirnya. Empat tempat yang menuliskannya
+sendiri-sendiri adalah empat tempat yang akan saling menyimpang.
+
+Lencana dasbor panel ikut dibedakan, sebab tindakan panitianya berbeda: yang
+belum mulai tinggal ditunggu, yang sudah selesai tanggalnya perlu
+diperpanjang, dan yang ditutup manual tinggal dibuka kembali dari menu
+Pengaturan.
+
+Sepuluh uji satuan mengunci aturannya, termasuk kedua keadaan yang
+bertentangan (saklar tutup sementara tanggal juga sudah lewat, dan saklar buka
+sementara tanggal sudah lewat), hari pertama, serta hari terakhir. Keempat
+keadaan diperiksa juga lewat peramban pada basis data sekali pakai: bilah
+berjalan, lencana, judul halaman formulir, dan kalimatnya cocok satu sama lain
+pada keempatnya, dan lencana dasbor panel menampilkan keempat kata yang
+berbeda.
+
 ### U. Menambah pendaftar dari panel, meski PPDB sudah ditutup
 
 Keadaan yang sangat lazim dan sebelumnya tidak tertangani: ada calon yang

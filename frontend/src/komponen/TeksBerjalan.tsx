@@ -1,4 +1,5 @@
 import { tanggalPanjang, angka, belumTerisi } from "@/lib/format";
+import { kataKeadaanPpdb } from "@/lib/ppdb";
 import type { Berita, Profil } from "@/lib/tipe";
 
 /**
@@ -36,17 +37,11 @@ export function TeksBerjalan({
   const sisa = Math.max(profil.ppdb.kuota - profil.ppdb.terisi, 0);
   const kabar: string[] = [];
 
-  if (profil.ppdb.dibuka) {
-    kabar.push(
-      p.ppdb_selesai
-        ? `Pendaftaran peserta didik baru tahun ajaran ${p.ppdb_tahun} sedang dibuka sampai ${tanggalPanjang(p.ppdb_selesai)}.`
-        : `Pendaftaran peserta didik baru tahun ajaran ${p.ppdb_tahun} sedang dibuka.`,
-    );
-  } else if (p.ppdb_mulai) {
-    kabar.push(
-      `Pendaftaran peserta didik baru tahun ajaran ${p.ppdb_tahun} dibuka mulai ${tanggalPanjang(p.ppdb_mulai)}.`,
-    );
-  }
+  // Kalimatnya disusun satu tempat, di lib/ppdb.ts, sebab kalimat yang sama
+  // dipakai juga oleh lencana beranda, kartu ajakan, dan halaman Info PPDB.
+  // Sebelumnya bilah ini menuliskannya sendiri, dan pada pendaftaran yang
+  // ditutup panitia ia mengabarkan tanggal mulai yang sudah lewat.
+  kabar.push(kataKeadaanPpdb(profil.ppdb, p).kalimat);
 
   if (profil.ppdb.kuota > 0) {
     kabar.push(

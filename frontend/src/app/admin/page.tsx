@@ -66,6 +66,14 @@ const RENTANG: Record<
   },
 };
 
+/** Kata untuk lencana keadaan PPDB di kepala dasbor. */
+const KATA_KEADAAN: Record<string, string> = {
+  dibuka: "Pendaftaran dibuka",
+  belum_mulai: "Pendaftaran belum mulai",
+  sudah_selesai: "Pendaftaran sudah ditutup",
+  ditutup: "Pendaftaran ditutup panitia",
+};
+
 export default function HalamanDasbor() {
   const { data, memuat, galat, muatUlang } = useMuat(() => api.dasbor());
   const [rentang, setRentang] = useState<JenisRentang>("tanggal");
@@ -105,7 +113,15 @@ export default function HalamanDasbor() {
         keterangan={`Ringkasan pendaftaran Tahun Ajaran ${data.tahun_ajaran}.`}
         aksi={
           <Lencana jenis={data.ppdb_dibuka ? "hijau" : "abu"}>
-            {data.ppdb_dibuka ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
+            {/* Panitia perlu tahu SEBAB tertutupnya, sebab tindakannya
+                berbeda: yang belum mulai tinggal ditunggu, yang sudah
+                selesai tanggalnya perlu diperpanjang, dan yang ditutup
+                manual tinggal dibuka kembali dari menu Pengaturan. */}
+            {
+              KATA_KEADAAN[
+                data.ppdb_keadaan ?? (data.ppdb_dibuka ? "dibuka" : "ditutup")
+              ]
+            }
           </Lencana>
         }
       />

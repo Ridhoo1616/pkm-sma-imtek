@@ -165,6 +165,7 @@ func (a *Aplikasi) tanganiDasbor(w http.ResponseWriter, r *http.Request) {
 	kirimJSON(w, http.StatusOK, map[string]any{
 		"tahun_ajaran": ta,
 		"ppdb_dibuka":  a.ppdbDibuka(),
+		"ppdb_keadaan": a.keadaanPpdb(),
 		"total":        total,
 		"kuota":        kuotaTotal,
 		"hari_ini":     hariIni,

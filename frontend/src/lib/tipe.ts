@@ -7,6 +7,11 @@ export type Pengaturan = Record<string, string>;
 
 export interface KeadaanPpdb {
   dibuka: boolean;
+  /**
+   * Mengapa tertutup, bukan hanya apakah tertutup: "dibuka",
+   * "belum_mulai", "sudah_selesai", atau "ditutup". Lihat lib/ppdb.ts.
+   */
+  keadaan?: "dibuka" | "belum_mulai" | "sudah_selesai" | "ditutup";
   kuota: number;
   terisi: number;
   jalur: string[];
@@ -162,6 +167,8 @@ export interface Cacah {
 export interface Dasbor {
   tahun_ajaran: string;
   ppdb_dibuka: boolean;
+  /** Sebab tertutupnya, supaya panitia tahu tindakan yang perlu. Lihat lib/ppdb.ts. */
+  ppdb_keadaan?: "dibuka" | "belum_mulai" | "sudah_selesai" | "ditutup";
   total: number;
   kuota: number;
   hari_ini: number;

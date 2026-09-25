@@ -44,10 +44,13 @@ func (a *Aplikasi) tanganiProfil(w http.ResponseWriter, r *http.Request) {
 		"pengaturan": isi,
 		"ppdb": map[string]any{
 			"dibuka": a.ppdbDibuka(),
-			"kuota":  kuota,
-			"terisi": terisi,
-			"jalur":  JalurPendaftaran,
-			"sumber": SumberInformasi,
+			// keadaan memberi tahu MENGAPA tertutup, supaya halaman publik
+			// tidak menjanjikan tanggal yang sudah lewat. Lihat keadaanPpdb.
+			"keadaan": a.keadaanPpdb(),
+			"kuota":   kuota,
+			"terisi":  terisi,
+			"jalur":   JalurPendaftaran,
+			"sumber":  SumberInformasi,
 		},
 	})
 }
