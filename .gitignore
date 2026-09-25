@@ -11,9 +11,16 @@ legacy-php/uploads/*/*
 # Folder unggahan backend Go (isinya sama-sama data pribadi)
 backend/data/
 
-# Cadangan basis data — bisa berisi data pribadi calon peserta didik
+# Cadangan basis data dan arsip unggahan — berisi data pribadi calon peserta
+# didik (NIK, Kartu Keluarga, akta). Pola .dump dan cadangan-*.sql ada di sini
+# karena memindahkan data ke komputer lain memakai keduanya, dan berkasnya
+# sering telanjur diletakkan di dalam folder repositori.
 *.sql.gz
 *.sql.zip
+*.dump
+cadangan-*.sql
+unggahan*.tgz
+unggahan*.tar.gz
 backup/
 dump/
 !backend/migrations/*.sql

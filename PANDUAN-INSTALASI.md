@@ -16,7 +16,7 @@ alamat backend harus dapat dijangkau dari peramban pengunjung.
 
 | Perangkat | Versi | Keterangan |
 |---|---|---|
-| **Go** | 1.24 atau lebih baru | [go.dev/dl](https://go.dev/dl/) |
+| **Go** | 1.27 atau lebih baru | [go.dev/dl](https://go.dev/dl/). `backend/go.mod` menuntut 1.27; Go yang lebih lama akan mengunduh sendiri perkakas 1.27 saat pertama dijalankan, dan itu memerlukan sambungan internet |
 | **Node.js** | 20 atau lebih baru | [nodejs.org](https://nodejs.org/) |
 | **PostgreSQL** | 14 atau lebih baru | [postgresql.org/download](https://www.postgresql.org/download/). Postgres.app dan pemasang resmi keduanya cukup |
 
@@ -241,6 +241,112 @@ di `PATH` proses VS Code, dan VS Code yang dibuka dari Finder tidak mewarisi
 "go not found" dan ESLint mati tanpa pesan, padahal keduanya terpasang.
 Komputer yang memasang Go dan Node lewat Homebrew tidak memerlukan dua baris
 itu dan cukup menghapusnya.
+
+---
+
+## 4c. Menjalankan di laptop kedua milik sendiri
+
+`git clone` hanya memberi **kode**. Tiga hal yang dibutuhkan aplikasi ini
+justru sengaja TIDAK ikut ke repositori, dan itu sebab paling sering situsnya
+tampak rusak di komputer baru:
+
+| Tidak ikut | Sebabnya | Akibat bila dilewatkan |
+| --- | --- | --- |
+| `backend/.env` | memuat kredensial sungguhan, repositori ini publik | backend mati saat dijalankan |
+| isi basis data | memuat data pribadi calon peserta didik | situs hidup tetapi kosong, seluruh pengaturan kembali ke penanda `[kurung siku]` |
+| `backend/data/` | dokumen pribadi pendaftar beserta gambar unggahan | logo, foto gedung, dan foto kepala sekolah tampil sebagai kerangka; dokumen pendaftar tidak dapat dibuka |
+
+### Langkah di laptop baru
+
+```bash
+# 1. Pasang Go, Node, dan PostgreSQL seperti bagian 1
+# 2. Ambil kodenya
+git clone https://github.com/Ridhoo1616/pkm-sma-imtek.git
+cd pkm-sma-imtek
+
+# 3. Basis data kosong. Tabelnya dibuat backend saat pertama dijalankan.
+createdb sma_imtek
+
+# 4. Konfigurasi backend
+cd backend
+cp .env.example .env
+# isi DB_USER, DB_PASS, dan JWT_SECRET. Kunci barunya:
+openssl rand -base64 48
+
+# 5. Konfigurasi frontend
+cd ../frontend
+printf 'NEXT_PUBLIC_API_URL=http://localhost:8090\n' > .env.local
+npm install
+```
+
+Sesudah itu jalankan seperti bagian 3 dan 4: `go run .` di `backend`, lalu
+`npm run dev` di `frontend`.
+
+Sampai di sini situsnya sudah hidup dengan data awal — cukup untuk menulis
+kode, tetapi seluruh isinya masih penanda `[kurung siku]`.
+
+### Membawa data yang sama
+
+Dikerjakan hanya bila laptop kedua perlu menampilkan isi yang sama, misalnya
+untuk demonstrasi PkM. **Di laptop yang sekarang:**
+
+```bash
+cd pkm-sma-imtek
+pg_dump -Fc sma_imtek > ~/Desktop/sma_imtek.dump
+tar -czf ~/Desktop/unggahan.tgz -C backend data
+```
+
+**Di laptop baru**, sesudah langkah 1-5 di atas:
+
+```bash
+cd pkm-sma-imtek
+pg_restore --no-owner --clean --if-exists -d sma_imtek ~/Desktop/sma_imtek.dump
+tar -xzf ~/Desktop/unggahan.tgz -C backend
+```
+
+`--no-owner` diperlukan karena tabelnya dimiliki peran `ppdb` yang belum ada
+di laptop baru; tanpa itu `pg_restore` melaporkan galat pemilik pada hampir
+setiap tabel. `--clean --if-exists` membuang tabel yang sudah dibuat backend
+saat pertama dijalankan, sehingga barisnya tidak bertumpuk.
+
+Migrasi di dalam dump sudah tercatat selesai, jadi backend tidak
+menjalankannya ulang. Bila kode di laptop baru lebih baru daripada dump-nya,
+migrasi yang belum ada di sana dijalankan saat backend dinyalakan.
+
+> **Kedua berkas itu memuat data pribadi**: NIK, Kartu Keluarga, akta, dan
+> nomor telepon orang tua. Pindahkan lewat flash disk atau kabel, **bukan**
+> lewat WhatsApp, surel, atau penyimpanan awan. Hapus dari kedua Desktop
+> sesudah selesai, dan jangan pernah meletakkannya di dalam folder
+> repositori.
+
+### Yang berbeda di laptop baru
+
+- **`JWT_SECRET` yang berbeda tidak masalah**, dan sebaiknya memang berbeda.
+  Akibatnya hanya satu: sesi masuk dari laptop lain tidak berlaku di sini.
+- **Sandi akun ikut berpindah** bersama dump-nya, sebab hash bcrypt-nya ada
+  di dalam tabel `users`. Tanpa dump, akunnya kembali ke `admin` / `admin123`
+  dan wajib diganti.
+- **Dua setelan VS Code menunjuk folder di komputer pembuat**: `go.goroot` dan
+  `eslint.runtime` di `.vscode/settings.json` menunjuk `~/.local`. Bila di
+  laptop baru Go dan Node dipasang lewat Homebrew atau pemasang resmi, kedua
+  baris itu **dihapus** — bila dibiarkan, ekstensi Go melaporkan
+  "go not found" dan ESLint mati tanpa pesan.
+- **Tugas VS Code di `.vscode/tasks.json` ditulis untuk macOS** (`open`,
+  `lsof`, dan letak Postgres.app). Di Windows, pakai perintah terminal pada
+  bagian 3 dan 4, bukan menu tugasnya.
+
+### Bila kedua laptop dipakai bergantian
+
+Kode dipindahkan lewat Git, bukan lewat penyalinan folder:
+
+```bash
+git pull origin dev     # sebelum mulai bekerja
+git push origin dev     # sesudah selesai
+```
+
+`backend/.env` tetap tinggal di masing-masing laptop dan tidak pernah ikut.
+Basis datanya juga terpisah: apa yang diisi lewat panel di satu laptop tidak
+muncul di laptop lain kecuali dump-nya dipindahkan lagi.
 
 ---
 
