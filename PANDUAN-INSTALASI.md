@@ -256,9 +256,18 @@ itu dan cukup menghapusnya.
    ubah `ppdb_status` menjadi `buka` saat pendaftaran benar-benar dimulai.
    Status `tutup` menutup jalur API-nya sekaligus, bukan hanya menyembunyikan
    tombolnya.
-4. **Buat akun operator** untuk panitia lain, supaya akun admin tidak dipakai
+4. **Isi Angka Sekolah** pada menu *Pengaturan*: `jumlah_siswa`,
+   `jumlah_guru`, dan `jumlah_rombel`. Ketiganya tampil pada sorotan beranda
+   sebagai angka yang merangkak dari nol, dan selama masih berupa
+   `[kurung siku]`, ketiganya **tidak ditampilkan sama sekali** — bukan
+   ditampilkan sebagai "0". Angka ini tidak dapat dihitung sistem: tidak ada
+   tabel siswa di sini, dan tabel tenaga pendidik hanya memuat guru yang
+   sekolah pilih untuk ditampilkan di halaman profil, bukan seluruh
+   pegawainya. Jumlah ekskul, peminatan, dan fasilitas di sebelahnya dihitung
+   sendiri dari datanya, jadi tidak perlu diisi di sini.
+5. **Buat akun operator** untuk panitia lain, supaya akun admin tidak dipakai
    bersama-sama.
-5. **Unggah gambar sekolah** pada bagian *Gambar* di menu *Pengaturan*: logo,
+6. **Unggah gambar sekolah** pada bagian *Gambar* di menu *Pengaturan*: logo,
    foto halaman depan, foto kepala sekolah, dan bagan struktur organisasi.
    Selama fotonya belum ada, halaman publik menampilkan kerangka berukuran
    sama yang menyebutkan perbandingan sisi dan ukuran piksel yang diharapkan,
@@ -277,20 +286,20 @@ itu dan cukup menghapusnya.
    Karena foto gedungnya dipudarkan sampai 20 persen lalu ditumpuk peredam,
    foto apa pun yang memperlihatkan bangunan sekolah sudah memadai; tidak
    perlu foto yang khusus disiapkan.
-6. **Isi menu Profil Sekolah, Akademik, dan Kesiswaan** di panel:
+7. **Isi menu Profil Sekolah, Akademik, dan Kesiswaan** di panel:
 
    | Menu panel | Mengisi halaman publik |
    |---|---|
    | *Halaman Profil* | Kurikulum, OSIS, Pendidikan Karakter. Ketiganya sudah tersedia sebagai kerangka dan menunggu naskah dari sekolah |
    | *Tenaga Pendidik* | Halaman Tenaga Pendidik; yang berkategori Pimpinan juga tampil pada halaman Struktur Organisasi |
    | *Kalender Akademik* | Halaman Kalender Akademik |
-   | *Kegiatan Siswa* | Halaman Ekstrakurikuler |
+   | *Kegiatan Siswa* | Halaman Ekstrakurikuler; yang berjenis Ekstrakurikuler juga dihitung sebagai angka *Ekskul* pada sorotan beranda |
    | *Perpustakaan* | Halaman Perpustakaan Digital |
 
    Prestasi Siswa tidak punya menu sendiri: tulis capaiannya lewat menu
    *Berita* dengan kategori **Prestasi**, dan halaman Prestasi Siswa
    mengambilnya dari sana.
-7. **Ketahui apa yang diperiksa sistem pada NISN dan NIK.** Sistem ini
+8. **Ketahui apa yang diperiksa sistem pada NISN dan NIK.** Sistem ini
    **tidak** mencocokkan keduanya ke basis data pemerintah, dan panitia
    sebaiknya tidak menjanjikan begitu kepada orang tua. NIK hanya dapat
    diperiksa ke Dukcapil lewat perjanjian kerja sama resmi, dan laman
@@ -303,7 +312,7 @@ itu dan cukup menghapusnya.
    NIK, dan pesannya menyebut bagian mana yang salah. Verifikasi sebenarnya
    tetap dilakukan panitia dengan membandingkan Kartu Keluarga dan rapor yang
    diunggah.
-8. **Isi `tautan_elearning` dan `tautan_jadwal`** pada menu *Pengaturan* bila
+9. **Isi `tautan_elearning` dan `tautan_jadwal`** pada menu *Pengaturan* bila
    sekolah sudah memakai layanan belajar daring, misalnya Google Classroom
    atau Moodle, dan sudah punya berkas jadwal pelajaran. Keduanya berupa
    pintu masuk ke layanan yang sudah ada, bukan sistem yang dibangun di sini.

@@ -213,7 +213,7 @@ pemeriksaan formulir demo (`demo-baru/js/05-ppdb.js`).
 | Galeri | `/admin/galeri` | Unggah, ubah, hapus foto beserta kategorinya |
 | Fasilitas | `/admin/fasilitas` | Kelola sarana beserta gambar dan urutannya |
 | Pesan Masuk | `/admin/pesan` | Pesan dari halaman kontak, tanda baca, balas lewat email/WhatsApp |
-| Pengaturan | `/admin/pengaturan` | Seluruh isi situs publik, dikelompokkan menjadi enam bagian |
+| Pengaturan | `/admin/pengaturan` | Seluruh isi situs publik, dikelompokkan menjadi sembilan bagian |
 | Notifikasi | `/admin/notifikasi` | Pesan WhatsApp yang disusun sistem, ditinjau lalu dikirim |
 | Bank Soal | `/admin/soal` | Soal pilihan ganda untuk tes seleksi |
 | Tes Seleksi | `/admin/ujian` | Jadwal tes, durasi, nilai minimum, dan rekap hasilnya |
@@ -286,10 +286,46 @@ Jawab. Bila nomor WhatsApp belum diisi sekolah, tombolnya tidak hilang; yang
 hilang hanya pilihan WhatsApp-nya, karena penunjuk alurnya tetap berguna.
 
 **Penunjuk alur** berupa bilah lima tahap di atas setiap halaman PPDB. Tahap
-yang sudah lewat ditandai centang, tahap sekarang disorot, dan tahap yang
-belum tercapai dibiarkan pudar. Tahap "Isi formulir" tidak dapat diklik bila
-pendaftaran sedang ditutup, jadi pengunjung tidak dibawa ke halaman yang pasti
-menolaknya.
+sekarang disorot, tahap yang tidak dapat dibuka dibiarkan pudar, dan
+**tidak ada tanda centang di sana** — lihat bagian berikutnya.
+
+#### Penunjuk alur tidak boleh mengaku tahu apa yang sudah dikerjakan orang
+
+Bentuk pertamanya memberi centang pada setiap tahap sebelum tahap sekarang.
+Bunyinya masuk akal sampai dicoba dari sisi pengunjung: membuka halaman
+**Verifikasi Berkas** menampilkan centang pada "Isi formulir" kepada orang
+yang belum pernah mengisi formulirnya, dan pada masa pendaftaran ditutup,
+kepada orang yang memang **tidak bisa** mengisinya. Bilah ini dirender server
+dan hanya mengetahui HALAMAN yang sedang dibuka, bukan riwayat pengunjungnya,
+jadi centangnya menyatakan sesuatu yang tidak diketahuinya. Sekarang yang
+ditampilkan nomor tahapnya saja.
+
+Dua kesalahan lain dibetulkan sekaligus, ketiganya dilaporkan user dari satu
+tangkapan layar:
+
+1. **Gayanya mengikuti dapat atau tidaknya dibuka, bukan letaknya.** Semula
+   tahap sesudah tahap sekarang selalu pudar meski tautannya hidup, sehingga
+   yang tampak mati sebenarnya dapat diklik — dan "Isi formulir" pada masa
+   tutup tampak hidup padahal menolak. Sekarang satu penanda, `bisaDibuka`,
+   menentukan gaya dan kelayakan klik sekaligus, jadi keduanya tidak mungkin
+   berselisih lagi.
+2. **`ppdbDibuka` dijadikan prop WAJIB, tanpa nilai bawaan.** Nilai bawaannya
+   dulu `true`, dan dua halaman lupa meneruskannya: Cek Status dan Tes
+   Seleksi. Di sanalah "Isi formulir" tetap dapat diklik meski pendaftaran
+   sudah ditutup. Dibuat wajib supaya halaman yang lupa **gagal saat
+   disusun**, bukan salah diam-diam — jenis kesalahan yang tidak akan
+   terlihat sampai ada yang melaporkannya.
+3. **Tahap yang sedang dibuka tidak ditandai `aria-disabled`** walau
+   pendaftarannya tutup. Halaman `/ppdb/daftar` tetap terbuka pada masa tutup
+   — isinya berganti menjadi keterangan penutupan — jadi menandainya "tidak
+   tersedia" sementara pengunjung berdiri di atasnya membingungkan pembaca
+   layar.
+
+Tahap yang tidak dapat dibuka menerangkan sebabnya lewat `title` beserta
+`aria-disabled`, sehingga pengunjung tidak dibawa ke halaman yang pasti
+menolaknya dan tetap tahu alasannya. Hanya tahap "Isi formulir" yang dapat
+tertutup; tahap lainnya boleh dibuka kapan pun, sebab yang sudah mendaftar
+tetap perlu memantau statusnya walau pendaftarannya sudah ditutup.
 
 **Arahan langkah berikutnya** pada halaman Info PPDB, yang isinya mengikuti
 keadaan: terbuka mengarahkan ke formulir, tertutup menjelaskan apa yang masih
@@ -1447,8 +1483,14 @@ pada kartu 358 piksel, rata di kedua sisi, 9 pemeriksaan lulus.
 ### N. Peta lokasi dan pengukur jarak
 
 Beranda memuat peta lokasi sekolah beserta tombol yang memungkinkan
-pengunjung mengukur jarak dan waktu tempuh dari rumahnya, untuk tiga moda:
-mobil, motor, dan angkutan umum.
+pengunjung mengukur jarak dan waktu tempuh dari rumahnya, untuk empat moda:
+mobil, jalan kaki, motor, dan angkutan umum.
+
+Jalan kaki diminta user dan bukan pelengkap: sebagian calon siswa SMA IMTEK
+tinggal di lingkungan sekitar sekolah dan memang berjalan kaki, dan bagi
+mereka angka "12 menit dengan mobil" tidak menjawab apa pun. Moda ini
+diletakkan kedua, langsung sesudah mobil, karena jaraknya yang paling
+menentukan keputusan justru bagi yang paling dekat.
 
 **Perhitungannya tidak dikerjakan situs ini, dan itu keputusan yang
 disengaja.** Menghitung jarak jalan beserta estimasi waktu memerlukan layanan
@@ -1517,9 +1559,8 @@ sebagus apa. Karena judul PkM ini tentang **promosi**, urutannya dibalik.
 Urutan beranda sekarang:
 
 1. **Sorotan sekolah** — nama, status, akreditasi, NPSN, semboyan, letak, foto
-   gedung sekolah, dan tiga angka yang bisa diperiksa (jumlah peminatan,
-   jumlah fasilitas, peringkat akreditasi). Tombol utamanya "Kenali Sekolah
-   Kami", bukan "Daftar".
+   gedung sekolah, dan angka sekolah yang bisa diperiksa (lihat di bawah).
+   Tombol utamanya "Kenali Sekolah Kami", bukan "Daftar".
 2. **Bilah keadaan PPDB** — satu baris: dibuka atau belum, tahun ajaran,
    tanggal penutupan, sisa kuota, beserta tombol Daftar dan Cek Status.
    Informasinya tidak hilang, hanya tidak lagi mengambil alih bagian atas.
@@ -1545,6 +1586,66 @@ terakhirnya bisa tersisa satu kartu sendirian beserta ruang kosong selebar dua
 kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
+
+### P2. Angka sekolah di beranda, beserta hitungannya dari nol
+
+Sorotan beranda memuat sebaris angka sekolah. Yang ditampilkan bukan sekadar
+angka, melainkan **angka yang asalnya dapat dipertanggungjawabkan**, dan
+asalnya ada dua macam:
+
+| Angka | Asal | Sebabnya |
+| --- | --- | --- |
+| Ekskul | dihitung dari tabel `kegiatan_siswa` | tabelnya memang daftar lengkapnya |
+| Peminatan | dihitung dari tabel `jurusan` | sama |
+| Fasilitas | dihitung dari tabel `fasilitas` | sama |
+| Akreditasi | pengaturan `akreditasi` | bukan angka, tidak dihitung |
+| Siswa | pengaturan `jumlah_siswa` (migrasi 019) | **tidak dapat dihitung** |
+| Guru | pengaturan `jumlah_guru` (migrasi 019) | **tidak dapat dihitung** |
+| Rombel | pengaturan `jumlah_rombel` (migrasi 019) | **tidak dapat dihitung** |
+
+Tiga yang terakhir sengaja TIDAK dihitung dari basis data, dan itu bukan
+kemalasan:
+
+- **Sistem ini tidak punya tabel siswa.** Yang ada tabel `pendaftar`, yaitu
+  calon peserta didik pada satu tahun ajaran. Menghitung "jumlah siswa" dari
+  sana akan menampilkan dua belas, padahal sekolahnya berisi ratusan.
+- **Tabel `tenaga_pendidik` ada, tetapi isinya yang DITAMPILKAN sekolah** di
+  halaman profil, bukan seluruh pegawainya. Sekolah dengan tiga puluh guru
+  bisa saja memasang sepuluh. Memakai hitungan barisnya sebagai angka utama
+  di beranda justru memamerkan angka yang lebih kecil daripada kenyataannya —
+  merugikan sekolah pada halaman yang gunanya promosi.
+
+Ketiganya diisi penanda `[kurung siku]` oleh migrasinya, dan **angka yang
+masih penanda tidak ditampilkan sama sekali** — bukan ditampilkan sebagai
+"0". Halaman promosi tidak boleh memamerkan angka kosong maupun angka contoh.
+Pemeriksaannya memakai `belumTerisi()` yang sudah dipakai seluruh pengaturan
+lain. Diisi lewat menu Pengaturan di panel admin, kelompok **Angka Sekolah**.
+
+Karena jumlah selnya bergantung pada apa yang sudah diisi sekolah — bisa tiga,
+bisa tujuh — barisnya tidak memakai grid tiga kolom melainkan flex yang
+membungkus, dengan setiap sel melebar mengisi barisnya sendiri. Dengan grid,
+baris terakhir yang tidak penuh menganga sebagai kotak kelabu; sempat terjadi
+saat angkanya tujuh, dan tampak seperti kerusakan tata letak. Pembatas
+antarselnya dari `gap-px` di atas latar `bg-garis`, bukan `divide-x`, sebab
+`divide-x` hanya menggambar pembatas mendatar sehingga baris kedua tampak
+menempel.
+
+**Angkanya merangkak dari nol** saat barisnya masuk pandangan, diminta user.
+`komponen/AngkaNaik.tsx` mengerjakannya dengan tiga sikap yang perlu dicatat:
+
+1. **Keadaan awalnya nilai AKHIR, bukan nol.** Yang dirender server dan yang
+   dilihat pengunjung tanpa JavaScript adalah angka sungguhannya. Kalau
+   keadaan awalnya nol, halaman tanpa JavaScript akan memamerkan "0 Siswa" —
+   kesalahan yang jauh lebih buruk daripada kehilangan animasinya. Animasi
+   memulai ulang dari nol hanya setelah pemantau perpotongan benar-benar
+   berjalan.
+2. **`prefers-reduced-motion` dihormati**: angkanya langsung tampil utuh.
+3. **Hanya sekali**, dijaga ref `sudahJalan`, supaya angkanya tidak
+   merangkak ulang setiap kali pengunjung menggulir naik-turun melewatinya.
+
+Lamanya 900 ms dengan pelandaian `easeOutCubic` — cepat, sesuai permintaan
+user, dan berhenti tepat di nilai akhirnya, bukan di angka pembulatan yang
+hampir tepat.
 
 ### Q. Tautan WhatsApp beserta pesan bawaannya
 
@@ -2306,6 +2407,19 @@ jawabannya tidak terlindungi seperti pada aplikasi sebenarnya. Hal yang sama
 berlaku untuk unggah gambar sekolah: pada aplikasi berkasnya disimpan server,
 sedangkan di demo tombolnya menjelaskan bahwa berkasnya tidak dapat disimpan.
 Kedua batasan itu disebutkan, bukan disembunyikan.
+
+Termasuk 21 pemeriksaan untuk penunjuk alur dan angka sekolah, dijalankan
+pada keadaan pendaftaran DITUTUP karena di sanalah kesalahannya tampak:
+keempat halaman PPDB diperiksa satu-satu, dan pada tiap halaman dipastikan
+tahap "Isi formulir" bukan tautan, tidak ada satu pun tanda centang, tahap
+yang sedang dibuka tidak ditandai tidak-tersedia, dan tahap selain formulir
+tetap dapat dibuka. Angka sekolah diperiksa dua kali: pada basis data uji
+yang ketiga pengaturannya terisi, angkanya harus benar-benar merangkak —
+jejaknya dipetik setiap 90 ms dan harus memuat lebih dari dua nilai berbeda,
+sebab pemeriksaan yang hanya membaca nilai akhir akan lulus walau animasinya
+mati — lalu berhenti tepat di nilai akhirnya; pada pemasangan sungguhan yang
+ketiganya masih penanda, ketiganya harus TIDAK tampil sementara yang dihitung
+dari basis data tetap tampil, dan tidak boleh ada baris yang tidak penuh.
 
 Backend bersih dari `go vet` dan `gofmt`; frontend bersih dari `eslint` dan
 `tsc`.

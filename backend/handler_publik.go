@@ -21,6 +21,8 @@ var pengaturanPublik = []string{
 	"foto_kepsek", "struktur_organisasi", "struktur_keterangan",
 	"tautan_elearning", "tautan_jadwal", "jadwal_keterangan",
 	"perpustakaan_keterangan",
+	// Angka sekolah pada kartu sorotan beranda. Lihat migrasi 019.
+	"jumlah_siswa", "jumlah_guru", "jumlah_rombel",
 	"ppdb_status", "ppdb_tahun", "ppdb_mulai", "ppdb_selesai",
 	"ppdb_pengumuman", "ppdb_kuota", "ppdb_biaya", "ppdb_syarat", "ppdb_alur",
 }

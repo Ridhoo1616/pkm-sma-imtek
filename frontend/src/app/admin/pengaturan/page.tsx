@@ -31,6 +31,12 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
     ],
   },
   {
+    judul: "Angka Sekolah",
+    keterangan:
+      "Tampil sebagai angka besar pada kartu sorotan di beranda. Ketiganya tidak dapat dihitung sistem: tidak ada tabel siswa, dan daftar tenaga pendidik hanya memuat guru yang ditampilkan di halaman profil, bukan seluruh pegawai. Isi angkanya saja, tanpa kata; yang dibiarkan berpenanda tidak ditampilkan di beranda. Jumlah ekstrakurikuler, peminatan, dan fasilitas dihitung sendiri dari datanya.",
+    kunci: ["jumlah_siswa", "jumlah_guru", "jumlah_rombel"],
+  },
+  {
     judul: "Naskah Profil",
     keterangan:
       "Isi halaman Profil. Untuk misi dan keunggulan, tulis satu poin per baris. Untuk sambutan dan sejarah, pisahkan paragraf dengan baris kosong. Keunggulan tampil di beranda sebagai alasan memilih sekolah ini; selama masih bertanda [kurung siku], bagiannya tidak tampil ke pengunjung.",
@@ -170,6 +176,9 @@ const TANGGAL = ["ppdb_mulai", "ppdb_selesai", "ppdb_pengumuman"];
 function labelDari(kunci: string): string {
   const khusus: Record<string, string> = {
     npsn: "NPSN",
+    jumlah_siswa: "Jumlah siswa",
+    jumlah_guru: "Jumlah guru & tenaga kependidikan",
+    jumlah_rombel: "Jumlah rombongan belajar",
     ppdb_status: "Status pendaftaran",
     ppdb_tahun: "Tahun ajaran",
     ppdb_mulai: "Tanggal mulai pendaftaran",

@@ -28,9 +28,19 @@ import type { Pengaturan } from "@/lib/tipe";
  * Maps-nya — jadi tidak perlu mengetik alamat rumah sama sekali.
  */
 
-/** Tiga moda yang masuk akal di sini. `two-wheeler` untuk sepeda motor. */
+/**
+ * Empat moda yang masuk akal di sini. `two-wheeler` untuk sepeda motor,
+ * `walking` untuk jalan kaki.
+ *
+ * Jalan kaki ditambahkan atas permintaan user, dan memang pantas: sekolah
+ * ini di tengah permukiman, jadi sebagian pendaftarnya memang berjalan kaki.
+ * Ia ditaruh di urutan kedua, bukan pertama, sebab yang pertama menjadi
+ * tombol utama, dan moda yang paling banyak dipakai orang tua yang mengukur
+ * jarak tetap kendaraan.
+ */
 const MODA = [
   { kode: "driving", label: "Mobil" },
+  { kode: "walking", label: "Jalan kaki" },
   { kode: "two-wheeler", label: "Motor" },
   { kode: "transit", label: "Angkutan umum" },
 ];

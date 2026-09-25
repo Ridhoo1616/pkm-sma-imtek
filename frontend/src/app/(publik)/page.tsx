@@ -9,6 +9,7 @@ import {
   kePoinTerisi,
 } from "@/lib/format";
 import { kataKeadaanPpdb } from "@/lib/ppdb";
+import { AngkaNaik } from "@/komponen/AngkaNaik";
 import { JudulBagian, Lencana, kelasKartuAkhir } from "@/komponen/Bagian";
 import { MunculNaik, MunculLangsung, KartuGerak } from "@/komponen/Gerak";
 import { MasalahJawaban } from "@/komponen/MasalahJawaban";
@@ -42,7 +43,7 @@ export default async function Beranda() {
   const p = profil.pengaturan;
 
   // Kegagalan satu bagian tidak boleh mengosongkan seluruh beranda.
-  const [jurusan, fasilitas, berita, prestasi] = await Promise.all([
+  const [jurusan, fasilitas, berita, prestasi, kegiatan] = await Promise.all([
     api
       .jurusan()
       .then((h) => h.data)
@@ -61,6 +62,11 @@ export default async function Beranda() {
       .berita("?kategori=Prestasi&per_halaman=3")
       .then((h) => h.data)
       .catch((): Berita[] => []),
+    // Dipakai menghitung jumlah ekstrakurikuler pada angka sekolah.
+    api
+      .kegiatanSiswa()
+      .then((h) => h.data)
+      .catch((): { jenis: string }[] => []),
   ]);
 
   const sisaKuota = Math.max(profil.ppdb.kuota - profil.ppdb.terisi, 0);
@@ -75,12 +81,33 @@ export default async function Beranda() {
   // baru mengisi sebagian poinnya, yang sudah diisi tetap tampil.
   const keunggulan = kePoinTerisi(p.keunggulan);
 
-  // Angka sekolah: hanya yang benar-benar terhitung dari basis data. Yang
-  // isinya masih nol tidak ditampilkan sebagai "0", tetapi dibuang dari
-  // daftar, supaya halaman promosi tidak memamerkan angka kosong.
+  /*
+   * Angka sekolah pada kartu sorotan.
+   *
+   * Dua sumbernya, dan bedanya penting. Siswa, guru, dan rombel DIISI
+   * sekolah lewat pengaturan, sebab tidak dapat dihitung: sistem ini tidak
+   * punya tabel siswa, dan tabel tenaga_pendidik hanya memuat guru yang
+   * ditampilkan di halaman profil, bukan seluruh pegawainya. Ekskul,
+   * peminatan, dan fasilitas DIHITUNG, sebab tabelnya memang daftar
+   * lengkapnya. Keterangannya di migrations/019_angka_sekolah.sql.
+   *
+   * Yang nol atau masih penanda dibuang dari daftar, bukan ditampilkan
+   * sebagai "0": halaman promosi tidak boleh memamerkan angka kosong.
+   */
+  const angkaPengaturan = (kunci: string) => {
+    const n = Number((p[kunci] ?? "").replace(/[^0-9]/g, ""));
+    return belumTerisi(p[kunci] ?? "") || !Number.isFinite(n) ? 0 : n;
+  };
   const angkaSekolah = [
-    { k: "Peminatan", v: jurusan.length, satuan: "pilihan" },
-    { k: "Fasilitas", v: fasilitas.length, satuan: "sarana" },
+    { k: "Siswa", v: angkaPengaturan("jumlah_siswa") },
+    { k: "Guru", v: angkaPengaturan("jumlah_guru") },
+    { k: "Rombel", v: angkaPengaturan("jumlah_rombel") },
+    {
+      k: "Ekskul",
+      v: kegiatan.filter((g) => g.jenis === "Ekstrakurikuler").length,
+    },
+    { k: "Peminatan", v: jurusan.length },
+    { k: "Fasilitas", v: fasilitas.length },
   ].filter((a) => a.v > 0);
 
   return (
@@ -196,18 +223,32 @@ export default async function Beranda() {
                 </div>
               )}
 
-              <dl className="grid grid-cols-3 divide-x divide-garis border-t border-garis text-center text-teks">
+              {/* Pembatas antarsel dibuat dari gap-px di atas latar garis,
+                  bukan dari divide-x. Jumlah angkanya berubah-ubah menurut
+                  apa yang sudah diisi sekolah, jadi barisnya bisa
+                  membungkus, dan divide-x hanya menggambar pembatas
+                  mendatar — barisnya kedua tampak menempel.
+
+                  Flex membungkus, BUKAN grid tiga kolom. Jumlah selnya
+                  bergantung pada isian sekolah, jadi baris terakhir sering
+                  tidak penuh: dengan grid, sisanya menganga sebagai kotak
+                  kelabu. Di sini setiap sel melebar mengisi barisnya
+                  sendiri, berapa pun yang tersisa. */}
+              <dl className="flex flex-wrap gap-px border-t border-garis bg-garis text-center text-teks">
                 {angkaSekolah.map((a) => (
-                  <div key={a.k} className="px-3 py-4">
-                    <dd className="text-2xl font-bold text-biru-tua tabular-nums">
-                      {angka(a.v)}
+                  <div
+                    key={a.k}
+                    className="grow basis-[calc(33.333%-1px)] bg-white px-3 py-4"
+                  >
+                    <dd className="text-2xl font-bold text-biru-tua">
+                      <AngkaNaik nilai={a.v} />
                     </dd>
                     <dt className="mt-0.5 text-xs font-semibold text-samar">
                       {a.k}
                     </dt>
                   </div>
                 ))}
-                <div className="px-3 py-4">
+                <div className="grow basis-[calc(33.333%-1px)] bg-white px-3 py-4">
                   <dd className="text-2xl font-bold text-biru-tua">
                     {p.akreditasi || "-"}
                   </dd>

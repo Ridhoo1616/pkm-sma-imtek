@@ -72,7 +72,7 @@ export default async function HalamanDaftar() {
         keterangan={`Tahun Ajaran ${p.ppdb_tahun ?? ""}. Isian bertanda bintang wajib diisi. Pengisian dibagi menjadi lima langkah, dan Anda dapat berpindah antar langkah kapan saja sebelum mengirim.`}
       />
 
-      <PenunjukAlur aktif="daftar" />
+      <PenunjukAlur aktif="daftar" ppdbDibuka />
 
       <div className="wadah py-12">
         <div className="mx-auto max-w-4xl">
