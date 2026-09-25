@@ -157,6 +157,7 @@ const GAYA_LENCANA: Record<JenisLencana, string> = {
   // dan tahap pembayaran. Keduanya tetap berisian padat, hanya lebih terang.
   terang: "bg-biru-muda text-biru-tua",
   putih: "bg-white text-biru-tua",
+  kaca: "bg-white/15 text-white ring-1 ring-white/20 backdrop-blur-md",
 };
 
 export function Lencana({

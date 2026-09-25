@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSesi } from "@/komponen/Sesi";
-import { GalatApi } from "@/lib/api";
+import { api, GalatApi, urlUnggahan } from "@/lib/api";
 import { Teks, Tombol } from "@/komponen/Medan";
 import { PesanGalat } from "@/komponen/Memuat";
 import { MunculLangsung } from "@/komponen/Gerak";
@@ -16,6 +16,23 @@ export default function HalamanMasuk() {
   const [sandi, setSandi] = useState("");
   const [galat, setGalat] = useState("");
   const [mengirim, setMengirim] = useState(false);
+
+  const [logo, setLogo] = useState<string>("");
+  const [namaSingkat, setNamaSingkat] = useState<string>("SI");
+
+  // Ambil profil sekolah untuk logo
+  useEffect(() => {
+    api.profil()
+      .then((p) => {
+        if (p.pengaturan.logo) {
+          setLogo(urlUnggahan("profil", p.pengaturan.logo));
+        }
+        if (p.pengaturan.nama_singkat) {
+          setNamaSingkat(p.pengaturan.nama_singkat.slice(0, 2).toUpperCase());
+        }
+      })
+      .catch(() => { });
+  }, []);
 
   // Petugas yang sudah punya sesi tidak perlu melihat formulir ini lagi.
   useEffect(() => {
@@ -41,9 +58,24 @@ export default function HalamanMasuk() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-biru-tua px-4 py-12">
-      <MunculLangsung className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center bg-biru-tua px-4 py-12 overflow-hidden">
+      {/* Vektor Hiasan Latar (Glowing Blobs) */}
+      <div className="absolute -top-[20%] -left-[10%] h-[600px] w-[600px] rounded-full bg-biru blur-[120px] opacity-70" aria-hidden="true" />
+      <div className="absolute -bottom-[20%] -right-[10%] h-[700px] w-[700px] rounded-full bg-emas blur-[150px] opacity-20" aria-hidden="true" />
+
+      <MunculLangsung className="relative z-10 w-full max-w-md">
         <div className="mb-7 text-center">
+          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-white p-3 shadow-lg ring-1 ring-white/20">
+            {logo ? (
+              <img
+                src={logo}
+                alt="Logo Sekolah"
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <span className="text-2xl font-bold text-biru-tua">{namaSingkat}</span>
+            )}
+          </div>
           <h1 className="text-2xl font-bold text-white">Masuk Petugas</h1>
           <p className="mt-2 text-sm text-white/70">
             Panel pengelolaan pendaftaran dan isi situs sekolah.

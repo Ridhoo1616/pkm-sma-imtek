@@ -15,61 +15,66 @@ import { Memuat } from "@/komponen/Memuat";
  * satu-satunya pengaman.
  */
 
+import { 
+  LayoutDashboard, Users, TrendingUp, Bell, Database, 
+  CheckSquare, Receipt, LibraryBig, School, 
+  MonitorSmartphone, Briefcase, Building, 
+  Calendar, Activity, Book, Newspaper, 
+  Image as ImageIcon, MessageCircleQuestion, Mail, 
+  Settings, UserCog, GraduationCap, type LucideIcon 
+} from "lucide-react";
+
 /**
  * Menu panel, dikelompokkan menurut pekerjaan panitia.
- *
- * Sebelumnya menunya berupa satu daftar rata. Setelah menu Profil Sekolah,
- * Akademik, dan Kesiswaan ditambahkan, daftarnya menjadi dua puluh butir dan
- * tidak lagi bisa dibaca sekali lihat, jadi sekarang diberi judul kelompok.
  */
 const KELOMPOK: {
   judul: string;
-  butir: { jalur: string; label: string; khususAdmin: boolean }[];
+  butir: { jalur: string; label: string; khususAdmin: boolean; ikon: LucideIcon }[];
 }[] = [
   {
     judul: "Pendaftaran",
     butir: [
-      { jalur: "/admin", label: "Dasbor", khususAdmin: false },
-      { jalur: "/admin/pendaftar", label: "Pendaftar", khususAdmin: false },
-      { jalur: "/admin/laporan", label: "Laporan Promosi", khususAdmin: false },
-      { jalur: "/admin/notifikasi", label: "Notifikasi", khususAdmin: false },
-      { jalur: "/admin/soal", label: "Bank Soal", khususAdmin: false },
-      { jalur: "/admin/ujian", label: "Tes Seleksi", khususAdmin: false },
-      { jalur: "/admin/biaya", label: "Rincian Biaya", khususAdmin: true },
-      { jalur: "/admin/jurusan", label: "Peminatan", khususAdmin: true },
-      { jalur: "/admin/sekolah", label: "Sekolah Asal", khususAdmin: false },
+      { jalur: "/admin", label: "Dasbor", khususAdmin: false, ikon: LayoutDashboard },
+      { jalur: "/admin/pendaftar", label: "Pendaftar", khususAdmin: false, ikon: Users },
+      { jalur: "/admin/laporan", label: "Laporan Promosi", khususAdmin: false, ikon: TrendingUp },
+      { jalur: "/admin/notifikasi", label: "Notifikasi", khususAdmin: false, ikon: Bell },
+      { jalur: "/admin/soal", label: "Bank Soal", khususAdmin: false, ikon: Database },
+      { jalur: "/admin/ujian", label: "Tes Seleksi", khususAdmin: false, ikon: CheckSquare },
+      { jalur: "/admin/biaya", label: "Rincian Biaya", khususAdmin: true, ikon: Receipt },
+      { jalur: "/admin/jurusan", label: "Peminatan", khususAdmin: true, ikon: LibraryBig },
+      { jalur: "/admin/sekolah", label: "Sekolah Asal", khususAdmin: false, ikon: School },
     ],
   },
   {
     judul: "Profil Sekolah",
     butir: [
-      { jalur: "/admin/halaman", label: "Halaman Profil", khususAdmin: false },
-      { jalur: "/admin/tenaga", label: "Tenaga Pendidik", khususAdmin: false },
-      { jalur: "/admin/fasilitas", label: "Sarana & Prasarana", khususAdmin: false },
+      { jalur: "/admin/halaman", label: "Halaman Profil", khususAdmin: false, ikon: MonitorSmartphone },
+      { jalur: "/admin/tenaga", label: "Tenaga Pendidik", khususAdmin: false, ikon: Briefcase },
+      { jalur: "/admin/fasilitas", label: "Sarana & Prasarana", khususAdmin: false, ikon: Building },
     ],
   },
   {
     judul: "Akademik & Kesiswaan",
     butir: [
-      { jalur: "/admin/kalender", label: "Kalender Akademik", khususAdmin: false },
-      { jalur: "/admin/kegiatan", label: "Kegiatan Siswa", khususAdmin: false },
-      { jalur: "/admin/pustaka", label: "Perpustakaan", khususAdmin: false },
+      { jalur: "/admin/kalender", label: "Kalender Akademik", khususAdmin: false, ikon: Calendar },
+      { jalur: "/admin/kegiatan", label: "Kegiatan Siswa", khususAdmin: false, ikon: Activity },
+      { jalur: "/admin/pustaka", label: "Perpustakaan", khususAdmin: false, ikon: Book },
     ],
   },
   {
     judul: "Isi Situs",
     butir: [
-      { jalur: "/admin/berita", label: "Berita", khususAdmin: false },
-      { jalur: "/admin/galeri", label: "Galeri", khususAdmin: false },
-      { jalur: "/admin/faq", label: "Tanya Jawab", khususAdmin: false },
-      { jalur: "/admin/pesan", label: "Pesan Masuk", khususAdmin: false },
+      { jalur: "/admin/berita", label: "Berita", khususAdmin: false, ikon: Newspaper },
+      { jalur: "/admin/galeri", label: "Galeri", khususAdmin: false, ikon: ImageIcon },
+      { jalur: "/admin/faq", label: "Tanya Jawab", khususAdmin: false, ikon: MessageCircleQuestion },
+      { jalur: "/admin/pesan", label: "Pesan Masuk", khususAdmin: false, ikon: Mail },
     ],
   },
   {
     judul: "Sistem",
     butir: [
-      { jalur: "/admin/pengaturan", label: "Pengaturan", khususAdmin: true },
-      { jalur: "/admin/pengguna", label: "Pengguna", khususAdmin: true },
+      { jalur: "/admin/pengaturan", label: "Pengaturan", khususAdmin: true, ikon: Settings },
+      { jalur: "/admin/pengguna", label: "Pengguna", khususAdmin: true, ikon: UserCog },
     ],
   },
 ];
@@ -81,6 +86,29 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
   const [sidebarTerbuka, setSidebarTerbuka] = useState(false);
   const wadahMenu = useRef<HTMLDivElement | null>(null);
   const sudahDiungkap = useRef(false);
+
+  const [logo, setLogo] = useState<string>("");
+  const [namaSingkat, setNamaSingkat] = useState<string>("SI");
+  const [namaSekolah, setNamaSekolah] = useState<string>("SMA IMTEK");
+
+  // Ambil profil sekolah untuk logo
+  useEffect(() => {
+    import("@/lib/api").then(({ api, urlUnggahan }) => {
+      api.profil()
+        .then((p) => {
+          if (p.pengaturan.logo) {
+            setLogo(urlUnggahan("profil", p.pengaturan.logo));
+          }
+          if (p.pengaturan.nama_singkat) {
+            setNamaSingkat(p.pengaturan.nama_singkat.slice(0, 2).toUpperCase());
+          }
+          if (p.pengaturan.nama_sekolah) {
+            setNamaSekolah(p.pengaturan.nama_sekolah);
+          }
+        })
+        .catch(() => {});
+    });
+  }, []);
 
   // Halaman masuk berada di bawah /admin, tetapi ia bukan bagian panel: tidak
   // dibungkus sidebar, dan tidak boleh dialihkan ke dirinya sendiri.
@@ -164,25 +192,20 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
                   // Sidebar layar kecil ditutup saat menunya dipilih.
                   onClick={() => setSidebarTerbuka(false)}
                   className={
-                    "relative block rounded-lg px-4 py-2.5 text-sm font-semibold transition " +
+                    "relative flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-semibold transition " +
                     (aktif(m.jalur)
                       ? "bg-biru text-white"
                       : "text-white/75 hover:bg-white/10 hover:text-white")
                   }
                 >
-                  {/* Penanda emas di tepi kiri menu yang terpilih.
-                      Bedanya latar menu terpilih dengan latar sidebar hanya
-                      selisih kepekatan, dan selisih kepekatan pada warna yang
-                      sudah gelap memang tipis. Penanda ini membuat menu yang
-                      sedang dibuka terbaca dari bentuknya, bukan dari
-                      warnanya saja, sehingga tetap jelas bagi yang sukar
-                      membedakan warna maupun pada layar yang murah. */}
+                  {/* Penanda emas di tepi kiri menu yang terpilih. */}
                   {aktif(m.jalur) && (
                     <span
                       aria-hidden
                       className="absolute top-1.5 bottom-1.5 left-0 w-1 rounded-r-full bg-emas"
                     />
                   )}
+                  <m.ikon size={18} className={aktif(m.jalur) ? "text-white" : "text-white/50"} />
                   {m.label}
                 </Link>
               </li>
@@ -197,13 +220,26 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar tetap untuk layar lebar */}
       <aside className="tanpa-cetak sticky top-0 h-screen hidden w-64 shrink-0 flex-col bg-biru-tua lg:flex">
-        <div className="border-b border-white/10 px-6 py-6">
-          <p className="text-xs font-semibold tracking-wider text-white/50 uppercase">
-            Panel Admin
-          </p>
-          <p className="mt-1 leading-tight font-bold text-white">
-            PPDB &amp; Profil Sekolah
-          </p>
+        <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm">
+            {logo ? (
+              <img 
+                src={logo} 
+                alt="Logo Sekolah" 
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <span className="text-[17px] font-bold text-biru-tua">{namaSingkat}</span>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-[16px] font-bold text-white">
+              {namaSekolah}
+            </h2>
+            <p className="mt-0.5 truncate text-[10px] font-bold tracking-[0.05em] text-emas uppercase">
+              PPDB Admin Portal
+            </p>
+          </div>
         </div>
         <div ref={wadahMenu} className="flex-1 overflow-y-auto px-3 py-4">
           {daftarMenu}

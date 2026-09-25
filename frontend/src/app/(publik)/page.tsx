@@ -80,26 +80,20 @@ export default async function Beranda() {
     <>
       {/* ---------------- Sorotan: sekolahnya, bukan pendaftarannya --------- */}
       <section className="relative overflow-hidden bg-biru-tua text-white">
-        <div
-          className="absolute inset-0 opacity-25"
-          style={{
-            background:
-              "radial-gradient(1000px 420px at 12% 0%, #1d6ec0 0%, transparent 62%), " +
-              "radial-gradient(760px 420px at 92% 100%, #f2b53c33 0%, transparent 60%)",
-          }}
-          aria-hidden
-        />
+        {/* Vektor Hiasan Latar (Glowing Blobs) */}
+        <div className="absolute -top-[20%] -left-[10%] h-[700px] w-[700px] rounded-full bg-biru blur-[130px] opacity-60" aria-hidden="true" />
+        <div className="absolute -bottom-[20%] -right-[10%] h-[800px] w-[800px] rounded-full bg-emas blur-[150px] opacity-20" aria-hidden="true" />
         <div className="wadah relative grid items-center gap-12 py-16 md:py-24 lg:grid-cols-[1.1fr_1fr]">
           <MunculLangsung>
             <div>
               <div className="mb-5 flex flex-wrap items-center gap-2">
                 {p.status_sekolah && (
-                  <Lencana jenis="putih">{p.status_sekolah}</Lencana>
+                  <Lencana jenis="kaca">{p.status_sekolah}</Lencana>
                 )}
                 {p.akreditasi && (
-                  <Lencana jenis="emas">Akreditasi {p.akreditasi}</Lencana>
+                  <Lencana jenis="kaca">Akreditasi {p.akreditasi}</Lencana>
                 )}
-                {p.npsn && <Lencana jenis="putih">NPSN {p.npsn}</Lencana>}
+                {p.npsn && <Lencana jenis="kaca">NPSN {p.npsn}</Lencana>}
               </div>
 
               <h1 className="text-4xl leading-[1.12] font-bold text-balance text-white md:text-5xl">
