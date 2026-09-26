@@ -288,36 +288,74 @@ kode, tetapi seluruh isinya masih penanda `[kurung siku]`.
 ### Membawa data yang sama
 
 Dikerjakan hanya bila laptop kedua perlu menampilkan isi yang sama, misalnya
-untuk demonstrasi PkM. **Di laptop yang sekarang:**
+untuk demonstrasi PkM.
+
+Basis data dan gambar unggahan dibawa lewat **repositori privat terpisah**,
+`Ridhoo1616/pkm-sma-imtek-data`, dan isinya selalu dienkripsi lebih dulu.
+`alat/bawa-data.sh` mengerjakan seluruhnya.
+
+**Sekali saja, di tiap laptop**, letakkan repositori data itu di sebelah
+repositori kode:
+
+```bash
+cd ~                       # folder yang memuat pkm-sma-imtek
+gh repo clone Ridhoo1616/pkm-sma-imtek-data
+```
+
+Susunan folder yang diharapkan skripnya:
+
+```
+~/
+├── pkm-sma-imtek/          kode, publik
+└── pkm-sma-imtek-data/     data, privat dan terenkripsi
+```
+
+**Di laptop yang datanya paling baru:**
 
 ```bash
 cd pkm-sma-imtek
-pg_dump -Fc sma_imtek > ~/Desktop/sma_imtek.dump
-tar -czf ~/Desktop/unggahan.tgz -C backend data
+./alat/bawa-data.sh kirim
 ```
 
-**Di laptop baru**, sesudah langkah 1-5 di atas:
+**Di laptop yang ingin disamakan:**
 
 ```bash
 cd pkm-sma-imtek
-pg_restore --no-owner --clean --if-exists -d sma_imtek ~/Desktop/sma_imtek.dump
-tar -xzf ~/Desktop/unggahan.tgz -C backend
+./alat/bawa-data.sh ambil
 ```
 
-`--no-owner` diperlukan karena tabelnya dimiliki peran `ppdb` yang belum ada
-di laptop baru; tanpa itu `pg_restore` melaporkan galat pemilik pada hampir
-setiap tabel. `--clean --if-exists` membuang tabel yang sudah dibuat backend
-saat pertama dijalankan, sehingga barisnya tidak bertumpuk.
+Keduanya menanyakan sandi enkripsi. Sandi itu tidak tersimpan di repositori
+mana pun dan tidak pernah ikut ke GitHub — diingat sendiri, atau disimpan di
+pengelola sandi.
+
+`ambil` **menimpa** basis data setempat, jadi ia menampilkan isi yang sekarang
+lebih dulu dan meminta diketik `ya`. Sesudahnya, nyalakan ulang backend supaya
+tembolok pengaturannya dibaca ulang.
+
+#### Yang dikerjakan skripnya, dan sebabnya
+
+| Langkah | Sebabnya |
+| --- | --- |
+| `pg_dump -Fc` lalu `tar` folder `backend/data` | keduanya tidak pernah ikut repositori kode yang publik |
+| enkripsi AES-256-CBC, PBKDF2 600.000 putaran | lihat catatan di bawah |
+| hasil enkripsinya langsung didekripsi dan dibandingkan dengan aslinya | enkripsi bersandi salah tetap menghasilkan berkas, dan kesalahannya baru ketahuan di laptop seberang, saat datanya justru sedang dibutuhkan |
+| `pg_restore --no-owner` | tabelnya dimiliki peran `ppdb` yang belum tentu ada di laptop tujuan; tanpa ini galat pemilik muncul pada hampir setiap tabel |
+| `pg_restore --clean --if-exists` | backend sudah membuat tabelnya saat pertama dinyalakan; tanpa ini barisnya bertumpuk |
 
 Migrasi di dalam dump sudah tercatat selesai, jadi backend tidak
-menjalankannya ulang. Bila kode di laptop baru lebih baru daripada dump-nya,
+menjalankannya ulang. Bila kode di laptop tujuan lebih baru daripada dumpnya,
 migrasi yang belum ada di sana dijalankan saat backend dinyalakan.
 
-> **Kedua berkas itu memuat data pribadi**: NIK, Kartu Keluarga, akta, dan
-> nomor telepon orang tua. Pindahkan lewat flash disk atau kabel, **bukan**
-> lewat WhatsApp, surel, atau penyimpanan awan. Hapus dari kedua Desktop
-> sesudah selesai, dan jangan pernah meletakkannya di dalam folder
-> repositori.
+> **Tentang enkripsinya.** Selama isinya masih data contoh — seluruh pendaftar
+> bawaan beralamat `@contoh.id` dan berkas dokumennya gambar buatan — memang
+> tidak ada yang perlu dirahasiakan. Tetapi begitu sekolah memakai sistem ini
+> sungguhan, dump yang sama akan memuat NIK, Kartu Keluarga, dan akta calon
+> peserta didik, dan pada saat itu tidak akan ada yang ingat mengubah caranya.
+> Karena itu skripnya mengenkripsi sejak sekarang, bukan nanti.
+>
+> Repositori privat pun **bukan** tempat yang tepat bagi dokumen pribadi yang
+> belum terenkripsi: privat hari ini tidak berarti privat selamanya, dan
+> riwayat Git menyimpan segalanya untuk seterusnya.
 
 ### Yang berbeda di laptop baru
 

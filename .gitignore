@@ -73,3 +73,6 @@ frontend/next-env.d.ts
 
 # Pembuka aplikasi khusus komputer sendiri, menunjuk ke path lokal
 jalankan.command
+
+# Repositori data privat, bila kebetulan diletakkan di dalam folder ini
+pkm-sma-imtek-data/

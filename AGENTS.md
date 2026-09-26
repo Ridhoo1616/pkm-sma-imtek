@@ -23,8 +23,16 @@ dibiarkan sampai memang disentuh, bukan diganti massal.
 | cadangan basis data (`*.dump`, `cadangan-*.sql`) | isinya sama |
 
 Ketiganya sudah ditolak `.gitignore`. Jangan pernah menulis nilai sungguhan ke
-`.env.example`. Sandi SMTP disimpan di `.env` saja, tidak di basis data, sebab
-cadangan basis data beredar jauh lebih bebas daripada berkas konfigurasi.
+`.env.example`.
+
+Isi basis data dan folder unggahan dibawa antarkomputer lewat repositori
+privat terpisah, `Ridhoo1616/pkm-sma-imtek-data`, memakai
+`alat/bawa-data.sh`. Isinya selalu dienkripsi lebih dulu; jangan pernah
+menaruh dump apa adanya di sana, dan jangan pernah menulis sandinya ke dalam
+berkas di repositori mana pun.
+
+Sandi SMTP disimpan di `.env` saja, tidak di basis data, sebab cadangan basis
+data beredar jauh lebih bebas daripada berkas konfigurasi.
 
 Akun bawaan `admin` / `admin123` ada hash-nya di repositori publik ini, jadi
 sandinya wajib diganti sebelum dipakai sungguhan.
