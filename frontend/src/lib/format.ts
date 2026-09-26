@@ -255,6 +255,37 @@ export function alamatLengkap(alamat?: string, kodePos?: string): string {
 }
 
 /**
+ * Titik tujuan sekolah pada Google Maps.
+ *
+ * Koordinat dipakai bila sekolah sudah mengisinya, dan nama beserta
+ * alamatnya bila belum. Keduanya diterima Google Maps; koordinat lebih tepat
+ * karena tidak bergantung pengenalan alamat.
+ *
+ * Ditulis di sini, bukan di dalam salah satu komponennya, karena dua tempat
+ * memakainya: pengukur jarak di beranda dan tautan "Buka Google Maps" di
+ * kaki halaman. Bila keduanya menghitung sendiri-sendiri, tautan yang satu
+ * bisa menunjuk koordinat sedangkan yang lain menunjuk alamat.
+ */
+export function tujuanPeta(p: {
+  nama_sekolah?: string;
+  alamat?: string;
+  kode_pos?: string;
+  peta_koordinat?: string;
+}): string {
+  const koordinat = (p.peta_koordinat ?? "").trim();
+  if (koordinat) return koordinat;
+  return `${p.nama_sekolah ?? ""} ${alamatLengkap(p.alamat, p.kode_pos)}`.trim();
+}
+
+/** Tautan yang membuka lokasi sekolah di Google Maps. */
+export function tautanPeta(p: Parameters<typeof tujuanPeta>[0]): string {
+  return (
+    "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(tujuanPeta(p))
+  );
+}
+
+/**
  * Menuliskan jumlah rupiah dengan pemisah ribuan gaya Indonesia.
  *
  * Sen tidak pernah dipakai pada biaya sekolah, jadi angkanya dibulatkan dan

@@ -1,7 +1,7 @@
 -- ============================================================
 --  BASIS DATA SISTEM INFORMASI PROFIL SEKOLAH & PPDB SMA IMTEK
---  Program Kreativitas Mahasiswa (PkM)
---  Jurusan: Teknik Informatika
+--  Pengabdian Kepada Masyarakat (PkM) Universitas Pamulang
+--  Program Studi: Teknik Informatika
 --  Bidang PkM: Manajemen Komputer & Sistem
 --
 --  PostgreSQL 14 atau lebih baru.

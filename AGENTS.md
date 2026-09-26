@@ -124,4 +124,5 @@ berdampingan.
 
 Ditulis berbahasa Indonesia, menerangkan **sebabnya**, bukan hanya apanya.
 Tanpa baris atribusi asisten apa pun: repositori ini dipakai untuk tugas
-Program Kreativitas Mahasiswa, jadi atribusinya murni atas nama penulisnya.
+Pengabdian Kepada Masyarakat (PkM) Universitas Pamulang, jadi atribusinya
+murni atas nama penulisnya.

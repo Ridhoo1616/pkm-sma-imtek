@@ -4,8 +4,9 @@ Sistem informasi berbasis web yang menggabungkan **profil sekolah** dan
 **Pendaftaran Peserta Didik Baru (PPDB) online** untuk meningkatkan efektivitas
 promosi SMA IMTEK.
 
-Dikembangkan oleh mahasiswa **Program Kreativitas Mahasiswa (PkM)**
-**Jurusan Teknik Informatika**, bidang *Manajemen Komputer & Sistem*.
+Dikembangkan oleh mahasiswa **Pengabdian Kepada Masyarakat (PkM)**
+**Universitas Pamulang**, Program Studi *Teknik Informatika*, bidang
+*Manajemen Komputer & Sistem*.
 
 | | |
 |---|---|
@@ -1646,6 +1647,45 @@ menempel.
 Lamanya 900 ms dengan pelandaian `easeOutCubic` — cepat, sesuai permintaan
 user, dan berhenti tepat di nilai akhirnya, bukan di angka pembulatan yang
 hampir tepat.
+
+### P3. Kaki halaman
+
+Susunannya empat blok pada dua lajur — identitas sekolah dan Hubungi Kami di
+kiri, Alamat Sekolah dan Tautan Pintar di kanan — dan menumpuk mengikuti
+urutan itu pada layar kecil.
+
+**Tautan Pintar dibangun dari `MENU`**, sumber yang sama dengan navigasi
+atas, bukan daftar yang ditulis ulang. Sebelumnya kelimanya diketik langsung
+di dalam `Footer.tsx`, sehingga halaman PPDB yang berganti nama atau
+berpindah jalur meninggalkan tautan kaki halaman yang menunjuk ke tempat yang
+salah, tanpa satu pun galat yang menandainya. Sekarang butir PPDB diambil
+dari `anakMenu("/ppdb")`, ditambah Berita dan pintu masuk petugas yang memang
+tidak ada di navigasi utama karena bukan untuk pengunjung umum.
+
+**Hijau dipakai pada empat tempat saja**: ikon telepon, ikon surel, tautan
+"Buka Google Maps", dan tanda `>` pada Tautan Pintar. Aksen situs ini emas,
+dan itu yang dipakai seluruh keadaan sorot di sini. Hijaunya menandai yang
+dapat langsung ditindaklanjuti pengunjung — ditelepon, disurel, dibuka
+petanya — bukan sekadar hiasan.
+
+Tautan "Buka Google Maps" memakai `tujuanPeta()` di `lib/format.ts`, penolong
+yang sama dengan pengukur jarak di beranda. Sebelum dipisahkan ke sana,
+perhitungan tujuannya hanya ada di dalam `PetaJarak.tsx`; bila kaki halaman
+menghitungnya sendiri, tautan yang satu bisa menunjuk koordinat sedangkan
+yang lain menunjuk alamat.
+
+Ikon media sosial diambil dari pengaturan `instagram`, `facebook`, `youtube`,
+dan `tiktok`. Yang belum diisi sekolah **tidak ditampilkan** — bukan
+ditampilkan sebagai ikon mati — dan bila keempatnya kosong, barisnya tidak ada
+sama sekali. Hal yang sama berlaku bagi semboyan dan jam layanan.
+
+**Tombol bantuan melayang sempat memotong kalimat pengembangnya.** Tombol itu
+duduk di pojok kanan bawah layar, dan bilah bawah kaki halaman berakhir tepat
+di situ. Ruangnya sekarang diberikan di tempat yang berbeda menurut lebar
+layar: pada layar lebar barisnya mendatar sehingga ruangnya di kanan, pada
+ponsel barisnya menumpuk dan tombolnya menutupi baris terakhir sehingga
+ruangnya di bawah. Diperiksa di tiga lebar layar dengan membandingkan kotak
+pembatas keduanya, bukan dengan melihat tangkapan layar saja.
 
 ### Q. Tautan WhatsApp beserta pesan bawaannya
 

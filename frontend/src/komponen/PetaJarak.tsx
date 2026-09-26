@@ -1,4 +1,4 @@
-import { alamatLengkap, belumTerisi } from "@/lib/format";
+import { alamatLengkap, belumTerisi, tujuanPeta } from "@/lib/format";
 import { IkonLokasi } from "@/komponen/Ikon";
 import type { Pengaturan } from "@/lib/tipe";
 
@@ -51,10 +51,9 @@ export function PetaJarak({ pengaturan }: { pengaturan: Pengaturan }) {
   const koordinat = (p.peta_koordinat ?? "").trim();
   const adaPeta = Boolean(p.peta_embed && !belumTerisi(p.peta_embed));
 
-  // Tujuan tautannya: koordinat bila sekolah sudah mengisinya, kalau tidak
-  // alamatnya sebagai teks. Keduanya diterima Google Maps; koordinat lebih
-  // tepat karena tidak bergantung pengenalan alamat.
-  const tujuan = koordinat || `${p.nama_sekolah ?? ""} ${alamat}`.trim();
+  // Tujuannya dihitung lib/format supaya sama persis dengan tautan
+  // "Buka Google Maps" di kaki halaman.
+  const tujuan = tujuanPeta(p);
   const arah = (moda: string) =>
     "https://www.google.com/maps/dir/?api=1&destination=" +
     encodeURIComponent(tujuan) +
