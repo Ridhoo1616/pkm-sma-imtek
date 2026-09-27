@@ -110,7 +110,7 @@ const PADANAN: string[][] = [
   ["lokasi", "alamat", "almt", "dimana", "dmn", "maps", "peta", "jalan", "tempat", "letak", "arah"],
   ["kontak", "hubungi", "telepon", "telp", "nomor", "nomer", "wa", "whatsapp", "email", "surel", "narahubung"],
   ["peminatan", "jurusan", "mipa", "ipa", "ips", "bahasa", "program"],
-  ["kuota", "tampung", "kursi", "sisa", "penuh", "kapasitas"],
+  ["kuota", "tampung", "kursi", "sisa", "penuh", "kapasitas", "slot", "bangku", "seat"],
   ["sekolah", "smaimtek", "imtek", "npsn", "akreditasi", "profil"],
   ["daftarulang", "heregistrasi"],
   ["ponsel", "hp", "handphone", "android", "iphone", "laptop", "komputer"],
@@ -305,6 +305,20 @@ function kataAsli(teks: string): string[] {
     hasil.push(kata);
   }
   return hasil;
+}
+
+/**
+ * Benar atau tidaknya pertanyaan ini memuat satu pun kata berisi.
+ *
+ * "gimana?" seluruhnya kata kosong, jadi tidak ada yang dapat dicari.
+ * Keadaan itu BERBEDA dengan pertanyaan yang berisi tetapi tidak ada
+ * jawabannya, dan pengunjung perlu diberi tahu yang berbeda pula:
+ * yang pertama perlu diminta memperjelas, yang kedua perlu diarahkan ke
+ * panitia. Menyamakan keduanya juga membuat kotaknya mengaku "pertanyaan
+ * ini dicatat" padahal kiriman sependek itu memang tidak dicatat.
+ */
+export function tanpaIsi(pertanyaan: string): boolean {
+  return kataAsli(pertanyaan).length === 0;
 }
 
 /* ------------------------------------------------------------------ *

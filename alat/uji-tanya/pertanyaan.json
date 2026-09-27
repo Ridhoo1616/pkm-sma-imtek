@@ -10,7 +10,6 @@
     "TYPO   : salah ketik yang lazim terjadi di ponsel.",
     "Polanya ekspresi reguler, dicocokkan tanpa membedakan huruf besar-kecil."
   ],
-
   "HARUS": [
     ["kapan pendaftaran ditutup?", "Juni 2027"],
     ["kapan pendaftaran dibuka", "September 2026|dibuka"],
@@ -39,9 +38,11 @@
     ["kpn dibuka", "September 2026|dibuka"],
     ["info pendaftaran dong", "."],
     ["syaratnya gmn", "dokumen wajib|Foto"],
-    ["langkah daftar online", "."]
+    ["langkah daftar online", "."],
+    ["slot nya ada?", "kuota|sisa|180"],
+    ["masih ada slot", "kuota|sisa|180"],
+    ["bangku masih ada", "kuota|sisa|180"]
   ],
-
   "JANGAN": [
     "apakah ada beasiswa untuk anak yatim",
     "siapa pelatih tim futsalnya",
@@ -53,7 +54,6 @@
     "berapa jumlah guru olahraga",
     "apakah ada asrama"
   ],
-
   "RAGAM": [
     {
       "maksud": "jadwal penutupan",
@@ -99,7 +99,9 @@
         "masih ada tempat ga",
         "daya tampung berapa",
         "kursinya masih ada",
-        "penuh belum"
+        "penuh belum",
+        "slot nya ada?",
+        "masih ada slot"
       ]
     },
     {
@@ -122,7 +124,6 @@
       ]
     }
   ],
-
   "TYPO": [
     ["pendaftran kapan ditutup", "2027|ditutup"],
     ["biyaya berapa", "GRATIS|biaya"],

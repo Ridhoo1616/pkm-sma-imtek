@@ -7,6 +7,7 @@ import {
   bangunPengetahuan,
   cariJawaban,
   pertanyaanPancingan,
+  tanpaIsi,
   type ButirPengetahuan,
 } from "@/lib/jawab";
 import type { Faq, Jurusan, KeadaanPpdb, Pengaturan } from "@/lib/tipe";
@@ -41,6 +42,8 @@ interface Percakapan {
   buntu?: boolean;
   /** Gelembung sementara selagi pencocok cadangan dihubungi. */
   menunggu?: boolean;
+  /** Pertanyaannya tidak memuat kata berisi; pancingan ditawarkan lagi. */
+  taksa?: boolean;
 }
 
 export default function TanyaCepat({
@@ -85,9 +88,32 @@ export default function TanyaCepat({
     const bersih = teks.trim();
     if (!bersih) return;
 
-    let hasil = cariJawaban(bersih, pengetahuan);
     const n = nomor.current;
     nomor.current += 2;
+
+    // "gimana?", "apa?", "ya?" — seluruhnya kata kosong, jadi tidak ada yang
+    // dapat dicari. Dijawab berbeda dengan pertanyaan yang berisi tetapi
+    // tidak ada jawabannya: yang ini perlu diminta memperjelas, bukan
+    // diarahkan ke panitia. Tidak dicatat pula — dan itu sekaligus
+    // membetulkan pengakuan "pertanyaan ini dicatat" yang sebelumnya
+    // ditampilkan padahal kiriman sependek itu memang ditolak server.
+    if (tanpaIsi(bersih)) {
+      setRiwayat((r) => [
+        ...r,
+        { id: n, dari: "orang", teks: bersih },
+        {
+          id: n + 1,
+          dari: "sistem",
+          teks: "Pertanyaannya belum terbaca. Sebutkan hal yang ingin ditanyakan — misalnya biaya, jadwal, dokumen, atau kuota.",
+          taksa: true,
+        },
+      ]);
+      setKetikan("");
+      medan.current?.focus();
+      return;
+    }
+
+    let hasil = cariJawaban(bersih, pengetahuan);
 
     // Model bahasa dipakai HANYA sebagai cadangan, sesudah pencocok
     // setempat menyerah. Dua akibatnya disengaja: biayanya jatuh pada
@@ -240,6 +266,26 @@ export default function TanyaCepat({
                       ))}
                     </ul>
                   </div>
+                )}
+
+                {b.taksa && (
+                  <ul className="mt-2 space-y-1.5">
+                    {pancingan.slice(0, 4).map((t) => (
+                      <li key={t}>
+                        <button
+                          type="button"
+                          onClick={() => void tanya(t)}
+                          className="flex w-full items-start gap-2 rounded-lg border border-garis bg-white px-3 py-2 text-left text-xs leading-relaxed font-medium text-teks transition hover:border-biru hover:bg-biru-muda/50 hover:text-biru"
+                        >
+                          <IkonPanahKanan
+                            ukuran={13}
+                            className="mt-0.5 shrink-0 text-biru"
+                          />
+                          {t}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 )}
 
                 {b.buntu && (
