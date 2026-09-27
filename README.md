@@ -1613,7 +1613,38 @@ gelap dari kiri untuk kolom tulisan, gelap dari bawah untuk barisan angka.
 mendorong seluruh isi halaman keluar dari pandangan pertama, padahal yang
 dicari orang tua justru ada di bawahnya.
 
-#### Peredam menggelapkan seluruh foto; panel kaca hanya menggelapkan tulisannya
+#### Kacanya putih, dan itu memaksa tulisannya menjadi gelap
+
+Panel kacanya semula biru pekat. Diminta user diganti putih — birunya terasa
+menutupi gedung sekolahnya. Penggantiannya bukan sekadar mengganti warna:
+**kaca putih dengan tulisan putih tidak terbaca sama sekali**, jadi seluruh
+tulisan di dalam panel ikut berganti menjadi gelap, lencananya berganti dari
+`kaca` menjadi `terang`, dan tombol keduanya menjadi putih bergaris seperti
+tombol pada bilah PPDB di bawahnya.
+
+Keadaan terburuknya pun berbalik. Panel gelap paling terancam oleh foto
+terang; panel putih paling terancam oleh foto **gelap**. Keduanya diuji
+dengan mengganti fotonya di peramban:
+
+| Bagian | Foto sekolah | Foto hitam | Foto putih | Minimal |
+| --- | --- | --- | --- | --- |
+| Judul | 11,88:1 | 9,52:1 | 15,18:1 | 3:1 |
+| Paragraf | 9,83:1 | 8,14:1 | 12,87:1 | 4,5:1 |
+| Lokasi | 9,45:1 | 8,14:1 | 12,64:1 | 4,5:1 |
+| Angka | 10,65:1 | 9,73:1 | 12,15:1 | 3:1 |
+| Label angka | 9,05:1 | 8,38:1 | 10,29:1 | 4,5:1 |
+
+Label angka sempat gagal di ketiga keadaan — 2,76 sampai 3,39:1 — sebab masih
+memakai `text-samar`. Kelabu di atas bidang terang memang tidak cukup; yang
+membedakannya dari angka di atasnya sekarang ukuran hurufnya, bukan
+kepudarannya.
+
+Kaca putih ternyata memberi lantai yang lebih tinggi daripada kaca gelap:
+terendahnya 8,14:1 dibanding 7,05:1. Alasannya sederhana — tulisan gelap di
+atas bidang terang bertahan lebih baik terhadap perubahan latar daripada
+sebaliknya.
+
+#### Sebelumnya: peredam menggelapkan seluruh foto
 
 Bentuk pertamanya memakai peredam gelap dari kiri. Terbaca, tetapi begitu
 sekolah mengunggah fotonya user langsung melihat masalahnya: **"terlalu gelap
@@ -1631,23 +1662,9 @@ tinggal 25% sebagai penyatu warna. Bedanya bukan sekadar tampilan —
 kepekatan panel yang tetap memberi **lantai kontras yang sama untuk foto apa
 pun**, sedangkan peredam selalu bergantung pada seberapa terang fotonya.
 
-Hasil pengukurannya, terhadap piksel yang benar-benar terlukis:
-
-| Bagian | Foto sekolah | Foto putih murni | Minimal WCAG AA |
-| --- | --- | --- | --- |
-| Judul | 9,24:1 | 8,25:1 | 3:1 |
-| Paragraf | 8,88:1 | 7,05:1 | 4,5:1 |
-| Lokasi | 9,71:1 | 7,17:1 | 4,5:1 |
-| Angka | 12,38:1 | 10,30:1 | 3:1 |
-| Label angka | 8,88:1 | 7,57:1 | 4,5:1 |
-
-Kolom kedua yang menentukan: fotonya diganti **putih murni** di peramban —
-keadaan terburuk yang mungkin ada — dan yang terendah masih 7,05:1. Foto
-seterang apa pun yang diunggah sekolah tidak dapat merusaknya.
-
-Pada 70% kepekatan, tulisan `text-white/75` masih akan jatuh ke 4,1:1 di atas
-foto putih menurut hitungan. Itu sebabnya tulisan di dalam panel dinaikkan ke
-`text-white/90` — menguatkan tulisannya, bukan menggelapkan fotonya lagi.
+Angka-angka pada tahap itu — panel biru 70%, tulisan putih — terendahnya
+7,05:1 di atas foto putih murni. Sudah memenuhi, dan tetap diganti karena
+yang dikeluhkan bukan keterbacaannya melainkan gedungnya yang tertutup.
 
 Di ponsel, panelnya sempat menelan hampir seluruh layar sehingga fotonya
 nyaris tidak terlihat — persis keluhan yang sama dalam bentuk lain. Paragraf
