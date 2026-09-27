@@ -338,6 +338,49 @@ menerangkan cara kerja sistem dan prosedurnya; angka dan tanggal milik sekolah
 tidak dikarang di sana, melainkan diarahkan ke bagian yang datanya diisi
 sekolah sendiri.
 
+### F0. Bilah halaman sekelompok menggulir sendiri ke halaman yang dibuka
+
+Dilaporkan user dari ponsel: membuka **Tenaga Pendidik dan Kependidikan**
+menampilkan bilah yang berhenti di "Sejarah Sekolah", dan yang terlihat
+bergerak justru batang penggulir di bawahnya — seolah penandanya menunjuk
+halaman yang salah. Halamannya sendiri benar; yang salah bilahnya tidak
+pernah bergeser.
+
+Diukur pada layar 390 piksel:
+
+```
+butir aktif : "Tenaga Pendidik dan Kependidikan"
+letaknya    : 724–987 piksel
+yang tampak : 0–358 piksel
+scrollLeft  : 0
+```
+
+Butir itu tidak akan pernah terlihat kecuali pengunjung menggeser bilahnya
+sendiri — dan ia tidak punya alasan menduga ada yang perlu digeser. Yang
+dilihatnya cuma tiga butir pertama beserta batang penggulir di kiri, yang
+justru terbaca sebagai penanda halaman aktif.
+
+`komponen/BilahGulir.tsx` menggeser bilahnya ke butir yang sedang dibuka.
+Empat hal yang menentukan cara menulisnya:
+
+1. **Hanya `scrollLeft` yang diubah.** `scrollIntoView` tampak lebih
+   ringkas dan salah: ia ikut menggulir HALAMAN secara tegak, sehingga
+   pengunjung yang baru membuka halaman langsung terlempar ke tengah dan
+   melewati judul halamannya. Diuji tersendiri: `window.scrollY` harus
+   tetap 0 sesudah bilahnya bergeser.
+2. **Tidak diapa-apakan bila butirnya memang sudah terlihat** — termasuk di
+   layar lebar, tempat seluruh butir muat tanpa penggulir sama sekali.
+3. **Tanpa animasi.** Ini pembetulan posisi awal, bukan tanggapan atas
+   perbuatan pengunjung.
+4. **Dijalankan sebelum peramban menggambar**, lewat `useLayoutEffect`.
+   Dengan `useEffect` biasa bilahnya sempat tergambar di posisi nol lalu
+   melompat — persis kedipan yang hendak dihindari poin ketiga.
+
+Diuji sembilan pemeriksaan pada empat halaman: butir terakhir, butir
+pertama yang tidak boleh digeser sia-sia, butir tengah, dan kelompok menu
+yang berbeda — masing-masing disertai pemeriksaan bahwa halamannya tidak
+ikut tergulir.
+
 ### F. Menu Profil Sekolah, Akademik, dan Kesiswaan
 
 Situs sekolah dibaca dengan cara yang berbeda dari portal pendaftaran: orang
