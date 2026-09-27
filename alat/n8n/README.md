@@ -95,11 +95,28 @@ n8n menuntut Node.js 24 atau lebih baru.
 
 ```bash
 npm install -g n8n
-n8n start
+./alat/n8n/jalankan.sh
 ```
 
 Panelnya di <http://localhost:5678>. Saat pertama kali dijalankan, n8n meminta
 pembuatan akun pemilik — akun itu setempat, tidak terhubung ke mana-mana.
+
+**Dijalankan lewat skrip itu, bukan `n8n start` langsung.** Skripnya menyetel
+dua hal yang harus dipakai bersama:
+
+- `N8N_LISTEN_ADDRESS=127.0.0.1` — bawaan n8n mendengarkan di `0.0.0.0`,
+  sehingga panelnya terbuka bagi siapa pun di jaringan yang sama. Selama akun
+  pemiliknya belum dibuat, orang itu dapat membuatnya duluan dan mengambil
+  alih; sesudah dibuat pun, panel n8n memuat kredensial.
+- `N8N_SECURE_COOKIE=false` — Safari tidak memperlakukan `http://localhost`
+  sebagai konteks aman, jadi cookie bertanda `Secure` ditolak dan panelnya
+  berhenti di layar *"Your n8n server is configured to use a secure cookie"*.
+  Chrome memaafkan localhost, Safari tidak.
+
+n8n menyebut setelan kedua "not recommended", dan peringatan itu benar untuk
+n8n yang dijangkau lewat jaringan. Di sini tidak: setelan pertama membuatnya
+tidak dapat dihubungi dari luar mesin ini sama sekali, sehingga cookienya
+tidak pernah melewati jaringan mana pun. Keduanya hanya aman bersama-sama.
 
 ### Memasukkan alurnya
 
