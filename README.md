@@ -2073,7 +2073,7 @@ Seluruh warnanya lulus rasio kontras 4,5:1 terhadap tulisan putih.
 | Pembatas laju rute publik | Tujuh rute publik dibatasi per alamat IP. Rute yang menyerahkan data pendaftar juga DIKUNCI PER NOMOR REGISTRASI sesudah sepuluh kegagalan dalam sejam, sehingga tanggal lahirnya tidak dapat ditebak habis dari banyak alamat IP sekaligus |
 | Alamat pemanggil | `X-Forwarded-For` hanya dipercaya bila permintaannya datang dari jaringan tepercaya, dan yang diambil entri terkanan di luar jaringan itu; tanpa itu kepala karangan membuat seluruh pembatas laju tidak berarti |
 | Pembatasan peran | `admin` mengelola pengaturan, peminatan, pengguna, dan penghapusan pendaftar; `operator` hanya mengelola pendaftar dan isi situs. Dijaga di backend, bukan hanya disembunyikan dari menu |
-| Unggahan berkas | Ekstensi **dan** beberapa bita pertama isinya diperiksa, sehingga skrip bernama `.jpg` tertolak. Batas 2 MB, nama berkas diacak |
+| Unggahan berkas | Ekstensi **dan** beberapa bita pertama isinya diperiksa, sehingga skrip bernama `.jpg` tertolak. Batas 3 MB, nama berkas diacak |
 | Dokumen pendaftar | Kartu Keluarga, akta, dan ijazah hanya dapat diunduh dengan token petugas, dan tidak disimpan di cache bersama |
 | Cek status | Nomor registrasi saja tidak cukup; tanggal lahir menjadi pasangan kunci agar data orang lain tidak terbuka dengan menebak nomor |
 | Spam | Kolom perangkap tersembunyi pada formulir pendaftaran dan kontak |
@@ -2256,7 +2256,7 @@ percikan klik. Dua yang ditambahkan di sini jenis lain, yaitu gerak yang
 memberi tahu keadaan.
 
 **Bilah kemajuan saat mengunggah dokumen.** Formulir PPDB mengirim sampai enam
-dokumen, masing-masing dibatasi 2 MB, jadi seluruhnya bisa 12 MB. Sebelum ini
+dokumen, masing-masing dibatasi 3 MB, jadi seluruhnya bisa 18 MB. Sebelum ini
 tombolnya hanya berputar tanpa keterangan; di data seluler yang lambat itu
 satu menit penuh, dan yang paling sering terjadi bukan pendaftar menunggu,
 melainkan menekan kirim lagi atau menutup halamannya.

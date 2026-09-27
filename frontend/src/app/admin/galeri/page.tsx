@@ -9,6 +9,7 @@ import { KepalaPanel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
 import { Teks, AreaTeks, Berkas, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import type { Galeri } from "@/lib/tipe";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 const KOSONG = { judul: "", kategori: "", keterangan: "" };
 
@@ -217,7 +218,7 @@ export default function HalamanGaleriAdmin() {
             namaTerpilih={gambarLama || undefined}
             bantuan={
               ubahId === null
-                ? "JPG atau PNG, maksimal 2 MB."
+                ? `JPG atau PNG, maksimal ${BATAS_UNGGAH}.`
                 : "Biarkan kosong bila fotonya tidak diganti."
             }
           />

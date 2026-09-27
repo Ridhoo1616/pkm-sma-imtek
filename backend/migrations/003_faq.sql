@@ -54,7 +54,7 @@ INSERT INTO faq (pertanyaan, jawaban, kategori, sorot, urutan) VALUES
    'Berkas', true, 4),
 
   ('Berapa ukuran maksimal berkas yang dapat diunggah?',
-   'Setiap berkas dibatasi 2 MB. Bila foto dari kamera telepon melebihi itu, kecilkan dulu resolusinya atau potret ulang dengan pengaturan kualitas yang lebih rendah. Format yang diterima JPG, PNG, dan PDF.',
+   'Setiap berkas dibatasi 3 MB. Bila foto dari kamera telepon melebihi itu, kecilkan dulu resolusinya atau potret ulang dengan pengaturan kualitas yang lebih rendah. Format yang diterima JPG, PNG, dan PDF.',
    'Berkas', false, 5),
 
   ('Dokumen saya belum lengkap, apakah tetap bisa mendaftar?',

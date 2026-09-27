@@ -18,6 +18,7 @@ import {
   RingkasanGalat,
 } from "@/komponen/Medan";
 import type { Berita } from "@/lib/tipe";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 const KOSONG = {
   judul: "",
@@ -367,7 +368,7 @@ export default function HalamanBeritaAdmin() {
             ubah={setGambar}
             galat={galatKolom.gambar}
             namaTerpilih={gambarLama || undefined}
-            bantuan="JPG atau PNG, maksimal 2 MB."
+            bantuan={`JPG atau PNG, maksimal ${BATAS_UNGGAH}.`}
           />
 
           {gambarLama && !gambar && (

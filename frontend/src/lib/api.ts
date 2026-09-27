@@ -181,8 +181,9 @@ export interface KemajuanUnggahan {
  * tidak dapat melaporkan kemajuan UNGGAHAN sama sekali. Yang tersedia di
  * fetch hanya kemajuan unduhan lewat ReadableStream pada jawabannya.
  *
- * Yang dikirim sampai enam dokumen, masing-masing dibatasi 2 MB, jadi
- * seluruhnya bisa 12 MB. Di data seluler yang lambat itu satu menit penuh
+ * Yang dikirim sampai enam dokumen, masing-masing dibatasi sebesar
+ * UPLOAD_MAX_BYTES, jadi seluruhnya belasan megabita. Di data seluler yang
+ * lambat itu satu menit penuh
  * tanpa tanda apa pun pada tombolnya, dan yang paling sering terjadi:
  * pendaftar menekan kirim lagi, atau menutup halamannya di tengah jalan.
  *

@@ -9,6 +9,7 @@ import { KepalaPanel } from "@/komponen/Panel";
 import { Memuat, PesanGalat } from "@/komponen/Memuat";
 import { Tombol, RingkasanGalat } from "@/komponen/Medan";
 import { Lencana } from "@/komponen/Bagian";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 /**
  * Pengelompokan pengaturan. Kunci apa pun yang tidak tercantum di sini tetap
@@ -516,8 +517,8 @@ function BagianGambar({
         <h2 className="text-base">Gambar</h2>
         <p className="mt-1 text-sm text-samar">
           Diunggah langsung dari sini, tanpa menekan tombol simpan. JPG atau
-          PNG, maksimal 2 MB. Gambar lama otomatis dibuang setelah penggantinya
-          tersimpan.
+          PNG, maksimal {BATAS_UNGGAH}. Gambar lama otomatis dibuang setelah
+          penggantinya tersimpan.
         </p>
       </div>
 

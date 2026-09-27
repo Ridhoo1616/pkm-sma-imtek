@@ -26,6 +26,7 @@ import {
 } from "@/lib/pilihan";
 import { periksaNik, periksaNisn, type KabarPeriksa } from "@/lib/identitas";
 import type { Jurusan } from "@/lib/tipe";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 /**
  * Kabar pemeriksaan NISN dan NIK di bawah kolomnya, muncul saat pendaftar
@@ -772,8 +773,9 @@ export default function FormulirPpdb({
               {langkah === 3 && (
                 <div className="space-y-5">
                   <p className="rounded-lg bg-biru-muda px-5 py-4 text-sm leading-relaxed text-biru-tua">
-                    Setiap berkas maksimal <strong>2 MB</strong>. Foto berupa
-                    JPG atau PNG; dokumen lain boleh JPG, PNG, atau PDF.
+                    Setiap berkas maksimal <strong>{BATAS_UNGGAH}</strong>.
+                    Foto berupa JPG atau PNG; dokumen lain boleh JPG, PNG,
+                    atau PDF.
                     Pastikan tulisan pada dokumen terbaca jelas agar verifikasi
                     tidak tertunda.
                   </p>
@@ -881,8 +883,9 @@ export default function FormulirPpdb({
               )}
           </div>
 
-          {/* Kemajuan unggahan. Enam dokumen, masing-masing sampai 2 MB, jadi
-              seluruhnya bisa 12 MB. Di data seluler yang lambat itu satu menit
+          {/* Kemajuan unggahan. Enam dokumen, masing-masing sampai batas
+              unggahan, jadi seluruhnya belasan megabita. Di data seluler
+              yang lambat itu satu menit
               penuh, dan tanpa tanda apa pun pendaftar akan menekan kirim lagi
               atau menutup halamannya di tengah jalan. */}
           {kemajuan && (

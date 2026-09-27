@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import type { Jurusan } from "@/lib/tipe";
 import { IkonFasilitas } from "@/komponen/Ikon";
 import { PenunjukAlur, ArahanLangkah } from "@/komponen/PenunjukAlur";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 export const metadata: Metadata = {
   title: "Informasi PPDB",
@@ -352,7 +353,7 @@ export default async function HalamanPpdb() {
                         </Lencana>
                       </div>
                       <p className="mt-0.5 text-xs text-samar">
-                        {d.tipe}, maksimal 2 MB.
+                        {d.tipe}, maksimal {BATAS_UNGGAH}.
                         {d.catatan ? ` ${d.catatan}` : ""}
                       </p>
                     </li>

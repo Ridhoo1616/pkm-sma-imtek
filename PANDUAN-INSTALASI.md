@@ -92,7 +92,7 @@ APP_ENV=pengembangan
 PORT=8090
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 UPLOAD_DIR=data/unggahan
-UPLOAD_MAX_BYTES=2097152
+UPLOAD_MAX_BYTES=3145728
 ```
 
 Lalu jalankan:
@@ -554,8 +554,8 @@ server {
     ssl_certificate     /etc/letsencrypt/live/www.smaimtek.sch.id/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/www.smaimtek.sch.id/privkey.pem;
 
-    # batas ukuran kiriman: enam dokumen × 2 MB, dilebihkan sedikit
-    client_max_body_size 16m;
+    # batas ukuran kiriman: enam dokumen × 3 MB, dilebihkan sedikit
+    client_max_body_size 24m;
 
     # API dan berkas unggahan ke backend Go
     location /api/ {

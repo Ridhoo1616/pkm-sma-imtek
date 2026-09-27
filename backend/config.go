@@ -140,9 +140,9 @@ func muatKonfigurasi() Konfigurasi {
 		rahasia = "kunci-pengembangan-jangan-dipakai-di-produksi"
 	}
 
-	batas, err := strconv.ParseInt(lingkungan("UPLOAD_MAX_BYTES", "2097152"), 10, 64)
+	batas, err := strconv.ParseInt(lingkungan("UPLOAD_MAX_BYTES", "3145728"), 10, 64)
 	if err != nil || batas <= 0 {
-		batas = 2 << 20 // 2 MB, sama dengan versi PHP
+		batas = 3 << 20 // 3 MB
 	}
 
 	// Peramban menganggap "localhost" dan "127.0.0.1" sebagai dua asal yang

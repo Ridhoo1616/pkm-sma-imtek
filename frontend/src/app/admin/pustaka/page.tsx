@@ -15,6 +15,7 @@ import {
   RingkasanGalat,
 } from "@/komponen/Medan";
 import type { Pustaka } from "@/lib/tipe";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 /**
  * Katalog perpustakaan digital.
@@ -314,7 +315,7 @@ export default function HalamanPustakaAdmin() {
             ubah={setBerkas}
             galat={galatKolom.berkas}
             namaTerpilih={berkasLama || undefined}
-            bantuan="PDF, JPG, atau PNG, maksimal 2 MB. Unggah hanya bahan yang memang boleh disebarkan."
+            bantuan={`PDF, JPG, atau PNG, maksimal ${BATAS_UNGGAH}. Unggah hanya bahan yang memang boleh disebarkan.`}
           />
 
           {berkasLama && !berkas && (
