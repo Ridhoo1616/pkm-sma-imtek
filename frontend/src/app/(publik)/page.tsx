@@ -10,6 +10,7 @@ import {
 } from "@/lib/format";
 import { kataKeadaanPpdb } from "@/lib/ppdb";
 import { AngkaNaik } from "@/komponen/AngkaNaik";
+import { Paralaks } from "@/komponen/Paralaks";
 import { JudulBagian, Lencana, kelasKartuAkhir } from "@/komponen/Bagian";
 import { MunculNaik, MunculLangsung, KartuGerak } from "@/komponen/Gerak";
 import { MasalahJawaban } from "@/komponen/MasalahJawaban";
@@ -134,74 +135,60 @@ export default async function Beranda() {
              pandangan pertama, dan yang dicari orang tua justru ada di
              bawahnya. */}
       <section className="relative isolate overflow-hidden bg-biru-tua text-white">
-        {adaGedung ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={urlUnggahan("profil", p.foto_depan)}
-            alt={`Gedung ${p.nama_sekolah || "sekolah"}`}
-            className="absolute inset-0 -z-10 h-full w-full object-cover"
-          />
-        ) : (
-          <div aria-hidden="true" className="absolute inset-0 -z-10">
-            <div className="absolute -top-[20%] -left-[10%] h-[700px] w-[700px] rounded-full bg-biru opacity-60 blur-[130px]" />
-            <div className="absolute -right-[10%] -bottom-[20%] h-[800px] w-[800px] rounded-full bg-emas opacity-20 blur-[150px]" />
-          </div>
-        )}
-        {/* Peredam tipis saja, dan HANYA saat ada foto.
+        <Paralaks>
+          {adaGedung ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={urlUnggahan("profil", p.foto_depan)}
+              alt={`Gedung ${p.nama_sekolah || "sekolah"}`}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div aria-hidden="true" className="absolute inset-0">
+              <div className="absolute -top-[20%] -left-[10%] h-[700px] w-[700px] rounded-full bg-biru opacity-60 blur-[130px]" />
+              <div className="absolute -right-[10%] -bottom-[20%] h-[800px] w-[800px] rounded-full bg-emas opacity-20 blur-[150px]" />
+            </div>
+          )}
+        </Paralaks>
+        {/* Peredam bergradasi, bukan panel.
 
-            Semula peredamnya pekat dan menutupi separuh kiri foto. Diminta
-            user dibetulkan: "terlalu gelap birunya jadi menutupi sekolah".
-            Yang salah bukan takaran peredamnya melainkan caranya —
-            menggelapkan SELURUH foto demi melindungi tulisan yang cuma
-            menempati sebagiannya.
+            Panel kaca dilepas atas permintaan user: yang dicari bentuk
+            seperti Starlink, tulisan langsung di atas foto tanpa kartu.
+            Bentuk itu bekerja pada foto yang sisi kirinya memang gelap;
+            foto gedung sekolah ini sisi kirinya justru terang, jadi
+            peredamnya tetap diperlukan.
 
-            Sekarang keterbacaannya dijamin panel kaca di bawah, yang
-            menutup persis sebesar tulisannya. Peredam di sini tinggal
-            penyatu warna supaya foto seterang apa pun tetap menyambung
-            dengan bagian halaman berikutnya. */}
+            Tiga lapis, dan pembagian tugasnya menentukan:
+
+              - Dari KIRI, cukup pekat di pangkal dan habis sebelum
+                tengah. Hanya kolom tulisan yang digelapkan; gedungnya di
+                kanan tidak tersentuh sama sekali.
+              - Dari BAWAH, untuk barisan angka sekaligus menyambungkan
+                sorotan dengan bagian halaman di bawahnya.
+              - Bayang per huruf pada tulisannya sendiri, dipasang di
+                bawah. Inilah yang membuat peredamnya boleh setipis ini:
+                bayang bekerja mengikuti hurufnya, bukan menggelapkan
+                bidang. */}
         {adaGedung && (
           <>
             <div
               aria-hidden="true"
-              className="absolute inset-0 -z-10 bg-biru-tua/25"
+              className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_28_49/0.88)_0%,rgb(10_28_49/0.72)_40%,rgb(10_28_49/0.32)_62%,transparent_82%)]"
             />
             <div
               aria-hidden="true"
-              className="absolute inset-0 -z-10 bg-gradient-to-t from-biru-tua/70 via-transparent to-transparent"
+              className="absolute inset-0 -z-10 bg-gradient-to-t from-biru-tua/80 via-transparent to-transparent"
             />
           </>
         )}
 
         <div className="wadah relative flex min-h-[min(38rem,80vh)] flex-col justify-end gap-10 py-16 md:py-20">
           <MunculLangsung>
-            {/* Panel kaca yang benar-benar tembus pandang.
-
-                Tiga bentuk sudah dicoba dan dua ditolak user: biru pekat
-                menutupi gedungnya, putih pekat "bukan kaca, cuma dicat".
-                Yang diminta memang kaca — gedungnya terlihat MELALUI panel,
-                bukan di sebelahnya.
-
-                Keterbacaannya karena itu tidak lagi ditopang kepekatan,
-                melainkan tiga hal yang bekerja bersama:
-
-                  1. Blur berat. Foto di belakangnya diratakan sehingga
-                     tidak ada lagi tepi tajam yang bersaing dengan huruf.
-                     Ini yang paling menentukan, dan ini pula yang membuat
-                     panelnya terlihat sebagai kaca.
-                  2. Tinta biru tipis, sekadar meredam bidang paling
-                     terang supaya huruf putih punya pijakan.
-                  3. Bayang tulisan. Berbeda dengan kedua hal di atas,
-                     bayang bekerja PER HURUF: seterang apa pun bidang di
-                     belakangnya, tiap huruf membawa gelapnya sendiri.
-
-                KEPEKATAN 50% ITU DITAKAR, BUKAN DIPILIH. Pada 40% panelnya
-                lebih bening tetapi paragrafnya jatuh ke 3,9:1 di atas foto
-                putih murni — di bawah ambang. Pada 50% menjadi 4,97:1,
-                yaitu kepekatan terendah yang masih memenuhi WCAG AA pada
-                keadaan terburuk yang mungkin ada. Menurunkannya lagi
-                menuntut pengukuran ulang; alatnya ada di catatan pengujian
-                pada README. */}
-            <div className="max-w-2xl rounded-3xl bg-biru-tua/50 p-7 ring-1 ring-white/25 backdrop-blur-2xl sm:p-9 [&_*]:[text-shadow:0_1px_10px_rgb(10_28_49/0.75)]">
+            {/* Tanpa panel: tulisan langsung di atas foto, seperti
+                rancangan Starlink yang diberikan user. Yang menjaga
+                keterbacaannya bayang per huruf di bawah ini beserta
+                peredam gradasi di atas — bukan bidang berisi. */}
+            <div className="max-w-2xl [&_h1]:[text-shadow:0_2px_18px_rgb(10_28_49/0.85)] [&_p]:[text-shadow:0_1px_14px_rgb(10_28_49/0.9)]">
               <div className="mb-5 flex flex-wrap items-center gap-2">
                 {p.status_sekolah && (
                   <Lencana jenis="kaca">{p.status_sekolah}</Lencana>
@@ -217,7 +204,7 @@ export default async function Beranda() {
               </h1>
 
               {p.tagline && !belumTerisi(p.tagline) && (
-                <p className="mt-4 max-w-xl text-lg leading-relaxed text-white">
+                <p className="mt-4 max-w-md text-lg leading-relaxed text-white">
                   {p.tagline}
                 </p>
               )}
@@ -240,7 +227,7 @@ export default async function Beranda() {
                   ini dibuat. Isinya tetap terbaca mulai lebar 640 piksel,
                   dan di bawah itu digantikan bagian-bagian halaman yang
                   memang menerangkan hal yang sama satu per satu. */}
-              <p className="mt-4 hidden max-w-xl leading-relaxed text-white sm:block">
+              <p className="mt-4 hidden max-w-md leading-relaxed text-white sm:block">
                 Di halaman ini tersedia profil sekolah, peminatan yang dibuka,
                 sarana belajar, kegiatan siswa, beserta pendaftaran peserta
                 didik baru yang seluruhnya dikerjakan online: mengisi formulir,
@@ -269,7 +256,7 @@ export default async function Beranda() {
                 </Link>
                 <Link
                   href="/ppdb"
-                  className="rounded-xl bg-white/15 px-6 py-3.5 font-semibold text-white ring-1 ring-white/30 backdrop-blur-xl transition-all hover:bg-white/25 hover:ring-2 hover:ring-white"
+                  className="rounded-xl bg-white/10 px-6 py-3.5 font-semibold text-white ring-1 ring-white/40 transition-all hover:bg-white/20 hover:ring-2 hover:ring-white"
                 >
                   Informasi PPDB
                 </Link>
@@ -287,16 +274,16 @@ export default async function Beranda() {
               tersisa — dengan grid, baris terakhir yang tidak penuh
               menganga sebagai kotak kosong. */}
           <MunculLangsung jeda={0.12}>
-            <dl className="flex flex-wrap gap-px overflow-hidden rounded-2xl bg-white/20 text-center ring-1 ring-white/25 backdrop-blur-2xl [&_*]:[text-shadow:0_1px_10px_rgb(10_28_49/0.75)]">
+            <dl className="flex max-w-3xl flex-wrap border-t border-white/25 text-center [&_*]:[text-shadow:0_1px_14px_rgb(10_28_49/0.9)]">
               {angkaSekolah.map((a) => (
                 <div
                   key={a.k}
-                  className="grow basis-[calc(33.333%-1px)] bg-biru-tua/50 px-3 py-4 sm:basis-[calc(16.666%-1px)]"
+                  className="grow basis-1/3 border-r border-white/15 px-3 py-4 last:border-r-0 sm:basis-1/6"
                 >
                   <dd className="text-2xl font-bold text-white">
                     <AngkaNaik nilai={a.v} />
                   </dd>
-                  <dt className="mt-0.5 text-xs font-semibold text-white/85">
+                  <dt className="mt-0.5 text-xs font-semibold text-white/80">
                     {a.k}
                   </dt>
                 </div>
@@ -305,7 +292,7 @@ export default async function Beranda() {
                 <dd className="text-2xl font-bold text-white">
                   {p.akreditasi || "-"}
                 </dd>
-                <dt className="mt-0.5 text-xs font-semibold text-white/85">
+                <dt className="mt-0.5 text-xs font-semibold text-white/80">
                   Akreditasi
                 </dt>
               </div>
@@ -321,7 +308,7 @@ export default async function Beranda() {
               kurang beserta ukuran yang diminta, tetapi ukurannya satu
               baris, dan hilang sendiri begitu fotonya diunggah. */}
           {!adaGedung && (
-            <p className="rounded-xl bg-biru-tua/50 px-4 py-3 text-xs leading-relaxed text-white/85 ring-1 ring-white/25 backdrop-blur-2xl">
+            <p className="max-w-2xl rounded-xl bg-biru-tua/60 px-4 py-3 text-xs leading-relaxed text-white/85 ring-1 ring-white/15">
               Latar ini akan memakai foto gedung sekolah begitu diunggah sebagai{" "}
               <span className="font-semibold text-white">
                 Foto halaman depan

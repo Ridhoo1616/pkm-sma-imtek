@@ -1613,7 +1613,94 @@ gelap dari kiri untuk kolom tulisan, gelap dari bawah untuk barisan angka.
 mendorong seluruh isi halaman keluar dari pandangan pertama, padahal yang
 dicari orang tua justru ada di bawahnya.
 
-#### Tiga bentuk kaca, dan yang dipilih ditakar bukan dipilih
+#### Bentuk akhir: tanpa kartu, tulisan langsung di atas foto
+
+Rancangan terakhir yang diberikan user halaman Starlink: tulisan berdiri
+langsung di atas foto, tanpa kartu maupun kaca, dan latarnya bergerak saat
+digulir. Panel kacanya karena itu dilepas.
+
+Bentuk itu bekerja pada foto Starlink karena sisi kirinya memang gelap. Foto
+gedung SMA IMTEK sisi kirinya justru terang, jadi peredamnya tetap
+diperlukan — tetapi sekarang tiga lapis dengan pembagian tugas yang jelas:
+
+| Lapis | Tugasnya |
+| --- | --- |
+| Gradasi dari kiri | menggelapkan **kolom tulisan saja**; habis pada 82% lebar, jadi gedungnya di kanan tidak tersentuh |
+| Gradasi dari bawah | barisan angka, sekaligus menyambung ke bagian halaman berikutnya |
+| Bayang per huruf | bekerja mengikuti huruf, bukan menggelapkan bidang — ini yang membuat dua lapis di atas boleh setipis itu |
+
+Paragrafnya juga **dipersempit** dari `max-w-xl` menjadi `max-w-md`. Yang
+disesuaikan lebar tulisannya, bukan gelapnya foto: paragraf yang melebar
+sampai ke dinding putih gedung menuntut peredam jauh lebih pekat demi satu
+baris terakhir.
+
+#### Alat ukurnya sendiri sempat berbohong empat kali
+
+Penyetelan di atas dikerjakan dengan mengukur, dan tiap cara ukur yang salah
+menghasilkan angka yang tampak masuk akal:
+
+1. **getComputedStyle saja.** Warna teks tidak memberi tahu apa pun tentang
+   apa yang ada di belakangnya, dan yang di belakangnya foto.
+2. **Mengambil piksel berkontras terendah** dari selisih potret berteks dan
+   potret tanpa teks. Yang terendah selalu tepi huruf yang memang campuran,
+   jadi hasilnya mendekati 1 berapa pun keadaannya — kelima ukuran keluar
+   1,5 seragam, dan keseragaman itu yang membongkarnya.
+3. **Mengurai warna dengan regex angka.** Chrome mengembalikan
+   `color(srgb 1 1 1 / 0.75)`, sehingga putih terbaca `rgb(1,1,1)` — nyaris
+   hitam, dan paragrafnya terhitung 1,22:1.
+4. **Memakai kotak elemen, bukan kotak barisnya.** `h1` selebar `max-w-2xl`
+   padahal "SMA IMTEK" hanya sepertiganya, jadi ikut terambil bidang kosong
+   di kanan tulisan — dan di sorotan ini bidang itu bagian foto yang paling
+   terang. Judulnya terhitung **3,45:1 padahal sebenarnya 10,13:1**, dan
+   selama dua putaran penyetelan angka palsu itu membuat peredamnya
+   dipekatkan tanpa perlu.
+
+Yang dipakai sekarang: kotak baris tulisan lewat `Range`, warna teks
+diterjemahkan peramban lewat kanvas, latar dibaca dari potret halaman yang
+tulisannya disembunyikan. Bayang tulisan tidak ikut terhitung, jadi angkanya
+batas bawah.
+
+| Bagian | Foto sekolah | Foto hitam | Foto putih | Minimal |
+| --- | --- | --- | --- | --- |
+| Judul | 8,93:1 | 17,86:1 | 7,63:1 | 3:1 |
+| Paragraf | 7,37:1 | 17,86:1 | 6,70:1 | 4,5:1 |
+| Lokasi | 9,50:1 | 17,71:1 | 7,74:1 | 4,5:1 |
+| Angka | 14,71:1 | 17,52:1 | 12,90:1 | 3:1 |
+| Label angka | 9,64:1 | 11,44:1 | 9,38:1 | 4,5:1 |
+
+#### Latar yang tertinggal saat digulir
+
+`komponen/Paralaks.tsx`. Fotonya bergerak 28% dari kecepatan halaman,
+sehingga tertinggal dan menimbulkan kesan kedalaman. Gerakannya kecil dengan
+sengaja: foto yang melesat mengalihkan perhatian dari tulisan di atasnya.
+
+Empat hal yang menentukan cara menulisnya:
+
+1. **Fotonya diperbesar 1,25 kali.** Menggeser gambar setinggi layar penuh
+   akan menyingkapkan bidang kosong di tepinya; pembesaran itu yang
+   menyediakan bahan untuk digeser.
+2. **Posisinya dihitung di dalam `requestAnimationFrame`**, bukan langsung
+   di penangan gulir. Penangan gulir dipanggil jauh lebih sering daripada
+   peramban menggambar.
+3. **Berhenti dihitung begitu sorotannya lewat.** Halaman ini panjang.
+4. **"Kurangi gerak" dihormati sepenuhnya**: fotonya diam, tanpa pembesaran
+   sekalipun. Gerak latar termasuk yang paling mengganggu bagi yang peka
+   terhadap gerak, sebab bidangnya besar dan mengisi seluruh pandangan.
+
+**Titik nolnya sempat salah.** Mula-mula pergeserannya dihitung dari `r.top`
+langsung, dan itu tampak benar. Tetapi sorotan ini berada di bawah bilah
+berjalan dan navigasi, sehingga `r.top` bernilai sekitar 147 bahkan saat
+halaman belum digulir sama sekali — latarnya sudah tergeser 41 piksel
+sebelum pengunjung menyentuh apa pun, dan fotonya terlihat salah pasang pada
+pandangan pertama. Titik nolnya sekarang diambil dari letak elemennya di
+dalam dokumen.
+
+Diuji tujuh pemeriksaan: diam di puncak halaman, bergerak saat digulir,
+bergeraknya lebih lambat daripada halaman, arahnya tertinggal bukan
+mendahului, berhenti saat sorotannya lewat, dan diam total beserta tanpa
+pembesaran saat "kurangi gerak" dinyalakan.
+
+#### Sebelumnya: tiga bentuk kaca
 
 Panelnya melewati tiga bentuk, dua ditolak user:
 
