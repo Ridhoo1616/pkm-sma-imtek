@@ -60,13 +60,17 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
     { label: "TikTok", url: p.tiktok },
   ].filter((s) => s.url);
 
-  // Butir PPDB diambil dari menu atas, lalu dua tautan yang memang tidak ada
-  // di sana ditambahkan: Berita, dan pintu masuk petugas yang sengaja tidak
-  // dipasang di navigasi utama karena bukan untuk pengunjung umum.
+  // Butir PPDB diambil dari menu atas, ditambah Berita yang memang tidak
+  // ada di sana.
+  //
+  // "Masuk Petugas" sempat ikut di sini dan dihapus atas permintaan user.
+  // Daftar ini memang untuk pengunjung — calon siswa beserta orang tuanya —
+  // sedangkan pintu masuk panitia bukan bagian dari alur mereka. Pintunya
+  // tidak hilang: tetap ada di bilah paling atas halaman, tempat panitia
+  // mencarinya.
   const tautanPintar = [
     ...anakMenu("/ppdb"),
     { jalur: "/berita", label: "Berita & Pengumuman" },
-    { jalur: "/admin", label: "Masuk Petugas" },
   ];
 
   const judulBagian =

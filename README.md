@@ -1886,8 +1886,12 @@ atas, bukan daftar yang ditulis ulang. Sebelumnya kelimanya diketik langsung
 di dalam `Footer.tsx`, sehingga halaman PPDB yang berganti nama atau
 berpindah jalur meninggalkan tautan kaki halaman yang menunjuk ke tempat yang
 salah, tanpa satu pun galat yang menandainya. Sekarang butir PPDB diambil
-dari `anakMenu("/ppdb")`, ditambah Berita dan pintu masuk petugas yang memang
-tidak ada di navigasi utama karena bukan untuk pengunjung umum.
+dari `anakMenu("/ppdb")`, ditambah Berita yang memang tidak ada di sana.
+
+"Masuk Petugas" sempat ikut dan dihapus atas permintaan user. Daftar itu
+memang untuk pengunjung — calon siswa beserta orang tuanya — sedangkan pintu
+masuk panitia bukan bagian dari alur mereka. Pintunya tidak hilang: tetap
+ada di bilah paling atas halaman.
 
 **Hijau dipakai pada empat tempat saja**: ikon telepon, ikon surel, tautan
 "Buka Google Maps", dan tanda `>` pada Tautan Pintar. Aksen situs ini emas,
