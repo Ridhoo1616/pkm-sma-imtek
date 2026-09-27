@@ -1815,6 +1815,40 @@ tempat ga" memakai "tempat" yang bisa berarti lokasi maupun kursi.
 Yang tetap tidak tertutupi: kosakata yang belum pernah terpikir. Itu ditutup
 dari sisi lain — lihat catatan tentang pertanyaan yang tidak terjawab.
 
+#### Celah isi ditutup dari sisi lain: pertanyaan yang gagal dijawab
+
+Pengupas imbuhan dan toleransi salah ketik memperbaiki cara **memahami**
+pertanyaan. Keduanya tidak dapat menjawab hal yang memang belum pernah
+ditulis sekolah — "apakah ada asrama", "seragam beli di mana". Celah itu
+hanya dapat ditutup sekolah sendiri, dan yang dibutuhkannya adalah daftar
+yang benar.
+
+Karena itu pertanyaan yang **tidak** terjawab dicatat, lalu muncul di panel
+sebagai menu **Belum Terjawab**, terurut menurut berapa orang menanyakan hal
+yang sama. Satu tombol membawanya ke menu Tanya Jawab dengan pertanyaannya
+sudah terisi; panitia tinggal menuliskan jawabannya.
+
+Ini juga satu-satunya bagian yang memperbaiki dirinya dari kenyataan.
+Seluruh padanan kata yang ditulis sejauh ini berasal dari menebak bagaimana
+orang mengetik, dan setiap kali diukur selalu ada bentuk yang tidak
+terpikir. Daftar ini datang dari orang sungguhan.
+
+**Tentang privasinya.** Yang tersimpan hanya kalimat pertanyaannya — tidak
+ada alamat IP, tidak ada pengenal peramban, tidak ada apa pun yang menunjuk
+penanyanya. Pembatas laju tetap memakai alamat IP seperti rute publik lain,
+tetapi alamat itu tidak pernah ikut tersimpan. Kotak tanyanya menyebutkan
+hal ini apa adanya saat pertanyaannya dicatat, dan panel menyediakan tombol
+hapus bila ada yang telanjur mengetikkan data pribadi.
+
+Pertanyaan yang sama digabung, bukan ditumpuk: yang menentukan prioritas
+panitia bukan banyaknya baris melainkan berapa orang menanyakannya.
+Penggabungannya memakai bentuk baku — huruf kecil tanpa tanda baca —
+sehingga "Kapan dibuka?" dan "kapan  dibuka" terhitung satu. Pertanyaan
+sependek satu kata dibuang diam-diam; tidak menerangkan apa pun kepada
+panitia. Menandai satu pertanyaan "sudah ditangani" tidak menghapusnya, dan
+kirimannya yang baru mengembalikan tandanya — bila pertanyaan yang sudah
+dijawab muncul lagi, yang perlu diperbaiki letak jawabannya, bukan isinya.
+
 #### Ambangnya ditakar, bukan ditebak
 
 Seluruh pertanyaan uji dijalankan dengan ambang dinolkan, lalu dicari celah

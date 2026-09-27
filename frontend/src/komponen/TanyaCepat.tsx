@@ -10,6 +10,7 @@ import {
   type ButirPengetahuan,
 } from "@/lib/jawab";
 import type { Faq, Jurusan, KeadaanPpdb, Pengaturan } from "@/lib/tipe";
+import { api } from "@/lib/api";
 
 /**
  * Kotak "Tanya cepat" di dalam panel bantuan melayang.
@@ -82,6 +83,12 @@ export default function TanyaCepat({
     const hasil = cariJawaban(bersih, pengetahuan);
     const n = nomor.current;
     nomor.current += 2;
+
+    // Pertanyaan yang tidak terjawab dicatat ke server sekolah, supaya
+    // panitia melihat apa yang sebenarnya ingin diketahui orang dan dapat
+    // menambahkannya ke Tanya Jawab. Sekali kirim, tanpa menunggu, dan
+    // kegagalannya diabaikan: pengunjung tidak meminta apa pun dicatat.
+    if (hasil.length === 0) void api.catatTanyaBuntu(bersih);
 
     const balasan: Percakapan =
       hasil.length === 0
@@ -214,6 +221,10 @@ export default function TanyaCepat({
                     >
                       Telusuri semua Tanya Jawab
                     </Link>
+                    <p className="w-full text-[11px] leading-relaxed text-samar">
+                      Pertanyaan ini dicatat untuk panitia supaya dapat dijawab
+                      lain kali. Yang tersimpan hanya kalimatnya.
+                    </p>
                   </div>
                 )}
               </div>

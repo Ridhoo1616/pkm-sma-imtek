@@ -159,6 +159,7 @@ type pembatasPublik struct {
 	identitasGagal *pembatasLaju
 	daftarIP       *pembatasLaju
 	pesanIP        *pembatasLaju
+	tanyaBuntuIP   *pembatasLaju
 	kunjunganIP    *pembatasLaju
 	// cariSekolahIP melayani pencarian ketik-sambil-cari pada formulir, jadi
 	// batasnya longgar: satu pendaftar bisa mengetik nama sekolahnya
@@ -172,14 +173,18 @@ func pembatasPublikBaru() *pembatasPublik {
 		identitasGagal: pembatasLajuBaru(10, time.Hour),
 		daftarIP:       pembatasLajuBaru(20, time.Hour),
 		pesanIP:        pembatasLajuBaru(10, time.Hour),
-		kunjunganIP:    pembatasLajuBaru(300, 10*time.Minute),
-		cariSekolahIP:  pembatasLajuBaru(150, 10*time.Minute),
+		// Kotak tanya memang dipakai berkali-kali dalam satu kunjungan,
+		// jadi batasnya lebih longgar daripada formulir kontak.
+		tanyaBuntuIP:  pembatasLajuBaru(40, time.Hour),
+		kunjunganIP:   pembatasLajuBaru(300, 10*time.Minute),
+		cariSekolahIP: pembatasLajuBaru(150, 10*time.Minute),
 	}
 }
 
 func (p *pembatasPublik) semua() []*pembatasLaju {
 	return []*pembatasLaju{
 		p.identitasIP, p.identitasGagal, p.daftarIP, p.pesanIP, p.kunjunganIP,
+		p.tanyaBuntuIP,
 		p.cariSekolahIP,
 	}
 }

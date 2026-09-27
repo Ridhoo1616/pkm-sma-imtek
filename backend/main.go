@@ -106,6 +106,13 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/galeri", a.tanganiGaleriPublik)
 	m.HandleFunc("POST /api/pesan", a.batasiIP(a.batas.pesanIP,
 		"Terlalu banyak pesan dikirim dari jaringan Anda.", a.tanganiKirimPesan))
+
+	/* ---- pertanyaan yang tidak terjawab kotak Tanya cepat ----
+	   Dicatat di latar belakang, tanpa alamat IP dan tanpa pengenal apa
+	   pun; lihat handler_tanya_buntu.go. */
+	m.HandleFunc("POST /api/tanya-buntu", a.batasiIP(a.batas.tanyaBuntuIP,
+		"Terlalu banyak pertanyaan dikirim dari jaringan ini.",
+		a.tanganiCatatTanyaBuntu))
 	m.HandleFunc("GET /api/biaya", a.tanganiBiayaPublik)
 	m.HandleFunc("GET /api/faq", a.tanganiFaqPublik)
 	m.HandleFunc("GET /api/halaman", a.tanganiHalamanPublik)
@@ -205,6 +212,11 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("POST /api/admin/faq", a.wajibMasuk(a.tanganiSimpanFaq))
 	m.HandleFunc("PUT /api/admin/faq/{id}", a.wajibMasuk(a.tanganiUbahFaq))
 	m.HandleFunc("DELETE /api/admin/faq/{id}", a.wajibMasuk(a.tanganiHapusFaq))
+
+	/* ---- pertanyaan tak terjawab ---- */
+	m.HandleFunc("GET /api/admin/tanya-buntu", a.wajibMasuk(a.tanganiDaftarTanyaBuntu))
+	m.HandleFunc("PATCH /api/admin/tanya-buntu/{id}", a.wajibMasuk(a.tanganiTandaiTanyaBuntu))
+	m.HandleFunc("DELETE /api/admin/tanya-buntu/{id}", a.wajibMasuk(a.tanganiHapusTanyaBuntu))
 
 	/* ---- bank soal dan paket ujian ---- */
 	m.HandleFunc("GET /api/admin/soal", a.wajibMasuk(a.tanganiDaftarSoal))

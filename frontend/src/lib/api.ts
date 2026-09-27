@@ -293,6 +293,17 @@ export const api = {
     ),
   kirimPesan: (isi: unknown) =>
     permintaan<{ pesan: string }>("/api/pesan", { metode: "POST", isi }),
+  /**
+   * Mencatat pertanyaan yang tidak dapat dijawab kotak Tanya cepat.
+   *
+   * Kegagalannya sengaja tidak pernah sampai ke pemanggil: ini pencatatan
+   * di latar belakang, dan pengunjung tidak meminta apa pun dicatat.
+   */
+  catatTanyaBuntu: (pertanyaan: string) =>
+    permintaan<void>("/api/tanya-buntu", {
+      metode: "POST",
+      isi: { pertanyaan },
+    }).catch(() => undefined),
   faq: () =>
     permintaan<{
       data: import("./tipe").Faq[];
@@ -929,6 +940,22 @@ export const api = {
     }),
   hapusFaq: (id: number) =>
     permintaan<{ pesan: string }>(`/api/admin/faq/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
+  tanyaBuntu: (kueri = "") =>
+    permintaan<{
+      data: import("./tipe").TanyaBuntu[];
+      belum_ditangani: number;
+    }>(`/api/admin/tanya-buntu${kueri}`, { token: true }),
+  tandaiTanyaBuntu: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/tanya-buntu/${id}`, {
+      metode: "PATCH",
+      token: true,
+    }),
+  hapusTanyaBuntu: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/tanya-buntu/${id}`, {
       metode: "DELETE",
       token: true,
     }),

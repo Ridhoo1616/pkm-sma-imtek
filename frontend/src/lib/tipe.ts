@@ -368,6 +368,21 @@ export interface Faq {
   aktif: boolean;
 }
 
+/**
+ * Pertanyaan yang tidak dapat dijawab kotak Tanya cepat.
+ *
+ * Yang tersimpan hanya teks pertanyaannya — tidak ada alamat IP maupun
+ * pengenal peramban. Lihat backend/handler_tanya_buntu.go.
+ */
+export interface TanyaBuntu {
+  id: number;
+  pertanyaan: string;
+  /** Berapa orang menanyakan hal yang sama. */
+  jumlah: number;
+  ditangani: boolean;
+  terakhir: string;
+}
+
 /* ---------------- profil, akademik, dan kesiswaan ---------------- */
 
 export type KelompokHalaman = "Profil" | "Akademik" | "Kesiswaan";
