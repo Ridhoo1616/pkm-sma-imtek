@@ -6,6 +6,7 @@ import {
   tautanPeta,
 } from "@/lib/format";
 import { kataKeadaanPpdb } from "@/lib/ppdb";
+import { DOKUMEN } from "@/lib/dokumen";
 
 /**
  * Mesin tanya jawab untuk kotak "Tanya cepat".
@@ -66,14 +67,25 @@ const KATA_BUANG = new Set([
   // setinggi kata asing sungguhan dan menenggelamkan nilainya.
   "sampai", "hingga", "saja", "aja", "lagi", "kok", "nih", "tuh", "banget",
   "oleh", "tentang", "sebuah", "para", "agar", "supaya", "serta",
-  // "apakah" murni penanda tanya, berbeda dengan "apa" yang masih
-  // menyempitkan. Sempat membuat "apakah bayar" dimenangkan butir yang
-  // kebetulan juga memuat kata "apakah" di pertanyaannya.
-  "apakah",
+  // "apakah" dan "bagaimana" murni penanda tanya, berbeda dengan "apa" yang
+  // masih menyempitkan. "apakah" sempat membuat "apakah bayar" dimenangkan
+  // butir yang kebetulan juga memuat kata itu; "bagaimana" berbuat hal yang
+  // sama pada "syaratnya gmn", yang dijawab "Bagaimana saya tahu berkas saya
+  // sudah diverifikasi?" alih-alih daftar dokumennya.
+  "apakah", "bagaimana", "gimana", "gmn", "bgmn", "bagaimanakah",
   // Kata keharusan. Muncul di hampir setiap pertanyaan tentang dokumen dan
   // tidak pernah membedakan butir yang satu dari yang lain.
   "perlu", "diperlukan", "memerlukan", "butuh", "dibutuhkan", "membutuhkan",
   "harus", "wajib", "mesti",
+  // Singkatan yang lazim diketik di ponsel, beserta kata pengisi percakapan.
+  // Dilaporkan user: "pendaftaran gimana" tidak terjawab. Penyebabnya bukan
+  // kata "pendaftaran" melainkan kata di sebelahnya — setiap kata yang tidak
+  // dikenal pengetahuan diberi bobot setinggi kata asing sungguhan, sehingga
+  // satu kata pengisi cukup untuk menenggelamkan pertanyaan yang topiknya
+  // sebenarnya sudah jelas.
+  "yg", "utk", "dgn", "sy", "jd", "sm", "dr", "tdk", "klo", "kalo",
+  "gitu", "gini", "deh", "nanya", "pengen", "pengin", "buat", "kek", "kayak",
+  "mas", "mbak", "mba", "bang", "bosku", "gan", "tanya",
 ]);
 
 /**
@@ -84,19 +96,21 @@ const KATA_BUANG = new Set([
 // prettier-ignore
 const PADANAN: string[][] = [
   ["biaya", "bayar", "membayar", "pembayaran", "uang", "duit", "gratis", "spp", "pungutan", "tarif", "harga", "iuran", "sumbangan"],
-  ["jadwal", "kapan", "tanggal", "waktu", "mulai", "dimulai", "tutup", "ditutup", "dibuka", "buka", "batas", "deadline", "penutupan", "pembukaan"],
+  ["jadwal", "kapan", "kpn", "tanggal", "tgl", "waktu", "mulai", "dimulai", "tutup", "ditutup", "dibuka", "buka", "batas", "deadline", "penutupan", "pembukaan"],
   ["dokumen", "berkas", "file", "syarat", "persyaratan", "unggah", "upload", "scan", "lampiran", "ijazah", "rapor", "akta", "kk", "nisn", "nik", "pasfoto"],
   ["daftar", "mendaftar", "pendaftaran", "registrasi", "ppdb", "formulir", "isi"],
   ["status", "verifikasi", "diverifikasi", "cek", "periksa", "lacak", "pantau"],
   ["pengumuman", "hasil", "lulus", "kelulusan", "diterima", "ditolak"],
   ["tes", "ujian", "seleksi", "soal", "tryout"],
-  ["lokasi", "alamat", "dimana", "maps", "peta", "jalan", "tempat", "letak", "arah"],
-  ["kontak", "hubungi", "telepon", "nomor", "wa", "whatsapp", "email", "surel", "narahubung"],
+  ["lokasi", "alamat", "almt", "dimana", "dmn", "maps", "peta", "jalan", "tempat", "letak", "arah"],
+  ["kontak", "hubungi", "telepon", "telp", "nomor", "nomer", "wa", "whatsapp", "email", "surel", "narahubung"],
   ["peminatan", "jurusan", "mipa", "ipa", "ips", "bahasa", "program"],
   ["kuota", "tampung", "kursi", "sisa", "penuh", "kapasitas"],
   ["sekolah", "smaimtek", "imtek", "npsn", "akreditasi", "profil"],
   ["daftarulang", "heregistrasi"],
   ["ponsel", "hp", "handphone", "android", "iphone", "laptop", "komputer"],
+  ["cara", "caranya", "prosedur", "proses", "tahapan", "langkah", "alur"],
+  ["berapa", "brp", "berapakah"],
 ];
 
 const KE_PADANAN = new Map<string, string>();
@@ -298,6 +312,29 @@ function butirDataHidup(
     });
   }
 
+  // Dokumen yang diminta. Butir ini ada meski sekolah belum mengisi apa pun,
+  // sebab daftarnya ditentukan formulir — bukan pengaturan — dan harus sama
+  // dengan `berkasPendaftar` di backend. Lihat lib/dokumen.ts.
+  const wajib = DOKUMEN.filter((d) => d.wajib);
+  const opsional = DOKUMEN.filter((d) => !d.wajib);
+  b.push({
+    id: "hidup-dokumen",
+    tanya: "Dokumen apa saja yang diunggah? (syarat berkas)",
+    jawab:
+      `Ada ${wajib.length} dokumen wajib: ` +
+      wajib.map((d) => d.nama).join(", ") +
+      "." +
+      (opsional.length > 0
+        ? ` Yang tidak wajib: ${opsional.map((d) => d.nama).join(", ")}.` +
+          (opsional[0].catatan ? ` ${opsional[0].catatan}` : "")
+        : "") +
+      " Berkasnya diunggah saat mengisi formulir.",
+    kategori: "Berkas",
+    kunci: ["dokumen", "syarat", "berkas", "unggah", "persyaratan"],
+    tautan: { label: "Lihat ketentuan PPDB", jalur: "/ppdb" },
+    utama: true,
+  });
+
   if (terisi("ppdb_syarat")) {
     b.push({
       id: "hidup-syarat",
@@ -339,8 +376,21 @@ export interface HasilJawab {
   nilai: number;
 }
 
-/** Di bawah ini dianggap tidak ketemu; lebih baik mengaku tidak tahu. */
-const AMBANG = 0.55;
+/**
+ * Di bawah ini dianggap tidak ketemu; lebih baik mengaku tidak tahu.
+ *
+ * Angkanya bukan tebakan. Seluruh pertanyaan uji ditakar nilainya dengan
+ * ambang dinolkan, lalu dicari celah antara yang paling lemah di antara
+ * yang HARUS terjawab dan yang paling kuat di antara yang HARUS ditolak:
+ *
+ *   0,516  "peminatan yang tersedia"        <- terlemah yang harus lolos
+ *   0,420  "berapa harga seragam batik"     <- terkuat yang harus ditolak
+ *
+ * 0,47 berada di tengah keduanya, jadi ada selisih di kedua sisi. Bila
+ * kelak butir pengetahuannya bertambah banyak, takaran ini perlu diulang —
+ * alat penakarnya ada di catatan pengujian pada README.
+ */
+const AMBANG = 0.47;
 
 /**
  * Bobot tiap konsep, dihitung dari pengetahuannya sendiri.
@@ -396,7 +446,15 @@ export function cariJawaban(
   if (tanya.size === 0) return [];
 
   const bobot = bobotKonsep(pengetahuan);
-  const bobotAsing = Math.log(1 + (pengetahuan.length || 1));
+  // Kata yang tidak dikenal pengetahuan tetap dihitung berat — itu yang
+  // membuat pertanyaan di luar cakupan jatuh ke bawah ambang, bukan
+  // dipaksakan ke butir terdekat. Tetapi tidak lagi LEBIH berat daripada
+  // kata apa pun yang dikenal: beratnya disamakan dengan kata terlangka
+  // yang memang ada, sehingga satu kata pengisi yang tidak terdaftar tidak
+  // sanggup lagi menenggelamkan pertanyaan yang topiknya sudah jelas.
+  let bobotAsing = 0;
+  for (const w of bobot.values()) bobotAsing = Math.max(bobotAsing, w);
+  if (bobotAsing === 0) bobotAsing = 1;
 
   // Konsep pertanyaan dikelompokkan menurut padanannya, supaya "alamatnya
   // dimana" tidak terhitung dua tuntutan terpisah — "alamat" dan "dimana"
@@ -441,6 +499,23 @@ export function cariJawaban(
     }
 
     let nilai = penuh > 0 ? dapat / penuh : 0;
+
+    // Sejauh ini yang diukur hanya seberapa banyak PERTANYAAN PENANYA yang
+    // tertutupi butir. Itu membuat butir yang panjang dan butir yang tepat
+    // sering bernilai persis sama, dan pemenangnya tinggal urutan larik:
+    // "pendaftaran gimana" seri antara "Bagaimana cara mendaftar di sekolah
+    // ini?" dan "Saya lupa nomor registrasi, bagaimana?".
+    //
+    // Karena itu ditambahkan ukuran sebaliknya: seberapa besar bagian
+    // PERTANYAAN BUTIR yang memang ditanyakan. Butir yang pendek dan tepat
+    // sasaran unggul atas butir panjang yang kebetulan memuat kata yang
+    // sama. Pengaruhnya sengaja kecil — hanya seperlima — supaya perannya
+    // memutus seri, bukan mengambil alih penilaian.
+    if (diTanya.size > 0) {
+      let tersentuh = 0;
+      for (const k of diTanya) if (tanya.has(k)) tersentuh += 1;
+      nilai *= 0.8 + 0.2 * (tersentuh / diTanya.size);
+    }
 
     // Butir yang TOPIKNYA tidak disinggung sama sekali diturunkan, walau
     // sebagian katanya cocok. `kunci` adalah pernyataan topik butir itu,

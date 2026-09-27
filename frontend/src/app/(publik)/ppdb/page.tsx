@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { DOKUMEN } from "@/lib/dokumen";
 import { muatProfil } from "@/lib/profil";
 import { angka, persen, rupiah, tanggalPanjang, belumTerisi } from "@/lib/format";
 import { kataKeadaanPpdb } from "@/lib/ppdb";
@@ -15,29 +16,6 @@ export const metadata: Metadata = {
   description:
     "Jadwal, persyaratan, jalur, dan alur pendaftaran peserta didik baru.",
 };
-
-/**
- * Dokumen yang diminta formulir.
- *
- * Daftarnya HARUS sama dengan `berkasPendaftar` pada backend
- * (handler_pendaftar.go). Akta Kelahiran dan Rapor sempat tertulis opsional
- * di sini padahal backend mewajibkan keduanya, jadi halaman ini menjanjikan
- * yang tidak benar: pendaftar membaca "opsional", lalu formulirnya menolak
- * kirimannya. Lima wajib, satu opsional.
- */
-const DOKUMEN = [
-  { nama: "Foto 3x4", wajib: true, tipe: "JPG atau PNG" },
-  { nama: "Ijazah atau Surat Keterangan Lulus", wajib: true, tipe: "JPG, PNG, atau PDF" },
-  { nama: "Kartu Keluarga", wajib: true, tipe: "JPG, PNG, atau PDF" },
-  { nama: "Akta Kelahiran", wajib: true, tipe: "JPG, PNG, atau PDF" },
-  { nama: "Rapor semester terakhir", wajib: true, tipe: "JPG, PNG, atau PDF" },
-  {
-    nama: "Sertifikat prestasi",
-    wajib: false,
-    tipe: "JPG, PNG, atau PDF",
-    catatan: "Wajib bila mendaftar lewat jalur Prestasi.",
-  },
-];
 
 const KETERANGAN_JALUR: Record<string, string> = {
   Reguler: "Jalur umum berdasarkan nilai rapor dan kelengkapan berkas.",

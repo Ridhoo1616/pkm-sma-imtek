@@ -1721,6 +1721,7 @@ dapat dikerjakan naskah FAQ:
 | Peminatan yang dibuka | tabel `jurusan` |
 | Alamat dan peta | `alamat`, `peta_koordinat` |
 | Cara menghubungi | `telepon`, `whatsapp`, `email`, `jam_layanan` |
+| Dokumen yang diunggah | `lib/dokumen.ts`, yang wajib sama dengan `berkasPendaftar` di backend |
 
 Tanggalnya ikut berubah begitu panitia mengubahnya di panel, tanpa ada yang
 perlu menyunting naskah FAQ. Yang datanya masih penanda `[kurung siku]`
@@ -1736,8 +1737,8 @@ Akhiran `-nya`, `-kah`, `-lah` dibuang seadanya supaya "biayanya" bertemu
 butir, dan bobot tiap konsep dihitung dari pengetahuannya sendiri: konsep yang
 muncul di mana-mana — "sekolah", "daftar" — hampir tidak menambah nilai.
 
-Empat kesalahan ditemukan lewat pengujian dan dibetulkan; keempatnya wajar
-terjadi dan tidak satu pun terlihat tanpa diuji:
+Tujuh kesalahan ditemukan dan dibetulkan — lima lewat pengujian, dua
+dilaporkan user. Tidak satu pun terlihat tanpa dicoba:
 
 1. **Padanan kata terlalu melebur.** "kapan" dan "ditutup" sama-sama menjadi
    `jadwal`, sehingga "kapan pendaftaran ditutup" menyusut menjadi dua konsep
@@ -1753,22 +1754,58 @@ terjadi dan tidak satu pun terlihat tanpa diuji:
    ditanyakan. Butir yang topiknya — `kunci`, atau kategori bagi butir FAQ —
    tidak tersentuh sama sekali kini diturunkan nilainya.
 4. **Ambangnya terlalu longgar.** Pada 0,34 pertanyaan "berapa harga seragam
-   batik" dijawab dengan biaya pendaftaran. Dinaikkan ke 0,55.
+   batik" dijawab dengan biaya pendaftaran.
+5. **Kata yang tidak dikenal diberi bobot tertinggi.** Dilaporkan user:
+   "pendaftaran gimana" tidak terjawab sama sekali. Penyebabnya bukan kata
+   "pendaftaran" melainkan kata di sebelahnya — setiap kata di luar
+   pengetahuan dihitung lebih berat daripada kata apa pun yang dikenal,
+   sehingga satu kata pengisi cukup menenggelamkan pertanyaan yang topiknya
+   sudah jelas. "gimana cara daftar" pun ikut gagal. Bobot kata asing kini
+   disamakan dengan kata terlangka yang memang ada, dan singkatan percakapan
+   ponsel — `gmn`, `kpn`, `tgl`, `dmn`, `brp`, `yg`, `utk` — didaftarkan.
+6. **Penanda tanya ikut menentukan.** "apakah" dan "bagaimana" tidak
+   menyempitkan apa pun, tetapi butir yang kebetulan memuatnya jadi unggul:
+   "syaratnya gmn" dijawab "Bagaimana saya tahu berkas saya sudah
+   diverifikasi?" alih-alih daftar dokumennya. Keduanya dibuang seperti kata
+   sambung biasa.
+7. **Butir panjang seri dengan butir yang tepat.** Ukurannya semula hanya
+   seberapa banyak pertanyaan penanya yang tertutupi butir, jadi "pendaftaran
+   gimana" seri antara "Bagaimana cara mendaftar" dan "Saya lupa nomor
+   registrasi, bagaimana?" — pemenangnya tinggal urutan larik. Ditambahkan
+   ukuran sebaliknya, seberapa besar bagian pertanyaan butir yang memang
+   ditanyakan, dengan pengaruh seperlima supaya perannya memutus seri saja.
+
+#### Ambangnya ditakar, bukan ditebak
+
+Seluruh pertanyaan uji dijalankan dengan ambang dinolkan, lalu dicari celah
+antara yang paling lemah di antara yang harus terjawab dan yang paling kuat
+di antara yang harus ditolak:
+
+```
+0,516  "peminatan yang tersedia"       <- terlemah yang harus lolos
+0,420  "berapa harga seragam batik"    <- terkuat yang harus ditolak
+```
+
+Ambangnya ditaruh di tengah keduanya, 0,47, sehingga ada selisih di kedua
+sisi. Bila kelak butir pengetahuannya bertambah banyak, takaran ini perlu
+diulang.
 
 #### Pengujiannya
 
-29 pemeriksaan pada `lib/jawab.ts`, dijalankan langsung terhadap modulnya
+37 pemeriksaan pada `lib/jawab.ts`, dijalankan langsung terhadap modulnya
 dengan data sungguhan dari API — bukan lewat peramban, supaya penyetelan
 peringkatnya dapat diulang dalam hitungan detik tanpa membangun ulang.
-22 pertanyaan **harus** terjawab, ditulis seperti orang tua sungguhan
+28 pertanyaan **harus** terjawab, ditulis seperti orang tua sungguhan
 mengetiknya: "berapa duit buat daftar", "biayanya berapa ya bu", "masih ada
-sisa kursi?", "jurusan apa aja", "daftar lewat hp bisa?".
+sisa kursi?", "daftar lewat hp bisa?", "pendaftaran gimana", "syaratnya gmn",
+"kpn dibuka".
 
-Tujuh sisanya **harus ditolak**, dan bagian ini yang paling penting: "apakah
-ada beasiswa untuk anak yatim", "siapa pelatih tim futsalnya", "berapa harga
-seragam batik", "menu kantin hari ini apa". Kotak yang memaksakan jawaban
-terdekat lebih berbahaya daripada kotak yang mengaku tidak tahu, jadi
-penolakan diuji sekeras kemampuan menjawab.
+Sembilan sisanya **harus ditolak**, dan bagian ini yang paling penting:
+"apakah ada beasiswa untuk anak yatim", "siapa pelatih tim futsalnya",
+"berapa harga seragam batik", "menu kantin hari ini apa", "apakah ada
+asrama". Kotak yang memaksakan jawaban terdekat lebih berbahaya daripada
+kotak yang mengaku tidak tahu, jadi penolakan diuji sekeras kemampuan
+menjawab.
 
 Ditambah 17 pemeriksaan di peramban sungguhan untuk antarmukanya: tab, tombol
 pancingan, gelembung percakapan, tautan lanjutan, dan tombol "Kirim
