@@ -3,20 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { IkonSurel, IkonTelepon, IkonWhatsapp } from "@/komponen/Ikon";
+import TanyaCepat from "@/komponen/TanyaCepat";
 import { belumTerisi, pesanTanyaPpdb, tautanWa } from "@/lib/format";
-import type { Pengaturan } from "@/lib/tipe";
+import type { Faq, Jurusan, KeadaanPpdb, Pengaturan } from "@/lib/tipe";
 
 /**
  * Tombol bantuan melayang di pojok kanan bawah.
  *
- * Dua pekerjaan sekaligus, karena keduanya dibutuhkan pada saat yang sama:
+ * Tiga pekerjaan sekaligus, karena ketiganya dibutuhkan pada saat yang sama:
  * pengunjung yang bingung ingin bertanya, dan pengunjung yang bertanya
  * biasanya sebenarnya hanya belum tahu langkah berikutnya.
  *
  *   1. Menunjukkan posisi pengunjung pada alur pendaftaran, beserta langkah
  *      berikutnya yang disorot. Ditentukan dari halaman yang sedang dibuka
  *      dan dari keadaan PPDB, bukan sekadar daftar tautan.
- *   2. Menyediakan jalur bertanya: WhatsApp, telepon, dan surel.
+ *   2. Kotak "Tanya cepat" pada tab kedua, yang menjawab dari Tanya Jawab
+ *      sekolah beserta data yang hidup. Lihat TanyaCepat.tsx.
+ *   3. Menyediakan jalur bertanya: WhatsApp, telepon, dan surel.
  *
  * Bila nomor WhatsApp belum diisi sekolah, tombolnya tidak dihilangkan.
  * Yang hilang hanya pilihan WhatsApp-nya, dan panelnya mengarahkan ke jalur
@@ -83,11 +86,21 @@ function langkahDari(jalur: string): number {
 export default function BantuanMelayang({
   pengaturan,
   ppdbDibuka,
+  faq,
+  ppdb,
+  jurusan,
 }: {
   pengaturan: Pengaturan;
   ppdbDibuka: boolean;
+  faq: Faq[];
+  ppdb: KeadaanPpdb;
+  jurusan: Jurusan[];
 }) {
   const [terbuka, setTerbuka] = useState(false);
+  // "alur" dibuka lebih dulu, bukan "tanya". Pengunjung yang menekan tombol
+  // ini paling sering belum tahu langkah berikutnya, bukan sedang punya
+  // pertanyaan yang sudah jadi kalimat.
+  const [tab, setTab] = useState<"alur" | "tanya">("alur");
   const [jalur, setJalur] = useState("");
   const panel = useRef<HTMLDivElement>(null);
   const tombol = useRef<HTMLButtonElement>(null);
@@ -151,14 +164,51 @@ export default function BantuanMelayang({
           aria-label="Bantuan pendaftaran"
           className="flex max-h-[min(34rem,calc(100vh-7.5rem))] w-[min(22rem,calc(100vw-2rem))] animate-[munculKabar_0.18s_ease-out] flex-col overflow-hidden rounded-kartu border border-garis bg-white shadow-kuat"
         >
-          <div className="shrink-0 bg-biru-tua px-5 py-4 text-white">
-            <p className="text-sm font-bold">Bingung harus ke mana?</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-white/80">
-              Ini urutan langkahnya. Yang disorot adalah langkah Anda
-              berikutnya.
+          <div className="shrink-0 bg-biru-tua px-5 pt-4 text-white">
+            <p className="text-sm font-bold">
+              {tab === "alur" ? "Bingung harus ke mana?" : "Tanya cepat"}
             </p>
+            <p className="mt-0.5 text-xs leading-relaxed text-white/80">
+              {tab === "alur"
+                ? "Ini urutan langkahnya. Yang disorot adalah langkah Anda berikutnya."
+                : "Dijawab dari Tanya Jawab sekolah dan data yang ada."}
+            </p>
+            <div role="tablist" className="mt-3.5 flex gap-1">
+              {(
+                [
+                  ["alur", "Langkah"],
+                  ["tanya", "Tanya"],
+                ] as const
+              ).map(([kunci, label]) => (
+                <button
+                  key={kunci}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === kunci}
+                  onClick={() => setTab(kunci)}
+                  className={
+                    "rounded-t-lg px-3.5 py-2 text-xs font-bold transition " +
+                    (tab === kunci
+                      ? "bg-white text-biru-tua"
+                      : "text-white/70 hover:bg-white/10 hover:text-white")
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
+          {tab === "tanya" ? (
+            <TanyaCepat
+              faq={faq}
+              pengaturan={pengaturan}
+              ppdb={ppdb}
+              jurusan={jurusan}
+              tutupPanel={() => setTerbuka(false)}
+            />
+          ) : (
+          <>
           <ol className="min-h-0 flex-1 divide-y divide-garis overflow-y-auto">
             {ALUR.map((l, i) => {
               const sedangDibuka = i === kini;
@@ -261,6 +311,8 @@ export default function BantuanMelayang({
               Lihat 24 pertanyaan yang sering diajukan
             </Link>
           </div>
+          </>
+          )}
         </div>
       )}
 

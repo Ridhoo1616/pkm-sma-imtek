@@ -1687,6 +1687,93 @@ ponsel barisnya menumpuk dan tombolnya menutupi baris terakhir sehingga
 ruangnya di bawah. Diperiksa di tiga lebar layar dengan membandingkan kotak
 pembatas keduanya, bukan dengan melihat tangkapan layar saja.
 
+### P4. Kotak "Tanya cepat", tanpa model bahasa
+
+Tab kedua pada tombol bantuan melayang: pengunjung mengetik pertanyaan dengan
+bahasanya sendiri, dan dijawab seketika. Tersedia di seluruh halaman publik,
+bukan hanya di halaman Tanya Jawab.
+
+**Tidak ada model bahasa di dalamnya, dan itu keputusan, bukan keterbatasan.**
+Yang paling sering ditanyakan orang tua adalah tanggal penutupan, biaya, dan
+dokumen yang diminta. Model bahasa menjawab dengan yakin walau datanya tidak
+ada, dan jawaban yang salah pada tiga hal itu merugikan orang sungguhan —
+seorang calon siswa bisa terlambat mendaftar karena diberi tanggal yang
+dikarang. Mesin ini hanya dapat mengembalikan kalimat yang memang ditulis
+sekolah atau nilai yang memang ada di basis data; bila tidak menemukan, ia
+mengatakan tidak tahu dan mengarahkan ke panitia.
+
+Akibat sampingannya kebetulan menyenangkan: tanpa kunci API, tanpa biaya per
+pertanyaan, tanpa pertanyaan pengunjung yang keluar ke penyedia mana pun, dan
+seluruhnya berjalan di peramban tanpa satu panggilan jaringan pun.
+
+#### Apa bedanya dengan halaman Tanya Jawab yang sudah ada
+
+Pengetahuannya dua sumber. Yang pertama tabel `faq`, sama dengan halaman
+Tanya Jawab. Yang kedua **disusun dari data yang hidup** — dan itu yang tidak
+dapat dikerjakan naskah FAQ:
+
+| Butir | Sumbernya |
+| --- | --- |
+| Apakah pendaftaran sedang dibuka | keadaan PPDB, lewat `kataKeadaanPpdb()` |
+| Kapan dibuka dan ditutup | `ppdb_mulai`, `ppdb_selesai`, `ppdb_pengumuman` |
+| Berapa biayanya | `ppdb_biaya`, `biaya_catatan` |
+| Kuota dan sisanya | `ppdb.kuota` dikurangi `ppdb.terisi` |
+| Peminatan yang dibuka | tabel `jurusan` |
+| Alamat dan peta | `alamat`, `peta_koordinat` |
+| Cara menghubungi | `telepon`, `whatsapp`, `email`, `jam_layanan` |
+
+Tanggalnya ikut berubah begitu panitia mengubahnya di panel, tanpa ada yang
+perlu menyunting naskah FAQ. Yang datanya masih penanda `[kurung siku]`
+**tidak dibuatkan butirnya sama sekali** — lebih baik mengaku belum ada
+keterangannya daripada menjawab dengan penanda.
+
+#### Bagaimana pencocokannya bekerja
+
+Pertanyaan dipecah menjadi konsep, bukan kata: daftar padanan memetakan
+"duit", "bayar", dan "gratis" ke `biaya`; "kursi" dan "sisa" ke `kuota`.
+Akhiran `-nya`, `-kah`, `-lah` dibuang seadanya supaya "biayanya" bertemu
+"biaya". Nilainya bagian **berbobot** dari pertanyaan penanya yang tertutupi
+butir, dan bobot tiap konsep dihitung dari pengetahuannya sendiri: konsep yang
+muncul di mana-mana — "sekolah", "daftar" — hampir tidak menambah nilai.
+
+Empat kesalahan ditemukan lewat pengujian dan dibetulkan; keempatnya wajar
+terjadi dan tidak satu pun terlihat tanpa diuji:
+
+1. **Padanan kata terlalu melebur.** "kapan" dan "ditutup" sama-sama menjadi
+   `jadwal`, sehingga "kapan pendaftaran ditutup" menyusut menjadi dua konsep
+   dan seri persis dengan butir "apakah pendaftaran sedang dibuka" — yang
+   menang tinggal urutan larik. Sekarang kata aslinya ikut disimpan, dan
+   cocok pada kata yang persis diketik bernilai lebih tinggi daripada cocok
+   lewat padanan.
+2. **Padanan bocor ke daftar "kata yang persis diketik".** Perbaikan nomor 1
+   sempat batal karenanya. Kata asli dan konsep sekarang dipisah tegas.
+3. **Butir bisa menang tanpa topiknya disinggung.** "pendaftaran sampai
+   tanggal berapa" dimenangkan butir "Berapa biaya pendaftarannya?", sebab
+   "berapa" dan "pendaftaran" sama-sama ada di sana padahal biaya tidak
+   ditanyakan. Butir yang topiknya — `kunci`, atau kategori bagi butir FAQ —
+   tidak tersentuh sama sekali kini diturunkan nilainya.
+4. **Ambangnya terlalu longgar.** Pada 0,34 pertanyaan "berapa harga seragam
+   batik" dijawab dengan biaya pendaftaran. Dinaikkan ke 0,55.
+
+#### Pengujiannya
+
+29 pemeriksaan pada `lib/jawab.ts`, dijalankan langsung terhadap modulnya
+dengan data sungguhan dari API — bukan lewat peramban, supaya penyetelan
+peringkatnya dapat diulang dalam hitungan detik tanpa membangun ulang.
+22 pertanyaan **harus** terjawab, ditulis seperti orang tua sungguhan
+mengetiknya: "berapa duit buat daftar", "biayanya berapa ya bu", "masih ada
+sisa kursi?", "jurusan apa aja", "daftar lewat hp bisa?".
+
+Tujuh sisanya **harus ditolak**, dan bagian ini yang paling penting: "apakah
+ada beasiswa untuk anak yatim", "siapa pelatih tim futsalnya", "berapa harga
+seragam batik", "menu kantin hari ini apa". Kotak yang memaksakan jawaban
+terdekat lebih berbahaya daripada kotak yang mengaku tidak tahu, jadi
+penolakan diuji sekeras kemampuan menjawab.
+
+Ditambah 17 pemeriksaan di peramban sungguhan untuk antarmukanya: tab, tombol
+pancingan, gelembung percakapan, tautan lanjutan, dan tombol "Kirim
+pertanyaan ke panitia" yang muncul saat buntu.
+
 ### Q. Tautan WhatsApp beserta pesan bawaannya
 
 Tautan `wa.me` ada di lima tempat: bilah atas, footer, halaman Kontak, tombol

@@ -6,7 +6,7 @@ import { TeksBerjalan } from "@/komponen/TeksBerjalan";
 import { PencatatKunjungan } from "@/komponen/PencatatKunjungan";
 import { api } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
-import type { Berita } from "@/lib/tipe";
+import type { Berita, Faq, Jurusan } from "@/lib/tipe";
 
 export default async function TataLetakPublik({ children }: LayoutProps<"/">) {
   const { profil, gagal } = await muatProfil();
@@ -18,6 +18,21 @@ export default async function TataLetakPublik({ children }: LayoutProps<"/">) {
     .berita("?per_halaman=1")
     .then((h) => h.data)
     .catch((): Berita[] => []);
+
+  // Bekal kotak "Tanya cepat" pada tombol bantuan melayang. Ditarik di sini
+  // supaya tersedia di seluruh halaman publik, bukan hanya di /faq, dan
+  // ditangkap kegagalannya seperti berita di atas: kotak tanya yang kosong
+  // jauh lebih baik daripada halaman yang gagal dirender seluruhnya.
+  const [faq, jurusan] = await Promise.all([
+    api
+      .faq()
+      .then((h) => h.data)
+      .catch((): Faq[] => []),
+    api
+      .jurusan()
+      .then((h) => h.data)
+      .catch((): Jurusan[] => []),
+  ]);
 
   return (
     <>
@@ -46,6 +61,9 @@ export default async function TataLetakPublik({ children }: LayoutProps<"/">) {
       <BantuanMelayang
         pengaturan={profil.pengaturan}
         ppdbDibuka={profil.ppdb.dibuka}
+        faq={faq}
+        ppdb={profil.ppdb}
+        jurusan={jurusan}
       />
     </>
   );
