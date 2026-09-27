@@ -1588,6 +1588,66 @@ kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
 
+### P1. Sorotan beranda: foto sekolah selebar layar
+
+Bentuknya mengikuti rancangan yang diberikan user: foto memenuhi latar,
+tulisan dan kartu kaca menumpang di atasnya. Bilah keadaan PPDB yang memang
+sudah berkaca dibiarkan pada tempatnya — ia sudah berperan seperti kartu
+melayang pada rancangan itu.
+
+Tiga hal yang membuat bentuk ini tetap aman:
+
+**1. Fotonya belum tentu ada.** Saat pengerjaannya, `foto_depan` memang masih
+kosong. Selama begitu, latarnya memakai gradasi bercahaya yang sudah dipakai
+sebelumnya, bukan kotak kelabu; tata letaknya tidak berubah sedikit pun saat
+fotonya nanti diunggah, yang berganti hanya lapisan paling belakang.
+Peredamnya pun **hanya dipasang saat ada foto** — sempat dipasang selalu, dan
+akibatnya gradasi cadangan tertutup olehnya sendiri sehingga latarnya rata
+gelap, lebih buruk daripada sebelum diubah.
+
+**2. Tulisan di atas foto mudah menjadi tidak terbaca**, dan fotonya dikirim
+sekolah sehingga terangnya tidak dapat diduga. Karena itu ada dua peredam:
+gelap dari kiri untuk kolom tulisan, gelap dari bawah untuk barisan angka.
+
+**3. Tingginya dibatasi 80% layar, bukan 100%.** Sorotan setinggi layar penuh
+mendorong seluruh isi halaman keluar dari pandangan pertama, padahal yang
+dicari orang tua justru ada di bawahnya.
+
+#### Keterbacaannya diukur, bukan dikira-kira
+
+Diuji dengan foto buatan yang **paling terang** — langit siang, gedung
+berwarna muda — sebab itu keadaan terburuk bagi tulisan putih. Kontrasnya
+diukur terhadap piksel yang benar-benar terlukis:
+
+| Bagian | Kontras | Minimal WCAG AA |
+| --- | --- | --- |
+| Judul | 9,99:1 | 3:1 |
+| Paragraf | 7,50:1 | 4,5:1 |
+| Lokasi | 6,86:1 | 4,5:1 |
+| Angka | 7,37:1 | 3:1 |
+| Label angka | 5,52:1 | 4,5:1 |
+
+Label angka semula 4,65:1 — lolos, tetapi sisanya hanya 0,15. Itu yang
+memutuskan peredamnya **tidak boleh diringankan** walau fotonya jadi tampak
+lebih redup daripada rancangan aslinya; yang dikuatkan justru warna labelnya.
+
+**Dua cara pengukuran yang salah sempat dipakai**, dan keduanya menghasilkan
+angka yang tampak masuk akal:
+
+1. Membandingkan potret berteks dengan potret tanpa teks, lalu mengambil
+   piksel berkontras terendah. Piksel terendah selalu tepi huruf yang memang
+   campuran, jadi hasilnya selalu mendekati 1 — kelima ukuran keluar 1,5
+   seragam, dan keseragaman itu yang membongkarnya.
+2. Mengurai warna dari `getComputedStyle` dengan regex angka. Chrome
+   mengembalikan `color(srgb 1 1 1 / 0.75)` untuk `text-white/75`, sehingga
+   putih terbaca sebagai `rgb(1,1,1)` — nyaris hitam, dan paragrafnya
+   terhitung 1,22:1. Warnanya sekarang diterjemahkan peramban lewat kanvas.
+
+Petunjuk bagi panitia selama fotonya belum ada tetap disediakan, tetapi
+sebesar satu baris. Sebelumnya berupa kotak besar bertuliskan "Tempat foto
+gedung sekolah": jelas bagi panitia, tetapi juga terbaca setiap pengunjung
+dan membuat halaman depan tampak belum jadi.
+
 ### P2. Angka sekolah di beranda, beserta hitungannya dari nol
 
 Sorotan beranda memuat sebaris angka sekolah. Yang ditampilkan bukan sekadar

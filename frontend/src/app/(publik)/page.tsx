@@ -112,14 +112,62 @@ export default async function Beranda() {
 
   return (
     <>
-      {/* ---------------- Sorotan: sekolahnya, bukan pendaftarannya --------- */}
-      <section className="relative overflow-hidden bg-biru-tua text-white">
-        {/* Vektor Hiasan Latar (Glowing Blobs) */}
-        <div className="absolute -top-[20%] -left-[10%] h-[700px] w-[700px] rounded-full bg-biru blur-[130px] opacity-60" aria-hidden="true" />
-        <div className="absolute -bottom-[20%] -right-[10%] h-[800px] w-[800px] rounded-full bg-emas blur-[150px] opacity-20" aria-hidden="true" />
-        <div className="wadah relative grid items-center gap-12 py-16 md:py-24 lg:grid-cols-[1.1fr_1fr]">
+      {/* ---------------- Sorotan: foto sekolah selebar layar ---------------
+
+          Bentuknya mengikuti rancangan yang diberikan user: foto memenuhi
+          latar, tulisan dan kartu kaca menumpang di atasnya.
+
+          TIGA HAL YANG MENENTUKAN RANCANGAN INI TETAP AMAN:
+
+          1. Fotonya belum tentu ada. Selama `foto_depan` kosong, latarnya
+             memakai gradasi bercahaya yang sudah dipakai sebelumnya —
+             bukan kotak kelabu. Tata letaknya tidak berubah sedikit pun
+             saat fotonya nanti diunggah; yang berganti hanya lapisan
+             paling belakang.
+          2. Tulisan di atas foto mudah menjadi tidak terbaca, dan fotonya
+             dikirim sekolah sehingga terangnya tidak dapat diduga. Karena
+             itu ada DUA peredam: gelap dari kiri untuk melindungi kolom
+             tulisan, dan gelap dari bawah untuk melindungi barisan angka.
+             Keduanya tetap terpasang walau fotonya sangat terang.
+          3. Tingginya dibatasi 80% layar, bukan 100%. Sorotan setinggi
+             layar penuh mendorong seluruh isi halaman keluar dari
+             pandangan pertama, dan yang dicari orang tua justru ada di
+             bawahnya. */}
+      <section className="relative isolate overflow-hidden bg-biru-tua text-white">
+        {adaGedung ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={urlUnggahan("profil", p.foto_depan)}
+            alt={`Gedung ${p.nama_sekolah || "sekolah"}`}
+            className="absolute inset-0 -z-10 h-full w-full object-cover"
+          />
+        ) : (
+          <div aria-hidden="true" className="absolute inset-0 -z-10">
+            <div className="absolute -top-[20%] -left-[10%] h-[700px] w-[700px] rounded-full bg-biru opacity-60 blur-[130px]" />
+            <div className="absolute -right-[10%] -bottom-[20%] h-[800px] w-[800px] rounded-full bg-emas opacity-20 blur-[150px]" />
+          </div>
+        )}
+        {/* Peredam HANYA dipasang saat ada foto. Sempat dipasang selalu,
+            dan akibatnya gradasi cadangan tertutup olehnya sendiri
+            sehingga latarnya rata gelap — lebih buruk daripada sebelum
+            diubah. Tanpa foto tidak ada yang perlu diredam: gradasinya
+            memang sudah dirancang cukup gelap untuk tulisan putih. */}
+        {adaGedung && (
+          <>
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -z-10 bg-gradient-to-r from-biru-tua via-biru-tua/85 to-biru-tua/35"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -z-10 bg-gradient-to-t from-biru-tua via-biru-tua/20 to-transparent"
+            />
+          </>
+        )}
+
+        <div className="wadah relative flex min-h-[min(38rem,80vh)] flex-col justify-end gap-10 py-16 md:py-20">
           <MunculLangsung>
-            <div>
+            <div className="max-w-2xl">
               <div className="mb-5 flex flex-wrap items-center gap-2">
                 {p.status_sekolah && (
                   <Lencana jenis="kaca">{p.status_sekolah}</Lencana>
@@ -130,7 +178,7 @@ export default async function Beranda() {
                 {p.npsn && <Lencana jenis="kaca">NPSN {p.npsn}</Lencana>}
               </div>
 
-              <h1 className="text-4xl leading-[1.12] font-bold text-balance text-white md:text-5xl">
+              <h1 className="text-4xl leading-[1.12] font-bold text-balance text-white drop-shadow-sm md:text-6xl">
                 {p.nama_sekolah || "SMA IMTEK"}
               </h1>
 
@@ -148,9 +196,7 @@ export default async function Beranda() {
                   bukan memuji sekolahnya. Kalimat tentang mutu sekolah hanya
                   boleh datang dari sekolah sendiri, dan tempatnya sudah
                   disediakan: semboyan di atas dan bagian keunggulan di
-                  bawah. Yang ini dapat ditulis di sini karena isinya cuma
-                  daftar bagian yang memang ada, dan itu dapat diperiksa
-                  siapa pun dengan menggulir halamannya. */}
+                  bawah. */}
               <p className="mt-4 max-w-xl leading-relaxed text-white/75">
                 Di halaman ini tersedia profil sekolah, peminatan yang dibuka,
                 sarana belajar, kegiatan siswa, beserta pendaftaran peserta
@@ -180,7 +226,7 @@ export default async function Beranda() {
                 </Link>
                 <Link
                   href="/ppdb"
-                  className="rounded-xl bg-white/10 px-6 py-3.5 font-semibold text-white ring-1 ring-white/25 transition-all hover:bg-white/20 hover:ring-2 hover:ring-white hover:ring-offset-2 hover:ring-offset-biru-tua"
+                  className="rounded-xl bg-white/10 px-6 py-3.5 font-semibold text-white ring-1 ring-white/25 backdrop-blur transition-all hover:bg-white/20 hover:ring-2 hover:ring-white hover:ring-offset-2 hover:ring-offset-biru-tua"
                 >
                   Informasi PPDB
                 </Link>
@@ -188,77 +234,59 @@ export default async function Beranda() {
             </div>
           </MunculLangsung>
 
-          {/* Foto gedung sekolah beserta angka yang bisa diperiksa. */}
+          {/* Angka sekolah, berkaca di atas fotonya.
+
+              Pembatasnya dari gap-px di atas latar putih tembus pandang,
+              bukan divide-x: jumlah selnya bergantung isian sekolah,
+              barisnya bisa membungkus, dan divide-x hanya menggambar
+              pembatas mendatar sehingga baris kedua tampak menempel. Tiap
+              sel melebar mengisi barisnya sendiri, berapa pun yang
+              tersisa — dengan grid, baris terakhir yang tidak penuh
+              menganga sebagai kotak kosong. */}
           <MunculLangsung jeda={0.12}>
-            <div className="overflow-hidden rounded-kartu bg-white shadow-kuat">
-              {adaGedung ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={urlUnggahan("profil", p.foto_depan)}
-                  alt={`Gedung ${p.nama_sekolah || "sekolah"}`}
-                  className="aspect-[4/3] w-full bg-biru-muda object-cover"
-                />
-              ) : (
-                <div className="grid aspect-[4/3] w-full place-items-center bg-biru-muda px-6 text-center">
-                  <div>
-                    <span
-                      aria-hidden
-                      className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white text-xl text-biru"
-                    >
-                      ☐
-                    </span>
-                    <p className="mt-3 text-sm font-semibold text-biru-tua">
-                      Tempat foto gedung sekolah
-                    </p>
-                    <p className="mx-auto mt-1.5 max-w-xs text-xs leading-relaxed text-biru/70">
-                      Foto mendatar, perbandingan sisi 4:3, paling tidak 1600
-                      piksel lebarnya. Diunggah sebagai
-                      <span className="font-semibold">
-                        {" "}
-                        Foto halaman depan{" "}
-                      </span>
-                      lewat menu Pengaturan di panel admin.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Pembatas antarsel dibuat dari gap-px di atas latar garis,
-                  bukan dari divide-x. Jumlah angkanya berubah-ubah menurut
-                  apa yang sudah diisi sekolah, jadi barisnya bisa
-                  membungkus, dan divide-x hanya menggambar pembatas
-                  mendatar — barisnya kedua tampak menempel.
-
-                  Flex membungkus, BUKAN grid tiga kolom. Jumlah selnya
-                  bergantung pada isian sekolah, jadi baris terakhir sering
-                  tidak penuh: dengan grid, sisanya menganga sebagai kotak
-                  kelabu. Di sini setiap sel melebar mengisi barisnya
-                  sendiri, berapa pun yang tersisa. */}
-              <dl className="flex flex-wrap gap-px border-t border-garis bg-garis text-center text-teks">
-                {angkaSekolah.map((a) => (
-                  <div
-                    key={a.k}
-                    className="grow basis-[calc(33.333%-1px)] bg-white px-3 py-4"
-                  >
-                    <dd className="text-2xl font-bold text-biru-tua">
-                      <AngkaNaik nilai={a.v} />
-                    </dd>
-                    <dt className="mt-0.5 text-xs font-semibold text-samar">
-                      {a.k}
-                    </dt>
-                  </div>
-                ))}
-                <div className="grow basis-[calc(33.333%-1px)] bg-white px-3 py-4">
-                  <dd className="text-2xl font-bold text-biru-tua">
-                    {p.akreditasi || "-"}
+            <dl className="flex flex-wrap gap-px overflow-hidden rounded-2xl bg-white/15 text-center ring-1 ring-white/20 backdrop-blur-md">
+              {angkaSekolah.map((a) => (
+                <div
+                  key={a.k}
+                  className="grow basis-[calc(33.333%-1px)] bg-white/10 px-3 py-4 sm:basis-[calc(16.666%-1px)]"
+                >
+                  <dd className="text-2xl font-bold text-white">
+                    <AngkaNaik nilai={a.v} />
                   </dd>
-                  <dt className="mt-0.5 text-xs font-semibold text-samar">
-                    Akreditasi
+                  <dt className="mt-0.5 text-xs font-semibold text-white/80">
+                    {a.k}
                   </dt>
                 </div>
-              </dl>
-            </div>
+              ))}
+              <div className="grow basis-[calc(33.333%-1px)] bg-white/10 px-3 py-4 sm:basis-[calc(16.666%-1px)]">
+                <dd className="text-2xl font-bold text-white">
+                  {p.akreditasi || "-"}
+                </dd>
+                <dt className="mt-0.5 text-xs font-semibold text-white/80">
+                  Akreditasi
+                </dt>
+              </div>
+            </dl>
           </MunculLangsung>
+
+          {/* Petunjuk bagi panitia selama fotonya belum ada.
+
+              Sebelumnya berupa kotak besar bertuliskan "Tempat foto gedung
+              sekolah" — jelas bagi panitia, tetapi juga terbaca setiap
+              pengunjung dan membuat halaman depan tampak belum jadi. Di
+              sini keterangannya tetap ada supaya panitia tahu apa yang
+              kurang beserta ukuran yang diminta, tetapi ukurannya satu
+              baris, dan hilang sendiri begitu fotonya diunggah. */}
+          {!adaGedung && (
+            <p className="rounded-xl bg-white/10 px-4 py-3 text-xs leading-relaxed text-white/70 ring-1 ring-white/15 backdrop-blur">
+              Latar ini akan memakai foto gedung sekolah begitu diunggah sebagai{" "}
+              <span className="font-semibold text-white">
+                Foto halaman depan
+              </span>{" "}
+              lewat menu Pengaturan di panel admin. Foto mendatar, paling tidak
+              1600 piksel lebarnya.
+            </p>
+          )}
         </div>
       </section>
 
@@ -277,9 +305,18 @@ export default async function Beranda() {
               {kataPpdb.lencana}
             </div>
             <p className="text-[15px] font-medium leading-relaxed text-teks">
-              Tahun Ajaran <span className="font-bold text-biru-tua">{p.ppdb_tahun || "-"}</span>
+              Tahun Ajaran{" "}
+              <span className="font-bold text-biru-tua">
+                {p.ppdb_tahun || "-"}
+              </span>
               {profil.ppdb.dibuka && p.ppdb_selesai && (
-                <> · Ditutup <span className="font-semibold">{tanggalPanjang(p.ppdb_selesai)}</span></>
+                <>
+                  {" "}
+                  · Ditutup{" "}
+                  <span className="font-semibold">
+                    {tanggalPanjang(p.ppdb_selesai)}
+                  </span>
+                </>
               )}
               {/* Tanggal mulai hanya disebut bila pendaftarannya memang
                   BELUM mulai. Pada pendaftaran yang sudah lewat atau yang
@@ -309,7 +346,9 @@ export default async function Beranda() {
               className="group flex-1 sm:flex-none relative flex items-center justify-center gap-2 rounded-xl bg-biru-tua px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl hover:bg-biru hover:ring-2 hover:ring-biru-tua hover:ring-offset-2"
             >
               {profil.ppdb.dibuka ? "Mulai Daftar" : "Lihat Syarat"}
-              <span className="transition-transform group-hover:translate-x-1 opacity-70 group-hover:opacity-100">→</span>
+              <span className="transition-transform group-hover:translate-x-1 opacity-70 group-hover:opacity-100">
+                →
+              </span>
             </Link>
             <Link
               href="/ppdb/cek"

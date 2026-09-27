@@ -74,6 +74,20 @@ const jawab = (q) => {
   return h.length ? h[0] : null;
 };
 
+/**
+ * Memeriksa satu hasil terhadap polanya.
+ *
+ * Pola berawalan "id:" memeriksa BUTIR MANA yang terpilih, bukan isi
+ * jawabannya. Itu yang dipakai untuk data milik sekolah: begitu panitia
+ * mengubah ppdb_biaya, isinya berubah dan uji yang memeriksa isi akan
+ * pecah walau mesinnya bekerja sebagaimana mestinya.
+ */
+const cocok = (h, pola) =>
+  h !== null &&
+  (pola.startsWith("id:")
+    ? h.butir.id === pola.slice(3)
+    : new RegExp(pola, "i").test(h.butir.jawab));
+
 /* ---------- melihat peringkat satu pertanyaan ---------- */
 const arg = process.argv.slice(2);
 if (arg.length > 0 && arg[0] !== "--takar") {
@@ -117,8 +131,8 @@ console.log(`Pengetahuan: ${P.length} butir (${P.filter((b) => b.utama).length} 
 console.log("── harus terjawab, dan isinya harus memuat pola yang diminta");
 for (const [q, pola] of HARUS) {
   const h = jawab(q);
-  cek(q, h !== null && new RegExp(pola, "i").test(h.butir.jawab),
-      h ? `(${h.nilai.toFixed(2)}) ${h.butir.jawab.slice(0, 70)}` : "tidak ada jawaban");
+  cek(q, cocok(h, pola),
+      h ? `(${h.nilai.toFixed(2)}) [${h.butir.id}] ${h.butir.jawab.slice(0, 60)}` : "tidak ada jawaban");
 }
 
 console.log("\n── harus mengaku tidak tahu");
@@ -131,10 +145,7 @@ for (const q of JANGAN) {
 
 console.log("\n── ragam cara bertanya: satu maksud, banyak bentuk");
 for (const { maksud, contoh, pola } of RAGAM) {
-  const kena = contoh.filter((q) => {
-    const h = jawab(q);
-    return h !== null && new RegExp(pola, "i").test(h.butir.jawab);
-  });
+  const kena = contoh.filter((q) => cocok(jawab(q), pola));
   cek(`${maksud} — ${kena.length}/${contoh.length} bentuk terjawab`,
       kena.length >= Math.ceil(contoh.length * 0.7),
       contoh.filter((q) => !kena.includes(q)).join(" | "));
@@ -143,8 +154,8 @@ for (const { maksud, contoh, pola } of RAGAM) {
 console.log("\n── salah ketik");
 for (const [q, pola] of TYPO) {
   const h = jawab(q);
-  cek(q, h !== null && new RegExp(pola, "i").test(h.butir.jawab),
-      h ? `(${h.nilai.toFixed(2)}) ${h.butir.tanya}` : "tidak ada jawaban");
+  cek(q, cocok(h, pola),
+      h ? `(${h.nilai.toFixed(2)}) [${h.butir.id}] ${h.butir.tanya}` : "tidak ada jawaban");
 }
 
 console.log(`\n${lulus} lulus, ${gagal} gagal`);
