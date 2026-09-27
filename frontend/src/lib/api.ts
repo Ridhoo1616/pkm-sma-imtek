@@ -299,6 +299,22 @@ export const api = {
    * Kegagalannya sengaja tidak pernah sampai ke pemanggil: ini pencatatan
    * di latar belakang, dan pengunjung tidak meminta apa pun dicatat.
    */
+  /**
+   * Meminta model bahasa memilih satu butir pengetahuan yang paling cocok.
+   *
+   * Yang dikirim hanya pertanyaan pengunjung beserta DAFTAR PERTANYAAN
+   * butirnya — isi jawabannya tidak pernah ikut, dan yang kembali hanya
+   * nomor butirnya. Teks jawabannya tetap diambil dari pengetahuan di
+   * peramban. Kegagalannya dianggap "tidak ketemu", bukan galat.
+   */
+  cocokkanTanya: (
+    pertanyaan: string,
+    pilihan: { id: string; tanya: string }[],
+  ) =>
+    permintaan<{ id: string | null }>("/api/tanya-cocok", {
+      metode: "POST",
+      isi: { pertanyaan, pilihan },
+    }).catch(() => ({ id: null })),
   catatTanyaBuntu: (pertanyaan: string) =>
     permintaan<void>("/api/tanya-buntu", {
       metode: "POST",

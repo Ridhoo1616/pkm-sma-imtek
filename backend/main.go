@@ -113,6 +113,13 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("POST /api/tanya-buntu", a.batasiIP(a.batas.tanyaBuntuIP,
 		"Terlalu banyak pertanyaan dikirim dari jaringan ini.",
 		a.tanganiCatatTanyaBuntu))
+
+	// Pencocok berbantuan model bahasa, dipakai hanya sebagai cadangan
+	// sesudah pencocok setempat menyerah. Mati secara bawaan; lihat
+	// handler_tanya_cocok.go.
+	m.HandleFunc("POST /api/tanya-cocok", a.batasiIP(a.batas.tanyaBuntuIP,
+		"Terlalu banyak pertanyaan dikirim dari jaringan ini.",
+		a.tanganiCocokkanTanya))
 	m.HandleFunc("GET /api/biaya", a.tanganiBiayaPublik)
 	m.HandleFunc("GET /api/faq", a.tanganiFaqPublik)
 	m.HandleFunc("GET /api/halaman", a.tanganiHalamanPublik)

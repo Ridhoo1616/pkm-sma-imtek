@@ -64,6 +64,7 @@ export default async function TataLetakPublik({ children }: LayoutProps<"/">) {
         faq={faq}
         ppdb={profil.ppdb}
         jurusan={jurusan}
+        pencocokAi={profil.pencocok_ai === true}
       />
     </>
   );

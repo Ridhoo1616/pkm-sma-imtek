@@ -1849,6 +1849,56 @@ panitia. Menandai satu pertanyaan "sudah ditangani" tidak menghapusnya, dan
 kirimannya yang baru mengembalikan tandanya — bila pertanyaan yang sudah
 dijawab muncul lagi, yang perlu diperbaiki letak jawabannya, bukan isinya.
 
+#### Model bahasa boleh MEMILIH, tidak boleh MENULIS
+
+Pilihan terakhir, **mati secara bawaan**. Bila `LLM_URL` disetel, pertanyaan
+yang tidak tertangani pencocok setempat dicarikan sekali lagi lewat model
+bahasa — tetapi dengan batas yang ditentukan rancangannya, bukan oleh
+perintah yang diberikan kepadanya:
+
+| Yang dikirim | Yang TIDAK dikirim |
+| --- | --- |
+| pertanyaan pengunjung | isi jawaban mana pun |
+| daftar pertanyaan butir, bernomor | naskah sekolah, data pendaftar, apa pun yang lain |
+
+Yang diterima kembali **hanya satu angka**. Jawaban yang bukan angka, angka
+di luar daftar, dan angka negatif dibuang; teks jawabannya tetap diambil
+frontend dari pengetahuannya sendiri. Dengan begitu model bahasa tidak punya
+jalan untuk mengarang tanggal penutupan maupun biaya — risiko yang sejak
+awal menjadi alasan menolaknya.
+
+`max_tokens` disetel 8 dan suhunya 0. Batas sekecil itu sekaligus menjadi
+penjaga biaya: jawaban panjang tidak mungkin terbit.
+
+**Dijalankan hanya sebagai cadangan**, sesudah pencocok setempat menyerah.
+Dua akibatnya disengaja: biayanya jatuh pada pertanyaan yang memang tidak
+tertangani saja, dan pertanyaan yang sudah terjawab setempat tidak pernah
+keluar dari peramban. Bila penyedianya gagal, menggantung, atau menjawab
+ngawur, kotaknya kembali mengaku tidak tahu seperti biasa — tidak pernah
+menampilkan galat.
+
+Bentuk permintaannya mengikuti `/v1/chat/completions`, jadi penyedia mana
+pun dapat dipakai, **termasuk yang dijalankan sendiri**:
+
+```ini
+LLM_URL=http://localhost:11434/v1/chat/completions   # Ollama, gratis
+LLM_MODEL=llama3.2
+```
+
+Dengan cara itu pertanyaan pengunjung tidak keluar ke mana pun sama sekali.
+Alamat selain localhost wajib `https`, sebab yang lewat adalah kalimat yang
+diketik pengunjung; `config.go` menolak selain itu saat server dinyalakan.
+
+Bila aktif, kotak tanyanya **menyebutkan hal itu sebelum orang mengetik**,
+bukan sesudahnya.
+
+Diuji dengan penyedia tiruan yang mencatat apa yang benar-benar diterimanya:
+kiriman terbukti tidak memuat satu pun isi jawaban; "3" memilih butir
+ketiga; " 2 " tetap terbaca; "0", "Saya pikir nomor 3", "999", dan "-1"
+seluruhnya ditolak menjadi tidak-ketemu; penyedia yang menjawab 500 maupun
+yang menggantung sepuluh detik tidak membuat kotaknya menampilkan galat; dan
+pertanyaan yang terjawab setempat terbukti tidak pernah menyentuh penyedia.
+
 #### Ambangnya ditakar, bukan ditebak
 
 Seluruh pertanyaan uji dijalankan dengan ambang dinolkan, lalu dicari celah

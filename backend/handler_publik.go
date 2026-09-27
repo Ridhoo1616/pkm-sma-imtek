@@ -54,6 +54,12 @@ func (a *Aplikasi) tanganiProfil(w http.ResponseWriter, r *http.Request) {
 			"jalur":   JalurPendaftaran,
 			"sumber":  SumberInformasi,
 		},
+		// Kotak Tanya cepat perlu tahu apakah pencocok berbantuan model
+		// bahasa tersedia, sebab keterangan yang ditampilkannya kepada
+		// pengunjung berbeda: bila aktif, pertanyaan yang tidak terjawab
+		// setempat ikut dikirim ke penyedia luar, dan itu harus disebutkan
+		// sebelum orang mengetik, bukan sesudahnya.
+		"pencocok_ai": a.pencocokAiAktif(),
 	})
 }
 

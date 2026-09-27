@@ -89,12 +89,15 @@ export default function BantuanMelayang({
   faq,
   ppdb,
   jurusan,
+  pencocokAi,
 }: {
   pengaturan: Pengaturan;
   ppdbDibuka: boolean;
   faq: Faq[];
   ppdb: KeadaanPpdb;
   jurusan: Jurusan[];
+  /** Pencocok berbantuan model bahasa tersedia di server. */
+  pencocokAi: boolean;
 }) {
   const [terbuka, setTerbuka] = useState(false);
   // "alur" dibuka lebih dulu, bukan "tanya". Pengunjung yang menekan tombol
@@ -205,6 +208,7 @@ export default function BantuanMelayang({
               pengaturan={pengaturan}
               ppdb={ppdb}
               jurusan={jurusan}
+              pencocokAi={pencocokAi}
               tutupPanel={() => setTerbuka(false)}
             />
           ) : (

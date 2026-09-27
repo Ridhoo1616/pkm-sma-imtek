@@ -21,6 +21,12 @@ export interface KeadaanPpdb {
 export interface Profil {
   pengaturan: Pengaturan;
   ppdb: KeadaanPpdb;
+  /**
+   * Pencocok pertanyaan berbantuan model bahasa tersedia di server.
+   * Mengubah keterangan yang ditampilkan kotak Tanya cepat: bila aktif,
+   * pertanyaan yang tidak terjawab setempat ikut dikirim ke penyedia luar.
+   */
+  pencocok_ai?: boolean;
 }
 
 export interface Jurusan {

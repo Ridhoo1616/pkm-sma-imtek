@@ -39,6 +39,8 @@ interface Percakapan {
   lain?: ButirPengetahuan[];
   /** Tidak menemukan jawaban; pengarahan ke panitia ditampilkan. */
   buntu?: boolean;
+  /** Gelembung sementara selagi pencocok cadangan dihubungi. */
+  menunggu?: boolean;
 }
 
 export default function TanyaCepat({
@@ -46,12 +48,15 @@ export default function TanyaCepat({
   pengaturan,
   ppdb,
   jurusan,
+  pencocokAi,
   tutupPanel,
 }: {
   faq: Faq[];
   pengaturan: Pengaturan;
   ppdb: KeadaanPpdb;
   jurusan: Jurusan[];
+  /** Pencocok berbantuan model bahasa tersedia di server. */
+  pencocokAi: boolean;
   tutupPanel: () => void;
 }) {
   const pengetahuan = useMemo(
@@ -76,15 +81,39 @@ export default function TanyaCepat({
     if (riwayat.length > 0) bawah.current?.scrollIntoView({ block: "end" });
   }, [riwayat]);
 
-  function tanya(teks: string) {
+  async function tanya(teks: string) {
     const bersih = teks.trim();
     if (!bersih) return;
 
-    const hasil = cariJawaban(bersih, pengetahuan);
+    let hasil = cariJawaban(bersih, pengetahuan);
     const n = nomor.current;
     nomor.current += 2;
 
-    // Pertanyaan yang tidak terjawab dicatat ke server sekolah, supaya
+    // Model bahasa dipakai HANYA sebagai cadangan, sesudah pencocok
+    // setempat menyerah. Dua akibatnya disengaja: biayanya jatuh pada
+    // pertanyaan yang memang tidak tertangani saja, dan pertanyaan yang
+    // sudah terjawab setempat tidak pernah keluar dari peramban.
+    //
+    // Yang dikirim cuma daftar PERTANYAAN butirnya; jawabannya tidak ikut,
+    // dan yang kembali cuma nomor. Teks jawabannya tetap diambil dari
+    // pengetahuan di sini, jadi model bahasa tidak punya jalan untuk
+    // mengarang tanggal atau biaya.
+    if (hasil.length === 0 && pencocokAi) {
+      setRiwayat((r) => [
+        ...r,
+        { id: n, dari: "orang", teks: bersih },
+        { id: n + 1, dari: "sistem", teks: "Sedang mencari…", menunggu: true },
+      ]);
+      const { id } = await api.cocokkanTanya(
+        bersih,
+        pengetahuan.map((b) => ({ id: b.id, tanya: b.tanya })),
+      );
+      const butir = id ? pengetahuan.find((b) => b.id === id) : undefined;
+      if (butir) hasil = [{ butir, nilai: 1 }];
+      setRiwayat((r) => r.filter((b) => !b.menunggu && b.id !== n));
+    }
+
+    // Pertanyaan yang tetap tidak terjawab dicatat ke server sekolah, supaya
     // panitia melihat apa yang sebenarnya ingin diketahui orang dan dapat
     // menambahkannya ke Tanya Jawab. Sekali kirim, tanpa menunggu, dan
     // kegagalannya diabaikan: pengunjung tidak meminta apa pun dicatat.
@@ -129,12 +158,20 @@ export default function TanyaCepat({
               yang terbaru. Yang belum ada jawabannya akan dikatakan apa adanya,
               bukan dikira-kira.
             </p>
+            {pencocokAi && (
+              <p className="text-[11px] leading-relaxed text-samar">
+                Pertanyaan yang tidak ditemukan di sini dicarikan sekali lagi
+                lewat layanan AI, jadi kalimatnya dikirim ke luar. Yang dikirim
+                hanya pertanyaannya — jawabannya tetap diambil dari naskah
+                sekolah, tidak pernah dikarang.
+              </p>
+            )}
             <ul className="space-y-1.5">
               {pancingan.map((t) => (
                 <li key={t}>
                   <button
                     type="button"
-                    onClick={() => tanya(t)}
+                    onClick={() => void tanya(t)}
                     className="flex w-full items-start gap-2 rounded-lg border border-garis bg-white px-3 py-2 text-left text-xs leading-relaxed font-medium text-teks transition hover:border-biru hover:bg-biru-muda/50 hover:text-biru"
                   >
                     <IkonPanahKanan
@@ -194,7 +231,7 @@ export default function TanyaCepat({
                         <li key={l.id}>
                           <button
                             type="button"
-                            onClick={() => tanya(l.tanya)}
+                            onClick={() => void tanya(l.tanya)}
                             className="text-left text-xs leading-relaxed font-medium text-biru hover:text-biru-tua hover:underline"
                           >
                             {l.tanya}
@@ -238,7 +275,7 @@ export default function TanyaCepat({
       <form
         onSubmit={(ev) => {
           ev.preventDefault();
-          tanya(ketikan);
+          void tanya(ketikan);
         }}
         className="flex shrink-0 items-center gap-2 border-t border-garis bg-slate-50 px-4 py-3"
       >
