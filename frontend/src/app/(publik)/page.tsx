@@ -147,27 +147,55 @@ export default async function Beranda() {
             <div className="absolute -right-[10%] -bottom-[20%] h-[800px] w-[800px] rounded-full bg-emas opacity-20 blur-[150px]" />
           </div>
         )}
-        {/* Peredam HANYA dipasang saat ada foto. Sempat dipasang selalu,
-            dan akibatnya gradasi cadangan tertutup olehnya sendiri
-            sehingga latarnya rata gelap — lebih buruk daripada sebelum
-            diubah. Tanpa foto tidak ada yang perlu diredam: gradasinya
-            memang sudah dirancang cukup gelap untuk tulisan putih. */}
+        {/* Peredam tipis saja, dan HANYA saat ada foto.
+
+            Semula peredamnya pekat dan menutupi separuh kiri foto. Diminta
+            user dibetulkan: "terlalu gelap birunya jadi menutupi sekolah".
+            Yang salah bukan takaran peredamnya melainkan caranya —
+            menggelapkan SELURUH foto demi melindungi tulisan yang cuma
+            menempati sebagiannya.
+
+            Sekarang keterbacaannya dijamin panel kaca di bawah, yang
+            menutup persis sebesar tulisannya. Peredam di sini tinggal
+            penyatu warna supaya foto seterang apa pun tetap menyambung
+            dengan bagian halaman berikutnya. */}
         {adaGedung && (
           <>
             <div
               aria-hidden="true"
-              className="absolute inset-0 -z-10 bg-gradient-to-r from-biru-tua via-biru-tua/85 to-biru-tua/35"
+              className="absolute inset-0 -z-10 bg-biru-tua/25"
             />
             <div
               aria-hidden="true"
-              className="absolute inset-0 -z-10 bg-gradient-to-t from-biru-tua via-biru-tua/20 to-transparent"
+              className="absolute inset-0 -z-10 bg-gradient-to-t from-biru-tua/70 via-transparent to-transparent"
             />
           </>
         )}
 
         <div className="wadah relative flex min-h-[min(38rem,80vh)] flex-col justify-end gap-10 py-16 md:py-20">
           <MunculLangsung>
-            <div className="max-w-2xl">
+            {/* Panel kaca. INI yang menjamin keterbacaannya, bukan peredam
+                di atas foto.
+
+                Bedanya menentukan: peredam bergantung pada seberapa terang
+                fotonya, sedangkan panel dengan kepekatan tetap memberi
+                lantai kontras yang sama untuk foto apa pun. Pada 70%
+                biru-tua, foto seputih apa pun pun tetap menghasilkan lebih
+                dari 6:1 untuk tulisan putih — dihitung dengan menyusun
+                warna panel di atas putih murni, keadaan terburuk yang
+                mungkin ada.
+
+                Tanpa foto, panelnya tidak diperlukan: gradasi cadangan
+                sudah gelap. Yang dipakai lapisan putih tipis saja, supaya
+                tulisannya tetap berkelompok tanpa menggelapkan dua kali. */}
+            <div
+              className={
+                "max-w-2xl rounded-3xl p-7 ring-1 backdrop-blur-md sm:p-9 " +
+                (adaGedung
+                  ? "bg-biru-tua/70 ring-white/15"
+                  : "bg-white/5 ring-white/10")
+              }
+            >
               <div className="mb-5 flex flex-wrap items-center gap-2">
                 {p.status_sekolah && (
                   <Lencana jenis="kaca">{p.status_sekolah}</Lencana>
@@ -183,7 +211,7 @@ export default async function Beranda() {
               </h1>
 
               {p.tagline && !belumTerisi(p.tagline) && (
-                <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/85">
+                <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/90">
                   {p.tagline}
                 </p>
               )}
@@ -197,7 +225,16 @@ export default async function Beranda() {
                   boleh datang dari sekolah sendiri, dan tempatnya sudah
                   disediakan: semboyan di atas dan bagian keunggulan di
                   bawah. */}
-              <p className="mt-4 max-w-xl leading-relaxed text-white/75">
+              {/* Disembunyikan di layar terkecil. Kalimat ini menerangkan
+                  isi situs, bukan sekolahnya — berguna, tetapi yang paling
+                  tidak mendesak di antara semua yang ada di sorotan. Di
+                  ponsel, empat barisnya membuat panel kaca menelan hampir
+                  seluruh layar sehingga foto sekolahnya nyaris tidak
+                  terlihat, dan justru foto itu yang menjadi alasan sorotan
+                  ini dibuat. Isinya tetap terbaca mulai lebar 640 piksel,
+                  dan di bawah itu digantikan bagian-bagian halaman yang
+                  memang menerangkan hal yang sama satu per satu. */}
+              <p className="mt-4 hidden max-w-xl leading-relaxed text-white/90 sm:block">
                 Di halaman ini tersedia profil sekolah, peminatan yang dibuka,
                 sarana belajar, kegiatan siswa, beserta pendaftaran peserta
                 didik baru yang seluruhnya dikerjakan online: mengisi formulir,
@@ -207,7 +244,7 @@ export default async function Beranda() {
               {/* Keterangan tempat, disusun dari data alamat yang sudah ada.
                   Bukan kalimat promosi: hanya menyebut sekolahnya di mana. */}
               {(p.kecamatan || p.kota) && (
-                <p className="mt-4 flex items-start gap-2 text-white/75">
+                <p className="mt-4 flex items-start gap-2 text-white/90">
                   <IkonLokasi ukuran={18} className="mt-0.5 shrink-0" />
                   <span className="leading-relaxed">
                     {[p.kecamatan, p.kota, p.provinsi]
@@ -244,11 +281,11 @@ export default async function Beranda() {
               tersisa — dengan grid, baris terakhir yang tidak penuh
               menganga sebagai kotak kosong. */}
           <MunculLangsung jeda={0.12}>
-            <dl className="flex flex-wrap gap-px overflow-hidden rounded-2xl bg-white/15 text-center ring-1 ring-white/20 backdrop-blur-md">
+            <dl className="flex flex-wrap gap-px overflow-hidden rounded-2xl bg-white/20 text-center ring-1 ring-white/15 backdrop-blur-md">
               {angkaSekolah.map((a) => (
                 <div
                   key={a.k}
-                  className="grow basis-[calc(33.333%-1px)] bg-white/10 px-3 py-4 sm:basis-[calc(16.666%-1px)]"
+                  className="grow basis-[calc(33.333%-1px)] bg-biru-tua/70 px-3 py-4 sm:basis-[calc(16.666%-1px)]"
                 >
                   <dd className="text-2xl font-bold text-white">
                     <AngkaNaik nilai={a.v} />
@@ -258,7 +295,7 @@ export default async function Beranda() {
                   </dt>
                 </div>
               ))}
-              <div className="grow basis-[calc(33.333%-1px)] bg-white/10 px-3 py-4 sm:basis-[calc(16.666%-1px)]">
+              <div className="grow basis-[calc(33.333%-1px)] bg-biru-tua/70 px-3 py-4 sm:basis-[calc(16.666%-1px)]">
                 <dd className="text-2xl font-bold text-white">
                   {p.akreditasi || "-"}
                 </dd>

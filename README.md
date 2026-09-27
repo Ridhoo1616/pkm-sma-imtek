@@ -1613,23 +1613,47 @@ gelap dari kiri untuk kolom tulisan, gelap dari bawah untuk barisan angka.
 mendorong seluruh isi halaman keluar dari pandangan pertama, padahal yang
 dicari orang tua justru ada di bawahnya.
 
-#### Keterbacaannya diukur, bukan dikira-kira
+#### Peredam menggelapkan seluruh foto; panel kaca hanya menggelapkan tulisannya
 
-Diuji dengan foto buatan yang **paling terang** — langit siang, gedung
-berwarna muda — sebab itu keadaan terburuk bagi tulisan putih. Kontrasnya
-diukur terhadap piksel yang benar-benar terlukis:
+Bentuk pertamanya memakai peredam gelap dari kiri. Terbaca, tetapi begitu
+sekolah mengunggah fotonya user langsung melihat masalahnya: **"terlalu gelap
+birunya jadi menutupi sekolah"**. Benar — separuh kiri gedungnya hilang di
+balik peredam.
 
-| Bagian | Kontras | Minimal WCAG AA |
-| --- | --- | --- |
-| Judul | 9,99:1 | 3:1 |
-| Paragraf | 7,50:1 | 4,5:1 |
-| Lokasi | 6,86:1 | 4,5:1 |
-| Angka | 7,37:1 | 3:1 |
-| Label angka | 5,52:1 | 4,5:1 |
+Yang salah bukan takaran peredamnya melainkan caranya: menggelapkan
+**seluruh** foto demi melindungi tulisan yang hanya menempati sebagiannya.
+Dan takarannya memang tidak bisa diringankan — label angka waktu itu 4,65:1,
+hanya 0,15 di atas ambang.
 
-Label angka semula 4,65:1 — lolos, tetapi sisanya hanya 0,15. Itu yang
-memutuskan peredamnya **tidak boleh diringankan** walau fotonya jadi tampak
-lebih redup daripada rancangan aslinya; yang dikuatkan justru warna labelnya.
+Sekarang keterbacaannya dijamin **panel kaca** yang menutup persis sebesar
+tulisannya: `bg-biru-tua/70` beserta `backdrop-blur-md`. Peredam di atas foto
+tinggal 25% sebagai penyatu warna. Bedanya bukan sekadar tampilan —
+kepekatan panel yang tetap memberi **lantai kontras yang sama untuk foto apa
+pun**, sedangkan peredam selalu bergantung pada seberapa terang fotonya.
+
+Hasil pengukurannya, terhadap piksel yang benar-benar terlukis:
+
+| Bagian | Foto sekolah | Foto putih murni | Minimal WCAG AA |
+| --- | --- | --- | --- |
+| Judul | 9,24:1 | 8,25:1 | 3:1 |
+| Paragraf | 8,88:1 | 7,05:1 | 4,5:1 |
+| Lokasi | 9,71:1 | 7,17:1 | 4,5:1 |
+| Angka | 12,38:1 | 10,30:1 | 3:1 |
+| Label angka | 8,88:1 | 7,57:1 | 4,5:1 |
+
+Kolom kedua yang menentukan: fotonya diganti **putih murni** di peramban —
+keadaan terburuk yang mungkin ada — dan yang terendah masih 7,05:1. Foto
+seterang apa pun yang diunggah sekolah tidak dapat merusaknya.
+
+Pada 70% kepekatan, tulisan `text-white/75` masih akan jatuh ke 4,1:1 di atas
+foto putih menurut hitungan. Itu sebabnya tulisan di dalam panel dinaikkan ke
+`text-white/90` — menguatkan tulisannya, bukan menggelapkan fotonya lagi.
+
+Di ponsel, panelnya sempat menelan hampir seluruh layar sehingga fotonya
+nyaris tidak terlihat — persis keluhan yang sama dalam bentuk lain. Paragraf
+pengantar disembunyikan di bawah 640 piksel: kalimat itu menerangkan isi
+situs, bukan sekolahnya, dan merupakan yang paling tidak mendesak di antara
+seluruh isi sorotan. Panelnya turun dari 78% menjadi 55% luas sorotan.
 
 **Dua cara pengukuran yang salah sempat dipakai**, dan keduanya menghasilkan
 angka yang tampak masuk akal:
