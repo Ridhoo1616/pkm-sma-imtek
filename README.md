@@ -1613,7 +1613,46 @@ gelap dari kiri untuk kolom tulisan, gelap dari bawah untuk barisan angka.
 mendorong seluruh isi halaman keluar dari pandangan pertama, padahal yang
 dicari orang tua justru ada di bawahnya.
 
-#### Kacanya putih, dan itu memaksa tulisannya menjadi gelap
+#### Tiga bentuk kaca, dan yang dipilih ditakar bukan dipilih
+
+Panelnya melewati tiga bentuk, dua ditolak user:
+
+| Bentuk | Ditolak karena |
+| --- | --- |
+| Biru pekat (`bg-biru-tua/70`) | "terlalu gelap birunya jadi menutupi sekolah" |
+| Putih pekat (`bg-white/75`) | bukan kaca, cuma dicat putih |
+| **Kaca tembus pandang** (`bg-biru-tua/50` + `backdrop-blur-2xl`) | dipakai |
+
+Yang diminta memang kaca: gedungnya terlihat **melalui** panel, bukan di
+sebelahnya. Keterbacaannya karena itu tidak lagi ditopang kepekatan
+melainkan tiga hal yang bekerja bersama:
+
+1. **Blur berat.** Foto di belakangnya diratakan sehingga tidak ada lagi
+   tepi tajam yang bersaing dengan huruf. Ini yang paling menentukan, dan
+   ini pula yang membuat panelnya terlihat sebagai kaca.
+2. **Tinta biru tipis**, sekadar meredam bidang paling terang.
+3. **Bayang tulisan.** Berbeda dengan keduanya, bayang bekerja **per
+   huruf**: seterang apa pun bidang di belakangnya, tiap huruf membawa
+   gelapnya sendiri.
+
+**Kepekatan 50% itu ditakar, bukan dipilih.** Pada 40% panelnya lebih bening
+tetapi paragrafnya jatuh ke 3,9:1 di atas foto putih murni — di bawah
+ambang. Pada 50% menjadi 4,97:1: kepekatan **terendah** yang masih memenuhi
+WCAG AA pada keadaan terburuk yang mungkin ada.
+
+| Bagian | Foto sekolah | Foto hitam | Foto putih | Minimal |
+| --- | --- | --- | --- | --- |
+| Paragraf | 8,19:1 | 18,87:1 | 4,97:1 | 4,5:1 |
+| Lokasi | 8,90:1 | 18,85:1 | 5,27:1 | 4,5:1 |
+| Angka | 10,44:1 | 13,80:1 | 7,25:1 | 3:1 |
+| Label angka | 8,09:1 | 10,41:1 | 5,90:1 | 4,5:1 |
+
+Angka-angka itu **tidak menghitung bayang tulisannya**: pengukurannya
+menyusun warna teks yang dinyatakan gaya di atas latar yang terpotret tanpa
+teks, sehingga bayangnya tidak ikut. Jadi yang tertulis di tabel lebih
+rendah daripada keadaan sebenarnya — batas bawah, bukan taksiran.
+
+#### Bentuk kedua: kaca putih, dan tulisan yang ikut menjadi gelap
 
 Panel kacanya semula biru pekat. Diminta user diganti putih — birunya terasa
 menutupi gedung sekolahnya. Penggantiannya bukan sekadar mengganti warna:

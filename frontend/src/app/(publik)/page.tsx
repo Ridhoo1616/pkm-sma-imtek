@@ -174,43 +174,50 @@ export default async function Beranda() {
 
         <div className="wadah relative flex min-h-[min(38rem,80vh)] flex-col justify-end gap-10 py-16 md:py-20">
           <MunculLangsung>
-            {/* Panel kaca PUTIH. INI yang menjamin keterbacaannya, bukan
-                peredam di atas foto.
+            {/* Panel kaca yang benar-benar tembus pandang.
 
-                Semula panelnya biru pekat, dan user memintanya diganti
-                putih: birunya terasa menutupi gedung sekolahnya. Kaca putih
-                justru memberi lantai kontras yang LEBIH tinggi, asalkan
-                tulisannya ikut berganti menjadi gelap — dan itu yang
-                dikerjakan di dalam sini. Kaca putih dengan tulisan putih
-                tidak terbaca sama sekali.
+                Tiga bentuk sudah dicoba dan dua ditolak user: biru pekat
+                menutupi gedungnya, putih pekat "bukan kaca, cuma dicat".
+                Yang diminta memang kaca — gedungnya terlihat MELALUI panel,
+                bukan di sebelahnya.
 
-                Keadaan terburuknya berkebalikan dengan panel gelap: yang
-                berbahaya bukan foto terang melainkan foto GELAP. Putih 75%
-                di atas hitam pekat pun menghasilkan kelabu terang, dan
-                tulisan biru-tua di atasnya tetap di atas 7:1.
+                Keterbacaannya karena itu tidak lagi ditopang kepekatan,
+                melainkan tiga hal yang bekerja bersama:
 
-                Berlaku juga saat fotonya belum ada: panel terang di atas
-                gradasi biru tampak menyatu, jadi tidak perlu dibedakan. */}
-            <div className="max-w-2xl rounded-3xl bg-white/75 p-7 ring-1 ring-white/60 backdrop-blur-xl sm:p-9">
+                  1. Blur berat. Foto di belakangnya diratakan sehingga
+                     tidak ada lagi tepi tajam yang bersaing dengan huruf.
+                     Ini yang paling menentukan, dan ini pula yang membuat
+                     panelnya terlihat sebagai kaca.
+                  2. Tinta biru tipis, sekadar meredam bidang paling
+                     terang supaya huruf putih punya pijakan.
+                  3. Bayang tulisan. Berbeda dengan kedua hal di atas,
+                     bayang bekerja PER HURUF: seterang apa pun bidang di
+                     belakangnya, tiap huruf membawa gelapnya sendiri.
+
+                KEPEKATAN 50% ITU DITAKAR, BUKAN DIPILIH. Pada 40% panelnya
+                lebih bening tetapi paragrafnya jatuh ke 3,9:1 di atas foto
+                putih murni — di bawah ambang. Pada 50% menjadi 4,97:1,
+                yaitu kepekatan terendah yang masih memenuhi WCAG AA pada
+                keadaan terburuk yang mungkin ada. Menurunkannya lagi
+                menuntut pengukuran ulang; alatnya ada di catatan pengujian
+                pada README. */}
+            <div className="max-w-2xl rounded-3xl bg-biru-tua/50 p-7 ring-1 ring-white/25 backdrop-blur-2xl sm:p-9 [&_*]:[text-shadow:0_1px_10px_rgb(10_28_49/0.75)]">
               <div className="mb-5 flex flex-wrap items-center gap-2">
-                {/* "terang", bukan "kaca". Lencana kaca isiannya putih 15
-                    persen dan kontras tulisannya datang dari latar gelap di
-                    belakangnya — di atas panel putih ia tidak terbaca. */}
                 {p.status_sekolah && (
-                  <Lencana jenis="terang">{p.status_sekolah}</Lencana>
+                  <Lencana jenis="kaca">{p.status_sekolah}</Lencana>
                 )}
                 {p.akreditasi && (
-                  <Lencana jenis="terang">Akreditasi {p.akreditasi}</Lencana>
+                  <Lencana jenis="kaca">Akreditasi {p.akreditasi}</Lencana>
                 )}
-                {p.npsn && <Lencana jenis="terang">NPSN {p.npsn}</Lencana>}
+                {p.npsn && <Lencana jenis="kaca">NPSN {p.npsn}</Lencana>}
               </div>
 
-              <h1 className="text-4xl leading-[1.12] font-bold text-balance text-biru-tua md:text-6xl">
+              <h1 className="text-4xl leading-[1.12] font-bold text-balance text-white md:text-6xl">
                 {p.nama_sekolah || "SMA IMTEK"}
               </h1>
 
               {p.tagline && !belumTerisi(p.tagline) && (
-                <p className="mt-4 max-w-xl text-lg leading-relaxed text-teks">
+                <p className="mt-4 max-w-xl text-lg leading-relaxed text-white">
                   {p.tagline}
                 </p>
               )}
@@ -233,7 +240,7 @@ export default async function Beranda() {
                   ini dibuat. Isinya tetap terbaca mulai lebar 640 piksel,
                   dan di bawah itu digantikan bagian-bagian halaman yang
                   memang menerangkan hal yang sama satu per satu. */}
-              <p className="mt-4 hidden max-w-xl leading-relaxed text-teks sm:block">
+              <p className="mt-4 hidden max-w-xl leading-relaxed text-white sm:block">
                 Di halaman ini tersedia profil sekolah, peminatan yang dibuka,
                 sarana belajar, kegiatan siswa, beserta pendaftaran peserta
                 didik baru yang seluruhnya dikerjakan online: mengisi formulir,
@@ -243,7 +250,7 @@ export default async function Beranda() {
               {/* Keterangan tempat, disusun dari data alamat yang sudah ada.
                   Bukan kalimat promosi: hanya menyebut sekolahnya di mana. */}
               {(p.kecamatan || p.kota) && (
-                <p className="mt-4 flex items-start gap-2 text-teks">
+                <p className="mt-4 flex items-start gap-2 text-white">
                   <IkonLokasi ukuran={18} className="mt-0.5 shrink-0" />
                   <span className="leading-relaxed">
                     {[p.kecamatan, p.kota, p.provinsi]
@@ -262,7 +269,7 @@ export default async function Beranda() {
                 </Link>
                 <Link
                   href="/ppdb"
-                  className="rounded-xl border-2 border-biru-tua/10 bg-white px-6 py-3.5 font-semibold text-biru-tua transition-all hover:border-transparent hover:bg-biru-muda hover:ring-2 hover:ring-biru-tua hover:ring-offset-2"
+                  className="rounded-xl bg-white/15 px-6 py-3.5 font-semibold text-white ring-1 ring-white/30 backdrop-blur-xl transition-all hover:bg-white/25 hover:ring-2 hover:ring-white"
                 >
                   Informasi PPDB
                 </Link>
@@ -280,25 +287,25 @@ export default async function Beranda() {
               tersisa — dengan grid, baris terakhir yang tidak penuh
               menganga sebagai kotak kosong. */}
           <MunculLangsung jeda={0.12}>
-            <dl className="flex flex-wrap gap-px overflow-hidden rounded-2xl bg-biru-tua/15 text-center ring-1 ring-white/50 backdrop-blur-xl">
+            <dl className="flex flex-wrap gap-px overflow-hidden rounded-2xl bg-white/20 text-center ring-1 ring-white/25 backdrop-blur-2xl [&_*]:[text-shadow:0_1px_10px_rgb(10_28_49/0.75)]">
               {angkaSekolah.map((a) => (
                 <div
                   key={a.k}
-                  className="grow basis-[calc(33.333%-1px)] bg-white/75 px-3 py-4 sm:basis-[calc(16.666%-1px)]"
+                  className="grow basis-[calc(33.333%-1px)] bg-biru-tua/50 px-3 py-4 sm:basis-[calc(16.666%-1px)]"
                 >
-                  <dd className="text-2xl font-bold text-biru-tua">
+                  <dd className="text-2xl font-bold text-white">
                     <AngkaNaik nilai={a.v} />
                   </dd>
-                  <dt className="mt-0.5 text-xs font-semibold text-teks">
+                  <dt className="mt-0.5 text-xs font-semibold text-white/85">
                     {a.k}
                   </dt>
                 </div>
               ))}
-              <div className="grow basis-[calc(33.333%-1px)] bg-white/75 px-3 py-4 sm:basis-[calc(16.666%-1px)]">
-                <dd className="text-2xl font-bold text-biru-tua">
+              <div className="grow basis-[calc(33.333%-1px)] bg-biru-tua/40 px-3 py-4 sm:basis-[calc(16.666%-1px)]">
+                <dd className="text-2xl font-bold text-white">
                   {p.akreditasi || "-"}
                 </dd>
-                <dt className="mt-0.5 text-xs font-semibold text-teks">
+                <dt className="mt-0.5 text-xs font-semibold text-white/85">
                   Akreditasi
                 </dt>
               </div>
@@ -314,7 +321,7 @@ export default async function Beranda() {
               kurang beserta ukuran yang diminta, tetapi ukurannya satu
               baris, dan hilang sendiri begitu fotonya diunggah. */}
           {!adaGedung && (
-            <p className="rounded-xl bg-white/75 px-4 py-3 text-xs leading-relaxed text-teks ring-1 ring-white/60 backdrop-blur-xl">
+            <p className="rounded-xl bg-biru-tua/50 px-4 py-3 text-xs leading-relaxed text-white/85 ring-1 ring-white/25 backdrop-blur-2xl">
               Latar ini akan memakai foto gedung sekolah begitu diunggah sebagai{" "}
               <span className="font-semibold text-white">
                 Foto halaman depan
