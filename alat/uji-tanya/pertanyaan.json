@@ -1,0 +1,134 @@
+{
+  "_catatan": [
+    "Daftar pertanyaan uji untuk kotak Tanya cepat.",
+    "HARUS  : wajib terjawab, dan jawabannya wajib cocok dengan pola.",
+    "JANGAN : wajib TIDAK terjawab. Ini bagian terpenting — memaksakan jawaban",
+    "         terdekat lebih berbahaya daripada mengaku tidak tahu.",
+    "RAGAM  : satu maksud ditulis dengan banyak bentuk; lulus bila 70% kena.",
+    "         Bagian ini yang mengukur ketahanan terhadap cara bertanya yang",
+    "         berbeda-beda, bukan terhadap kalimat yang kebetulan disetel.",
+    "TYPO   : salah ketik yang lazim terjadi di ponsel.",
+    "Polanya ekspresi reguler, dicocokkan tanpa membedakan huruf besar-kecil."
+  ],
+
+  "HARUS": [
+    ["kapan pendaftaran ditutup?", "Juni 2027"],
+    ["kapan pendaftaran dibuka", "September 2026|dibuka"],
+    ["pendaftaran sampai tanggal berapa", "2027|ditutup"],
+    ["berapa duit buat daftar", "GRATIS"],
+    ["biayanya berapa ya bu", "GRATIS"],
+    ["apakah bayar", "GRATIS"],
+    ["masih ada sisa kursi?", "kuota|sisa"],
+    ["kuota berapa", "kuota|180"],
+    ["jurusan apa aja", "MIPA|IPS|Bahasa"],
+    ["peminatan yang tersedia", "MIPA|IPS|Bahasa"],
+    ["alamatnya dimana", "Pagedangan"],
+    ["lokasi sekolah", "Pagedangan"],
+    ["nomor telepon sekolah", "021|telepon"],
+    ["cara menghubungi panitia", "021|telepon|surel"],
+    ["apakah pendaftaran sedang dibuka", "."],
+    ["dokumen apa saja yang harus diunggah", "."],
+    ["berkas apa yang diperlukan", "."],
+    ["bagaimana cara mendaftar", "."],
+    ["kapan pengumuman hasil seleksi", "."],
+    ["bagaimana cek status pendaftaran", "."],
+    ["ukuran maksimal file", "."],
+    ["daftar lewat hp bisa?", "."],
+    ["pendaftaran gimana", "."],
+    ["gimana cara daftar", "."],
+    ["kpn dibuka", "September 2026|dibuka"],
+    ["info pendaftaran dong", "."],
+    ["syaratnya gmn", "dokumen wajib|Foto"],
+    ["langkah daftar online", "."]
+  ],
+
+  "JANGAN": [
+    "apakah ada beasiswa untuk anak yatim",
+    "siapa pelatih tim futsalnya",
+    "berapa harga seragam batik",
+    "jam berapa bel masuk sekolah",
+    "apakah boleh bawa motor ke sekolah",
+    "siapa nama wali kelas 10 ipa 2",
+    "menu kantin hari ini apa",
+    "berapa jumlah guru olahraga",
+    "apakah ada asrama"
+  ],
+
+  "RAGAM": [
+    {
+      "maksud": "jadwal penutupan",
+      "pola": "Juni 2027|ditutup|Jadwal",
+      "contoh": [
+        "kapan terakhir daftar",
+        "batas akhir pendaftaran kapan",
+        "deadline nya kapan",
+        "pendaftaran ditutup tgl brp",
+        "masih sempat daftar ga",
+        "udah telat belum daftarnya",
+        "penerimaan siswa baru sampai kapan"
+      ]
+    },
+    {
+      "maksud": "biaya",
+      "pola": "GRATIS|biaya",
+      "contoh": [
+        "bayar berapa",
+        "ada pungutan ga",
+        "daftar bayar apa engga",
+        "biaya masuk berapaan",
+        "apakah dipungut biaya",
+        "gratis atau bayar"
+      ]
+    },
+    {
+      "maksud": "dokumen",
+      "pola": "dokumen|berkas|Foto 3x4",
+      "contoh": [
+        "apa aja yang disiapkan",
+        "persyaratannya apa",
+        "bawa berkas apa",
+        "upload apa aja",
+        "dokumen yg dibutuhkan apa",
+        "file apa yang dikirim"
+      ]
+    },
+    {
+      "maksud": "kuota",
+      "pola": "kuota|sisa|180",
+      "contoh": [
+        "masih ada tempat ga",
+        "daya tampung berapa",
+        "kursinya masih ada",
+        "penuh belum"
+      ]
+    },
+    {
+      "maksud": "cara mendaftar",
+      "pola": "online|formulir|daftar",
+      "contoh": [
+        "saya mau daftar caranya",
+        "mendaftarkan anak bagaimana",
+        "prosedur pendaftaran",
+        "langkah daftar online"
+      ]
+    },
+    {
+      "maksud": "lokasi",
+      "pola": "Pagedangan",
+      "contoh": [
+        "sekolahnya dimana ya",
+        "alamat lengkapnya",
+        "lokasinya di daerah mana"
+      ]
+    }
+  ],
+
+  "TYPO": [
+    ["pendaftran kapan ditutup", "2027|ditutup"],
+    ["biyaya berapa", "GRATIS|biaya"],
+    ["skolah dimana", "Pagedangan"],
+    ["dokumn apa saja", "dokumen|Foto"],
+    ["jursan apa aja", "MIPA|IPS|Bahasa"],
+    ["kuoata berapa", "kuota|180"]
+  ]
+}

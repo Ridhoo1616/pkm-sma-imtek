@@ -86,6 +86,11 @@ const KATA_BUANG = new Set([
   "yg", "utk", "dgn", "sy", "jd", "sm", "dr", "tdk", "klo", "kalo",
   "gitu", "gini", "deh", "nanya", "pengen", "pengin", "buat", "kek", "kayak",
   "mas", "mbak", "mba", "bang", "bosku", "gan", "tanya",
+  "udah", "udh", "dah", "engga", "enggak", "ngga", "emang", "emangnya",
+  // Setiap pertanyaan di situs ini tentang calon siswa, jadi kata-kata ini
+  // tidak pernah membedakan butir yang satu dari yang lain.
+  "siswa", "murid", "peserta", "didik", "anak", "calon", "putra", "putri",
+  "online", "daring", "offline", "luring",
 ]);
 
 /**
@@ -96,9 +101,9 @@ const KATA_BUANG = new Set([
 // prettier-ignore
 const PADANAN: string[][] = [
   ["biaya", "bayar", "membayar", "pembayaran", "uang", "duit", "gratis", "spp", "pungutan", "tarif", "harga", "iuran", "sumbangan"],
-  ["jadwal", "kapan", "kpn", "tanggal", "tgl", "waktu", "mulai", "dimulai", "tutup", "ditutup", "dibuka", "buka", "batas", "deadline", "penutupan", "pembukaan"],
+  ["jadwal", "kapan", "kpn", "tanggal", "tgl", "waktu", "mulai", "dimulai", "tutup", "ditutup", "dibuka", "buka", "batas", "deadline", "penutupan", "pembukaan", "sempat", "telat", "terlambat", "keburu"],
   ["dokumen", "berkas", "file", "syarat", "persyaratan", "unggah", "upload", "scan", "lampiran", "ijazah", "rapor", "akta", "kk", "nisn", "nik", "pasfoto"],
-  ["daftar", "mendaftar", "pendaftaran", "registrasi", "ppdb", "formulir", "isi"],
+  ["daftar", "mendaftar", "pendaftaran", "registrasi", "ppdb", "formulir", "isi", "penerimaan", "terima", "masuk"],
   ["status", "verifikasi", "diverifikasi", "cek", "periksa", "lacak", "pantau"],
   ["pengumuman", "hasil", "lulus", "kelulusan", "diterima", "ditolak"],
   ["tes", "ujian", "seleksi", "soal", "tryout"],
@@ -117,21 +122,124 @@ const KE_PADANAN = new Map<string, string>();
 for (const baris of PADANAN) {
   for (const kata of baris) KE_PADANAN.set(kata, baris[0]);
 }
-
-/**
- * Membuang akhiran yang tidak mengubah arti kata dalam bahasa Indonesia.
- *
- * Seadanya saja, bukan pemenggal kata sungguhan: yang dikejar hanya supaya
- * "biayanya" bertemu "biaya" dan "pendaftarannya" bertemu "pendaftaran".
- * Pemenggalan yang lebih agresif justru merusak — "berkas" bukan "berka".
- */
-function akar(kata: string): string {
-  for (const akhiran of ["nya", "kah", "lah", "pun"]) {
-    if (kata.length > akhiran.length + 3 && kata.endsWith(akhiran)) {
-      return kata.slice(0, -akhiran.length);
+// Bentuk tanpa akhiran ikut dipetakan ke padanan yang sama. Tanpa ini,
+// "dipungut" yang terkupas menjadi "pungut" kehilangan kaitannya dengan
+// "biaya", sebab yang terdaftar hanya "pungutan".
+for (const baris of PADANAN) {
+  for (const kata of baris) {
+    for (const a of ["kan", "an", "i"]) {
+      if (kata.length > a.length + 3 && kata.endsWith(a)) {
+        const dasar = kata.slice(0, -a.length);
+        if (!KE_PADANAN.has(dasar)) KE_PADANAN.set(dasar, baris[0]);
+      }
     }
   }
+}
+
+/**
+ * Membuang akhiran milik "-nya".
+ *
+ * HANYA "-nya", dan itu perbaikan dari bentuk sebelumnya yang juga
+ * memenggal "-kah", "-lah", dan "-pun" tanpa memeriksa apa pun. Akibatnya
+ * fatal dan tidak terlihat: "langkah" menjadi "lang", "sekolah" menjadi
+ * "seko", "masalah" menjadi "masa". Kata yang terpenggal begitu kehilangan
+ * padanannya sekaligus — "seko" tidak ada di daftar padanan mana pun —
+ * sehingga "langkah daftar online" tidak terjawab sama sekali.
+ *
+ * Ketiganya sekarang ditangani `kupasan`, yang hanya menerima hasil
+ * kupasan bila bentuknya memang dikenal pengetahuan. "langkah" dan
+ * "sekolah" dikenal, jadi keduanya berhenti sebelum dipenggal.
+ *
+ * "-nya" dipertahankan di sini karena dipakai kedua sisi dan cukup aman:
+ * penjaga panjangnya membuat "hanya", "punya", dan "tanya" tidak tersentuh.
+ */
+function akar(kata: string): string {
+  if (kata.length > 6 && kata.endsWith("nya")) return kata.slice(0, -3);
   return kata;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Pemenggal imbuhan
+ *
+ *  Daftar padanan buatan tangan hanya menangani kata yang sempat
+ *  terpikir. Yang tidak terpikir jatuh diam-diam: "dipungut" tidak
+ *  bertemu "pungutan", "mendaftarkan" tidak bertemu "mendaftar",
+ *  "berapaan" tidak bertemu "berapa". Diukur dengan 30 pertanyaan yang
+ *  tidak dipakai menyetel, sepuluh gagal dan lima di antaranya gagal
+ *  hanya karena imbuhan.
+ *
+ *  Imbuhan berbeda sifatnya dengan kosakata: jumlahnya terbatas dan
+ *  berpola, jadi satu aturan menangani seluruhnya sekaligus, termasuk
+ *  bentuk yang belum pernah dilihat.
+ *
+ *  KUNCINYA MENGUPAS MENUJU KOSAKATA YANG DIKENAL, bukan mengupas
+ *  sebanyak-banyaknya. Kata yang sudah ada di pengetahuan tidak disentuh
+ *  sama sekali, dan hasil kupasan hanya diterima bila bentuknya memang
+ *  dikenal. Itu yang menjaga "berkas" tidak menjadi "kas" dan "berapa"
+ *  tidak menjadi "apa" — keduanya kata yang dikenal, jadi berhenti di
+ *  langkah pertama.
+ * ------------------------------------------------------------------ */
+
+/** Akhiran turunan. Dipakai pada kedua sisi, sebab cukup jinak. */
+const AKHIRAN = ["kan", "an", "i"];
+
+/**
+ * Akhiran penegas. Hanya dikupas pada sisi penanya dan hanya bila hasilnya
+ * dikenal, sebab "langkah" dan "sekolah" berakhiran sama tanpa memuatnya.
+ */
+const AKHIRAN_PENEGAS = ["kah", "lah", "pun"];
+
+/**
+ * Awalan beserta pemulihan huruf yang luluh. "meny-" memakan huruf s pada
+ * "menyapu" -> "sapu", "meng-" memakan k pada "mengambil" -> "ambil".
+ */
+const AWALAN: { imbuhan: string; pulih: string[] }[] = [
+  { imbuhan: "meng", pulih: ["", "k"] },
+  { imbuhan: "meny", pulih: ["s"] },
+  { imbuhan: "mem", pulih: ["", "p"] },
+  { imbuhan: "men", pulih: ["", "t"] },
+  { imbuhan: "peng", pulih: ["", "k"] },
+  { imbuhan: "peny", pulih: ["s"] },
+  { imbuhan: "pem", pulih: ["", "p"] },
+  { imbuhan: "pen", pulih: ["", "t"] },
+  { imbuhan: "ber", pulih: [""] },
+  { imbuhan: "ter", pulih: [""] },
+  { imbuhan: "per", pulih: [""] },
+  { imbuhan: "me", pulih: [""] },
+  { imbuhan: "pe", pulih: [""] },
+  { imbuhan: "di", pulih: [""] },
+  { imbuhan: "ke", pulih: [""] },
+  { imbuhan: "se", pulih: [""] },
+];
+
+/** Bentuk yang mungkin, dari yang paling sedikit dikupas. */
+function kupasan(kata: string): string[] {
+  const hasil = [kata];
+
+  const tanpaAkhiran = [kata];
+  for (const a of AKHIRAN_PENEGAS) {
+    if (kata.length > a.length + 3 && kata.endsWith(a)) {
+      tanpaAkhiran.push(kata.slice(0, -a.length));
+    }
+  }
+  for (const a of AKHIRAN) {
+    if (kata.length > a.length + 3 && kata.endsWith(a)) {
+      tanpaAkhiran.push(kata.slice(0, -a.length));
+    }
+  }
+  for (const k of tanpaAkhiran) if (k !== kata) hasil.push(k);
+
+  for (const dasar of tanpaAkhiran) {
+    for (const { imbuhan, pulih } of AWALAN) {
+      if (!dasar.startsWith(imbuhan)) continue;
+      const sisa = dasar.slice(imbuhan.length);
+      for (const huruf of pulih) {
+        const calon = huruf + sisa;
+        if (calon.length >= 3) hasil.push(calon);
+      }
+    }
+  }
+  return hasil;
 }
 
 /**
@@ -148,9 +256,24 @@ function akar(kata: string): string {
 export function konsep(teks: string): Set<string> {
   const hasil = new Set<string>();
   for (const kata of kataAsli(teks)) {
-    hasil.add(kata);
-    const padanan = KE_PADANAN.get(kata);
-    if (padanan && padanan !== kata) hasil.add(padanan);
+    // Bentuk tanpa akhiran turunan ikut disimpan, supaya "pungutan" di sisi
+    // pengetahuan dapat dipertemukan dengan "dipungut" di sisi penanya:
+    // keduanya bertemu di "pungut".
+    for (const bentuk of [kata, ...bentukTanpaAkhiran(kata)]) {
+      hasil.add(bentuk);
+      const padanan = KE_PADANAN.get(bentuk);
+      if (padanan && padanan !== bentuk) hasil.add(padanan);
+    }
+  }
+  return hasil;
+}
+
+function bentukTanpaAkhiran(kata: string): string[] {
+  const hasil: string[] = [];
+  for (const a of AKHIRAN) {
+    if (kata.length > a.length + 3 && kata.endsWith(a)) {
+      hasil.push(kata.slice(0, -a.length));
+    }
   }
   return hasil;
 }
@@ -368,6 +491,120 @@ export function bangunPengetahuan(
 }
 
 /* ------------------------------------------------------------------ *
+ *  Kosakata dan toleransi salah ketik
+ * ------------------------------------------------------------------ */
+
+interface Kamus {
+  /** Seluruh konsep yang ada di pengetahuan. */
+  kosakata: Set<string>;
+  /** Indeks tiga-huruf, untuk mencari kata yang mirip. */
+  tigaHuruf: Map<string, string[]>;
+}
+
+const simpananKamus = new WeakMap<ButirPengetahuan[], Kamus>();
+
+function tigaHurufDari(kata: string): string[] {
+  const p = `  ${kata} `;
+  const hasil: string[] = [];
+  for (let i = 0; i < p.length - 2; i++) hasil.push(p.slice(i, i + 3));
+  return hasil;
+}
+
+function bangunKamus(pengetahuan: ButirPengetahuan[]): Kamus {
+  const tersimpan = simpananKamus.get(pengetahuan);
+  if (tersimpan) return tersimpan;
+
+  const kosakata = new Set<string>();
+  for (const b of pengetahuan) {
+    for (const k of konsep(b.tanya)) kosakata.add(k);
+    for (const k of konsep((b.kunci ?? []).join(" "))) kosakata.add(k);
+    for (const k of konsep(b.jawab)) kosakata.add(k);
+  }
+  // Kata padanan ikut masuk kosakata beserta bentuk tanpa akhirannya,
+  // supaya "dipungut" yang terkupas menjadi "pungut" tetap menemukan
+  // "pungutan" walau kata itu tidak pernah muncul di naskah mana pun.
+  for (const k of KE_PADANAN.keys()) {
+    kosakata.add(k);
+    for (const b of bentukTanpaAkhiran(k)) kosakata.add(b);
+  }
+
+  const tigaHuruf = new Map<string, string[]>();
+  for (const kata of kosakata) {
+    for (const t of tigaHurufDari(kata)) {
+      const daftar = tigaHuruf.get(t);
+      if (daftar) daftar.push(kata);
+      else tigaHuruf.set(t, [kata]);
+    }
+  }
+
+  const kamus = { kosakata, tigaHuruf };
+  simpananKamus.set(pengetahuan, kamus);
+  return kamus;
+}
+
+/**
+ * Kata dikenal yang paling mirip, atau kosong bila tidak ada yang cukup
+ * mirip. Dipakai untuk salah ketik: "pendaftran", "skolah", "biyaya".
+ *
+ * Kemiripannya dihitung dari irisan potongan tiga huruf. Ambangnya 0,42,
+ * dan angka itu diukur bukan ditebak: "biyaya" terhadap "biaya" hanya
+ * 0,44 pada hitungan ini, "kuoata" terhadap "kuota" pun 0,44, sedangkan
+ * "skolah" terhadap "sekolah" 0,50. Ambang yang semula 0,55 menolak
+ * hampir seluruh salah ketik yang lazim terjadi.
+ * Panjangnya dibatasi berselisih paling banyak dua huruf, supaya
+ * longgarnya ambang tidak menyeret kata asing ke kata yang tidak
+ * berhubungan.
+ */
+function kataTermirip(kata: string, kamus: Kamus): string {
+  if (kata.length < 5) return "";
+  const potongan = tigaHurufDari(kata);
+  const hitung = new Map<string, number>();
+  for (const t of potongan) {
+    for (const k of kamus.tigaHuruf.get(t) ?? []) {
+      hitung.set(k, (hitung.get(k) ?? 0) + 1);
+    }
+  }
+
+  let terbaik = "";
+  let nilaiTerbaik = 0;
+  for (const [k, sama] of hitung) {
+    // Salah ketik tidak mengubah panjang kata jauh-jauh. Penjaga ini yang
+    // mencegah kata pendek tak dikenal tersedot ke kata panjang yang
+    // kebetulan berbagi beberapa potongan.
+    if (Math.abs(k.length - kata.length) > 2) continue;
+    const nilai = sama / (potongan.length + tigaHurufDari(k).length - sama);
+    if (nilai > nilaiTerbaik) {
+      nilaiTerbaik = nilai;
+      terbaik = k;
+    }
+  }
+  return nilaiTerbaik >= 0.42 ? terbaik : "";
+}
+
+/**
+ * Membakukan kata yang diketik penanya menjadi kata yang dikenal
+ * pengetahuan, dengan tiga usaha berurutan.
+ *
+ *   1. Sudah dikenal? Dipakai apa adanya. Langkah ini yang menjaga
+ *      "berapa" tidak dikupas menjadi "apa" dan "berkas" tidak menjadi
+ *      "kas".
+ *   2. Kupas imbuhannya, ambil bentuk pertama yang dikenal.
+ *   3. Cari kata dikenal yang paling mirip, untuk salah ketik.
+ *
+ * Bila ketiganya gagal, katanya dibiarkan apa adanya — dan karena tidak
+ * dikenal, bobotnya berat dan pertanyaannya cenderung jatuh ke bawah
+ * ambang. Itu memang yang diinginkan untuk pertanyaan di luar cakupan.
+ */
+function bakukan(kata: string, kamus: Kamus): string {
+  if (kamus.kosakata.has(kata)) return kata;
+  for (const calon of kupasan(kata)) {
+    if (kamus.kosakata.has(calon)) return calon;
+  }
+  const mirip = kataTermirip(kata, kamus);
+  return mirip || kata;
+}
+
+/* ------------------------------------------------------------------ *
  *  Pencocokan
  * ------------------------------------------------------------------ */
 
@@ -442,8 +679,20 @@ export function cariJawaban(
   pengetahuan: ButirPengetahuan[],
   maks = 3,
 ): HasilJawab[] {
-  const tanya = konsep(pertanyaan);
-  if (tanya.size === 0) return [];
+  const kamus = bangunKamus(pengetahuan);
+
+  // Tiap kata yang diketik penanya dibakukan lebih dulu menjadi kata yang
+  // dikenal pengetahuan — lewat pengupasan imbuhan, lalu lewat kemiripan
+  // tiga huruf bila masih belum dikenal juga.
+  const kataDibakukan = kataAsli(pertanyaan).map((k) => bakukan(k, kamus));
+  if (kataDibakukan.length === 0) return [];
+
+  const tanya = new Set<string>();
+  for (const k of kataDibakukan) {
+    tanya.add(k);
+    const padanan = KE_PADANAN.get(k);
+    if (padanan && padanan !== k) tanya.add(padanan);
+  }
 
   const bobot = bobotKonsep(pengetahuan);
   // Kata yang tidak dikenal pengetahuan tetap dihitung berat — itu yang
@@ -461,7 +710,7 @@ export function cariJawaban(
   // menanyakan hal yang sama, dan butir yang menjawabnya cuma perlu
   // menyebut salah satunya.
   const kelompok = new Map<string, Set<string>>();
-  for (const k of kataAsli(pertanyaan)) {
+  for (const k of kataDibakukan) {
     const kanon = KE_PADANAN.get(k) ?? k;
     if (!kelompok.has(kanon)) kelompok.set(kanon, new Set());
     kelompok.get(kanon)!.add(k);

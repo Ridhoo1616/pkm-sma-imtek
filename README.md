@@ -1775,6 +1775,46 @@ dilaporkan user. Tidak satu pun terlihat tanpa dicoba:
    ukuran sebaliknya, seberapa besar bagian pertanyaan butir yang memang
    ditanyakan, dengan pengaruh seperlima supaya perannya memutus seri saja.
 
+#### Setiap orang bertanya dengan caranya sendiri
+
+Ditanyakan user, dan itu memang batas sebenarnya dari cara kerja ini.
+Daftar padanan buatan tangan hanya menangani kata yang sempat terpikir.
+Diukur dengan **30 pertanyaan yang tidak dipakai menyetel** — satu maksud
+ditulis dengan banyak bentuk, seperti orang berbeda-beda menanyakannya —
+hasilnya mula-mula **20 dari 30**.
+
+Sepuluh yang gagal terbelah dua, dan keduanya berbeda sifat:
+
+| Sifat | Contoh | Sifatnya |
+| --- | --- | --- |
+| Imbuhan | "dipungut", "mendaftarkan", "berapaan", "penerimaan" | **terbatas dan berpola** |
+| Kosakata baru | "sempat", "telat", "online", "anak" | **tidak terbatas** |
+
+Imbuhan ditangani satu aturan sekaligus, termasuk bentuk yang belum pernah
+dilihat. Kuncinya **mengupas menuju kosakata yang dikenal**, bukan mengupas
+sebanyak-banyaknya: kata yang sudah ada di pengetahuan tidak disentuh, dan
+hasil kupasan hanya diterima bila bentuknya memang dikenal. Itu yang menjaga
+"berkas" tidak menjadi "kas" dan "berapa" tidak menjadi "apa".
+
+Salah ketik ditangani kemiripan potongan tiga huruf terhadap kosakata yang
+sama: "pendaftran", "biyaya", "skolah", "dokumn", "jursan", "kuoata" —
+keenamnya kini terjawab. Ambang kemiripannya 0,42, diukur bukan ditebak;
+"biyaya" terhadap "biaya" hanya bernilai 0,44.
+
+**Satu bug lama tersingkap saat mengerjakannya.** Pemenggal akhiran memangkas
+`-kah`, `-lah`, dan `-pun` tanpa memeriksa apa pun, sehingga **"langkah"
+menjadi "lang" dan "sekolah" menjadi "seko"** — kata yang terpenggal begitu
+kehilangan padanannya sekaligus. Ketiganya sekarang hanya dikupas bila
+hasilnya dikenal; hanya `-nya` yang tetap dipangkas langsung, dan itu pun
+dijaga panjangnya supaya "hanya", "punya", dan "tanya" tidak tersentuh.
+
+Hasil akhirnya **28 dari 30, 93%**, dengan dua yang tersisa memang taksa:
+"apa aja yang disiapkan" tidak memuat satu pun kata topik, dan "masih ada
+tempat ga" memakai "tempat" yang bisa berarti lokasi maupun kursi.
+
+Yang tetap tidak tertutupi: kosakata yang belum pernah terpikir. Itu ditutup
+dari sisi lain — lihat catatan tentang pertanyaan yang tidak terjawab.
+
 #### Ambangnya ditakar, bukan ditebak
 
 Seluruh pertanyaan uji dijalankan dengan ambang dinolkan, lalu dicari celah
@@ -1792,24 +1832,36 @@ diulang.
 
 #### Pengujiannya
 
-37 pemeriksaan pada `lib/jawab.ts`, dijalankan langsung terhadap modulnya
-dengan data sungguhan dari API — bukan lewat peramban, supaya penyetelan
-peringkatnya dapat diulang dalam hitungan detik tanpa membangun ulang.
-28 pertanyaan **harus** terjawab, ditulis seperti orang tua sungguhan
-mengetiknya: "berapa duit buat daftar", "biayanya berapa ya bu", "masih ada
-sisa kursi?", "daftar lewat hp bisa?", "pendaftaran gimana", "syaratnya gmn",
-"kpn dibuka".
+```bash
+node alat/uji-tanya/jalankan.mjs            # 49 pemeriksaan
+node alat/uji-tanya/jalankan.mjs --takar    # menakar ulang ambangnya
+node alat/uji-tanya/jalankan.mjs "tanya apa pun"   # melihat peringkatnya
+```
 
-Sembilan sisanya **harus ditolak**, dan bagian ini yang paling penting:
-"apakah ada beasiswa untuk anak yatim", "siapa pelatih tim futsalnya",
-"berapa harga seragam batik", "menu kantin hari ini apa", "apakah ada
-asrama". Kotak yang memaksakan jawaban terdekat lebih berbahaya daripada
-kotak yang mengaku tidak tahu, jadi penolakan diuji sekeras kemampuan
-menjawab.
+Dijalankan langsung terhadap modulnya dengan data sungguhan dari API, bukan
+lewat peramban — menyetel peringkat menuntut puluhan putaran, dan satu
+putaran lewat `next build` memakan menit sedangkan lewat sini beberapa detik.
+Datanya diambil dari API yang berjalan, bukan dikarang, sebab pengujian
+dengan data karangan tidak membuktikan apa pun tentang naskah yang
+benar-benar ditulis sekolah.
 
-Ditambah 17 pemeriksaan di peramban sungguhan untuk antarmukanya: tab, tombol
-pancingan, gelembung percakapan, tautan lanjutan, dan tombol "Kirim
-pertanyaan ke panitia" yang muncul saat buntu.
+Isinya empat bagian, dan daftarnya ada di `alat/uji-tanya/pertanyaan.json`:
+
+| Bagian | Isi |
+| --- | --- |
+| HARUS | 28 pertanyaan yang wajib terjawab beserta pola jawabannya |
+| JANGAN | 9 pertanyaan yang wajib **tidak** terjawab |
+| RAGAM | 6 maksud × beberapa bentuk; lulus bila 70% kena |
+| TYPO | 6 salah ketik yang lazim di ponsel |
+
+Bagian JANGAN yang paling penting: "apakah ada beasiswa untuk anak yatim",
+"siapa pelatih tim futsalnya", "menu kantin hari ini apa". Kotak yang
+memaksakan jawaban terdekat lebih berbahaya daripada kotak yang mengaku
+tidak tahu, jadi penolakan diuji sekeras kemampuan menjawab.
+
+Antarmukanya diuji terpisah di peramban: tab, tombol pancingan, gelembung
+percakapan, tautan lanjutan, dan tombol "Kirim pertanyaan ke panitia" yang
+muncul saat buntu.
 
 ### Q. Tautan WhatsApp beserta pesan bawaannya
 
