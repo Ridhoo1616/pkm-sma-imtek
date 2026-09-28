@@ -4,6 +4,7 @@ import GulirHalus from "@/komponen/GulirHalus";
 import BantuanMelayang from "@/komponen/BantuanMelayang";
 import { TeksBerjalan } from "@/komponen/TeksBerjalan";
 import { PencatatKunjungan } from "@/komponen/PencatatKunjungan";
+import { LayarPembuka } from "@/komponen/LayarPembuka";
 import { api } from "@/lib/api";
 import { muatProfil } from "@/lib/profil";
 import type { Berita } from "@/lib/tipe";
@@ -21,6 +22,10 @@ export default async function TataLetakPublik({ children }: LayoutProps<"/">) {
 
   return (
     <>
+      <LayarPembuka 
+        logoUrl={profil.pengaturan.logo} 
+        namaSekolah={profil.pengaturan.nama_sekolah} 
+      />
       <GulirHalus />
       <PencatatKunjungan />
       <TeksBerjalan profil={profil} berita={berita} />
