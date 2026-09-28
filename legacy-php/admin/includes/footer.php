@@ -2,7 +2,7 @@
 
     <footer class="kaki-admin">
       <span>&copy; <?= date('Y') ?> <?= e(setting('nama_sekolah')) ?> &mdash; Sistem Informasi Profil Sekolah &amp; PPDB Online</span>
-      <span class="d-none d-md-inline">Dikembangkan melalui Program Kreativitas Mahasiswa (PkM)</span>
+      <span class="d-none d-md-inline">Dikembangkan melalui Pengabdian Kepada Masyarakat (PkM) Universitas Pamulang</span>
     </footer>
   </div>
 </div>

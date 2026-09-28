@@ -7,12 +7,22 @@ import { useKabar } from "@/komponen/Kabar";
 import { tanggalJam } from "@/lib/format";
 import { useSesi } from "@/komponen/Sesi";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
-import { Memuat, PesanGalat } from "@/komponen/Memuat";
+import { PesanGalat, KerangkaTabel } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import { Teks, Pilihan, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import type { Pengguna } from "@/lib/tipe";
 
 const KOSONG = { nama: "", username: "", sandi: "", role: "operator" };
+
+/** Dipakai bersama oleh kerangka muat dan tabel sesungguhnya. */
+const KEPALA_TABEL = [
+  "Nama",
+  "Nama pengguna",
+  "Peran",
+  "Terakhir masuk",
+  "Dibuat",
+  "",
+];
 
 export default function HalamanPengguna() {
   const kabar = useKabar();
@@ -93,15 +103,12 @@ export default function HalamanPengguna() {
         aksi={<Tombol onClick={() => buka()}>Tambah Pengguna</Tombol>}
       />
 
-
       {memuat ? (
-        <Memuat />
+        <KerangkaTabel kepala={KEPALA_TABEL} baris={3} />
       ) : galat ? (
         <PesanGalat pesan={galat} ulangi={muatUlang} />
       ) : !data ? null : (
-        <Tabel
-          kepala={["Nama", "Nama pengguna", "Peran", "Terakhir masuk", "Dibuat", ""]}
-        >
+        <Tabel kepala={KEPALA_TABEL}>
           {data.data.map((p) => {
             const iniSaya = p.id === saya?.id;
             return (

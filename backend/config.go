@@ -43,6 +43,15 @@ type Konfigurasi struct {
 	// jaringan lokal. Diisi hanya bila proksi baliknya ada di mesin lain.
 	ProksiTepercaya string
 
+	// Pencocok pertanyaan berbantuan model bahasa. Kosong berarti mati, dan
+	// kotak Tanya cepat bekerja sepenuhnya di peramban seperti biasa.
+	// Bentuk permintaannya mengikuti /v1/chat/completions, supaya penyedia
+	// mana pun dapat dipakai — termasuk yang dijalankan sendiri di komputer
+	// sekolah, sehingga pertanyaan pengunjung tidak keluar ke mana pun.
+	LlmURL   string
+	LlmKunci string
+	LlmModel string
+
 	SmtpHost     string
 	SmtpPorta    string
 	SmtpPengguna string
@@ -131,9 +140,9 @@ func muatKonfigurasi() Konfigurasi {
 		rahasia = "kunci-pengembangan-jangan-dipakai-di-produksi"
 	}
 
-	batas, err := strconv.ParseInt(lingkungan("UPLOAD_MAX_BYTES", "2097152"), 10, 64)
+	batas, err := strconv.ParseInt(lingkungan("UPLOAD_MAX_BYTES", "3145728"), 10, 64)
 	if err != nil || batas <= 0 {
-		batas = 2 << 20 // 2 MB, sama dengan versi PHP
+		batas = 3 << 20 // 3 MB
 	}
 
 	// Peramban menganggap "localhost" dan "127.0.0.1" sebagai dua asal yang
@@ -158,6 +167,14 @@ func muatKonfigurasi() Konfigurasi {
 		log.Fatal("WA_GATEWAY_URL harus memakai https, kecuali bila menunjuk ke localhost")
 	}
 
+	// Alamat penyedia model bahasa menerima pertanyaan pengunjung, jadi
+	// aturannya sama dengan gateway WhatsApp: https, kecuali bila menunjuk
+	// ke mesin yang sama — penyedia yang dijalankan sendiri lazimnya begitu.
+	llmURL := lingkungan("LLM_URL", "")
+	if llmURL != "" && !gatewaySah(llmURL) {
+		log.Fatal("LLM_URL harus memakai https, kecuali bila menunjuk ke localhost")
+	}
+
 	return Konfigurasi{
 		Alamat:         ":" + lingkungan("PORT", "8090"),
 		DSN:            dsn,
@@ -171,6 +188,10 @@ func muatKonfigurasi() Konfigurasi {
 		WaMedanPesan:   lingkungan("WA_MEDAN_PESAN", "message"),
 
 		ProksiTepercaya: lingkungan("TRUSTED_PROXIES", ""),
+
+		LlmURL:   llmURL,
+		LlmKunci: lingkungan("LLM_KUNCI", ""),
+		LlmModel: lingkungan("LLM_MODEL", "claude-sonnet-5"),
 
 		SmtpHost:     lingkungan("SMTP_HOST", ""),
 		SmtpPorta:    lingkungan("SMTP_PORT", "587"),

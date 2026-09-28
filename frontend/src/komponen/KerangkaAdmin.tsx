@@ -67,6 +67,7 @@ const KELOMPOK: {
       { jalur: "/admin/berita", label: "Berita", khususAdmin: false, ikon: Newspaper },
       { jalur: "/admin/galeri", label: "Galeri", khususAdmin: false, ikon: ImageIcon },
       { jalur: "/admin/faq", label: "Tanya Jawab", khususAdmin: false, ikon: MessageCircleQuestion },
+      { jalur: "/admin/tanya-buntu", label: "Belum Terjawab", khususAdmin: false, ikon: MessageCircleQuestion },
       { jalur: "/admin/pesan", label: "Pesan Masuk", khususAdmin: false, ikon: Mail },
     ],
   },

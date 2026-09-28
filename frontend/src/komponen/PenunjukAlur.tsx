@@ -4,10 +4,21 @@ import Link from "next/link";
  * Penunjuk alur pendaftaran, dipasang di atas halaman-halaman PPDB.
  *
  * Gunanya satu: pengunjung langsung tahu ia ada di tahap mana dan apa
- * berikutnya, tanpa harus membaca seluruh halaman lebih dulu. Tahap yang
- * sudah lewat diberi tanda centang, tahap sekarang disorot, dan tahap yang
- * belum tercapai dibiarkan pudar sekaligus tidak dapat diklik bila memang
- * belum bisa dibuka.
+ * berikutnya, tanpa harus membaca seluruh halaman lebih dulu.
+ *
+ * TIDAK ADA TANDA CENTANG DI SINI, dan itu perbaikan dari bentuk sebelumnya.
+ * Dulu setiap tahap sebelum tahap sekarang diberi centang, sehingga membuka
+ * halaman Cek Status menampilkan "centang Isi formulir" kepada orang yang
+ * belum pernah mengisi formulirnya — dan pada masa pendaftaran yang tertutup,
+ * kepada orang yang memang tidak bisa mengisinya. Penunjuk ini hanya
+ * mengetahui HALAMAN yang sedang dibuka, bukan riwayat pengunjungnya, jadi ia
+ * tidak boleh mengaku tahu apa yang sudah dikerjakan orang. Yang ditampilkan
+ * nomor tahapnya saja.
+ *
+ * Tahap yang tidak dapat dibuka tampil pudar, tidak dapat diklik, dan
+ * menerangkan sebabnya lewat title beserta aria-disabled. Yang dapat dibuka
+ * SELALU berupa tautan, baik letaknya sebelum maupun sesudah tahap sekarang,
+ * supaya yang terlihat dapat diklik memang dapat diklik.
  *
  * Dirender di server, tanpa JavaScript sama sekali, karena isinya hanya
  * ditentukan halaman yang sedang dibuka.
@@ -31,11 +42,19 @@ const TAHAP: Tahap[] = [
 
 export function PenunjukAlur({
   aktif,
-  ppdbDibuka = true,
+  ppdbDibuka,
 }: {
   aktif: TahapAlur;
-  /** Bila pendaftaran tutup, tahap formulir tidak dapat dibuka. */
-  ppdbDibuka?: boolean;
+  /**
+   * Bila pendaftaran tutup, tahap "Isi formulir" tidak dapat dibuka.
+   *
+   * WAJIB diisi, tanpa nilai bawaan. Sebelumnya bawaannya `true`, dan dua
+   * halaman lupa meneruskannya: Cek Status dan Tes Seleksi. Akibatnya tahap
+   * "Isi formulir" tetap dapat diklik di sana meski pendaftarannya sudah
+   * ditutup, padahal halaman tujuannya sendiri menolak. Dibuat wajib supaya
+   * halaman yang lupa gagal saat disusun, bukan salah diam-diam.
+   */
+  ppdbDibuka: boolean;
 }) {
   const indeksAktif = TAHAP.findIndex((t) => t.kunci === aktif);
 
@@ -46,8 +65,10 @@ export function PenunjukAlur({
     >
       <ol className="wadah flex snap-x gap-2 overflow-x-auto py-3.5">
         {TAHAP.map((t, i) => {
-          const sudah = i < indeksAktif;
           const sekarang = i === indeksAktif;
+          // Hanya tahap formulir yang dapat tertutup. Tahap lainnya boleh
+          // dibuka kapan pun: yang sudah mendaftar tetap perlu memantau
+          // statusnya walau pendaftarannya sudah ditutup.
           const bisaDibuka = t.kunci !== "daftar" || ppdbDibuka;
 
           const isi = (
@@ -58,24 +79,28 @@ export function PenunjukAlur({
                   "grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold tabular-nums " +
                   (sekarang
                     ? "bg-biru-tua text-white"
-                    : sudah
+                    : bisaDibuka
                       ? "bg-biru-muda text-biru"
                       : "bg-slate-100 text-slate-400")
                 }
               >
-                {sudah ? "✓" : i + 1}
+                {i + 1}
               </span>
               <span className="whitespace-nowrap">{t.label}</span>
             </>
           );
 
+          // Gayanya mengikuti DAPAT ATAU TIDAKNYA dibuka, bukan letaknya
+          // sebelum atau sesudah tahap sekarang. Sebelumnya tahap sesudahnya
+          // selalu pudar meski tautannya hidup, jadi yang terlihat mati
+          // sebenarnya dapat diklik, dan sebaliknya.
           const gaya =
             "flex snap-start items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold transition " +
             (sekarang
               ? "bg-biru-muda text-biru-tua"
-              : sudah
+              : bisaDibuka
                 ? "text-teks hover:bg-biru-muda/60"
-                : "text-slate-400");
+                : "cursor-not-allowed text-slate-400");
 
           return (
             <li key={t.kunci}>
@@ -87,9 +112,16 @@ export function PenunjukAlur({
                 <span
                   className={gaya}
                   aria-current={sekarang ? "step" : undefined}
+                  // Tahap yang SEDANG dibuka tidak diberi aria-disabled walau
+                  // pendaftarannya tutup. Halaman /ppdb/daftar tetap terbuka
+                  // pada masa tutup — isinya berganti menjadi keterangan
+                  // penutupan — jadi menandainya "tidak tersedia" sementara
+                  // pengunjung berdiri di atasnya justru membingungkan
+                  // pembaca layar. Keterangan penutupannya ada di isi halaman.
+                  aria-disabled={!bisaDibuka && !sekarang ? true : undefined}
                   title={
-                    !bisaDibuka
-                      ? "Pendaftaran sedang ditutup"
+                    !bisaDibuka && !sekarang
+                      ? "Pendaftaran sedang ditutup, jadi formulirnya tidak dapat diisi."
                       : undefined
                   }
                 >

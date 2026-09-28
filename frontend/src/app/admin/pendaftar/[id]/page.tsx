@@ -364,6 +364,16 @@ export default function HalamanDetailPendaftar() {
               { k: "Peminatan dipilih", v: p.nama_jurusan },
               { k: "Waktu mendaftar", v: tanggalJam(p.dibuat) },
               { k: "Terakhir diubah", v: tanggalJam(p.diubah) },
+              {
+                k: "Cara mendaftar",
+                // Pendaftar yang dimasukkan panitia tidak punya berkas
+                // unggahan di sistem, jadi verifikasinya harus dicocokkan
+                // dari kertas. Penanda ini yang memberi tahu panitia
+                // berikutnya, dan alamat IP-nya memang kosong untuk mereka.
+                v: p.ditambahkan_oleh
+                  ? `Dimasukkan panitia: ${p.ditambahkan_oleh}`
+                  : "Mengisi formulir online sendiri",
+              },
               { k: "Alamat IP pendaftar", v: p.ip_pendaftar },
             ]}
           />

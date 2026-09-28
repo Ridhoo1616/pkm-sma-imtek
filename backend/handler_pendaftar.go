@@ -48,184 +48,17 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Isian diperiksa oleh fungsi yang SAMA dengan penambahan dari panel,
+	// supaya keduanya tidak menyimpang. Lihat pendaftar_isian.go.
 	isi := func(k string) string { return strings.TrimSpace(r.FormValue(k)) }
 	v := validasiBaru()
-
-	/* ---- isian wajib ---- */
-	namaLengkap := v.wajib("nama_lengkap", "Nama lengkap", isi("nama_lengkap"))
-	jenisKelamin := v.wajib("jenis_kelamin", "Jenis kelamin", isi("jenis_kelamin"))
-	tempatLahir := v.wajib("tempat_lahir", "Tempat lahir", isi("tempat_lahir"))
-	tanggalLahir := isi("tanggal_lahir")
-	agama := v.wajib("agama", "Agama", isi("agama"))
-	alamat := v.wajib("alamat", "Alamat tempat tinggal", isi("alamat"))
-	noHP := isi("no_hp")
-	asalSekolah := v.wajib("asal_sekolah", "Asal sekolah", isi("asal_sekolah"))
-	namaAyah := v.wajib("nama_ayah", "Nama ayah", isi("nama_ayah"))
-	namaIbu := v.wajib("nama_ibu", "Nama ibu", isi("nama_ibu"))
-	jalur := v.wajib("jalur", "Jalur pendaftaran", isi("jalur"))
-
-	v.pilihan("jenis_kelamin", "Jenis kelamin", jenisKelamin, JenisKelamin)
-	v.pilihan("agama", "Agama", agama, Agama)
-	v.pilihan("jalur", "Jalur pendaftaran", jalur, JalurPendaftaran)
-	v.panjangMaks("nama_lengkap", "Nama lengkap", namaLengkap, 100)
-	v.panjangMaks("alamat", "Alamat", alamat, 1000)
-
-	// Isian asal-asalan — "aaaa", "123", "....." — ditahan di sini. Nama
-	// orang tidak pernah berangka, sedangkan alamat hampir selalu berangka,
-	// jadi keduanya dibedakan lewat parameter terakhir.
-	v.teksWajar("nama_lengkap", "Nama lengkap", namaLengkap, false)
-	v.teksWajar("nama_ayah", "Nama ayah", namaAyah, false)
-	v.teksWajar("nama_ibu", "Nama ibu", namaIbu, false)
-	v.teksWajar("tempat_lahir", "Tempat lahir", tempatLahir, false)
-	v.teksWajar("alamat", "Alamat tempat tinggal", alamat, true)
-	v.teksWajar("asal_sekolah", "Asal sekolah", asalSekolah, true)
-
-	if lahir, ok := v.tanggal("tanggal_lahir", "Tanggal lahir", tanggalLahir, true); ok {
-		v.usiaWajar("tanggal_lahir", lahir)
-	}
-
-	/* ---- identitas dan alamat: wajib ----
-
-	   Sebelumnya NISN, NIK, dan seluruh rincian alamat bersifat opsional.
-	   Itu membuat baris pendaftar yang tidak dapat diverifikasi panitia:
-	   tanpa NISN dan NIK, tidak ada yang bisa dicocokkan ke data Dapodik
-	   maupun dokumen kependudukan; tanpa kelurahan sampai kode pos, jalur
-	   zonasi tidak dapat dinilai dan surat panggilan tidak dapat dikirim.
-
-	   Pesan galatnya disusun oleh v.wajib() dengan menyebut nama kolomnya,
-	   supaya pendaftar tahu tepat mana yang kurang. */
-	nisn := isi("nisn")
-	nik := v.wajib("nik", "NIK", isi("nik"))
-	kelurahan := v.wajib("kelurahan", "Kelurahan/Desa", isi("kelurahan"))
-	kecamatan := v.wajib("kecamatan", "Kecamatan", isi("kecamatan"))
-	kota := v.wajib("kota", "Kota/Kabupaten", isi("kota"))
-	provinsi := v.wajib("provinsi", "Provinsi", isi("provinsi"))
-	kodePos := v.wajib("kode_pos", "Kode pos", isi("kode_pos"))
-
-	/* ---- sekolah asal: wajib ----
-
-	   NPSN dan tahun lulus dipakai panitia mencocokkan pendaftar ke data
-	   sekolah asalnya, dan alamat sekolah dipakai menilai jalur zonasi. */
-	npsnSekolah := v.wajib("npsn_sekolah", "NPSN sekolah asal", isi("npsn_sekolah"))
-	alamatSekolah := v.wajib("alamat_sekolah", "Alamat sekolah asal", isi("alamat_sekolah"))
-	tahunLulus := v.wajib("tahun_lulus", "Tahun lulus", isi("tahun_lulus"))
-
-	/* ---- isian opsional ---- */
-	email := isi("email")
-	// Keduanya diperiksa strukturnya, lalu dicocokkan dengan isian lain pada
-	// formulir yang sama. Lihat validasi_identitas.go untuk alasannya, beserta
-	// keterangan bahwa pencocokan ke basis data pemerintah tidak mungkin
-	// dilakukan tanpa perjanjian kerja sama resmi.
-	v.periksaNisn(nisn, nik, tanggalLahir)
-	v.periksaNik(nik, tanggalLahir, jenisKelamin)
-	v.telepon("no_hp", "Nomor HP/WhatsApp", noHP, true)
-	v.telepon("no_hp_ortu", "Nomor HP orang tua", isi("no_hp_ortu"), false)
-	v.email("email", email)
-
-	// Kode pos Indonesia selalu lima angka. Diperiksa di sini, bukan di
-	// v.wajib(), karena v.wajib() hanya memastikan isinya tidak kosong.
-	if kodePos != "" && !polaKodePos.MatchString(kodePos) {
-		v.tambah("kode_pos", "Kode pos harus lima angka.")
-	}
-	// NPSN sekolah selalu delapan angka, sama seperti NPSN pada Data Sekolah.
-	npsnBentuknyaBenar := polaNpsn.MatchString(npsnSekolah)
-	if npsnSekolah != "" && !npsnBentuknyaBenar {
-		v.tambah("npsn_sekolah", "NPSN sekolah asal harus delapan angka. Nomor ini tercantum pada ijazah atau dapat dicari di laman Referensi Kemendikbud.")
-	}
-
-	// Sekolah asalnya dicocokkan ke daftar rujukan yang diimpor panitia.
-	// Selama daftarnya kosong, pemeriksaan ini tidak menolak apa pun.
-	// Keterangannya di sekolah.go.
-	sekolahTerdaftar := false
-	if npsnBentuknyaBenar {
-		sekolahTerdaftar = a.periksaAsalSekolah(v, asalSekolah, npsnSekolah,
-			isi("sekolah_tidak_terdaftar") == "1")
-	}
-
-	nilaiRata2 := v.desimalRentang("nilai_rata2", "Nilai rata-rata", isi("nilai_rata2"), 0, 100)
-
-	// Tiga kolom di bawah bertipe teks di basis data, mengikuti bentuk isian
-	// Dapodik yang kadang ditulis bebas. Pemeriksa rentang tetap dijalankan
-	// untuk pesan galatnya, tetapi yang disimpan tetap teksnya, karena
-	// PostgreSQL tidak mengubah angka menjadi teks dengan sendirinya.
-	v.bulatRentang("anak_ke", "Anak ke-", isi("anak_ke"), 1, 20)
-	v.bulatRentang("jumlah_saudara", "Jumlah saudara", isi("jumlah_saudara"), 0, 20)
-	v.bulatRentang("tahun_lulus", "Tahun lulus", tahunLulus, 2000, 2100)
-
-	sumberInfo := isi("sumber_informasi")
-	if sumberInfo != "" && !sumberSah(sumberInfo) {
-		v.tambah("sumber_informasi", "Pilihan sumber informasi tidak valid.")
-	}
-
-	if isi("pernyataan") == "" {
-		v.tambah("pernyataan", "Anda harus menyetujui pernyataan kebenaran data.")
-	}
-
-	/* ---- peminatan ---- */
-	// Peminatan hanya diwajibkan bila sekolah memang membuka pilihannya.
-	// Sekolah yang tidak menjuruskan sejak pendaftaran cukup menonaktifkan
-	// seluruh peminatan, dan kolom ini otomatis tidak diperiksa.
-	daftarJurusan, err := a.ambilJurusan(true)
+	d, err := a.periksaIsianPendaftar(v, isi, opsiIsian{
+		WajibPernyataan: true,
+		SekolahKetat:    true,
+	})
 	if err != nil {
-		a.galatServer(w, "mengambil jurusan", err)
+		a.galatServer(w, "memeriksa isian pendaftar", err)
 		return
-	}
-	var jurusanID any
-	if len(daftarJurusan) > 0 {
-		pilihan := isi("jurusan_id")
-		sah := false
-		for _, j := range daftarJurusan {
-			if pilihan == fmt.Sprint(j.ID) {
-				sah = true
-				jurusanID = j.ID
-				break
-			}
-		}
-		if !sah {
-			v.tambah("jurusan_id", "Peminatan wajib dipilih.")
-		}
-	}
-
-	/* ---- cegah pendaftaran ganda ---- */
-	if namaLengkap != "" && tanggalLahir != "" {
-		var noLama string
-		err := a.db.QueryRow(
-			`SELECT no_registrasi FROM pendaftar
-			  WHERE nama_lengkap = $1 AND tanggal_lahir = $2 AND tahun_ajaran = $3`,
-			namaLengkap, tanggalLahir, a.atur("ppdb_tahun")).Scan(&noLama)
-		switch {
-		case err == nil:
-			v.tambahUmum("Data dengan nama dan tanggal lahir yang sama sudah terdaftar dengan nomor registrasi " +
-				noLama + ". Gunakan menu Cek Status untuk memantau pendaftaran tersebut.")
-		case err != sql.ErrNoRows:
-			a.galatServer(w, "memeriksa pendaftaran ganda", err)
-			return
-		}
-	}
-
-	/* ---- satu NISN untuk satu pendaftar ----
-
-	   Nomornya sengaja TIDAK disebutkan pada pesan galatnya, berbeda dengan
-	   pemeriksaan nama dan tanggal lahir di atas. Alasannya: nama beserta
-	   tanggal lahir hanya diketahui orang yang memang mengenal pendaftarnya,
-	   sedangkan NISN adalah satu nomor tunggal. Kalau nomor registrasi ikut
-	   dikembalikan, formulir ini berubah menjadi alat penelusuran — cukup
-	   mencoba satu per satu NISN untuk mengetahui siapa saja yang mendaftar.
-	   Pendaftar yang memang merasa belum pernah mendaftar diarahkan ke
-	   panitia. */
-	if nisn != "" {
-		var ada bool
-		err := a.db.QueryRow(
-			`SELECT EXISTS (SELECT 1 FROM pendaftar
-			                 WHERE nisn = $1 AND tahun_ajaran = $2)`,
-			nisn, a.atur("ppdb_tahun")).Scan(&ada)
-		if err != nil {
-			a.galatServer(w, "memeriksa NISN ganda", err)
-			return
-		}
-		if ada {
-			v.tambah("nisn", "NISN ini sudah dipakai pendaftaran lain pada tahun ajaran ini. Satu NISN hanya untuk satu orang. Bila Anda merasa belum pernah mendaftar, hubungi panitia lewat halaman Kontak.")
-		}
 	}
 
 	/* ---- unggahan ---- */
@@ -253,7 +86,7 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		tersimpan[b.Kolom] = nama
 	}
 
-	if jalur == "Prestasi" && tersimpan["file_prestasi"] == "" {
+	if d.Jalur == "Prestasi" && tersimpan["file_prestasi"] == "" {
 		v.tambah("file_prestasi", "Jalur Prestasi mewajibkan unggahan sertifikat prestasi.")
 	}
 
@@ -264,7 +97,8 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/* ---- simpan ---- */
-	tahunAjaran := a.atur("ppdb_tahun")
+	// Penyimpanannya juga satu fungsi dengan penambahan dari panel; yang
+	// berbeda hanya berkas unggahan dan pencatat pembuatnya.
 	transaksi, err := a.db.Begin()
 	if err != nil {
 		bereskan()
@@ -275,49 +109,14 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 	// tidak berpengaruh apa-apa.
 	defer transaksi.Rollback()
 
-	noReg, err := buatNoRegistrasi(transaksi, tahunAjaran)
-	if err != nil {
-		bereskan()
-		a.galatServer(w, "membuat nomor registrasi", err)
-		return
-	}
-
-	_, err = transaksi.Exec(`INSERT INTO pendaftar (
-		no_registrasi, tahun_ajaran, jalur, jurusan_id,
-		nama_lengkap, nisn, nik, jenis_kelamin, tempat_lahir, tanggal_lahir, agama,
-		anak_ke, jumlah_saudara, alamat, kelurahan, kecamatan, kota, provinsi, kode_pos,
-		no_hp, email, asal_sekolah, npsn_sekolah, alamat_sekolah, tahun_lulus, nilai_rata2,
-		nama_ayah, pekerjaan_ayah, pendidikan_ayah, nama_ibu, pekerjaan_ibu, pendidikan_ibu,
-		penghasilan, no_hp_ortu, nama_wali,
-		file_foto, file_ijazah, file_kk, file_akta, file_raport, file_prestasi,
-		sumber_informasi, catatan_sumber, ip_pendaftar, asal_sekolah_terdaftar
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26,
-	          $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45)`,
-		noReg, tahunAjaran, jalur, jurusanID,
-		namaLengkap, kosongJadiNil(nisn), kosongJadiNil(nik), jenisKelamin,
-		tempatLahir, tanggalLahir, agama,
-		kosongJadiNil(isi("anak_ke")), kosongJadiNil(isi("jumlah_saudara")), alamat,
-		kelurahan, kecamatan, kota, provinsi, kodePos,
-		noHP, kosongJadiNil(email),
-		asalSekolah, npsnSekolah, alamatSekolah,
-		tahunLulus, nilaiRata2,
-		namaAyah, kosongJadiNil(isi("pekerjaan_ayah")), kosongJadiNil(isi("pendidikan_ayah")),
-		namaIbu, kosongJadiNil(isi("pekerjaan_ibu")), kosongJadiNil(isi("pendidikan_ibu")),
-		kosongJadiNil(isi("penghasilan")), kosongJadiNil(isi("no_hp_ortu")), kosongJadiNil(isi("nama_wali")),
-		nilBerkas(tersimpan, "file_foto"), nilBerkas(tersimpan, "file_ijazah"),
-		nilBerkas(tersimpan, "file_kk"), nilBerkas(tersimpan, "file_akta"),
-		nilBerkas(tersimpan, "file_raport"), nilBerkas(tersimpan, "file_prestasi"),
-		kosongJadiNil(sumberInfo), kosongJadiNil(isi("catatan_sumber")), alamatPemanggil(r),
-		sekolahTerdaftar)
+	noReg, err := a.simpanPendaftar(transaksi, d, tersimpan, 0, alamatPemanggil(r))
 	if err != nil {
 		bereskan()
 		// Basis data punya DUA batasan unik untuk tahun ajaran yang sama:
 		// nama dengan tanggal lahir, dan NISN. Keduanya menjaring pendaftaran
 		// ganda yang lolos dari pemeriksaan di atas, misalnya dua kiriman yang
 		// tepat bersamaan. Pesannya menyebut keduanya karena di sini yang
-		// tersedia hanya kode SQLSTATE, bukan nama batasan yang dilanggar —
-		// dan menebak salah satunya berarti menyuruh pendaftar membetulkan
-		// kolom yang sebenarnya sudah benar.
+		// tersedia hanya kode SQLSTATE, bukan nama batasan yang dilanggar.
 		if kodeGanda(err) {
 			kirimGalat(w, http.StatusConflict,
 				"Data ini sudah terdaftar pada tahun ajaran ini: nama dengan "+
@@ -338,7 +137,7 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 	kirimJSON(w, http.StatusCreated, map[string]any{
 		"pesan":         "Pendaftaran berhasil dikirim.",
 		"no_registrasi": noReg,
-		"tahun_ajaran":  tahunAjaran,
+		"tahun_ajaran":  a.atur("ppdb_tahun"),
 	})
 }
 

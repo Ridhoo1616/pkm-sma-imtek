@@ -15,6 +15,7 @@ import {
   RingkasanGalat,
 } from "@/komponen/Medan";
 import type { Tenaga } from "@/lib/tipe";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 /**
  * Data guru dan tenaga kependidikan.
@@ -320,7 +321,7 @@ export default function HalamanTenagaAdmin() {
             ubah={setFoto}
             galat={galatKolom.foto}
             namaTerpilih={fotoLama || undefined}
-            bantuan="Potret perbandingan sisi 3:4, JPG atau PNG, maksimal 2 MB. Tanpa foto, kartunya memakai inisial nama."
+            bantuan={`Potret perbandingan sisi 3:4, JPG atau PNG, maksimal ${BATAS_UNGGAH}. Tanpa foto, kartunya memakai inisial nama.`}
           />
 
           {fotoLama && !foto && (

@@ -6,7 +6,7 @@ import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { angka, tanggalJam, nomorWa, tautanWa } from "@/lib/format";
 import { KepalaPanel, KartuAngka, Konfirmasi, Jendela } from "@/komponen/Panel";
-import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
+import { PesanGalat, TanpaData, KerangkaKartu } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import {
   Teks,
@@ -277,7 +277,7 @@ export default function HalamanPesanAdmin() {
       </div>
 
       {memuat ? (
-        <Memuat />
+        <KerangkaKartu jumlah={4} baris={4} />
       ) : galat ? (
         <PesanGalat pesan={galat} ulangi={muatUlang} />
       ) : !data || data.data.length === 0 ? (

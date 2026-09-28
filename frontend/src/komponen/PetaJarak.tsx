@@ -1,4 +1,4 @@
-import { alamatLengkap, belumTerisi } from "@/lib/format";
+import { alamatLengkap, belumTerisi, tujuanPeta } from "@/lib/format";
 import { IkonLokasi } from "@/komponen/Ikon";
 import type { Pengaturan } from "@/lib/tipe";
 
@@ -28,9 +28,19 @@ import type { Pengaturan } from "@/lib/tipe";
  * Maps-nya — jadi tidak perlu mengetik alamat rumah sama sekali.
  */
 
-/** Tiga moda yang masuk akal di sini. `two-wheeler` untuk sepeda motor. */
+/**
+ * Empat moda yang masuk akal di sini. `two-wheeler` untuk sepeda motor,
+ * `walking` untuk jalan kaki.
+ *
+ * Jalan kaki ditambahkan atas permintaan user, dan memang pantas: sekolah
+ * ini di tengah permukiman, jadi sebagian pendaftarnya memang berjalan kaki.
+ * Ia ditaruh di urutan kedua, bukan pertama, sebab yang pertama menjadi
+ * tombol utama, dan moda yang paling banyak dipakai orang tua yang mengukur
+ * jarak tetap kendaraan.
+ */
 const MODA = [
   { kode: "driving", label: "Mobil" },
+  { kode: "walking", label: "Jalan kaki" },
   { kode: "two-wheeler", label: "Motor" },
   { kode: "transit", label: "Angkutan umum" },
 ];
@@ -41,10 +51,9 @@ export function PetaJarak({ pengaturan }: { pengaturan: Pengaturan }) {
   const koordinat = (p.peta_koordinat ?? "").trim();
   const adaPeta = Boolean(p.peta_embed && !belumTerisi(p.peta_embed));
 
-  // Tujuan tautannya: koordinat bila sekolah sudah mengisinya, kalau tidak
-  // alamatnya sebagai teks. Keduanya diterima Google Maps; koordinat lebih
-  // tepat karena tidak bergantung pengenalan alamat.
-  const tujuan = koordinat || `${p.nama_sekolah ?? ""} ${alamat}`.trim();
+  // Tujuannya dihitung lib/format supaya sama persis dengan tautan
+  // "Buka Google Maps" di kaki halaman.
+  const tujuan = tujuanPeta(p);
   const arah = (moda: string) =>
     "https://www.google.com/maps/dir/?api=1&destination=" +
     encodeURIComponent(tujuan) +

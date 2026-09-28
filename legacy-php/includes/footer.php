@@ -58,7 +58,7 @@
 
     <div class="border-top border-light border-opacity-10 py-3 d-md-flex justify-content-between small opacity-75">
       <span>&copy; <?= date('Y') ?> <?= e(setting('nama_sekolah')) ?>. Seluruh hak cipta dilindungi.</span>
-      <span>Dikembangkan melalui Program Kreativitas Mahasiswa (PkM)</span>
+      <span>Dikembangkan melalui Pengabdian Kepada Masyarakat (PkM) Universitas Pamulang</span>
     </div>
   </div>
 </footer>

@@ -159,6 +159,111 @@ export function urlUnggahan(subfolder: string, nama: string): string {
   return `${ALAMAT_API}/unggahan/${subfolder}/${encodeURIComponent(nama)}`;
 }
 
+/**
+ * Keadaan unggahan yang dilaporkan ke formulir.
+ *
+ * `tahap` penting, bukan hiasan: sesudah bita terakhir terkirim, server masih
+ * menyimpan berkasnya dan menerbitkan nomor registrasi. Bilah yang berhenti
+ * di 100 persen tanpa keterangan terbaca sebagai macet, dan orang menekan
+ * tombolnya lagi.
+ */
+export interface KemajuanUnggahan {
+  tahap: "mengunggah" | "menyimpan";
+  persen: number;
+  terkirim: number;
+  total: number;
+}
+
+/**
+ * Mengirim formulir pendaftaran beserta laporan kemajuannya.
+ *
+ * MEMAKAI XMLHttpRequest, bukan fetch, dan itu bukan pilihan gaya: fetch
+ * tidak dapat melaporkan kemajuan UNGGAHAN sama sekali. Yang tersedia di
+ * fetch hanya kemajuan unduhan lewat ReadableStream pada jawabannya.
+ *
+ * Yang dikirim sampai enam dokumen, masing-masing dibatasi sebesar
+ * UPLOAD_MAX_BYTES, jadi seluruhnya belasan megabita. Di data seluler yang
+ * lambat itu satu menit penuh
+ * tanpa tanda apa pun pada tombolnya, dan yang paling sering terjadi:
+ * pendaftar menekan kirim lagi, atau menutup halamannya di tengah jalan.
+ *
+ * Penanganan galatnya disamakan dengan permintaan(): badan JSON diubah
+ * menjadi GalatApi lengkap dengan galat per kolom, supaya formulirnya tetap
+ * dapat menyorot kolom yang bermasalah seperti sebelumnya.
+ */
+function kirimBerkasPendaftaran(
+  formulir: FormData,
+  kabarkan?: (k: KemajuanUnggahan) => void,
+): Promise<{ pesan: string; no_registrasi: string; tahun_ajaran: string }> {
+  return new Promise((selesai, tolak) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${ALAMAT_API}/api/ppdb/daftar`);
+    xhr.responseType = "text";
+
+    xhr.upload.onprogress = (e) => {
+      if (!kabarkan) return;
+      // lengthComputable bernilai salah bila panjangnya tidak diketahui,
+      // dan persen yang dihitung dari total nol menghasilkan NaN.
+      const total = e.lengthComputable ? e.total : 0;
+      kabarkan({
+        tahap: "mengunggah",
+        persen: total > 0 ? Math.round((e.loaded / total) * 100) : 0,
+        terkirim: e.loaded,
+        total,
+      });
+    };
+
+    // Bita terakhir sudah terkirim, tetapi jawabannya belum datang: di sinilah
+    // server menyimpan berkasnya dan menerbitkan nomor registrasi.
+    xhr.upload.onload = () => {
+      kabarkan?.({ tahap: "menyimpan", persen: 100, terkirim: 0, total: 0 });
+    };
+
+    xhr.onerror = () =>
+      tolak(
+        new GalatApi(0, {
+          pesan:
+            "Tidak dapat menghubungi server. Periksa koneksi Anda, " +
+            "atau pastikan server API sedang berjalan.",
+        }),
+      );
+    xhr.onabort = () =>
+      tolak(new GalatApi(0, { pesan: "Pengiriman dibatalkan." }));
+
+    xhr.onload = () => {
+      const tipe = xhr.getResponseHeader("content-type") ?? "";
+      if (!tipe.includes("application/json")) {
+        tolak(
+          new GalatApi(xhr.status, {
+            pesan: `Server menjawab dengan galat ${xhr.status}.`,
+          }),
+        );
+        return;
+      }
+      let isi: unknown;
+      try {
+        isi = JSON.parse(xhr.responseText);
+      } catch {
+        tolak(
+          new GalatApi(xhr.status, {
+            pesan: "Jawaban server tidak dapat dibaca.",
+          }),
+        );
+        return;
+      }
+      if (xhr.status < 200 || xhr.status > 299) {
+        tolak(new GalatApi(xhr.status, isi as IsiGalat));
+        return;
+      }
+      selesai(
+        isi as { pesan: string; no_registrasi: string; tahun_ajaran: string },
+      );
+    };
+
+    xhr.send(formulir);
+  });
+}
+
 export const api = {
   /* ---------- publik ---------- */
   profil: () =>
@@ -189,6 +294,33 @@ export const api = {
     ),
   kirimPesan: (isi: unknown) =>
     permintaan<{ pesan: string }>("/api/pesan", { metode: "POST", isi }),
+  /**
+   * Mencatat pertanyaan yang tidak dapat dijawab kotak Tanya cepat.
+   *
+   * Kegagalannya sengaja tidak pernah sampai ke pemanggil: ini pencatatan
+   * di latar belakang, dan pengunjung tidak meminta apa pun dicatat.
+   */
+  /**
+   * Meminta model bahasa memilih satu butir pengetahuan yang paling cocok.
+   *
+   * Yang dikirim hanya pertanyaan pengunjung beserta DAFTAR PERTANYAAN
+   * butirnya — isi jawabannya tidak pernah ikut, dan yang kembali hanya
+   * nomor butirnya. Teks jawabannya tetap diambil dari pengetahuan di
+   * peramban. Kegagalannya dianggap "tidak ketemu", bukan galat.
+   */
+  cocokkanTanya: (
+    pertanyaan: string,
+    pilihan: { id: string; tanya: string }[],
+  ) =>
+    permintaan<{ id: string | null }>("/api/tanya-cocok", {
+      metode: "POST",
+      isi: { pertanyaan, pilihan },
+    }).catch(() => ({ id: null })),
+  catatTanyaBuntu: (pertanyaan: string) =>
+    permintaan<void>("/api/tanya-buntu", {
+      metode: "POST",
+      isi: { pertanyaan },
+    }).catch(() => undefined),
   faq: () =>
     permintaan<{
       data: import("./tipe").Faq[];
@@ -235,11 +367,8 @@ export const api = {
     ),
 
   /* ---------- PPDB ---------- */
-  daftar: (formulir: FormData) =>
-    permintaan<{ pesan: string; no_registrasi: string; tahun_ajaran: string }>(
-      "/api/ppdb/daftar",
-      { metode: "POST", formulir },
-    ),
+  daftar: (formulir: FormData, kabarkan?: (k: KemajuanUnggahan) => void) =>
+    kirimBerkasPendaftaran(formulir, kabarkan),
   cekStatus: (isi: { no_registrasi: string; tanggal_lahir: string }) =>
     permintaan<import("./tipe").StatusPendaftaran>("/api/ppdb/cek", {
       metode: "POST",
@@ -438,6 +567,18 @@ export const api = {
       metode: "DELETE",
       token: true,
     }),
+
+  /**
+   * Menambah pendaftar dari panel.
+   *
+   * Tetap berjalan meski PPDB sudah ditutup; itu seluruh gunanya. Tanpa
+   * berkas unggahan, sebab dokumennya diterima petugas dalam bentuk kertas.
+   */
+  tambahPendaftar: (isi: Record<string, string>) =>
+    permintaan<{ pesan: string; no_registrasi: string; tahun_ajaran: string }>(
+      "/api/admin/pendaftar",
+      { metode: "POST", isi, token: true },
+    ),
 
   /* ---------- daftar rujukan sekolah asal ---------- */
   cariSekolah: (cari: string) =>
@@ -816,6 +957,22 @@ export const api = {
     }),
   hapusFaq: (id: number) =>
     permintaan<{ pesan: string }>(`/api/admin/faq/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
+  tanyaBuntu: (kueri = "") =>
+    permintaan<{
+      data: import("./tipe").TanyaBuntu[];
+      belum_ditangani: number;
+    }>(`/api/admin/tanya-buntu${kueri}`, { token: true }),
+  tandaiTanyaBuntu: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/tanya-buntu/${id}`, {
+      metode: "PATCH",
+      token: true,
+    }),
+  hapusTanyaBuntu: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/tanya-buntu/${id}`, {
       metode: "DELETE",
       token: true,
     }),

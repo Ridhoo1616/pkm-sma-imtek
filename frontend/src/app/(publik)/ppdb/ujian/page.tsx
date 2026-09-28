@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { api } from "@/lib/api";
+import { muatProfil } from "@/lib/profil";
 import { belumTerisi } from "@/lib/format";
 import { KepalaHalaman } from "@/komponen/Bagian";
 import Ujian from "@/komponen/Ujian";
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 
 export default async function HalamanUjian() {
   const info = await api.infoUjian().catch(() => null);
+  const { profil } = await muatProfil();
 
   return (
     <>
@@ -24,7 +26,7 @@ export default async function HalamanUjian() {
       />
 
 
-      <PenunjukAlur aktif="tes" />
+      <PenunjukAlur aktif="tes" ppdbDibuka={profil.ppdb.dibuka} />
       <div className="wadah max-w-3xl py-12">
         {info && !info.dibuka ? (
           <div className="kartu space-y-3 p-6">

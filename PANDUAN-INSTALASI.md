@@ -16,7 +16,7 @@ alamat backend harus dapat dijangkau dari peramban pengunjung.
 
 | Perangkat | Versi | Keterangan |
 |---|---|---|
-| **Go** | 1.24 atau lebih baru | [go.dev/dl](https://go.dev/dl/) |
+| **Go** | 1.27 atau lebih baru | [go.dev/dl](https://go.dev/dl/). `backend/go.mod` menuntut 1.27; Go yang lebih lama akan mengunduh sendiri perkakas 1.27 saat pertama dijalankan, dan itu memerlukan sambungan internet |
 | **Node.js** | 20 atau lebih baru | [nodejs.org](https://nodejs.org/) |
 | **PostgreSQL** | 14 atau lebih baru | [postgresql.org/download](https://www.postgresql.org/download/). Postgres.app dan pemasang resmi keduanya cukup |
 
@@ -92,7 +92,7 @@ APP_ENV=pengembangan
 PORT=8090
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 UPLOAD_DIR=data/unggahan
-UPLOAD_MAX_BYTES=2097152
+UPLOAD_MAX_BYTES=3145728
 ```
 
 Lalu jalankan:
@@ -244,6 +244,150 @@ itu dan cukup menghapusnya.
 
 ---
 
+## 4c. Menjalankan di laptop kedua milik sendiri
+
+`git clone` hanya memberi **kode**. Tiga hal yang dibutuhkan aplikasi ini
+justru sengaja TIDAK ikut ke repositori, dan itu sebab paling sering situsnya
+tampak rusak di komputer baru:
+
+| Tidak ikut | Sebabnya | Akibat bila dilewatkan |
+| --- | --- | --- |
+| `backend/.env` | memuat kredensial sungguhan, repositori ini publik | backend mati saat dijalankan |
+| isi basis data | memuat data pribadi calon peserta didik | situs hidup tetapi kosong, seluruh pengaturan kembali ke penanda `[kurung siku]` |
+| `backend/data/` | dokumen pribadi pendaftar beserta gambar unggahan | logo, foto gedung, dan foto kepala sekolah tampil sebagai kerangka; dokumen pendaftar tidak dapat dibuka |
+
+### Langkah di laptop baru
+
+```bash
+# 1. Pasang Go, Node, dan PostgreSQL seperti bagian 1
+# 2. Ambil kodenya
+git clone https://github.com/Ridhoo1616/pkm-sma-imtek.git
+cd pkm-sma-imtek
+
+# 3. Basis data kosong. Tabelnya dibuat backend saat pertama dijalankan.
+createdb sma_imtek
+
+# 4. Konfigurasi backend
+cd backend
+cp .env.example .env
+# isi DB_USER, DB_PASS, dan JWT_SECRET. Kunci barunya:
+openssl rand -base64 48
+
+# 5. Konfigurasi frontend
+cd ../frontend
+printf 'NEXT_PUBLIC_API_URL=http://localhost:8090\n' > .env.local
+npm install
+```
+
+Sesudah itu jalankan seperti bagian 3 dan 4: `go run .` di `backend`, lalu
+`npm run dev` di `frontend`.
+
+Sampai di sini situsnya sudah hidup dengan data awal — cukup untuk menulis
+kode, tetapi seluruh isinya masih penanda `[kurung siku]`.
+
+### Membawa data yang sama
+
+Dikerjakan hanya bila laptop kedua perlu menampilkan isi yang sama, misalnya
+untuk demonstrasi PkM.
+
+Basis data dan gambar unggahan dibawa lewat **repositori privat terpisah**,
+`Ridhoo1616/pkm-sma-imtek-data`, dan isinya selalu dienkripsi lebih dulu.
+`alat/bawa-data.sh` mengerjakan seluruhnya.
+
+**Sekali saja, di tiap laptop**, letakkan repositori data itu di sebelah
+repositori kode:
+
+```bash
+cd ~                       # folder yang memuat pkm-sma-imtek
+gh repo clone Ridhoo1616/pkm-sma-imtek-data
+```
+
+Susunan folder yang diharapkan skripnya:
+
+```
+~/
+├── pkm-sma-imtek/          kode, publik
+└── pkm-sma-imtek-data/     data, privat dan terenkripsi
+```
+
+**Di laptop yang datanya paling baru:**
+
+```bash
+cd pkm-sma-imtek
+./alat/bawa-data.sh kirim
+```
+
+**Di laptop yang ingin disamakan:**
+
+```bash
+cd pkm-sma-imtek
+./alat/bawa-data.sh ambil
+```
+
+Keduanya menanyakan sandi enkripsi. Sandi itu tidak tersimpan di repositori
+mana pun dan tidak pernah ikut ke GitHub — diingat sendiri, atau disimpan di
+pengelola sandi.
+
+`ambil` **menimpa** basis data setempat, jadi ia menampilkan isi yang sekarang
+lebih dulu dan meminta diketik `ya`. Sesudahnya, nyalakan ulang backend supaya
+tembolok pengaturannya dibaca ulang.
+
+#### Yang dikerjakan skripnya, dan sebabnya
+
+| Langkah | Sebabnya |
+| --- | --- |
+| `pg_dump -Fc` lalu `tar` folder `backend/data` | keduanya tidak pernah ikut repositori kode yang publik |
+| enkripsi AES-256-CBC, PBKDF2 600.000 putaran | lihat catatan di bawah |
+| hasil enkripsinya langsung didekripsi dan dibandingkan dengan aslinya | enkripsi bersandi salah tetap menghasilkan berkas, dan kesalahannya baru ketahuan di laptop seberang, saat datanya justru sedang dibutuhkan |
+| `pg_restore --no-owner` | tabelnya dimiliki peran `ppdb` yang belum tentu ada di laptop tujuan; tanpa ini galat pemilik muncul pada hampir setiap tabel |
+| `pg_restore --clean --if-exists` | backend sudah membuat tabelnya saat pertama dinyalakan; tanpa ini barisnya bertumpuk |
+
+Migrasi di dalam dump sudah tercatat selesai, jadi backend tidak
+menjalankannya ulang. Bila kode di laptop tujuan lebih baru daripada dumpnya,
+migrasi yang belum ada di sana dijalankan saat backend dinyalakan.
+
+> **Tentang enkripsinya.** Selama isinya masih data contoh — seluruh pendaftar
+> bawaan beralamat `@contoh.id` dan berkas dokumennya gambar buatan — memang
+> tidak ada yang perlu dirahasiakan. Tetapi begitu sekolah memakai sistem ini
+> sungguhan, dump yang sama akan memuat NIK, Kartu Keluarga, dan akta calon
+> peserta didik, dan pada saat itu tidak akan ada yang ingat mengubah caranya.
+> Karena itu skripnya mengenkripsi sejak sekarang, bukan nanti.
+>
+> Repositori privat pun **bukan** tempat yang tepat bagi dokumen pribadi yang
+> belum terenkripsi: privat hari ini tidak berarti privat selamanya, dan
+> riwayat Git menyimpan segalanya untuk seterusnya.
+
+### Yang berbeda di laptop baru
+
+- **`JWT_SECRET` yang berbeda tidak masalah**, dan sebaiknya memang berbeda.
+  Akibatnya hanya satu: sesi masuk dari laptop lain tidak berlaku di sini.
+- **Sandi akun ikut berpindah** bersama dump-nya, sebab hash bcrypt-nya ada
+  di dalam tabel `users`. Tanpa dump, akunnya kembali ke `admin` / `admin123`
+  dan wajib diganti.
+- **Dua setelan VS Code menunjuk folder di komputer pembuat**: `go.goroot` dan
+  `eslint.runtime` di `.vscode/settings.json` menunjuk `~/.local`. Bila di
+  laptop baru Go dan Node dipasang lewat Homebrew atau pemasang resmi, kedua
+  baris itu **dihapus** — bila dibiarkan, ekstensi Go melaporkan
+  "go not found" dan ESLint mati tanpa pesan.
+- **Tugas VS Code di `.vscode/tasks.json` ditulis untuk macOS** (`open`,
+  `lsof`, dan letak Postgres.app). Di Windows, pakai perintah terminal pada
+  bagian 3 dan 4, bukan menu tugasnya.
+
+### Bila kedua laptop dipakai bergantian
+
+Kode dipindahkan lewat Git, bukan lewat penyalinan folder:
+
+```bash
+git pull origin dev     # sebelum mulai bekerja
+git push origin dev     # sesudah selesai
+```
+
+`backend/.env` tetap tinggal di masing-masing laptop dan tidak pernah ikut.
+Basis datanya juga terpisah: apa yang diisi lewat panel di satu laptop tidak
+muncul di laptop lain kecuali dump-nya dipindahkan lagi.
+
+---
+
 ## 5. Hal pertama yang wajib dilakukan
 
 1. **Ganti kata sandi `admin`** lewat menu *Ganti Sandi*. Hash sandi bawaan ada
@@ -256,9 +400,18 @@ itu dan cukup menghapusnya.
    ubah `ppdb_status` menjadi `buka` saat pendaftaran benar-benar dimulai.
    Status `tutup` menutup jalur API-nya sekaligus, bukan hanya menyembunyikan
    tombolnya.
-4. **Buat akun operator** untuk panitia lain, supaya akun admin tidak dipakai
+4. **Isi Angka Sekolah** pada menu *Pengaturan*: `jumlah_siswa`,
+   `jumlah_guru`, dan `jumlah_rombel`. Ketiganya tampil pada sorotan beranda
+   sebagai angka yang merangkak dari nol, dan selama masih berupa
+   `[kurung siku]`, ketiganya **tidak ditampilkan sama sekali** — bukan
+   ditampilkan sebagai "0". Angka ini tidak dapat dihitung sistem: tidak ada
+   tabel siswa di sini, dan tabel tenaga pendidik hanya memuat guru yang
+   sekolah pilih untuk ditampilkan di halaman profil, bukan seluruh
+   pegawainya. Jumlah ekskul, peminatan, dan fasilitas di sebelahnya dihitung
+   sendiri dari datanya, jadi tidak perlu diisi di sini.
+5. **Buat akun operator** untuk panitia lain, supaya akun admin tidak dipakai
    bersama-sama.
-5. **Unggah gambar sekolah** pada bagian *Gambar* di menu *Pengaturan*: logo,
+6. **Unggah gambar sekolah** pada bagian *Gambar* di menu *Pengaturan*: logo,
    foto halaman depan, foto kepala sekolah, dan bagan struktur organisasi.
    Selama fotonya belum ada, halaman publik menampilkan kerangka berukuran
    sama yang menyebutkan perbandingan sisi dan ukuran piksel yang diharapkan,
@@ -277,20 +430,20 @@ itu dan cukup menghapusnya.
    Karena foto gedungnya dipudarkan sampai 20 persen lalu ditumpuk peredam,
    foto apa pun yang memperlihatkan bangunan sekolah sudah memadai; tidak
    perlu foto yang khusus disiapkan.
-6. **Isi menu Profil Sekolah, Akademik, dan Kesiswaan** di panel:
+7. **Isi menu Profil Sekolah, Akademik, dan Kesiswaan** di panel:
 
    | Menu panel | Mengisi halaman publik |
    |---|---|
    | *Halaman Profil* | Kurikulum, OSIS, Pendidikan Karakter. Ketiganya sudah tersedia sebagai kerangka dan menunggu naskah dari sekolah |
    | *Tenaga Pendidik* | Halaman Tenaga Pendidik; yang berkategori Pimpinan juga tampil pada halaman Struktur Organisasi |
    | *Kalender Akademik* | Halaman Kalender Akademik |
-   | *Kegiatan Siswa* | Halaman Ekstrakurikuler |
+   | *Kegiatan Siswa* | Halaman Ekstrakurikuler; yang berjenis Ekstrakurikuler juga dihitung sebagai angka *Ekskul* pada sorotan beranda |
    | *Perpustakaan* | Halaman Perpustakaan Digital |
 
    Prestasi Siswa tidak punya menu sendiri: tulis capaiannya lewat menu
    *Berita* dengan kategori **Prestasi**, dan halaman Prestasi Siswa
    mengambilnya dari sana.
-7. **Ketahui apa yang diperiksa sistem pada NISN dan NIK.** Sistem ini
+8. **Ketahui apa yang diperiksa sistem pada NISN dan NIK.** Sistem ini
    **tidak** mencocokkan keduanya ke basis data pemerintah, dan panitia
    sebaiknya tidak menjanjikan begitu kepada orang tua. NIK hanya dapat
    diperiksa ke Dukcapil lewat perjanjian kerja sama resmi, dan laman
@@ -303,7 +456,7 @@ itu dan cukup menghapusnya.
    NIK, dan pesannya menyebut bagian mana yang salah. Verifikasi sebenarnya
    tetap dilakukan panitia dengan membandingkan Kartu Keluarga dan rapor yang
    diunggah.
-8. **Isi `tautan_elearning` dan `tautan_jadwal`** pada menu *Pengaturan* bila
+9. **Isi `tautan_elearning` dan `tautan_jadwal`** pada menu *Pengaturan* bila
    sekolah sudah memakai layanan belajar daring, misalnya Google Classroom
    atau Moodle, dan sudah punya berkas jadwal pelajaran. Keduanya berupa
    pintu masuk ke layanan yang sudah ada, bukan sistem yang dibangun di sini.
@@ -401,8 +554,8 @@ server {
     ssl_certificate     /etc/letsencrypt/live/www.smaimtek.sch.id/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/www.smaimtek.sch.id/privkey.pem;
 
-    # batas ukuran kiriman: enam dokumen × 2 MB, dilebihkan sedikit
-    client_max_body_size 16m;
+    # batas ukuran kiriman: enam dokumen × 3 MB, dilebihkan sedikit
+    client_max_body_size 24m;
 
     # API dan berkas unggahan ke backend Go
     location /api/ {

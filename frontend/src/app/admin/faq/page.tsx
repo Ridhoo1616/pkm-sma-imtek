@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { api, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
@@ -40,6 +41,22 @@ export default function HalamanFaqAdmin() {
   const [hapusTarget, setHapusTarget] = useState<Faq | null>(null);
   const [menghapus, setMenghapus] = useState(false);
   const [galatHapus, setGalatHapus] = useState("");
+
+  /* Pertanyaan yang dibawa dari menu "Belum Terjawab" lewat ?tanya=...
+     Jendelanya dibuka sendiri dengan pertanyaan itu sudah terisi, supaya
+     panitia tinggal menuliskan jawabannya. Dijaga ref supaya hanya sekali:
+     tanpa itu, menutup jendelanya akan membukanya lagi selama alamatnya
+     masih memuat parameter tersebut. */
+  const parameter = useSearchParams();
+  const dariBuntu = parameter.get("tanya");
+  const sudahDibuka = useRef(false);
+  useEffect(() => {
+    if (!dariBuntu || sudahDibuka.current) return;
+    sudahDibuka.current = true;
+    setUbahId(null);
+    setIsi({ ...KOSONG, pertanyaan: dariBuntu });
+    setJendela(true);
+  }, [dariBuntu]);
 
   function buka(f?: Faq) {
     setGalatKolom({});

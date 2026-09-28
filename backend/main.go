@@ -106,6 +106,20 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/galeri", a.tanganiGaleriPublik)
 	m.HandleFunc("POST /api/pesan", a.batasiIP(a.batas.pesanIP,
 		"Terlalu banyak pesan dikirim dari jaringan Anda.", a.tanganiKirimPesan))
+
+	/* ---- pertanyaan yang tidak terjawab kotak Tanya cepat ----
+	   Dicatat di latar belakang, tanpa alamat IP dan tanpa pengenal apa
+	   pun; lihat handler_tanya_buntu.go. */
+	m.HandleFunc("POST /api/tanya-buntu", a.batasiIP(a.batas.tanyaBuntuIP,
+		"Terlalu banyak pertanyaan dikirim dari jaringan ini.",
+		a.tanganiCatatTanyaBuntu))
+
+	// Pencocok berbantuan model bahasa, dipakai hanya sebagai cadangan
+	// sesudah pencocok setempat menyerah. Mati secara bawaan; lihat
+	// handler_tanya_cocok.go.
+	m.HandleFunc("POST /api/tanya-cocok", a.batasiIP(a.batas.tanyaBuntuIP,
+		"Terlalu banyak pertanyaan dikirim dari jaringan ini.",
+		a.tanganiCocokkanTanya))
 	m.HandleFunc("GET /api/biaya", a.tanganiBiayaPublik)
 	m.HandleFunc("GET /api/faq", a.tanganiFaqPublik)
 	m.HandleFunc("GET /api/halaman", a.tanganiHalamanPublik)
@@ -156,6 +170,9 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/admin/dasbor", a.wajibMasuk(a.tanganiDasbor))
 	m.HandleFunc("GET /api/admin/kunjungan", a.wajibMasuk(a.tanganiKunjunganAdmin))
 	m.HandleFunc("GET /api/admin/pendaftar", a.wajibMasuk(a.tanganiDaftarPendaftar))
+	// Menambah pendaftar dari panel. SENGAJA tidak memeriksa apakah PPDB
+	// sedang dibuka; keterangannya di pendaftar_isian.go.
+	m.HandleFunc("POST /api/admin/pendaftar", a.wajibMasuk(a.tanganiTambahPendaftar))
 	m.HandleFunc("GET /api/admin/pendaftar/ekspor", a.wajibMasuk(a.tanganiEksporPendaftar))
 	m.HandleFunc("GET /api/admin/pendaftar/{id}", a.wajibMasuk(a.tanganiDetailPendaftar))
 	m.HandleFunc("PATCH /api/admin/pendaftar/{id}/status", a.wajibMasuk(a.tanganiUbahStatus))
@@ -202,6 +219,11 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("POST /api/admin/faq", a.wajibMasuk(a.tanganiSimpanFaq))
 	m.HandleFunc("PUT /api/admin/faq/{id}", a.wajibMasuk(a.tanganiUbahFaq))
 	m.HandleFunc("DELETE /api/admin/faq/{id}", a.wajibMasuk(a.tanganiHapusFaq))
+
+	/* ---- pertanyaan tak terjawab ---- */
+	m.HandleFunc("GET /api/admin/tanya-buntu", a.wajibMasuk(a.tanganiDaftarTanyaBuntu))
+	m.HandleFunc("PATCH /api/admin/tanya-buntu/{id}", a.wajibMasuk(a.tanganiTandaiTanyaBuntu))
+	m.HandleFunc("DELETE /api/admin/tanya-buntu/{id}", a.wajibMasuk(a.tanganiHapusTanyaBuntu))
 
 	/* ---- bank soal dan paket ujian ---- */
 	m.HandleFunc("GET /api/admin/soal", a.wajibMasuk(a.tanganiDaftarSoal))

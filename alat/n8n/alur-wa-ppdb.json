@@ -1,0 +1,214 @@
+{
+  "id": "PpdbWaGateway001",
+  "name": "PPDB SMA IMTEK - Gateway WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ppdb-wa",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000001",
+      "name": "Terima dari backend",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -380,
+        0
+      ],
+      "webhookId": "a1000000-0000-4000-8000-000000000001",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ppdbGatewayToken",
+          "name": "Token gateway PPDB"
+        }
+      },
+      "notes": "Backend Go mengirim POST {to, message} ke sini. Header Auth memeriksa WA_GATEWAY_TOKEN; tanpa itu siapa pun yang menemukan URL-nya dapat menyuruh WhatsApp sekolah mengirim apa saja."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Memeriksa kiriman backend sebelum diteruskan ke Meta.\n//\n// Backend Go sudah membakukan nomornya lewat nomorWaKirim() sebelum\n// disimpan, jadi yang masuk semestinya sudah berbentuk 62xxx. Tetap\n// diperiksa ulang di sini: notifikasi lama yang tersimpan sebelum\n// pembakuan itu ada, dan satu nomor salah bentuk membuat Meta menolak\n// seluruh permintaannya dengan pesan yang tidak menerangkan apa-apa.\n\nconst keluar = [];\n\nfor (const butir of $input.all()) {\n  const badan = butir.json.body ?? butir.json;\n\n  const nomorMentah = String(badan.to ?? '').trim();\n  const pesan = String(badan.message ?? '').trim();\n\n  // Hanya angka, lalu dipaksa berawalan kode negara.\n  let nomor = nomorMentah.replace(/[^0-9]/g, '');\n  if (nomor.startsWith('0')) nomor = '62' + nomor.slice(1);\n  else if (nomor && !nomor.startsWith('62')) nomor = '62' + nomor;\n\n  const salah = [];\n  if (!nomor) salah.push('nomor tujuan kosong');\n  else if (nomor.length < 10 || nomor.length > 15) salah.push('panjang nomor tidak masuk akal: ' + nomor.length + ' angka');\n  if (!pesan) salah.push('isi pesan kosong');\n  else if (pesan.length > 4096) salah.push('pesan melebihi 4096 aksara');\n\n  keluar.push({ json: { nomor, pesan, sah: salah.length === 0, sebab: salah.join('; ') } });\n}\n\nreturn keluar;"
+      },
+      "id": "a1000000-0000-4000-8000-000000000002",
+      "name": "Periksa isian",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.sah }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000003",
+      "name": "Isian sah?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        60,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "ISI_PHONE_NUMBER_ID",
+        "recipientPhoneNumber": "={{ $json.nomor }}",
+        "textBody": "={{ $json.pesan }}",
+        "additionalFields": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000004",
+      "name": "Kirim lewat WhatsApp Cloud",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        280,
+        -100
+      ],
+      "disabled": true,
+      "onError": "continueErrorOutput",
+      "notes": "DIMATIKAN sampai kredensial Meta tersedia. Operasi 'send' hanya berlaku di dalam jendela 24 jam; notifikasi PPDB yang dimulai sekolah menuntut operasi 'Send Template' beserta template yang sudah disetujui Meta."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'terkirim', tujuan: $('Periksa isian').item.json.nomor }) }}",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000005",
+      "name": "Jawab 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        500,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'ditolak', sebab: $json.sebab }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000006",
+      "name": "Jawab 400",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        280,
+        120
+      ],
+      "notes": "Bukan 2xx, jadi backend mencatat notifikasinya sebagai Gagal beserta sebabnya. Panitia melihat sebab itu di menu Notifikasi."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'gagal', sebab: String($json.error?.message ?? 'WhatsApp Cloud menolak permintaan') }) }}",
+        "options": {
+          "responseCode": 502
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000007",
+      "name": "Jawab 502",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        500,
+        40
+      ],
+      "notes": "Meta menolak atau tidak dapat dihubungi. 502 dipilih supaya bedanya dengan 400 jelas di catatan galat: 400 berarti kiriman backend yang salah, 502 berarti pihak Meta."
+    }
+  ],
+  "connections": {
+    "Terima dari backend": {
+      "main": [
+        [
+          {
+            "node": "Periksa isian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Periksa isian": {
+      "main": [
+        [
+          {
+            "node": "Isian sah?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Isian sah?": {
+      "main": [
+        [
+          {
+            "node": "Kirim lewat WhatsApp Cloud",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Jawab 400",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kirim lewat WhatsApp Cloud": {
+      "main": [
+        [
+          {
+            "node": "Jawab 200",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Jawab 502",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {}
+}

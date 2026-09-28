@@ -86,17 +86,54 @@ func (a *Aplikasi) atur(kunci string, bawaan ...string) string {
 // ppdbDibuka menyatukan tiga syarat seperti versi PHP: status harus "buka",
 // dan hari ini harus berada di dalam rentang tanggal pendaftaran.
 func (a *Aplikasi) ppdbDibuka() bool {
-	if a.atur("ppdb_status", "tutup") != "buka" {
-		return false
+	return a.keadaanPpdb() == KeadaanPpdbDibuka
+}
+
+// Keadaan PPDB. Yang tertutup dipecah menjadi TIGA, sebab maknanya berbeda
+// dan kalimat yang pantas untuk pengunjung juga berbeda.
+//
+// Sebelumnya yang tersedia hanya boolean, dan halaman publik memakai satu
+// kalimat untuk ketiganya: "Segera Dibuka, mulai {ppdb_mulai}". Pada
+// pendaftaran yang ditutup manual atau yang tanggalnya sudah lewat, kalimat
+// itu menjanjikan tanggal yang sudah berlalu — dan itu tampil bersebelahan
+// dengan judul "Pendaftaran Belum Dibuka" pada halaman yang sama.
+const (
+	KeadaanPpdbDibuka  = "dibuka"
+	KeadaanPpdbBelum   = "belum_mulai"
+	KeadaanPpdbSelesai = "sudah_selesai"
+	KeadaanPpdbDitutup = "ditutup"
+)
+
+/*
+keadaanPpdb menyatukan ketiga syarat menjadi satu keadaan.
+
+Urutan pemeriksaannya penting. Tanggal diperiksa LEBIH DULU daripada saklar
+`ppdb_status`, sebab tanggal yang sudah lewat lebih menerangkan daripada
+saklar: sekolah yang lupa menutup saklarnya sesudah tanggal selesai tetap
+mendapat kalimat "sudah ditutup pada ...", bukan "sedang tidak dibuka".
+*/
+func (a *Aplikasi) keadaanPpdb() string {
+	return keadaanPpdbDari(
+		a.atur("ppdb_status", "tutup"),
+		a.atur("ppdb_mulai"),
+		a.atur("ppdb_selesai"),
+		time.Now().Format("2006-01-02"),
+	)
+}
+
+// keadaanPpdbDari memuat aturannya sendiri, terpisah dari pembacaan
+// pengaturan dan dari jam, supaya dapat diuji tanpa basis data.
+func keadaanPpdbDari(status, mulai, selesai, hariIni string) string {
+	if selesai != "" && hariIni > selesai {
+		return KeadaanPpdbSelesai
 	}
-	hariIni := time.Now().Format("2006-01-02")
-	if m := a.atur("ppdb_mulai"); m != "" && hariIni < m {
-		return false
+	if mulai != "" && hariIni < mulai {
+		return KeadaanPpdbBelum
 	}
-	if s := a.atur("ppdb_selesai"); s != "" && hariIni > s {
-		return false
+	if status != "buka" {
+		return KeadaanPpdbDitutup
 	}
-	return true
+	return KeadaanPpdbDibuka
 }
 
 /* ---------------- pembantu ---------------- */

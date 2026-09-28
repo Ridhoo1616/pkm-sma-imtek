@@ -6,7 +6,7 @@ import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { tanggalJam } from "@/lib/format";
 import { KepalaPanel, Tabel, Jendela } from "@/komponen/Panel";
-import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
+import { PesanGalat, TanpaData, KerangkaTabel } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
 import type { JenisLencana } from "@/komponen/Bagian";
 import { AreaTeks, Pilihan, Tombol, RingkasanGalat } from "@/komponen/Medan";
@@ -28,6 +28,17 @@ const WARNA_STATUS: Record<string, JenisLencana> = {
   Gagal: "merah",
   Dibatalkan: "abu",
 };
+
+/** Dipakai bersama oleh kerangka muat dan tabel sesungguhnya. */
+const KEPALA_TABEL = [
+  "Waktu",
+  "Pendaftar",
+  "Kanal",
+  "Jenis",
+  "Tujuan",
+  "Keadaan",
+  "",
+];
 
 export default function HalamanNotifikasi() {
   const kabar = useKabar();
@@ -155,7 +166,7 @@ export default function HalamanNotifikasi() {
       </div>
 
       {memuat ? (
-        <Memuat />
+        <KerangkaTabel kepala={KEPALA_TABEL} baris={6} />
       ) : galat ? (
         <PesanGalat pesan={galat} ulangi={muatUlang} />
       ) : !data || data.data.length === 0 ? (
@@ -164,17 +175,7 @@ export default function HalamanNotifikasi() {
           keterangan="Notifikasi tersusun sendiri begitu status seorang pendaftar diubah di menu Pendaftar."
         />
       ) : (
-        <Tabel
-          kepala={[
-            "Waktu",
-            "Pendaftar",
-            "Kanal",
-            "Jenis",
-            "Tujuan",
-            "Keadaan",
-            "",
-          ]}
-        >
+        <Tabel kepala={KEPALA_TABEL}>
           {data.data.map((n) => (
             <tr key={n.id} className="hover:bg-slate-50">
               <td className="px-4 py-3 text-xs whitespace-nowrap text-samar">

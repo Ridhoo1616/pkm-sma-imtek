@@ -9,6 +9,7 @@ import { KepalaPanel } from "@/komponen/Panel";
 import { Memuat, PesanGalat } from "@/komponen/Memuat";
 import { Tombol, RingkasanGalat } from "@/komponen/Medan";
 import { Lencana } from "@/komponen/Bagian";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 /**
  * Pengelompokan pengaturan. Kunci apa pun yang tidak tercantum di sini tetap
@@ -29,6 +30,12 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
       "yayasan",
       "kepala_sekolah",
     ],
+  },
+  {
+    judul: "Angka Sekolah",
+    keterangan:
+      "Tampil sebagai angka besar pada kartu sorotan di beranda. Ketiganya tidak dapat dihitung sistem: tidak ada tabel siswa, dan daftar tenaga pendidik hanya memuat guru yang ditampilkan di halaman profil, bukan seluruh pegawai. Isi angkanya saja, tanpa kata; yang dibiarkan berpenanda tidak ditampilkan di beranda. Jumlah ekstrakurikuler, peminatan, dan fasilitas dihitung sendiri dari datanya.",
+    kunci: ["jumlah_siswa", "jumlah_guru", "jumlah_rombel"],
   },
   {
     judul: "Naskah Profil",
@@ -170,6 +177,9 @@ const TANGGAL = ["ppdb_mulai", "ppdb_selesai", "ppdb_pengumuman"];
 function labelDari(kunci: string): string {
   const khusus: Record<string, string> = {
     npsn: "NPSN",
+    jumlah_siswa: "Jumlah siswa",
+    jumlah_guru: "Jumlah guru & tenaga kependidikan",
+    jumlah_rombel: "Jumlah rombongan belajar",
     ppdb_status: "Status pendaftaran",
     ppdb_tahun: "Tahun ajaran",
     ppdb_mulai: "Tanggal mulai pendaftaran",
@@ -507,8 +517,8 @@ function BagianGambar({
         <h2 className="text-base">Gambar</h2>
         <p className="mt-1 text-sm text-samar">
           Diunggah langsung dari sini, tanpa menekan tombol simpan. JPG atau
-          PNG, maksimal 2 MB. Gambar lama otomatis dibuang setelah penggantinya
-          tersimpan.
+          PNG, maksimal {BATAS_UNGGAH}. Gambar lama otomatis dibuang setelah
+          penggantinya tersimpan.
         </p>
       </div>
 

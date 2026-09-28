@@ -18,6 +18,7 @@ import {
   RingkasanGalat,
 } from "@/komponen/Medan";
 import type { Halaman } from "@/lib/tipe";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 /**
  * Halaman profil bernaskah panjang: Kurikulum, OSIS, Pendidikan Karakter,
@@ -365,7 +366,7 @@ export default function HalamanProfilAdmin() {
             ubah={setGambar}
             galat={galatKolom.gambar}
             namaTerpilih={gambarLama || undefined}
-            bantuan="Tidak wajib. JPG atau PNG, maksimal 2 MB."
+            bantuan={`Tidak wajib. JPG atau PNG, maksimal ${BATAS_UNGGAH}.`}
           />
 
           {gambarLama && !gambar && (

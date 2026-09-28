@@ -15,7 +15,7 @@ smaimtek.sch.id, www.smaimtek.sch.id {
 	encode zstd gzip
 
 	# Pembatas ukuran kiriman. Formulir PPDB mengunggah enam dokumen, masing-
-	# masing dibatasi 2 MB oleh backend, jadi 20 MB sudah sangat lapang.
+	# masing dibatasi 3 MB oleh backend, jadi 20 MB sudah sangat lapang.
 	request_body {
 		max_size 20MB
 	}

@@ -7,6 +7,11 @@ export type Pengaturan = Record<string, string>;
 
 export interface KeadaanPpdb {
   dibuka: boolean;
+  /**
+   * Mengapa tertutup, bukan hanya apakah tertutup: "dibuka",
+   * "belum_mulai", "sudah_selesai", atau "ditutup". Lihat lib/ppdb.ts.
+   */
+  keadaan?: "dibuka" | "belum_mulai" | "sudah_selesai" | "ditutup";
   kuota: number;
   terisi: number;
   jalur: string[];
@@ -16,6 +21,12 @@ export interface KeadaanPpdb {
 export interface Profil {
   pengaturan: Pengaturan;
   ppdb: KeadaanPpdb;
+  /**
+   * Pencocok pertanyaan berbantuan model bahasa tersedia di server.
+   * Mengubah keterangan yang ditampilkan kotak Tanya cepat: bila aktif,
+   * pertanyaan yang tidak terjawab setempat ikut dikirim ke penyedia luar.
+   */
+  pencocok_ai?: boolean;
 }
 
 export interface Jurusan {
@@ -102,6 +113,8 @@ export interface RingkasPendaftar {
    * false berarti perlu diperiksa manual dari ijazah.
    */
   asal_sekolah_terdaftar: boolean;
+  /** Nama petugas yang memasukkan data ini dari panel; kosong berarti pendaftar sendiri. */
+  ditambahkan_oleh?: string;
   no_hp: string;
   email: string;
   nilai_rata2: number | null;
@@ -160,6 +173,8 @@ export interface Cacah {
 export interface Dasbor {
   tahun_ajaran: string;
   ppdb_dibuka: boolean;
+  /** Sebab tertutupnya, supaya panitia tahu tindakan yang perlu. Lihat lib/ppdb.ts. */
+  ppdb_keadaan?: "dibuka" | "belum_mulai" | "sudah_selesai" | "ditutup";
   total: number;
   kuota: number;
   hari_ini: number;
@@ -357,6 +372,21 @@ export interface Faq {
   sorot: boolean;
   urutan: number;
   aktif: boolean;
+}
+
+/**
+ * Pertanyaan yang tidak dapat dijawab kotak Tanya cepat.
+ *
+ * Yang tersimpan hanya teks pertanyaannya — tidak ada alamat IP maupun
+ * pengenal peramban. Lihat backend/handler_tanya_buntu.go.
+ */
+export interface TanyaBuntu {
+  id: number;
+  pertanyaan: string;
+  /** Berapa orang menanyakan hal yang sama. */
+  jumlah: number;
+  ditangani: boolean;
+  terakhir: string;
 }
 
 /* ---------------- profil, akademik, dan kesiswaan ---------------- */

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { menuDari } from "@/lib/menu";
+import { BilahGulir } from "@/komponen/BilahGulir";
 
 /**
  * Jejak lokasi beserta tautan ke halaman sekelompok.
@@ -10,8 +11,10 @@ import { menuDari } from "@/lib/menu";
  * sedang dibuka diberi tanda dan tidak dibuat tautan, sama seperti penunjuk
  * alur pada halaman PPDB.
  *
- * Seluruhnya dirender di server: isinya hanya bergantung pada jalur yang
- * dikirim pemanggilnya.
+ * Isinya dirender di server: hanya bergantung pada jalur yang dikirim
+ * pemanggilnya. Satu-satunya bagian yang berjalan di peramban penggulung
+ * bilahnya, yang menggeser bilah mendatar ke butir yang sedang dibuka —
+ * lihat BilahGulir.
  */
 export function JejakMenu({
   induk,
@@ -58,7 +61,7 @@ export function JejakMenu({
           aria-label={`Halaman lain dalam ${kelompok.label}`}
           className="mt-4 border-b border-garis pb-3"
         >
-          <ul className="flex snap-x gap-2 overflow-x-auto pb-1">
+          <BilahGulir className="flex snap-x gap-2 overflow-x-auto pb-1">
             {anak.map((a) => {
               const ini = a.jalur === jalur;
               const gaya =
@@ -85,7 +88,7 @@ export function JejakMenu({
                 </li>
               );
             })}
-          </ul>
+          </BilahGulir>
         </nav>
       )}
     </div>

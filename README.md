@@ -4,8 +4,9 @@ Sistem informasi berbasis web yang menggabungkan **profil sekolah** dan
 **Pendaftaran Peserta Didik Baru (PPDB) online** untuk meningkatkan efektivitas
 promosi SMA IMTEK.
 
-Dikembangkan oleh mahasiswa **Program Kreativitas Mahasiswa (PkM)**
-**Jurusan Teknik Informatika**, bidang *Manajemen Komputer & Sistem*.
+Dikembangkan oleh mahasiswa **Pengabdian Kepada Masyarakat (PkM)**
+**Universitas Pamulang**, Program Studi *Teknik Informatika*, bidang
+*Manajemen Komputer & Sistem*.
 
 | | |
 |---|---|
@@ -213,7 +214,7 @@ pemeriksaan formulir demo (`demo-baru/js/05-ppdb.js`).
 | Galeri | `/admin/galeri` | Unggah, ubah, hapus foto beserta kategorinya |
 | Fasilitas | `/admin/fasilitas` | Kelola sarana beserta gambar dan urutannya |
 | Pesan Masuk | `/admin/pesan` | Pesan dari halaman kontak, tanda baca, balas lewat email/WhatsApp |
-| Pengaturan | `/admin/pengaturan` | Seluruh isi situs publik, dikelompokkan menjadi enam bagian |
+| Pengaturan | `/admin/pengaturan` | Seluruh isi situs publik, dikelompokkan menjadi sembilan bagian |
 | Notifikasi | `/admin/notifikasi` | Pesan WhatsApp yang disusun sistem, ditinjau lalu dikirim |
 | Bank Soal | `/admin/soal` | Soal pilihan ganda untuk tes seleksi |
 | Tes Seleksi | `/admin/ujian` | Jadwal tes, durasi, nilai minimum, dan rekap hasilnya |
@@ -286,10 +287,46 @@ Jawab. Bila nomor WhatsApp belum diisi sekolah, tombolnya tidak hilang; yang
 hilang hanya pilihan WhatsApp-nya, karena penunjuk alurnya tetap berguna.
 
 **Penunjuk alur** berupa bilah lima tahap di atas setiap halaman PPDB. Tahap
-yang sudah lewat ditandai centang, tahap sekarang disorot, dan tahap yang
-belum tercapai dibiarkan pudar. Tahap "Isi formulir" tidak dapat diklik bila
-pendaftaran sedang ditutup, jadi pengunjung tidak dibawa ke halaman yang pasti
-menolaknya.
+sekarang disorot, tahap yang tidak dapat dibuka dibiarkan pudar, dan
+**tidak ada tanda centang di sana** — lihat bagian berikutnya.
+
+#### Penunjuk alur tidak boleh mengaku tahu apa yang sudah dikerjakan orang
+
+Bentuk pertamanya memberi centang pada setiap tahap sebelum tahap sekarang.
+Bunyinya masuk akal sampai dicoba dari sisi pengunjung: membuka halaman
+**Verifikasi Berkas** menampilkan centang pada "Isi formulir" kepada orang
+yang belum pernah mengisi formulirnya, dan pada masa pendaftaran ditutup,
+kepada orang yang memang **tidak bisa** mengisinya. Bilah ini dirender server
+dan hanya mengetahui HALAMAN yang sedang dibuka, bukan riwayat pengunjungnya,
+jadi centangnya menyatakan sesuatu yang tidak diketahuinya. Sekarang yang
+ditampilkan nomor tahapnya saja.
+
+Dua kesalahan lain dibetulkan sekaligus, ketiganya dilaporkan user dari satu
+tangkapan layar:
+
+1. **Gayanya mengikuti dapat atau tidaknya dibuka, bukan letaknya.** Semula
+   tahap sesudah tahap sekarang selalu pudar meski tautannya hidup, sehingga
+   yang tampak mati sebenarnya dapat diklik — dan "Isi formulir" pada masa
+   tutup tampak hidup padahal menolak. Sekarang satu penanda, `bisaDibuka`,
+   menentukan gaya dan kelayakan klik sekaligus, jadi keduanya tidak mungkin
+   berselisih lagi.
+2. **`ppdbDibuka` dijadikan prop WAJIB, tanpa nilai bawaan.** Nilai bawaannya
+   dulu `true`, dan dua halaman lupa meneruskannya: Cek Status dan Tes
+   Seleksi. Di sanalah "Isi formulir" tetap dapat diklik meski pendaftaran
+   sudah ditutup. Dibuat wajib supaya halaman yang lupa **gagal saat
+   disusun**, bukan salah diam-diam — jenis kesalahan yang tidak akan
+   terlihat sampai ada yang melaporkannya.
+3. **Tahap yang sedang dibuka tidak ditandai `aria-disabled`** walau
+   pendaftarannya tutup. Halaman `/ppdb/daftar` tetap terbuka pada masa tutup
+   — isinya berganti menjadi keterangan penutupan — jadi menandainya "tidak
+   tersedia" sementara pengunjung berdiri di atasnya membingungkan pembaca
+   layar.
+
+Tahap yang tidak dapat dibuka menerangkan sebabnya lewat `title` beserta
+`aria-disabled`, sehingga pengunjung tidak dibawa ke halaman yang pasti
+menolaknya dan tetap tahu alasannya. Hanya tahap "Isi formulir" yang dapat
+tertutup; tahap lainnya boleh dibuka kapan pun, sebab yang sudah mendaftar
+tetap perlu memantau statusnya walau pendaftarannya sudah ditutup.
 
 **Arahan langkah berikutnya** pada halaman Info PPDB, yang isinya mengikuti
 keadaan: terbuka mengarahkan ke formulir, tertutup menjelaskan apa yang masih
@@ -300,6 +337,49 @@ Yang ditandai sorot muncul lebih dulu. Seluruh jawaban bawaannya hanya
 menerangkan cara kerja sistem dan prosedurnya; angka dan tanggal milik sekolah
 tidak dikarang di sana, melainkan diarahkan ke bagian yang datanya diisi
 sekolah sendiri.
+
+### F0. Bilah halaman sekelompok menggulir sendiri ke halaman yang dibuka
+
+Dilaporkan user dari ponsel: membuka **Tenaga Pendidik dan Kependidikan**
+menampilkan bilah yang berhenti di "Sejarah Sekolah", dan yang terlihat
+bergerak justru batang penggulir di bawahnya — seolah penandanya menunjuk
+halaman yang salah. Halamannya sendiri benar; yang salah bilahnya tidak
+pernah bergeser.
+
+Diukur pada layar 390 piksel:
+
+```
+butir aktif : "Tenaga Pendidik dan Kependidikan"
+letaknya    : 724–987 piksel
+yang tampak : 0–358 piksel
+scrollLeft  : 0
+```
+
+Butir itu tidak akan pernah terlihat kecuali pengunjung menggeser bilahnya
+sendiri — dan ia tidak punya alasan menduga ada yang perlu digeser. Yang
+dilihatnya cuma tiga butir pertama beserta batang penggulir di kiri, yang
+justru terbaca sebagai penanda halaman aktif.
+
+`komponen/BilahGulir.tsx` menggeser bilahnya ke butir yang sedang dibuka.
+Empat hal yang menentukan cara menulisnya:
+
+1. **Hanya `scrollLeft` yang diubah.** `scrollIntoView` tampak lebih
+   ringkas dan salah: ia ikut menggulir HALAMAN secara tegak, sehingga
+   pengunjung yang baru membuka halaman langsung terlempar ke tengah dan
+   melewati judul halamannya. Diuji tersendiri: `window.scrollY` harus
+   tetap 0 sesudah bilahnya bergeser.
+2. **Tidak diapa-apakan bila butirnya memang sudah terlihat** — termasuk di
+   layar lebar, tempat seluruh butir muat tanpa penggulir sama sekali.
+3. **Tanpa animasi.** Ini pembetulan posisi awal, bukan tanggapan atas
+   perbuatan pengunjung.
+4. **Dijalankan sebelum peramban menggambar**, lewat `useLayoutEffect`.
+   Dengan `useEffect` biasa bilahnya sempat tergambar di posisi nol lalu
+   melompat — persis kedipan yang hendak dihindari poin ketiga.
+
+Diuji sembilan pemeriksaan pada empat halaman: butir terakhir, butir
+pertama yang tidak boleh digeser sia-sia, butir tengah, dan kelompok menu
+yang berbeda — masing-masing disertai pemeriksaan bahwa halamannya tidak
+ikut tergulir.
 
 ### F. Menu Profil Sekolah, Akademik, dan Kesiswaan
 
@@ -1447,8 +1527,14 @@ pada kartu 358 piksel, rata di kedua sisi, 9 pemeriksaan lulus.
 ### N. Peta lokasi dan pengukur jarak
 
 Beranda memuat peta lokasi sekolah beserta tombol yang memungkinkan
-pengunjung mengukur jarak dan waktu tempuh dari rumahnya, untuk tiga moda:
-mobil, motor, dan angkutan umum.
+pengunjung mengukur jarak dan waktu tempuh dari rumahnya, untuk empat moda:
+mobil, jalan kaki, motor, dan angkutan umum.
+
+Jalan kaki diminta user dan bukan pelengkap: sebagian calon siswa SMA IMTEK
+tinggal di lingkungan sekitar sekolah dan memang berjalan kaki, dan bagi
+mereka angka "12 menit dengan mobil" tidak menjawab apa pun. Moda ini
+diletakkan kedua, langsung sesudah mobil, karena jaraknya yang paling
+menentukan keputusan justru bagi yang paling dekat.
 
 **Perhitungannya tidak dikerjakan situs ini, dan itu keputusan yang
 disengaja.** Menghitung jarak jalan beserta estimasi waktu memerlukan layanan
@@ -1517,9 +1603,8 @@ sebagus apa. Karena judul PkM ini tentang **promosi**, urutannya dibalik.
 Urutan beranda sekarang:
 
 1. **Sorotan sekolah** — nama, status, akreditasi, NPSN, semboyan, letak, foto
-   gedung sekolah, dan tiga angka yang bisa diperiksa (jumlah peminatan,
-   jumlah fasilitas, peringkat akreditasi). Tombol utamanya "Kenali Sekolah
-   Kami", bukan "Daftar".
+   gedung sekolah, dan angka sekolah yang bisa diperiksa (lihat di bawah).
+   Tombol utamanya "Kenali Sekolah Kami", bukan "Daftar".
 2. **Bilah keadaan PPDB** — satu baris: dibuka atau belum, tahun ajaran,
    tanggal penutupan, sisa kuota, beserta tombol Daftar dan Cek Status.
    Informasinya tidak hilang, hanya tidak lagi mengambil alih bagian atas.
@@ -1545,6 +1630,596 @@ terakhirnya bisa tersisa satu kartu sendirian beserta ruang kosong selebar dua
 kartu. `kelasKartuAkhir()` di `komponen/Bagian.tsx` melebarkan kartu terakhir
 supaya barisnya habis, pada kedua ambang layar sekaligus. Dipakai bagian
 keunggulan, peminatan, prestasi, dan kartu halaman turunan.
+
+### P1. Sorotan beranda: foto sekolah selebar layar
+
+Bentuknya mengikuti rancangan yang diberikan user: foto memenuhi latar,
+tulisan dan kartu kaca menumpang di atasnya. Bilah keadaan PPDB yang memang
+sudah berkaca dibiarkan pada tempatnya — ia sudah berperan seperti kartu
+melayang pada rancangan itu.
+
+Tiga hal yang membuat bentuk ini tetap aman:
+
+**1. Fotonya belum tentu ada.** Saat pengerjaannya, `foto_depan` memang masih
+kosong. Selama begitu, latarnya memakai gradasi bercahaya yang sudah dipakai
+sebelumnya, bukan kotak kelabu; tata letaknya tidak berubah sedikit pun saat
+fotonya nanti diunggah, yang berganti hanya lapisan paling belakang.
+Peredamnya pun **hanya dipasang saat ada foto** — sempat dipasang selalu, dan
+akibatnya gradasi cadangan tertutup olehnya sendiri sehingga latarnya rata
+gelap, lebih buruk daripada sebelum diubah.
+
+**2. Tulisan di atas foto mudah menjadi tidak terbaca**, dan fotonya dikirim
+sekolah sehingga terangnya tidak dapat diduga. Karena itu ada dua peredam:
+gelap dari kiri untuk kolom tulisan, gelap dari bawah untuk barisan angka.
+
+**3. Tingginya dibatasi 80% layar, bukan 100%.** Sorotan setinggi layar penuh
+mendorong seluruh isi halaman keluar dari pandangan pertama, padahal yang
+dicari orang tua justru ada di bawahnya.
+
+#### Bentuk akhir: tanpa kartu, tulisan langsung di atas foto
+
+Rancangan terakhir yang diberikan user halaman Starlink: tulisan berdiri
+langsung di atas foto, tanpa kartu maupun kaca, dan latarnya bergerak saat
+digulir. Panel kacanya karena itu dilepas.
+
+Bentuk itu bekerja pada foto Starlink karena sisi kirinya memang gelap. Foto
+gedung SMA IMTEK sisi kirinya justru terang, jadi peredamnya tetap
+diperlukan — tetapi sekarang tiga lapis dengan pembagian tugas yang jelas:
+
+| Lapis | Tugasnya |
+| --- | --- |
+| Gradasi dari kiri | menggelapkan **kolom tulisan saja**; habis pada 82% lebar, jadi gedungnya di kanan tidak tersentuh |
+| Gradasi dari bawah | barisan angka, sekaligus menyambung ke bagian halaman berikutnya |
+| Bayang per huruf | bekerja mengikuti huruf, bukan menggelapkan bidang — ini yang membuat dua lapis di atas boleh setipis itu |
+
+Paragrafnya juga **dipersempit** dari `max-w-xl` menjadi `max-w-md`. Yang
+disesuaikan lebar tulisannya, bukan gelapnya foto: paragraf yang melebar
+sampai ke dinding putih gedung menuntut peredam jauh lebih pekat demi satu
+baris terakhir.
+
+#### Alat ukurnya sendiri sempat berbohong empat kali
+
+Penyetelan di atas dikerjakan dengan mengukur, dan tiap cara ukur yang salah
+menghasilkan angka yang tampak masuk akal:
+
+1. **getComputedStyle saja.** Warna teks tidak memberi tahu apa pun tentang
+   apa yang ada di belakangnya, dan yang di belakangnya foto.
+2. **Mengambil piksel berkontras terendah** dari selisih potret berteks dan
+   potret tanpa teks. Yang terendah selalu tepi huruf yang memang campuran,
+   jadi hasilnya mendekati 1 berapa pun keadaannya — kelima ukuran keluar
+   1,5 seragam, dan keseragaman itu yang membongkarnya.
+3. **Mengurai warna dengan regex angka.** Chrome mengembalikan
+   `color(srgb 1 1 1 / 0.75)`, sehingga putih terbaca `rgb(1,1,1)` — nyaris
+   hitam, dan paragrafnya terhitung 1,22:1.
+4. **Memakai kotak elemen, bukan kotak barisnya.** `h1` selebar `max-w-2xl`
+   padahal "SMA IMTEK" hanya sepertiganya, jadi ikut terambil bidang kosong
+   di kanan tulisan — dan di sorotan ini bidang itu bagian foto yang paling
+   terang. Judulnya terhitung **3,45:1 padahal sebenarnya 10,13:1**, dan
+   selama dua putaran penyetelan angka palsu itu membuat peredamnya
+   dipekatkan tanpa perlu.
+
+Yang dipakai sekarang: kotak baris tulisan lewat `Range`, warna teks
+diterjemahkan peramban lewat kanvas, latar dibaca dari potret halaman yang
+tulisannya disembunyikan. Bayang tulisan tidak ikut terhitung, jadi angkanya
+batas bawah.
+
+| Bagian | Foto sekolah | Foto hitam | Foto putih | Minimal |
+| --- | --- | --- | --- | --- |
+| Judul | 8,93:1 | 17,86:1 | 7,63:1 | 3:1 |
+| Paragraf | 7,37:1 | 17,86:1 | 6,70:1 | 4,5:1 |
+| Lokasi | 9,50:1 | 17,71:1 | 7,74:1 | 4,5:1 |
+| Angka | 14,71:1 | 17,52:1 | 12,90:1 | 3:1 |
+| Label angka | 9,64:1 | 11,44:1 | 9,38:1 | 4,5:1 |
+
+#### Latar yang tertinggal saat digulir
+
+`komponen/Paralaks.tsx`. Fotonya bergerak 28% dari kecepatan halaman,
+sehingga tertinggal dan menimbulkan kesan kedalaman. Gerakannya kecil dengan
+sengaja: foto yang melesat mengalihkan perhatian dari tulisan di atasnya.
+
+Empat hal yang menentukan cara menulisnya:
+
+1. **Fotonya diperbesar 1,25 kali.** Menggeser gambar setinggi layar penuh
+   akan menyingkapkan bidang kosong di tepinya; pembesaran itu yang
+   menyediakan bahan untuk digeser.
+2. **Posisinya dihitung di dalam `requestAnimationFrame`**, bukan langsung
+   di penangan gulir. Penangan gulir dipanggil jauh lebih sering daripada
+   peramban menggambar.
+3. **Berhenti dihitung begitu sorotannya lewat.** Halaman ini panjang.
+4. **"Kurangi gerak" dihormati sepenuhnya**: fotonya diam, tanpa pembesaran
+   sekalipun. Gerak latar termasuk yang paling mengganggu bagi yang peka
+   terhadap gerak, sebab bidangnya besar dan mengisi seluruh pandangan.
+
+**Titik nolnya sempat salah.** Mula-mula pergeserannya dihitung dari `r.top`
+langsung, dan itu tampak benar. Tetapi sorotan ini berada di bawah bilah
+berjalan dan navigasi, sehingga `r.top` bernilai sekitar 147 bahkan saat
+halaman belum digulir sama sekali — latarnya sudah tergeser 41 piksel
+sebelum pengunjung menyentuh apa pun, dan fotonya terlihat salah pasang pada
+pandangan pertama. Titik nolnya sekarang diambil dari letak elemennya di
+dalam dokumen.
+
+Diuji tujuh pemeriksaan: diam di puncak halaman, bergerak saat digulir,
+bergeraknya lebih lambat daripada halaman, arahnya tertinggal bukan
+mendahului, berhenti saat sorotannya lewat, dan diam total beserta tanpa
+pembesaran saat "kurangi gerak" dinyalakan.
+
+#### Sebelumnya: tiga bentuk kaca
+
+Panelnya melewati tiga bentuk, dua ditolak user:
+
+| Bentuk | Ditolak karena |
+| --- | --- |
+| Biru pekat (`bg-biru-tua/70`) | "terlalu gelap birunya jadi menutupi sekolah" |
+| Putih pekat (`bg-white/75`) | bukan kaca, cuma dicat putih |
+| **Kaca tembus pandang** (`bg-biru-tua/50` + `backdrop-blur-2xl`) | dipakai |
+
+Yang diminta memang kaca: gedungnya terlihat **melalui** panel, bukan di
+sebelahnya. Keterbacaannya karena itu tidak lagi ditopang kepekatan
+melainkan tiga hal yang bekerja bersama:
+
+1. **Blur berat.** Foto di belakangnya diratakan sehingga tidak ada lagi
+   tepi tajam yang bersaing dengan huruf. Ini yang paling menentukan, dan
+   ini pula yang membuat panelnya terlihat sebagai kaca.
+2. **Tinta biru tipis**, sekadar meredam bidang paling terang.
+3. **Bayang tulisan.** Berbeda dengan keduanya, bayang bekerja **per
+   huruf**: seterang apa pun bidang di belakangnya, tiap huruf membawa
+   gelapnya sendiri.
+
+**Kepekatan 50% itu ditakar, bukan dipilih.** Pada 40% panelnya lebih bening
+tetapi paragrafnya jatuh ke 3,9:1 di atas foto putih murni — di bawah
+ambang. Pada 50% menjadi 4,97:1: kepekatan **terendah** yang masih memenuhi
+WCAG AA pada keadaan terburuk yang mungkin ada.
+
+| Bagian | Foto sekolah | Foto hitam | Foto putih | Minimal |
+| --- | --- | --- | --- | --- |
+| Paragraf | 8,19:1 | 18,87:1 | 4,97:1 | 4,5:1 |
+| Lokasi | 8,90:1 | 18,85:1 | 5,27:1 | 4,5:1 |
+| Angka | 10,44:1 | 13,80:1 | 7,25:1 | 3:1 |
+| Label angka | 8,09:1 | 10,41:1 | 5,90:1 | 4,5:1 |
+
+Angka-angka itu **tidak menghitung bayang tulisannya**: pengukurannya
+menyusun warna teks yang dinyatakan gaya di atas latar yang terpotret tanpa
+teks, sehingga bayangnya tidak ikut. Jadi yang tertulis di tabel lebih
+rendah daripada keadaan sebenarnya — batas bawah, bukan taksiran.
+
+#### Bentuk kedua: kaca putih, dan tulisan yang ikut menjadi gelap
+
+Panel kacanya semula biru pekat. Diminta user diganti putih — birunya terasa
+menutupi gedung sekolahnya. Penggantiannya bukan sekadar mengganti warna:
+**kaca putih dengan tulisan putih tidak terbaca sama sekali**, jadi seluruh
+tulisan di dalam panel ikut berganti menjadi gelap, lencananya berganti dari
+`kaca` menjadi `terang`, dan tombol keduanya menjadi putih bergaris seperti
+tombol pada bilah PPDB di bawahnya.
+
+Keadaan terburuknya pun berbalik. Panel gelap paling terancam oleh foto
+terang; panel putih paling terancam oleh foto **gelap**. Keduanya diuji
+dengan mengganti fotonya di peramban:
+
+| Bagian | Foto sekolah | Foto hitam | Foto putih | Minimal |
+| --- | --- | --- | --- | --- |
+| Judul | 11,88:1 | 9,52:1 | 15,18:1 | 3:1 |
+| Paragraf | 9,83:1 | 8,14:1 | 12,87:1 | 4,5:1 |
+| Lokasi | 9,45:1 | 8,14:1 | 12,64:1 | 4,5:1 |
+| Angka | 10,65:1 | 9,73:1 | 12,15:1 | 3:1 |
+| Label angka | 9,05:1 | 8,38:1 | 10,29:1 | 4,5:1 |
+
+Label angka sempat gagal di ketiga keadaan — 2,76 sampai 3,39:1 — sebab masih
+memakai `text-samar`. Kelabu di atas bidang terang memang tidak cukup; yang
+membedakannya dari angka di atasnya sekarang ukuran hurufnya, bukan
+kepudarannya.
+
+Kaca putih ternyata memberi lantai yang lebih tinggi daripada kaca gelap:
+terendahnya 8,14:1 dibanding 7,05:1. Alasannya sederhana — tulisan gelap di
+atas bidang terang bertahan lebih baik terhadap perubahan latar daripada
+sebaliknya.
+
+#### Sebelumnya: peredam menggelapkan seluruh foto
+
+Bentuk pertamanya memakai peredam gelap dari kiri. Terbaca, tetapi begitu
+sekolah mengunggah fotonya user langsung melihat masalahnya: **"terlalu gelap
+birunya jadi menutupi sekolah"**. Benar — separuh kiri gedungnya hilang di
+balik peredam.
+
+Yang salah bukan takaran peredamnya melainkan caranya: menggelapkan
+**seluruh** foto demi melindungi tulisan yang hanya menempati sebagiannya.
+Dan takarannya memang tidak bisa diringankan — label angka waktu itu 4,65:1,
+hanya 0,15 di atas ambang.
+
+Sekarang keterbacaannya dijamin **panel kaca** yang menutup persis sebesar
+tulisannya: `bg-biru-tua/70` beserta `backdrop-blur-md`. Peredam di atas foto
+tinggal 25% sebagai penyatu warna. Bedanya bukan sekadar tampilan —
+kepekatan panel yang tetap memberi **lantai kontras yang sama untuk foto apa
+pun**, sedangkan peredam selalu bergantung pada seberapa terang fotonya.
+
+Angka-angka pada tahap itu — panel biru 70%, tulisan putih — terendahnya
+7,05:1 di atas foto putih murni. Sudah memenuhi, dan tetap diganti karena
+yang dikeluhkan bukan keterbacaannya melainkan gedungnya yang tertutup.
+
+Di ponsel, panelnya sempat menelan hampir seluruh layar sehingga fotonya
+nyaris tidak terlihat — persis keluhan yang sama dalam bentuk lain. Paragraf
+pengantar disembunyikan di bawah 640 piksel: kalimat itu menerangkan isi
+situs, bukan sekolahnya, dan merupakan yang paling tidak mendesak di antara
+seluruh isi sorotan. Panelnya turun dari 78% menjadi 55% luas sorotan.
+
+**Dua cara pengukuran yang salah sempat dipakai**, dan keduanya menghasilkan
+angka yang tampak masuk akal:
+
+1. Membandingkan potret berteks dengan potret tanpa teks, lalu mengambil
+   piksel berkontras terendah. Piksel terendah selalu tepi huruf yang memang
+   campuran, jadi hasilnya selalu mendekati 1 — kelima ukuran keluar 1,5
+   seragam, dan keseragaman itu yang membongkarnya.
+2. Mengurai warna dari `getComputedStyle` dengan regex angka. Chrome
+   mengembalikan `color(srgb 1 1 1 / 0.75)` untuk `text-white/75`, sehingga
+   putih terbaca sebagai `rgb(1,1,1)` — nyaris hitam, dan paragrafnya
+   terhitung 1,22:1. Warnanya sekarang diterjemahkan peramban lewat kanvas.
+
+Petunjuk bagi panitia selama fotonya belum ada tetap disediakan, tetapi
+sebesar satu baris. Sebelumnya berupa kotak besar bertuliskan "Tempat foto
+gedung sekolah": jelas bagi panitia, tetapi juga terbaca setiap pengunjung
+dan membuat halaman depan tampak belum jadi.
+
+### P2. Angka sekolah di beranda, beserta hitungannya dari nol
+
+Sorotan beranda memuat sebaris angka sekolah. Yang ditampilkan bukan sekadar
+angka, melainkan **angka yang asalnya dapat dipertanggungjawabkan**, dan
+asalnya ada dua macam:
+
+| Angka | Asal | Sebabnya |
+| --- | --- | --- |
+| Ekskul | dihitung dari tabel `kegiatan_siswa` | tabelnya memang daftar lengkapnya |
+| Peminatan | dihitung dari tabel `jurusan` | sama |
+| Fasilitas | dihitung dari tabel `fasilitas` | sama |
+| Akreditasi | pengaturan `akreditasi` | bukan angka, tidak dihitung |
+| Siswa | pengaturan `jumlah_siswa` (migrasi 019) | **tidak dapat dihitung** |
+| Guru | pengaturan `jumlah_guru` (migrasi 019) | **tidak dapat dihitung** |
+| Rombel | pengaturan `jumlah_rombel` (migrasi 019) | **tidak dapat dihitung** |
+
+Tiga yang terakhir sengaja TIDAK dihitung dari basis data, dan itu bukan
+kemalasan:
+
+- **Sistem ini tidak punya tabel siswa.** Yang ada tabel `pendaftar`, yaitu
+  calon peserta didik pada satu tahun ajaran. Menghitung "jumlah siswa" dari
+  sana akan menampilkan dua belas, padahal sekolahnya berisi ratusan.
+- **Tabel `tenaga_pendidik` ada, tetapi isinya yang DITAMPILKAN sekolah** di
+  halaman profil, bukan seluruh pegawainya. Sekolah dengan tiga puluh guru
+  bisa saja memasang sepuluh. Memakai hitungan barisnya sebagai angka utama
+  di beranda justru memamerkan angka yang lebih kecil daripada kenyataannya —
+  merugikan sekolah pada halaman yang gunanya promosi.
+
+Ketiganya diisi penanda `[kurung siku]` oleh migrasinya, dan **angka yang
+masih penanda tidak ditampilkan sama sekali** — bukan ditampilkan sebagai
+"0". Halaman promosi tidak boleh memamerkan angka kosong maupun angka contoh.
+Pemeriksaannya memakai `belumTerisi()` yang sudah dipakai seluruh pengaturan
+lain. Diisi lewat menu Pengaturan di panel admin, kelompok **Angka Sekolah**.
+
+Karena jumlah selnya bergantung pada apa yang sudah diisi sekolah — bisa tiga,
+bisa tujuh — barisnya tidak memakai grid tiga kolom melainkan flex yang
+membungkus, dengan setiap sel melebar mengisi barisnya sendiri. Dengan grid,
+baris terakhir yang tidak penuh menganga sebagai kotak kelabu; sempat terjadi
+saat angkanya tujuh, dan tampak seperti kerusakan tata letak. Pembatas
+antarselnya dari `gap-px` di atas latar `bg-garis`, bukan `divide-x`, sebab
+`divide-x` hanya menggambar pembatas mendatar sehingga baris kedua tampak
+menempel.
+
+**Angkanya merangkak dari nol** saat barisnya masuk pandangan, diminta user.
+`komponen/AngkaNaik.tsx` mengerjakannya dengan tiga sikap yang perlu dicatat:
+
+1. **Keadaan awalnya nilai AKHIR, bukan nol.** Yang dirender server dan yang
+   dilihat pengunjung tanpa JavaScript adalah angka sungguhannya. Kalau
+   keadaan awalnya nol, halaman tanpa JavaScript akan memamerkan "0 Siswa" —
+   kesalahan yang jauh lebih buruk daripada kehilangan animasinya. Animasi
+   memulai ulang dari nol hanya setelah pemantau perpotongan benar-benar
+   berjalan.
+2. **`prefers-reduced-motion` dihormati**: angkanya langsung tampil utuh.
+3. **Hanya sekali**, dijaga ref `sudahJalan`, supaya angkanya tidak
+   merangkak ulang setiap kali pengunjung menggulir naik-turun melewatinya.
+
+Lamanya 900 ms dengan pelandaian `easeOutCubic` — cepat, sesuai permintaan
+user, dan berhenti tepat di nilai akhirnya, bukan di angka pembulatan yang
+hampir tepat.
+
+### P3. Kaki halaman
+
+Susunannya empat blok pada dua lajur — identitas sekolah dan Hubungi Kami di
+kiri, Alamat Sekolah dan Tautan Pintar di kanan — dan menumpuk mengikuti
+urutan itu pada layar kecil.
+
+**Tautan Pintar dibangun dari `MENU`**, sumber yang sama dengan navigasi
+atas, bukan daftar yang ditulis ulang. Sebelumnya kelimanya diketik langsung
+di dalam `Footer.tsx`, sehingga halaman PPDB yang berganti nama atau
+berpindah jalur meninggalkan tautan kaki halaman yang menunjuk ke tempat yang
+salah, tanpa satu pun galat yang menandainya. Sekarang butir PPDB diambil
+dari `anakMenu("/ppdb")`, ditambah Berita yang memang tidak ada di sana.
+
+"Masuk Petugas" sempat ikut dan dihapus atas permintaan user. Daftar itu
+memang untuk pengunjung — calon siswa beserta orang tuanya — sedangkan pintu
+masuk panitia bukan bagian dari alur mereka. Pintunya tidak hilang: tetap
+ada di bilah paling atas halaman.
+
+**Hijau dipakai pada empat tempat saja**: ikon telepon, ikon surel, tautan
+"Buka Google Maps", dan tanda `>` pada Tautan Pintar. Aksen situs ini emas,
+dan itu yang dipakai seluruh keadaan sorot di sini. Hijaunya menandai yang
+dapat langsung ditindaklanjuti pengunjung — ditelepon, disurel, dibuka
+petanya — bukan sekadar hiasan.
+
+Tautan "Buka Google Maps" memakai `tujuanPeta()` di `lib/format.ts`, penolong
+yang sama dengan pengukur jarak di beranda. Sebelum dipisahkan ke sana,
+perhitungan tujuannya hanya ada di dalam `PetaJarak.tsx`; bila kaki halaman
+menghitungnya sendiri, tautan yang satu bisa menunjuk koordinat sedangkan
+yang lain menunjuk alamat.
+
+Ikon media sosial diambil dari pengaturan `instagram`, `facebook`, `youtube`,
+dan `tiktok`. Yang belum diisi sekolah **tidak ditampilkan** — bukan
+ditampilkan sebagai ikon mati — dan bila keempatnya kosong, barisnya tidak ada
+sama sekali. Hal yang sama berlaku bagi semboyan dan jam layanan.
+
+**Tombol bantuan melayang sempat memotong kalimat pengembangnya.** Tombol itu
+duduk di pojok kanan bawah layar, dan bilah bawah kaki halaman berakhir tepat
+di situ. Ruangnya sekarang diberikan di tempat yang berbeda menurut lebar
+layar: pada layar lebar barisnya mendatar sehingga ruangnya di kanan, pada
+ponsel barisnya menumpuk dan tombolnya menutupi baris terakhir sehingga
+ruangnya di bawah. Diperiksa di tiga lebar layar dengan membandingkan kotak
+pembatas keduanya, bukan dengan melihat tangkapan layar saja.
+
+### P4. Kotak "Tanya cepat", tanpa model bahasa
+
+Tab kedua pada tombol bantuan melayang: pengunjung mengetik pertanyaan dengan
+bahasanya sendiri, dan dijawab seketika. Tersedia di seluruh halaman publik,
+bukan hanya di halaman Tanya Jawab.
+
+**Tidak ada model bahasa di dalamnya, dan itu keputusan, bukan keterbatasan.**
+Yang paling sering ditanyakan orang tua adalah tanggal penutupan, biaya, dan
+dokumen yang diminta. Model bahasa menjawab dengan yakin walau datanya tidak
+ada, dan jawaban yang salah pada tiga hal itu merugikan orang sungguhan —
+seorang calon siswa bisa terlambat mendaftar karena diberi tanggal yang
+dikarang. Mesin ini hanya dapat mengembalikan kalimat yang memang ditulis
+sekolah atau nilai yang memang ada di basis data; bila tidak menemukan, ia
+mengatakan tidak tahu dan mengarahkan ke panitia.
+
+Akibat sampingannya kebetulan menyenangkan: tanpa kunci API, tanpa biaya per
+pertanyaan, tanpa pertanyaan pengunjung yang keluar ke penyedia mana pun, dan
+seluruhnya berjalan di peramban tanpa satu panggilan jaringan pun.
+
+#### Apa bedanya dengan halaman Tanya Jawab yang sudah ada
+
+Pengetahuannya dua sumber. Yang pertama tabel `faq`, sama dengan halaman
+Tanya Jawab. Yang kedua **disusun dari data yang hidup** — dan itu yang tidak
+dapat dikerjakan naskah FAQ:
+
+| Butir | Sumbernya |
+| --- | --- |
+| Apakah pendaftaran sedang dibuka | keadaan PPDB, lewat `kataKeadaanPpdb()` |
+| Kapan dibuka dan ditutup | `ppdb_mulai`, `ppdb_selesai`, `ppdb_pengumuman` |
+| Berapa biayanya | `ppdb_biaya`, `biaya_catatan` |
+| Kuota dan sisanya | `ppdb.kuota` dikurangi `ppdb.terisi` |
+| Peminatan yang dibuka | tabel `jurusan` |
+| Alamat dan peta | `alamat`, `peta_koordinat` |
+| Cara menghubungi | `telepon`, `whatsapp`, `email`, `jam_layanan` |
+| Dokumen yang diunggah | `lib/dokumen.ts`, yang wajib sama dengan `berkasPendaftar` di backend |
+
+Tanggalnya ikut berubah begitu panitia mengubahnya di panel, tanpa ada yang
+perlu menyunting naskah FAQ. Yang datanya masih penanda `[kurung siku]`
+**tidak dibuatkan butirnya sama sekali** — lebih baik mengaku belum ada
+keterangannya daripada menjawab dengan penanda.
+
+#### Bagaimana pencocokannya bekerja
+
+Pertanyaan dipecah menjadi konsep, bukan kata: daftar padanan memetakan
+"duit", "bayar", dan "gratis" ke `biaya`; "kursi" dan "sisa" ke `kuota`.
+Akhiran `-nya`, `-kah`, `-lah` dibuang seadanya supaya "biayanya" bertemu
+"biaya". Nilainya bagian **berbobot** dari pertanyaan penanya yang tertutupi
+butir, dan bobot tiap konsep dihitung dari pengetahuannya sendiri: konsep yang
+muncul di mana-mana — "sekolah", "daftar" — hampir tidak menambah nilai.
+
+Tujuh kesalahan ditemukan dan dibetulkan — lima lewat pengujian, dua
+dilaporkan user. Tidak satu pun terlihat tanpa dicoba:
+
+1. **Padanan kata terlalu melebur.** "kapan" dan "ditutup" sama-sama menjadi
+   `jadwal`, sehingga "kapan pendaftaran ditutup" menyusut menjadi dua konsep
+   dan seri persis dengan butir "apakah pendaftaran sedang dibuka" — yang
+   menang tinggal urutan larik. Sekarang kata aslinya ikut disimpan, dan
+   cocok pada kata yang persis diketik bernilai lebih tinggi daripada cocok
+   lewat padanan.
+2. **Padanan bocor ke daftar "kata yang persis diketik".** Perbaikan nomor 1
+   sempat batal karenanya. Kata asli dan konsep sekarang dipisah tegas.
+3. **Butir bisa menang tanpa topiknya disinggung.** "pendaftaran sampai
+   tanggal berapa" dimenangkan butir "Berapa biaya pendaftarannya?", sebab
+   "berapa" dan "pendaftaran" sama-sama ada di sana padahal biaya tidak
+   ditanyakan. Butir yang topiknya — `kunci`, atau kategori bagi butir FAQ —
+   tidak tersentuh sama sekali kini diturunkan nilainya.
+4. **Ambangnya terlalu longgar.** Pada 0,34 pertanyaan "berapa harga seragam
+   batik" dijawab dengan biaya pendaftaran.
+5. **Kata yang tidak dikenal diberi bobot tertinggi.** Dilaporkan user:
+   "pendaftaran gimana" tidak terjawab sama sekali. Penyebabnya bukan kata
+   "pendaftaran" melainkan kata di sebelahnya — setiap kata di luar
+   pengetahuan dihitung lebih berat daripada kata apa pun yang dikenal,
+   sehingga satu kata pengisi cukup menenggelamkan pertanyaan yang topiknya
+   sudah jelas. "gimana cara daftar" pun ikut gagal. Bobot kata asing kini
+   disamakan dengan kata terlangka yang memang ada, dan singkatan percakapan
+   ponsel — `gmn`, `kpn`, `tgl`, `dmn`, `brp`, `yg`, `utk` — didaftarkan.
+6. **Penanda tanya ikut menentukan.** "apakah" dan "bagaimana" tidak
+   menyempitkan apa pun, tetapi butir yang kebetulan memuatnya jadi unggul:
+   "syaratnya gmn" dijawab "Bagaimana saya tahu berkas saya sudah
+   diverifikasi?" alih-alih daftar dokumennya. Keduanya dibuang seperti kata
+   sambung biasa.
+7. **Butir panjang seri dengan butir yang tepat.** Ukurannya semula hanya
+   seberapa banyak pertanyaan penanya yang tertutupi butir, jadi "pendaftaran
+   gimana" seri antara "Bagaimana cara mendaftar" dan "Saya lupa nomor
+   registrasi, bagaimana?" — pemenangnya tinggal urutan larik. Ditambahkan
+   ukuran sebaliknya, seberapa besar bagian pertanyaan butir yang memang
+   ditanyakan, dengan pengaruh seperlima supaya perannya memutus seri saja.
+
+#### Setiap orang bertanya dengan caranya sendiri
+
+Ditanyakan user, dan itu memang batas sebenarnya dari cara kerja ini.
+Daftar padanan buatan tangan hanya menangani kata yang sempat terpikir.
+Diukur dengan **30 pertanyaan yang tidak dipakai menyetel** — satu maksud
+ditulis dengan banyak bentuk, seperti orang berbeda-beda menanyakannya —
+hasilnya mula-mula **20 dari 30**.
+
+Sepuluh yang gagal terbelah dua, dan keduanya berbeda sifat:
+
+| Sifat | Contoh | Sifatnya |
+| --- | --- | --- |
+| Imbuhan | "dipungut", "mendaftarkan", "berapaan", "penerimaan" | **terbatas dan berpola** |
+| Kosakata baru | "sempat", "telat", "online", "anak" | **tidak terbatas** |
+
+Imbuhan ditangani satu aturan sekaligus, termasuk bentuk yang belum pernah
+dilihat. Kuncinya **mengupas menuju kosakata yang dikenal**, bukan mengupas
+sebanyak-banyaknya: kata yang sudah ada di pengetahuan tidak disentuh, dan
+hasil kupasan hanya diterima bila bentuknya memang dikenal. Itu yang menjaga
+"berkas" tidak menjadi "kas" dan "berapa" tidak menjadi "apa".
+
+Salah ketik ditangani kemiripan potongan tiga huruf terhadap kosakata yang
+sama: "pendaftran", "biyaya", "skolah", "dokumn", "jursan", "kuoata" —
+keenamnya kini terjawab. Ambang kemiripannya 0,42, diukur bukan ditebak;
+"biyaya" terhadap "biaya" hanya bernilai 0,44.
+
+**Satu bug lama tersingkap saat mengerjakannya.** Pemenggal akhiran memangkas
+`-kah`, `-lah`, dan `-pun` tanpa memeriksa apa pun, sehingga **"langkah"
+menjadi "lang" dan "sekolah" menjadi "seko"** — kata yang terpenggal begitu
+kehilangan padanannya sekaligus. Ketiganya sekarang hanya dikupas bila
+hasilnya dikenal; hanya `-nya` yang tetap dipangkas langsung, dan itu pun
+dijaga panjangnya supaya "hanya", "punya", dan "tanya" tidak tersentuh.
+
+Hasil akhirnya **28 dari 30, 93%**, dengan dua yang tersisa memang taksa:
+"apa aja yang disiapkan" tidak memuat satu pun kata topik, dan "masih ada
+tempat ga" memakai "tempat" yang bisa berarti lokasi maupun kursi.
+
+Yang tetap tidak tertutupi: kosakata yang belum pernah terpikir. Itu ditutup
+dari sisi lain — lihat catatan tentang pertanyaan yang tidak terjawab.
+
+#### Celah isi ditutup dari sisi lain: pertanyaan yang gagal dijawab
+
+Pengupas imbuhan dan toleransi salah ketik memperbaiki cara **memahami**
+pertanyaan. Keduanya tidak dapat menjawab hal yang memang belum pernah
+ditulis sekolah — "apakah ada asrama", "seragam beli di mana". Celah itu
+hanya dapat ditutup sekolah sendiri, dan yang dibutuhkannya adalah daftar
+yang benar.
+
+Karena itu pertanyaan yang **tidak** terjawab dicatat, lalu muncul di panel
+sebagai menu **Belum Terjawab**, terurut menurut berapa orang menanyakan hal
+yang sama. Satu tombol membawanya ke menu Tanya Jawab dengan pertanyaannya
+sudah terisi; panitia tinggal menuliskan jawabannya.
+
+Ini juga satu-satunya bagian yang memperbaiki dirinya dari kenyataan.
+Seluruh padanan kata yang ditulis sejauh ini berasal dari menebak bagaimana
+orang mengetik, dan setiap kali diukur selalu ada bentuk yang tidak
+terpikir. Daftar ini datang dari orang sungguhan.
+
+**Tentang privasinya.** Yang tersimpan hanya kalimat pertanyaannya — tidak
+ada alamat IP, tidak ada pengenal peramban, tidak ada apa pun yang menunjuk
+penanyanya. Pembatas laju tetap memakai alamat IP seperti rute publik lain,
+tetapi alamat itu tidak pernah ikut tersimpan. Kotak tanyanya menyebutkan
+hal ini apa adanya saat pertanyaannya dicatat, dan panel menyediakan tombol
+hapus bila ada yang telanjur mengetikkan data pribadi.
+
+Pertanyaan yang sama digabung, bukan ditumpuk: yang menentukan prioritas
+panitia bukan banyaknya baris melainkan berapa orang menanyakannya.
+Penggabungannya memakai bentuk baku — huruf kecil tanpa tanda baca —
+sehingga "Kapan dibuka?" dan "kapan  dibuka" terhitung satu. Pertanyaan
+sependek satu kata dibuang diam-diam; tidak menerangkan apa pun kepada
+panitia. Menandai satu pertanyaan "sudah ditangani" tidak menghapusnya, dan
+kirimannya yang baru mengembalikan tandanya — bila pertanyaan yang sudah
+dijawab muncul lagi, yang perlu diperbaiki letak jawabannya, bukan isinya.
+
+#### Model bahasa boleh MEMILIH, tidak boleh MENULIS
+
+Pilihan terakhir, **mati secara bawaan**. Bila `LLM_URL` disetel, pertanyaan
+yang tidak tertangani pencocok setempat dicarikan sekali lagi lewat model
+bahasa — tetapi dengan batas yang ditentukan rancangannya, bukan oleh
+perintah yang diberikan kepadanya:
+
+| Yang dikirim | Yang TIDAK dikirim |
+| --- | --- |
+| pertanyaan pengunjung | isi jawaban mana pun |
+| daftar pertanyaan butir, bernomor | naskah sekolah, data pendaftar, apa pun yang lain |
+
+Yang diterima kembali **hanya satu angka**. Jawaban yang bukan angka, angka
+di luar daftar, dan angka negatif dibuang; teks jawabannya tetap diambil
+frontend dari pengetahuannya sendiri. Dengan begitu model bahasa tidak punya
+jalan untuk mengarang tanggal penutupan maupun biaya — risiko yang sejak
+awal menjadi alasan menolaknya.
+
+`max_tokens` disetel 8 dan suhunya 0. Batas sekecil itu sekaligus menjadi
+penjaga biaya: jawaban panjang tidak mungkin terbit.
+
+**Dijalankan hanya sebagai cadangan**, sesudah pencocok setempat menyerah.
+Dua akibatnya disengaja: biayanya jatuh pada pertanyaan yang memang tidak
+tertangani saja, dan pertanyaan yang sudah terjawab setempat tidak pernah
+keluar dari peramban. Bila penyedianya gagal, menggantung, atau menjawab
+ngawur, kotaknya kembali mengaku tidak tahu seperti biasa — tidak pernah
+menampilkan galat.
+
+Bentuk permintaannya mengikuti `/v1/chat/completions`, jadi penyedia mana
+pun dapat dipakai, **termasuk yang dijalankan sendiri**:
+
+```ini
+LLM_URL=http://localhost:11434/v1/chat/completions   # Ollama, gratis
+LLM_MODEL=llama3.2
+```
+
+Dengan cara itu pertanyaan pengunjung tidak keluar ke mana pun sama sekali.
+Alamat selain localhost wajib `https`, sebab yang lewat adalah kalimat yang
+diketik pengunjung; `config.go` menolak selain itu saat server dinyalakan.
+
+Bila aktif, kotak tanyanya **menyebutkan hal itu sebelum orang mengetik**,
+bukan sesudahnya.
+
+Diuji dengan penyedia tiruan yang mencatat apa yang benar-benar diterimanya:
+kiriman terbukti tidak memuat satu pun isi jawaban; "3" memilih butir
+ketiga; " 2 " tetap terbaca; "0", "Saya pikir nomor 3", "999", dan "-1"
+seluruhnya ditolak menjadi tidak-ketemu; penyedia yang menjawab 500 maupun
+yang menggantung sepuluh detik tidak membuat kotaknya menampilkan galat; dan
+pertanyaan yang terjawab setempat terbukti tidak pernah menyentuh penyedia.
+
+#### Ambangnya ditakar, bukan ditebak
+
+Seluruh pertanyaan uji dijalankan dengan ambang dinolkan, lalu dicari celah
+antara yang paling lemah di antara yang harus terjawab dan yang paling kuat
+di antara yang harus ditolak:
+
+```
+0,516  "peminatan yang tersedia"       <- terlemah yang harus lolos
+0,420  "berapa harga seragam batik"    <- terkuat yang harus ditolak
+```
+
+Ambangnya ditaruh di tengah keduanya, 0,47, sehingga ada selisih di kedua
+sisi. Bila kelak butir pengetahuannya bertambah banyak, takaran ini perlu
+diulang.
+
+#### Pengujiannya
+
+```bash
+node alat/uji-tanya/jalankan.mjs            # 49 pemeriksaan
+node alat/uji-tanya/jalankan.mjs --takar    # menakar ulang ambangnya
+node alat/uji-tanya/jalankan.mjs "tanya apa pun"   # melihat peringkatnya
+```
+
+Dijalankan langsung terhadap modulnya dengan data sungguhan dari API, bukan
+lewat peramban — menyetel peringkat menuntut puluhan putaran, dan satu
+putaran lewat `next build` memakan menit sedangkan lewat sini beberapa detik.
+Datanya diambil dari API yang berjalan, bukan dikarang, sebab pengujian
+dengan data karangan tidak membuktikan apa pun tentang naskah yang
+benar-benar ditulis sekolah.
+
+Isinya empat bagian, dan daftarnya ada di `alat/uji-tanya/pertanyaan.json`:
+
+| Bagian | Isi |
+| --- | --- |
+| HARUS | 28 pertanyaan yang wajib terjawab beserta pola jawabannya |
+| JANGAN | 9 pertanyaan yang wajib **tidak** terjawab |
+| RAGAM | 6 maksud × beberapa bentuk; lulus bila 70% kena |
+| TYPO | 6 salah ketik yang lazim di ponsel |
+
+Bagian JANGAN yang paling penting: "apakah ada beasiswa untuk anak yatim",
+"siapa pelatih tim futsalnya", "menu kantin hari ini apa". Kotak yang
+memaksakan jawaban terdekat lebih berbahaya daripada kotak yang mengaku
+tidak tahu, jadi penolakan diuji sekeras kemampuan menjawab.
+
+Antarmukanya diuji terpisah di peramban: tab, tombol pancingan, gelembung
+percakapan, tautan lanjutan, dan tombol "Kirim pertanyaan ke panitia" yang
+muncul saat buntu.
 
 ### Q. Tautan WhatsApp beserta pesan bawaannya
 
@@ -1612,7 +2287,7 @@ Seluruh warnanya lulus rasio kontras 4,5:1 terhadap tulisan putih.
 | Pembatas laju rute publik | Tujuh rute publik dibatasi per alamat IP. Rute yang menyerahkan data pendaftar juga DIKUNCI PER NOMOR REGISTRASI sesudah sepuluh kegagalan dalam sejam, sehingga tanggal lahirnya tidak dapat ditebak habis dari banyak alamat IP sekaligus |
 | Alamat pemanggil | `X-Forwarded-For` hanya dipercaya bila permintaannya datang dari jaringan tepercaya, dan yang diambil entri terkanan di luar jaringan itu; tanpa itu kepala karangan membuat seluruh pembatas laju tidak berarti |
 | Pembatasan peran | `admin` mengelola pengaturan, peminatan, pengguna, dan penghapusan pendaftar; `operator` hanya mengelola pendaftar dan isi situs. Dijaga di backend, bukan hanya disembunyikan dari menu |
-| Unggahan berkas | Ekstensi **dan** beberapa bita pertama isinya diperiksa, sehingga skrip bernama `.jpg` tertolak. Batas 2 MB, nama berkas diacak |
+| Unggahan berkas | Ekstensi **dan** beberapa bita pertama isinya diperiksa, sehingga skrip bernama `.jpg` tertolak. Batas 3 MB, nama berkas diacak |
 | Dokumen pendaftar | Kartu Keluarga, akta, dan ijazah hanya dapat diunduh dengan token petugas, dan tidak disimpan di cache bersama |
 | Cek status | Nomor registrasi saja tidak cukup; tanggal lahir menjadi pasangan kunci agar data orang lain tidak terbuka dengan menebak nomor |
 | Spam | Kolom perangkap tersembunyi pada formulir pendaftaran dan kontak |
@@ -1682,6 +2357,178 @@ sebelas percobaan tanggal lahir yang salah untuk satu nomor, yang ke-11
 dijawab 429 dengan `Retry-After: 3600`; nomor lain tidak terpengaruh; dan
 kepala karangan yang ditambahi alamat sebenarnya oleh proksi tetap terhitung
 satu pengunjung.
+
+### V. Tiga macam "tutup", tiga kalimat yang berbeda
+
+Keadaan PPDB ditentukan tiga syarat: saklar `ppdb_status`, tanggal
+`ppdb_mulai`, dan tanggal `ppdb_selesai`. Satu saja gagal, pendaftarannya
+tertutup. Tetapi yang disediakan API hanya boolean `dibuka`, dan halaman
+publik memakai SATU kalimat untuk ketiga sebab tertutupnya: "Segera Dibuka,
+mulai {ppdb_mulai}".
+
+Akibatnya pada dua dari tiga keadaan itu kalimatnya menjanjikan tanggal yang
+sudah berlalu. Terlihat saat mematikan PPDB dari panel: judul halamannya
+"Pendaftaran Belum Dibuka", sedangkan bilah berjalan di atasnya pada layar
+yang sama berbunyi "dibuka mulai 1 September 2026" — tanggal yang sudah lewat
+tiga minggu.
+
+API sekarang mengirim `ppdb.keadaan` dengan empat nilai, dan kalimatnya
+menyesuaikan:
+
+| Keadaan | Lencana | Kalimat |
+|---|---|---|
+| `dibuka` | Pendaftaran Dibuka | "sedang dibuka sampai {selesai}" |
+| `belum_mulai` | Segera Dibuka | "dibuka mulai {mulai} sampai {selesai}" |
+| `sudah_selesai` | Pendaftaran Ditutup | "sudah ditutup pada {selesai}" |
+| `ditutup` | Pendaftaran Ditutup | "sedang tidak dibuka. Perhatikan pengumuman sekolah untuk jadwal berikutnya." |
+
+Yang terakhir SENGAJA tidak menyebut tanggal sama sekali: pendaftaran yang
+ditutup panitia di tengah masa pendaftaran tidak punya tanggal yang dapat
+dijanjikan.
+
+Urutan pemeriksaannya juga ditentukan dengan sengaja: **tanggal diperiksa
+lebih dulu daripada saklar.** Sekolah yang lupa menutup saklarnya sesudah
+tanggal selesai tetap mendapat kalimat "sudah ditutup pada ...", bukan "sedang
+tidak dibuka", sebab tanggal lebih menerangkan bagi yang membaca.
+
+Kalimatnya disusun di satu tempat, `lib/ppdb.ts`, sebab dipakai di empat
+tempat: bilah berjalan, lencana beranda, kartu ajakan beranda, dan halaman
+Info PPDB beserta halaman formulirnya. Empat tempat yang menuliskannya
+sendiri-sendiri adalah empat tempat yang akan saling menyimpang.
+
+Lencana dasbor panel ikut dibedakan, sebab tindakan panitianya berbeda: yang
+belum mulai tinggal ditunggu, yang sudah selesai tanggalnya perlu
+diperpanjang, dan yang ditutup manual tinggal dibuka kembali dari menu
+Pengaturan.
+
+Sepuluh uji satuan mengunci aturannya, termasuk kedua keadaan yang
+bertentangan (saklar tutup sementara tanggal juga sudah lewat, dan saklar buka
+sementara tanggal sudah lewat), hari pertama, serta hari terakhir. Keempat
+keadaan diperiksa juga lewat peramban pada basis data sekali pakai: bilah
+berjalan, lencana, judul halaman formulir, dan kalimatnya cocok satu sama lain
+pada keempatnya, dan lencana dasbor panel menampilkan keempat kata yang
+berbeda.
+
+### U. Menambah pendaftar dari panel, meski PPDB sudah ditutup
+
+Keadaan yang sangat lazim dan sebelumnya tidak tertangani: ada calon yang
+datang langsung ke sekolah SESUDAH pendaftaran ditutup, lalu kepala sekolah
+memutuskan menerimanya. Formulir publik ditolak backend ketika PPDB tutup,
+jadi satu-satunya jalan adalah membuka kembali PPDB untuk SEMUA ORANG,
+memasukkan satu data, lalu menutupnya lagi. Selama jendela itu terbuka,
+siapa pun di internet dapat mendaftar.
+
+Sekarang ada menu **Pendaftar → Tambah Pendaftar**, satu halaman panjang yang
+**tetap bekerja meski PPDB sudah ditutup**. Bentuknya bukan lima langkah
+seperti formulir publik: yang mengisi petugas yang sudah hafal isinya dan
+sedang menghadapi orang di meja pendaftaran.
+
+Tiga hal yang berbeda dari formulir publik, dan masing-masing ada sebabnya:
+
+| Beda | Sebabnya |
+|---|---|
+| Tidak memeriksa apakah PPDB dibuka | Itu seluruh gunanya |
+| Tanpa unggahan berkas | Dokumennya diterima petugas dalam bentuk kertas; memaksa lima unggahan di meja pendaftaran membuat fiturnya tidak terpakai |
+| Tanpa centang pernyataan kebenaran data | Yang menandatangani pernyataan itu pendaftarnya sendiri, dan petugas tidak dapat menandatanganinya atas nama orang lain |
+| Sekolah di luar daftar rujukan tidak ditolak | Petugas memasukkan data dengan ijazahnya di tangan, jadi ia tahu lebih banyak daripada daftar rujukannya |
+
+Pemeriksaan lain SELURUHNYA sama: NISN, NIK beserta pencocokan silangnya,
+kewajaran tulisan, kode pos, NPSN, dan kedua penjaga pendaftaran ganda. Data
+yang masuk lewat pintu ini tidak boleh lebih rendah mutunya.
+
+Akibat yang diterima dengan sadar, dan dikatakan apa adanya di halamannya:
+pendaftar yang dimasukkan dari sini **tidak punya berkas apa pun di sistem**,
+jadi verifikasinya harus dicocokkan dari kertas. Karena itu rincian
+pendaftar mendapat baris baru, **"Cara mendaftar"**, yang berbunyi
+"Dimasukkan panitia: <nama petugas>" atau "Mengisi formulir online sendiri".
+Penandanya dari kolom `pendaftar.dibuat_oleh` (migrasi 018); kosong berarti
+pendaftar mengisi sendiri.
+
+**Pemeriksaan isian kedua jalur kini SATU FUNGSI** (`periksaIsianPendaftar`
+pada `pendaftar_isian.go`), begitu pula penyimpanannya (`simpanPendaftar`).
+Alasannya konkret, bukan kerapian: dua jalur yang memeriksa isian yang sama
+dengan kode yang berbeda pasti menyimpang satu sama lain. Contohnya sudah
+terjadi di proyek ini — daftar dokumen di halaman Info PPDB menyebut Akta
+Kelahiran dan Rapor bersifat **opsional** padahal backend mewajibkan
+keduanya, sehingga halaman itu menjanjikan yang tidak benar dan pendaftar
+yang mengikutinya akan ditolak formulirnya. Daftar itu ikut dibetulkan di
+sini, dan diberi catatan bahwa isinya harus sama dengan `berkasPendaftar`.
+
+Diuji pada basis data sekali pakai dengan PPDB DITUTUP: penambahan dari panel
+berhasil (201) pada saat yang sama formulir publik ditolak (409); tanpa token
+401; isian kosong ditolak dengan 21 galat per kolom; NIK yang jenis
+kelaminnya bertentangan ditolak; pendaftaran ganda ditolak beserta nomor
+registrasi yang sudah ada; dan `dibuat_oleh` tercatat. Formulir publik diuji
+ulang sesudah penyatuan itu, lengkap dengan lima berkas unggahan, dan tetap
+berhasil. Antarmukanya sembilan pemeriksaan lewat peramban.
+
+### T. Dua gerak yang menyampaikan keadaan, bukan menghias
+
+Situs ini sudah cukup banyak gerak hiasan: muncul-naik saat digulir di 26
+halaman, gulir halus Lenis, kartu terangkat saat disorot, karusel berita, dan
+percikan klik. Dua yang ditambahkan di sini jenis lain, yaitu gerak yang
+memberi tahu keadaan.
+
+**Bilah kemajuan saat mengunggah dokumen.** Formulir PPDB mengirim sampai enam
+dokumen, masing-masing dibatasi 3 MB, jadi seluruhnya bisa 18 MB. Sebelum ini
+tombolnya hanya berputar tanpa keterangan; di data seluler yang lambat itu
+satu menit penuh, dan yang paling sering terjadi bukan pendaftar menunggu,
+melainkan menekan kirim lagi atau menutup halamannya.
+
+Sekarang tampil persennya beserta bita yang sudah terkirim dari totalnya.
+Sesudah bita terakhir terkirim, tahapnya berganti sendiri menjadi "Menyimpan
+di server" — sebab pada saat itu server masih menyimpan berkasnya dan
+menerbitkan nomor registrasi, dan bilah yang berhenti di 100 persen tanpa
+keterangan terbaca sebagai macet.
+
+Pengirimannya karena itu memakai `XMLHttpRequest`, bukan `fetch`, dan itu
+bukan pilihan gaya: **fetch tidak dapat melaporkan kemajuan unggahan sama
+sekali.** Yang tersedia di fetch hanya kemajuan unduhan. Penanganan galatnya
+disamakan dengan `permintaan()`, sehingga galat per kolom tetap menyorot
+kolom yang bermasalah seperti sebelumnya.
+
+**Kerangka muat pengganti bulatan berputar.** Daftar dan tabel di panel
+sebelumnya menampilkan satu bulatan berputar di tengah ruang kosong, lalu
+tata letaknya melompat begitu datanya tiba. Kerangka muat menahan bentuknya:
+kepala tabel sudah terbaca, dan kotak abu berdenyut menempati tempat yang akan
+diisi datanya.
+
+Dipasang di enam tempat yang bentuknya sudah diketahui: dasbor, Pendaftar,
+Notifikasi, Pengguna, Sekolah Asal, dan Pesan Masuk. Kepala tabelnya dijadikan
+satu tetapan yang dipakai BERSAMA oleh kerangka dan tabel sesungguhnya,
+sehingga jumlah kolom keduanya tidak mungkin berbeda. Halaman lain masih
+memakai bulatan berputar; bentuknya belum tentu satu tabel, jadi kerangkanya
+akan menipu kalau dipaksakan.
+
+Dua hal teknis yang menentukan keduanya tetap ringan di ponsel murah:
+
+- Bilah kemajuannya digerakkan dengan `transform: scaleX`, bukan `width`.
+  Mengubah lebar memaksa peramban menghitung ulang tata letak pada setiap
+  rangka, dan itu tersendat justru ketika sedang mengunggah.
+- Denyut kerangkanya memakai `opacity`, bukan latar yang bergeser.
+
+Keduanya menghormati setelan "kurangi gerak", tetapi TIDAK dengan cara yang
+sama. Denyut kerangka berhenti sepenuhnya: bentuknya sendiri sudah
+menyampaikan bahwa ada yang dimuat. Bilah kemajuan tetap bergerak, sebab ia
+keterangan dan bukan hiasan; yang dihilangkan hanya kehalusan peralihannya,
+sehingga angkanya melompat langsung ke tempatnya.
+
+Diuji lewat peramban sungguhan. Bilah kemajuannya pada basis data sekali pakai
+beserta salinan frontend tersendiri, bukan pada pemasangan user: formulir
+diisi lengkap, lima berkas 1,7 MB dipasang lewat protokol DevTools, unggahannya
+diperlambat ke 400 kB/s, lalu bilahnya terekam 139 kali dari "1%, 48 KB dari
+8,3 MB" sampai 100 persen, berganti ke tahap "Menyimpan di server", dan
+berakhir pada nomor registrasi yang benar-benar terbit. Kerangka muatnya pada
+pemasangan user tetapi hanya dengan permintaan GET, jaringannya diperlambat
+supaya keadaan muatnya dapat ditangkap: empat belas pemeriksaan pada lima
+halaman, termasuk bahwa kepala tabelnya sudah terbaca saat memuat dan tidak
+ada lagi bulatan berputar.
+
+Tinggi halaman saat memuat dan sesudah datanya tiba diukur juga, sebab itu
+inti gunanya: selisihnya 0 piksel pada Notifikasi dan Pengguna, 34 pada
+Sekolah Asal, 59 pada Pendaftar, dan 402 pada Pesan Masuk. Yang terakhir
+memang tidak dapat dibuat tepat: panjang badan pesan tidak diketahui sebelum
+pesannya datang.
 
 ### Menu terpilih di panel tidak terlihat: dua warna yang bernilai sama
 
@@ -2134,6 +2981,19 @@ jawabannya tidak terlindungi seperti pada aplikasi sebenarnya. Hal yang sama
 berlaku untuk unggah gambar sekolah: pada aplikasi berkasnya disimpan server,
 sedangkan di demo tombolnya menjelaskan bahwa berkasnya tidak dapat disimpan.
 Kedua batasan itu disebutkan, bukan disembunyikan.
+
+Termasuk 21 pemeriksaan untuk penunjuk alur dan angka sekolah, dijalankan
+pada keadaan pendaftaran DITUTUP karena di sanalah kesalahannya tampak:
+keempat halaman PPDB diperiksa satu-satu, dan pada tiap halaman dipastikan
+tahap "Isi formulir" bukan tautan, tidak ada satu pun tanda centang, tahap
+yang sedang dibuka tidak ditandai tidak-tersedia, dan tahap selain formulir
+tetap dapat dibuka. Angka sekolah diperiksa dua kali: pada basis data uji
+yang ketiga pengaturannya terisi, angkanya harus benar-benar merangkak —
+jejaknya dipetik setiap 90 ms dan harus memuat lebih dari dua nilai berbeda,
+sebab pemeriksaan yang hanya membaca nilai akhir akan lulus walau animasinya
+mati — lalu berhenti tepat di nilai akhirnya; pada pemasangan sungguhan yang
+ketiganya masih penanda, ketiganya harus TIDAK tampil sementara yang dihitung
+dari basis data tetap tampil, dan tidak boleh ada baris yang tidak penuh.
 
 Backend bersih dari `go vet` dan `gofmt`; frontend bersih dari `eslint` dan
 `tsc`.

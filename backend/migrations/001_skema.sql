@@ -1,7 +1,7 @@
 -- ============================================================
 --  BASIS DATA SISTEM INFORMASI PROFIL SEKOLAH & PPDB SMA IMTEK
---  Program Kreativitas Mahasiswa (PkM)
---  Jurusan: Teknik Informatika
+--  Pengabdian Kepada Masyarakat (PkM) Universitas Pamulang
+--  Program Studi: Teknik Informatika
 --  Bidang PkM: Manajemen Komputer & Sistem
 --
 --  PostgreSQL 14 atau lebih baru.
@@ -330,7 +330,7 @@ Pendaftaran tidak dipungut biaya. Pengumuman hasil seleksi dijadwalkan pada 5 Ju
    'Panduan langkah demi langkah mengisi formulir, mengunggah dokumen, dan memantau hasil verifikasi.',
    'Pendaftaran online dapat diselesaikan dalam waktu kurang dari lima belas menit, asalkan dokumennya sudah disiapkan lebih dulu.
 
-Siapkan hasil pindai atau foto dari tiga dokumen wajib, yaitu foto 3x4, ijazah atau surat keterangan lulus, dan Kartu Keluarga. Akta kelahiran, rapor, dan sertifikat prestasi bersifat opsional. Setiap berkas dibatasi 2 MB.
+Siapkan hasil pindai atau foto dari tiga dokumen wajib, yaitu foto 3x4, ijazah atau surat keterangan lulus, dan Kartu Keluarga. Akta kelahiran, rapor, dan sertifikat prestasi bersifat opsional. Setiap berkas dibatasi 3 MB.
 
 Buka menu Daftar PPDB, lalu isi formulir yang terbagi menjadi lima langkah. Anda dapat berpindah antar langkah kapan saja sebelum mengirim.
 

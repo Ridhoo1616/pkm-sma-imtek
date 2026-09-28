@@ -1,34 +1,22 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { DOKUMEN } from "@/lib/dokumen";
 import { muatProfil } from "@/lib/profil";
 import { angka, persen, rupiah, tanggalPanjang, belumTerisi } from "@/lib/format";
+import { kataKeadaanPpdb } from "@/lib/ppdb";
 import { KepalaHalaman, JudulBagian, Lencana } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
 import type { Metadata } from "next";
 import type { Jurusan } from "@/lib/tipe";
 import { IkonFasilitas } from "@/komponen/Ikon";
 import { PenunjukAlur, ArahanLangkah } from "@/komponen/PenunjukAlur";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 export const metadata: Metadata = {
   title: "Informasi PPDB",
   description:
     "Jadwal, persyaratan, jalur, dan alur pendaftaran peserta didik baru.",
 };
-
-/** Dokumen yang diminta formulir; daftarnya sama dengan yang divalidasi backend. */
-const DOKUMEN = [
-  { nama: "Foto 3x4", wajib: true, tipe: "JPG atau PNG" },
-  { nama: "Ijazah atau Surat Keterangan Lulus", wajib: true, tipe: "JPG, PNG, atau PDF" },
-  { nama: "Kartu Keluarga", wajib: true, tipe: "JPG, PNG, atau PDF" },
-  { nama: "Akta Kelahiran", wajib: false, tipe: "JPG, PNG, atau PDF" },
-  { nama: "Rapor semester terakhir", wajib: false, tipe: "JPG, PNG, atau PDF" },
-  {
-    nama: "Sertifikat prestasi",
-    wajib: false,
-    tipe: "JPG, PNG, atau PDF",
-    catatan: "Wajib bila mendaftar lewat jalur Prestasi.",
-  },
-];
 
 const KETERANGAN_JALUR: Record<string, string> = {
   Reguler: "Jalur umum berdasarkan nilai rapor dan kelengkapan berkas.",
@@ -59,6 +47,7 @@ export default async function HalamanPpdb() {
     .filter(Boolean);
 
   const sisa = Math.max(profil.ppdb.kuota - profil.ppdb.terisi, 0);
+  const kataPpdb = kataKeadaanPpdb(profil.ppdb, p);
 
   return (
     <>
@@ -67,14 +56,10 @@ export default async function HalamanPpdb() {
         keterangan="Seluruh tahap pendaftaran dilakukan secara online. Bacalah persyaratan dan jadwal berikut sebelum mengisi formulir."
         anak={
           <div className="flex flex-wrap items-center gap-3">
-            <Lencana
-              jenis={
-                profil.ppdb.dibuka
-                  ? "hijau"
-                  : "abu"
-              }
-            >
-              {profil.ppdb.dibuka ? "Pendaftaran dibuka" : "Pendaftaran belum dibuka"}
+            {/* Lencananya membedakan "belum dibuka" dari "sudah ditutup";
+                kalimatnya disusun di lib/ppdb.ts. */}
+            <Lencana jenis={kataPpdb.dibuka ? "hijau" : "abu"}>
+              {kataPpdb.lencana}
             </Lencana>
             {profil.ppdb.dibuka ? (
               <Link
@@ -368,7 +353,7 @@ export default async function HalamanPpdb() {
                         </Lencana>
                       </div>
                       <p className="mt-0.5 text-xs text-samar">
-                        {d.tipe}, maksimal 2 MB.
+                        {d.tipe}, maksimal {BATAS_UNGGAH}.
                         {d.catatan ? ` ${d.catatan}` : ""}
                       </p>
                     </li>

@@ -21,6 +21,8 @@ var pengaturanPublik = []string{
 	"foto_kepsek", "struktur_organisasi", "struktur_keterangan",
 	"tautan_elearning", "tautan_jadwal", "jadwal_keterangan",
 	"perpustakaan_keterangan",
+	// Angka sekolah pada kartu sorotan beranda. Lihat migrasi 019.
+	"jumlah_siswa", "jumlah_guru", "jumlah_rombel",
 	"ppdb_status", "ppdb_tahun", "ppdb_mulai", "ppdb_selesai",
 	"ppdb_pengumuman", "ppdb_kuota", "ppdb_biaya", "ppdb_syarat", "ppdb_alur",
 }
@@ -44,11 +46,20 @@ func (a *Aplikasi) tanganiProfil(w http.ResponseWriter, r *http.Request) {
 		"pengaturan": isi,
 		"ppdb": map[string]any{
 			"dibuka": a.ppdbDibuka(),
-			"kuota":  kuota,
-			"terisi": terisi,
-			"jalur":  JalurPendaftaran,
-			"sumber": SumberInformasi,
+			// keadaan memberi tahu MENGAPA tertutup, supaya halaman publik
+			// tidak menjanjikan tanggal yang sudah lewat. Lihat keadaanPpdb.
+			"keadaan": a.keadaanPpdb(),
+			"kuota":   kuota,
+			"terisi":  terisi,
+			"jalur":   JalurPendaftaran,
+			"sumber":  SumberInformasi,
 		},
+		// Kotak Tanya cepat perlu tahu apakah pencocok berbantuan model
+		// bahasa tersedia, sebab keterangan yang ditampilkannya kepada
+		// pengunjung berbeda: bila aktif, pertanyaan yang tidak terjawab
+		// setempat ikut dikirim ke penyedia luar, dan itu harus disebutkan
+		// sebelum orang mengetik, bukan sesudahnya.
+		"pencocok_ai": a.pencocokAiAktif(),
 	})
 }
 

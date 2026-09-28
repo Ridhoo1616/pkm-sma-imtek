@@ -13,7 +13,12 @@ import {
   warnaStatus,
 } from "@/lib/format";
 import { KepalaPanel, KartuAngka, Tabel, BarisBilah } from "@/komponen/Panel";
-import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
+import {
+  PesanGalat,
+  TanpaData,
+  KerangkaAngka,
+  Kerangka,
+} from "@/komponen/Memuat";
 import { DiagramLingkaran } from "@/komponen/DiagramLingkaran";
 import { Lencana } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
@@ -61,11 +66,40 @@ const RENTANG: Record<
   },
 };
 
+/** Kata untuk lencana keadaan PPDB di kepala dasbor. */
+const KATA_KEADAAN: Record<string, string> = {
+  dibuka: "Pendaftaran dibuka",
+  belum_mulai: "Pendaftaran belum mulai",
+  sudah_selesai: "Pendaftaran sudah ditutup",
+  ditutup: "Pendaftaran ditutup panitia",
+};
+
 export default function HalamanDasbor() {
   const { data, memuat, galat, muatUlang } = useMuat(() => api.dasbor());
   const [rentang, setRentang] = useState<JenisRentang>("tanggal");
 
-  if (memuat) return <Memuat />;
+  // Kerangka muat menahan bentuk dasbornya: kepala halaman, empat kartu
+  // angka, lalu dua kartu grafik. Tanpa itu, halamannya melompat dari satu
+  // bulatan berputar menjadi halaman penuh begitu datanya tiba.
+  if (memuat)
+    return (
+      <>
+        <KepalaPanel
+          judul="Dasbor"
+          keterangan="Memuat ringkasan pendaftaran..."
+        />
+        <KerangkaAngka jumlah={4} />
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          {[0, 1].map((i) => (
+            <div key={i} className="kartu p-6">
+              <Kerangka className="h-4 w-40" />
+              <Kerangka className="mt-2 h-3 w-56" />
+              <Kerangka className="mt-6 h-40 w-40 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </>
+    );
   if (galat) return <PesanGalat pesan={galat} ulangi={muatUlang} />;
   if (!data) return null;
 
@@ -79,7 +113,15 @@ export default function HalamanDasbor() {
         keterangan={`Ringkasan pendaftaran Tahun Ajaran ${data.tahun_ajaran}.`}
         aksi={
           <Lencana jenis={data.ppdb_dibuka ? "hijau" : "abu"}>
-            {data.ppdb_dibuka ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
+            {/* Panitia perlu tahu SEBAB tertutupnya, sebab tindakannya
+                berbeda: yang belum mulai tinggal ditunggu, yang sudah
+                selesai tanggalnya perlu diperpanjang, dan yang ditutup
+                manual tinggal dibuka kembali dari menu Pengaturan. */}
+            {
+              KATA_KEADAAN[
+                data.ppdb_keadaan ?? (data.ppdb_dibuka ? "dibuka" : "ditutup")
+              ]
+            }
           </Lencana>
         }
       />
@@ -375,7 +417,7 @@ function BagianKunjungan() {
       </div>
 
       {memuat ? (
-        <Memuat />
+        <KerangkaAngka jumlah={4} />
       ) : galat ? (
         <PesanGalat pesan={galat} ulangi={muatUlang} />
       ) : !data ? null : (
