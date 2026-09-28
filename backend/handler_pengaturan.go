@@ -641,6 +641,9 @@ func (a *Aplikasi) pastikanMasihAdaAdmin(id int, peranBaru string) error {
 var gambarPengaturan = map[string]string{
 	"logo":                "Logo sekolah",
 	"foto_depan":          "Foto halaman depan",
+	"foto_depan_2":        "Foto sorotan kedua",
+	"foto_depan_3":        "Foto sorotan ketiga",
+	"foto_depan_4":        "Foto sorotan keempat",
 	"foto_kepsek":         "Foto kepala sekolah",
 	"struktur_organisasi": "Bagan struktur organisasi",
 }

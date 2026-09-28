@@ -143,6 +143,24 @@ const KUNCI_GAMBAR: { kunci: string; label: string; bantuan: string }[] = [
       "Foto mendatar, perbandingan sisi 16:9, paling tidak 1600 piksel lebarnya.",
   },
   {
+    kunci: "foto_depan_2",
+    label: "Foto sorotan kedua",
+    bantuan:
+      "Berganti-ganti dengan foto halaman depan di beranda. Ukurannya sama: mendatar 16:9, paling tidak 1600 piksel. Kosongkan bila tidak dipakai.",
+  },
+  {
+    kunci: "foto_depan_3",
+    label: "Foto sorotan ketiga",
+    bantuan:
+      "Berganti-ganti dengan foto halaman depan di beranda. Ukurannya sama: mendatar 16:9, paling tidak 1600 piksel. Kosongkan bila tidak dipakai.",
+  },
+  {
+    kunci: "foto_depan_4",
+    label: "Foto sorotan keempat",
+    bantuan:
+      "Berganti-ganti dengan foto halaman depan di beranda. Ukurannya sama: mendatar 16:9, paling tidak 1600 piksel. Kosongkan bila tidak dipakai.",
+  },
+  {
     kunci: "foto_kepsek",
     label: "Foto kepala sekolah",
     bantuan:
@@ -194,6 +212,9 @@ function labelDari(kunci: string): string {
     peta_koordinat: "Koordinat lokasi (lintang,bujur)",
     nama_singkat: "Nama singkat",
     foto_depan: "Foto halaman depan",
+    foto_depan_2: "Foto sorotan kedua",
+    foto_depan_3: "Foto sorotan ketiga",
+    foto_depan_4: "Foto sorotan keempat",
     whatsapp: "Nomor WhatsApp panitia",
     foto_kepsek: "Foto kepala sekolah",
     struktur_organisasi: "Bagan struktur organisasi",
