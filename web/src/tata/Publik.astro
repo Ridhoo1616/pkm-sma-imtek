@@ -2,6 +2,7 @@
 import "../gaya.css";
 import Navigasi from "../komponen/Navigasi.astro";
 import Interaksi from "../komponen/Interaksi.astro";
+import LayarPembuka from "../komponen/LayarPembuka.astro";
 import { TeksBerjalan } from "@/komponen/TeksBerjalan";
 import Footer from "@/komponen/Footer";
 import BantuanMelayang from "@/komponen/BantuanMelayang";
@@ -68,6 +69,7 @@ const keterangan =
     <link rel="icon" href="/favicon.ico" sizes="any" />
   </head>
   <body class="latar-kaca flex min-h-full flex-col overflow-x-clip">
+    <LayarPembuka logo={p.logo} namaSekolah={p.nama_sekolah} />
     <ClickSpark client:idle sparkColor="#F59E0B" sparkSize={12} sparkRadius={20} sparkCount={8} duration={500} />
     <GulirHalus client:idle />
     <PencatatKunjungan client:idle />

@@ -1,0 +1,110 @@
+---
+import { urlUnggahan } from "@/lib/api";
+
+/**
+ * Layar pembuka (splash screen) halaman publik. Rancangannya karya Adam
+ * Darusman di frontend Next (frontend/src/komponen/LayarPembuka.tsx):
+ * tampilan, teks, dan waktunya disamakan persis — muncul sekali per sesi
+ * tab, mulai menghilang pada 1,2 detik, lepas dari halaman pada 2 detik.
+ *
+ * Ditulis ulang tanpa React, dan itu bukan soal selera. Versi React baru
+ * dapat memutuskan tampil sesudah React dimuat, dan di Astro React sengaja
+ * dimuat belakangan (client:idle) supaya halaman ringan. Memakainya apa
+ * adanya berarti halaman terlihat sekejap lalu tertutup layar pembuka, atau
+ * React harus dimuat lebih dulu di setiap halaman. Di sini keputusannya
+ * diambil skrip sebaris di <head>, SEBELUM halaman digambar:
+ *
+ *   - sessionStorage belum bertanda  → kelas `pembuka-aktif` dipasang pada
+ *     <html>, dan CSS menampilkan layar ini sejak gambar pertama;
+ *   - sudah bertanda, atau JavaScript mati → layar ini tidak pernah tampil,
+ *     jadi tidak ada kedipan pada kunjungan berikutnya dan tidak ada halaman
+ *     yang tertutup selamanya bila skripnya gagal.
+ */
+interface Props {
+  logo?: string;
+  namaSekolah?: string;
+}
+const { logo, namaSekolah = "SMA IMTEK" } = Astro.props;
+---
+
+<script is:inline>
+  try {
+    if (sessionStorage.getItem("splash_ditampilkan") !== "ya") {
+      document.documentElement.classList.add("pembuka-aktif");
+    }
+  } catch (e) {
+    /* Penyimpanan diblokir: layar pembuka dilewati. */
+  }
+</script>
+
+<div
+  id="layar-pembuka"
+  aria-hidden="true"
+  class="fixed inset-0 z-[9999] flex-col items-center justify-center bg-[#061428] transition-all duration-[900ms] ease-[cubic-bezier(0.65,0,0.35,1)]"
+>
+  <div class="absolute -top-[20%] -left-[10%] h-[700px] w-[700px] rounded-full bg-biru opacity-40 blur-[140px]"></div>
+  <div class="absolute -right-[10%] -bottom-[20%] h-[800px] w-[800px] rounded-full bg-emas opacity-20 blur-[160px]"></div>
+
+  <div class="pembuka-isi relative z-10 flex flex-col items-center transition-all delay-100 duration-[800ms] ease-out">
+    <div class="relative mb-8">
+      <div class="absolute inset-0 animate-ping rounded-[2rem] bg-emas/30" style="animation-duration:3s"></div>
+      <div class="absolute inset-0 animate-ping rounded-[2rem] bg-biru/40" style="animation-duration:2.5s;animation-delay:1s"></div>
+      <div class="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-[2rem] bg-white/5 p-4 shadow-2xl ring-1 ring-white/20 backdrop-blur-md">
+        <div class="absolute inset-0 z-20 w-1/2 animate-[geserCahaya_2.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-70"></div>
+        {
+          logo ? (
+            <img src={urlUnggahan("profil", logo)} alt="" class="relative z-10 h-full w-full object-contain drop-shadow-lg" />
+          ) : (
+            <span class="relative z-10 text-4xl font-black text-white drop-shadow-md">{namaSekolah.slice(0, 2).toUpperCase()}</span>
+          )
+        }
+      </div>
+    </div>
+    <div class="relative text-center">
+      <p class="mb-1 text-[10px] font-bold tracking-[0.3em] text-emas/80 uppercase">SELAMAT DATANG DI</p>
+      <p class="text-2xl font-black tracking-wider text-white sm:text-3xl">{namaSekolah}</p>
+    </div>
+    <div class="mt-10 h-0.5 w-48 overflow-hidden rounded-full bg-white/10">
+      <div class="pembuka-bilah h-full w-[70%] bg-emas transition-all duration-[1200ms] ease-out"></div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  @keyframes geserCahaya {
+    0% { transform: translateX(-100%) skewX(-15deg); }
+    100% { transform: translateX(200%) skewX(-15deg); }
+  }
+  @keyframes munculHalus {
+    0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  #layar-pembuka { display: none; }
+  .pembuka-aktif #layar-pembuka { display: flex; }
+  .pembuka-aktif body { overflow: hidden; }
+  #layar-pembuka .pembuka-isi { animation: munculHalus 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+  #layar-pembuka.pembuka-hilang { pointer-events: none; opacity: 0; transform: scale(1.1); }
+  #layar-pembuka.pembuka-hilang .pembuka-isi { opacity: 0; transform: scale(1.5); filter: blur(12px); }
+  #layar-pembuka.pembuka-hilang .pembuka-bilah { width: 100%; }
+</style>
+
+<script>
+  const akar = document.documentElement;
+  const layar = document.getElementById("layar-pembuka");
+  if (layar && akar.classList.contains("pembuka-aktif")) {
+    window.setTimeout(() => {
+      layar.classList.add("pembuka-hilang");
+      akar.classList.remove("pembuka-aktif");
+      // Ditandai SESUDAH transisinya dimulai, seperti versi aslinya.
+      try {
+        sessionStorage.setItem("splash_ditampilkan", "ya");
+      } catch {
+        /* diabaikan */
+      }
+      // Kelas aktif dicabut di atas supaya gulir halaman kembali, jadi
+      // layarnya dipertahankan tampil lewat gaya sebaris selama memudar.
+      layar.style.display = "flex";
+    }, 1200);
+    window.setTimeout(() => layar.remove(), 2000);
+  }
+</script>
