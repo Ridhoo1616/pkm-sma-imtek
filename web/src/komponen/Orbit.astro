@@ -1,0 +1,77 @@
+---
+/**
+ * Garis orbit tipis beserta bintang empat sudut, hiasan latar pada rancangan
+ * beranda. Tidak memuat kata apa pun dan disembunyikan dari pembaca layar.
+ *
+ * `nada` menentukan warna garisnya: "terang" untuk di atas latar gelap,
+ * "gelap" untuk di atas latar terang.
+ */
+interface Props {
+  class?: string;
+  nada?: "terang" | "gelap";
+  miring?: number;
+  /** Letak bintang pada garis, dalam persen lebar dan tinggi kotaknya. */
+  bintang?: { x: number; y: number; ukuran?: number }[];
+}
+
+const {
+  class: kelas = "",
+  nada = "gelap",
+  miring = -14,
+  bintang = [
+    { x: 8, y: 58, ukuran: 16 },
+    { x: 88, y: 22, ukuran: 12 },
+  ],
+} = Astro.props;
+
+const id = `orbit-${Math.random().toString(36).slice(2, 8)}`;
+const warna = nada === "terang" ? "255 255 255" : "15 42 74";
+const BINTANG = "M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z";
+---
+
+<svg
+  class={`orbit ${kelas}`}
+  data-orbit
+  viewBox="0 0 1000 400"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <linearGradient id={id} x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color={`rgb(${warna} / 0)`} />
+      <stop offset="0.3" stop-color={`rgb(${warna} / 0.55)`} />
+      <stop offset="0.7" stop-color={`rgb(${warna} / 0.35)`} />
+      <stop offset="1" stop-color={`rgb(${warna} / 0)`} />
+    </linearGradient>
+  </defs>
+  <ellipse
+    cx="500"
+    cy="200"
+    rx="490"
+    ry="150"
+    class="garis-orbit"
+    pathLength="1"
+    fill="none"
+    stroke={`url(#${id})`}
+    stroke-width="1.4"
+    vector-effect="non-scaling-stroke"
+    transform={`rotate(${miring} 500 200)`}
+  />
+  {
+    bintang.map((b, i) => {
+      const s = b.ukuran ?? 14;
+      return (
+        <g transform={`translate(${b.x * 10 - s / 2} ${b.y * 4 - s / 2})`}>
+          <path
+            class="bintang"
+            d={BINTANG}
+            transform={`scale(${s / 24})`}
+            fill={nada === "terang" ? "#fff" : "#0f2a4a"}
+            style={`animation-delay:${i * 1.1}s`}
+          />
+        </g>
+      );
+    })
+  }
+</svg>

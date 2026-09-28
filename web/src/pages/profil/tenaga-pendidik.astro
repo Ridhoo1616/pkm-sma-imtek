@@ -1,0 +1,58 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import KartuPembuka from "../../komponen/KartuPembuka.astro";
+import { data } from "../../lib/tembolok";
+import DaftarTenaga from "@/komponen/DaftarTenaga";
+import type { Tenaga } from "@/lib/tipe";
+
+/**
+ * Daftar guru memakai komponen React yang sudah ada sebagai bagian
+ * interaktif (client:visible), sebab pencarian, penyaring kategori dan
+ * mata pelajaran, urutan, serta "tampilkan lainnya" sudah diuji di sana.
+ * Skripnya baru diunduh ketika daftarnya digulir ke dalam layar.
+ */
+const [{ profil }, hasil] = await Promise.all([
+  data.profil(),
+  data.tenaga().catch((): { data: Tenaga[]; kategori: string[] } => ({ data: [], kategori: [] })),
+]);
+const p = profil.pengaturan;
+---
+
+<Publik sorotan judul="Tenaga Pendidik dan Kependidikan" deskripsi="Guru dan tenaga kependidikan sekolah beserta jabatan dan bidang yang diampu.">
+  <KepalaHalaman
+    pengaturan={p}
+    judul="Tenaga Pendidik dan Kependidikan"
+    keterangan="Guru dan tenaga kependidikan yang bertugas di sekolah pada tahun pelajaran ini."
+    induk="/profil"
+    jalur="/profil/tenaga-pendidik"
+  />
+
+  <div class="wadah space-y-8 py-12 md:py-16">
+    <KartuPembuka
+      atas="Tenaga Pendidik dan Kependidikan"
+      judul="Guru dan Tenaga Kependidikan"
+      keterangan="Tenaga pendidik dan kependidikan adalah bagian penting dalam mewujudkan proses pembelajaran yang berkualitas, serta mendukung terciptanya lingkungan sekolah yang aman, nyaman, dan berkarakter."
+      gambar="/ilustrasi/tenaga.png"
+      alt="Ilustrasi lima guru dan siswa berdiri di depan gedung sekolah"
+      lebar={1487}
+      tinggi={709}
+    />
+
+    {
+      hasil.data.length === 0 ? (
+        <div class="kaca px-6 py-14 text-center">
+          <p class="text-lg font-semibold text-biru-tua">Data tenaga pendidik belum tersedia</p>
+          <p class="mt-2 text-sm text-samar">
+            Daftarnya diisi lewat menu Tenaga Pendidik di panel admin. Nama, jabatan, mata pelajaran, dan kelas yang diampu hanya
+            boleh berasal dari data sekolah.
+          </p>
+        </div>
+      ) : (
+        <div data-muncul>
+          <DaftarTenaga client:visible daftar={hasil.data} />
+        </div>
+      )
+    }
+  </div>
+</Publik>

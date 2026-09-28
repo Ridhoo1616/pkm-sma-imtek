@@ -1,0 +1,109 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import { data } from "../../lib/tembolok";
+import { alamatLengkap, belumTerisi } from "@/lib/format";
+import { Menunggu } from "@/komponen/Halaman";
+import { IkonBendera, IkonLokasi, IkonTelepon } from "@/komponen/Ikon";
+
+const { profil } = await data.profil();
+const p = profil.pengaturan;
+
+// Butir yang masih penanda [kurung siku] tidak ditampilkan; kelompok yang
+// seluruh butirnya kosong ikut hilang.
+const kelompok = [
+  {
+    judul: "Identitas",
+    ikon: IkonBendera,
+    butir: [
+      { k: "Nama sekolah", v: p.nama_sekolah },
+      { k: "Nama singkat", v: p.nama_singkat },
+      { k: "NPSN", v: p.npsn },
+      { k: "Status sekolah", v: p.status_sekolah },
+      { k: "Akreditasi", v: p.akreditasi },
+      { k: "Yayasan penyelenggara", v: p.yayasan },
+      { k: "Kepala sekolah", v: p.kepala_sekolah },
+    ],
+  },
+  {
+    judul: "Alamat",
+    ikon: IkonLokasi,
+    butir: [
+      { k: "Alamat", v: alamatLengkap(p.alamat, p.kode_pos) },
+      { k: "Kelurahan/Desa", v: p.kelurahan },
+      { k: "Kecamatan", v: p.kecamatan },
+      { k: "Kabupaten/Kota", v: p.kota },
+      { k: "Provinsi", v: p.provinsi },
+    ],
+  },
+  {
+    judul: "Kontak dan layanan",
+    ikon: IkonTelepon,
+    butir: [
+      { k: "Telepon", v: p.telepon },
+      { k: "Surel", v: p.email },
+      { k: "WhatsApp panitia", v: p.whatsapp },
+      { k: "Jam layanan", v: p.jam_layanan },
+    ],
+  },
+]
+  .map((g) => ({ ...g, butir: g.butir.filter((b) => b.v && !belumTerisi(b.v)) }))
+  .filter((g) => g.butir.length > 0);
+
+const adaPeta = Boolean(p.peta_embed && !belumTerisi(p.peta_embed));
+---
+
+<Publik sorotan judul="Data Sekolah" deskripsi="Data pokok sekolah: NPSN, status, akreditasi, penyelenggara, alamat, dan jam layanan.">
+  <KepalaHalaman
+    pengaturan={p}
+    judul="Data Sekolah"
+    keterangan="Data pokok yang biasa diminta pada pendaftaran, pengurusan surat, dan verifikasi data pendidikan."
+    induk="/profil"
+    jalur="/profil/data-sekolah"
+  />
+
+  <section class="wadah py-12 md:py-16">
+    {
+      kelompok.length === 0 ? (
+        <div class="kaca max-w-3xl p-6 md:p-8">
+          <Menunggu apa="Data pokok sekolah" polos />
+        </div>
+      ) : (
+        <div class={"grid gap-6 lg:items-start " + (adaPeta ? "lg:grid-cols-2" : "max-w-3xl")}>
+          <div class="space-y-6">
+            {kelompok.map((g, i) => (
+              <section class="kaca overflow-hidden" data-muncul={String(i * 0.06)}>
+                <h2 class="flex items-center gap-3 border-b border-garis/70 px-6 py-4 text-base">
+                  <span class="grid h-9 w-9 place-items-center rounded-lg bg-biru-tua text-white" aria-hidden="true">
+                    <g.ikon ukuran={18} />
+                  </span>
+                  {g.judul}
+                </h2>
+                <dl class="divide-y divide-garis/70 text-sm">
+                  {g.butir.map((b) => (
+                    <div class="grid gap-1 px-6 py-3.5 transition hover:bg-white/70 sm:grid-cols-[11rem_1fr] sm:gap-4">
+                      <dt class="text-xs font-semibold tracking-wide text-samar uppercase sm:text-sm sm:normal-case">{b.k}</dt>
+                      <dd class="font-medium text-teks">{b.v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            ))}
+          </div>
+
+          {adaPeta && (
+            <section class="kaca overflow-hidden lg:sticky lg:top-28" data-muncul="0.1">
+              <h2 class="flex items-center gap-3 border-b border-garis/70 px-6 py-4 text-base">
+                <span class="grid h-9 w-9 place-items-center rounded-lg bg-biru-tua text-white" aria-hidden="true">
+                  <IkonLokasi ukuran={18} />
+                </span>
+                Lokasi
+              </h2>
+              <div class="peta-sematan" set:html={p.peta_embed} />
+            </section>
+          )}
+        </div>
+      )
+    }
+  </section>
+</Publik>

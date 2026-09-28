@@ -1,0 +1,83 @@
+---
+import Publik from "../tata/Publik.astro";
+import KepalaHalaman from "../komponen/KepalaHalaman.astro";
+import JudulBagian from "../komponen/JudulBagian.astro";
+import { data } from "../lib/tembolok";
+import { alamatLengkap, belumTerisi, pesanTanyaPpdb, tautanWa } from "@/lib/format";
+import FormulirKontak from "@/komponen/FormulirKontak";
+import { IkonJam, IkonLokasi, IkonSurel, IkonTelepon, IkonWhatsapp } from "@/komponen/Ikon";
+
+/**
+ * Formulir pertanyaan memakai komponen React yang sudah ada (pemeriksaan
+ * isian dan kabar terkirim). Kirimannya menuju /api/pesan di asal yang sama,
+ * yang diteruskan server Astro ke backend.
+ */
+const { profil } = await data.profil();
+const p = profil.pengaturan;
+const wa = tautanWa(p.whatsapp ?? "", pesanTanyaPpdb(p.nama_sekolah ?? ""));
+const jalur = [
+  { ikon: IkonLokasi, label: "Alamat", isi: alamatLengkap(p.alamat, p.kode_pos), tautan: "" },
+  p.telepon && { ikon: IkonTelepon, label: "Telepon", isi: p.telepon, tautan: `tel:${p.telepon}` },
+  p.email && { ikon: IkonSurel, label: "Surel", isi: p.email, tautan: `mailto:${p.email}` },
+  p.jam_layanan && !belumTerisi(p.jam_layanan) && { ikon: IkonJam, label: "Jam layanan", isi: p.jam_layanan, tautan: "" },
+].filter(Boolean) as { ikon: typeof IkonLokasi; label: string; isi: string; tautan: string }[];
+const adaPeta = Boolean(p.peta_embed && !belumTerisi(p.peta_embed));
+---
+
+<Publik sorotan judul="Kontak" deskripsi="Alamat, nomor telepon, dan formulir pertanyaan untuk sekolah.">
+  <KepalaHalaman
+    pengaturan={p}
+    judul="Kontak Sekolah"
+    keterangan="Sampaikan pertanyaan seputar pendaftaran, biaya, atau kegiatan sekolah. Panitia akan membalas melalui jalur yang Anda cantumkan."
+    induk="/kontak"
+    jalur="/kontak"
+  />
+
+  <div class="wadah grid gap-10 py-12 md:py-16 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
+    <div data-muncul>
+      <JudulBagian atas="Hubungi" judul="Alamat & Jalur Kontak" />
+      <div class="kaca divide-y divide-garis/70 overflow-hidden">
+        {
+          jalur.map((j) => (
+            <div class="flex gap-4 px-6 py-5 transition hover:bg-white/70">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-biru-tua text-white" aria-hidden="true">
+                <j.ikon ukuran={18} />
+              </span>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold tracking-wide text-samar uppercase">{j.label}</p>
+                {j.tautan ? (
+                  <a href={j.tautan} class="mt-1 block text-[15px] font-semibold break-all text-biru hover:underline">{j.isi}</a>
+                ) : (
+                  <p class="mt-1 text-[15px] leading-relaxed text-teks">{j.isi}</p>
+                )}
+              </div>
+            </div>
+          ))
+        }
+        <div class="flex gap-4 px-6 py-5">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-green-700 text-white" aria-hidden="true"><IkonWhatsapp ukuran={18} /></span>
+          <div class="min-w-0">
+            <p class="text-xs font-semibold tracking-wide text-samar uppercase">WhatsApp panitia PPDB</p>
+            {
+              wa ? (
+                <a href={wa} target="_blank" rel="noopener noreferrer" class="tombol-kilau mt-2 inline-flex items-center gap-2 rounded-xl bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800">
+                  <IkonWhatsapp ukuran={16} /> Chat WhatsApp
+                </a>
+              ) : (
+                <p class="mt-1 text-sm text-samar">Nomor WhatsApp panitia belum tersedia. Gunakan telepon, surel, atau formulir di samping.</p>
+              )
+            }
+          </div>
+        </div>
+      </div>
+      {adaPeta && <div class="kaca peta-sematan mt-6 overflow-hidden" set:html={p.peta_embed} />}
+    </div>
+
+    <div data-muncul="0.1">
+      <JudulBagian atas="Formulir" judul="Kirim Pertanyaan" />
+      <div class="kaca p-6 md:p-7">
+        <FormulirKontak client:visible />
+      </div>
+    </div>
+  </div>
+</Publik>

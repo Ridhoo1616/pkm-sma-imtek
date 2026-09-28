@@ -1,0 +1,127 @@
+---
+import Orbit from "./Orbit.astro";
+import { urlUnggahan } from "@/lib/api";
+import { belumTerisi } from "@/lib/format";
+import { menuDari } from "@/lib/menu";
+import type { Pengaturan } from "@/lib/tipe";
+
+/**
+ * Kepala halaman turunan, sebangun dengan sorotan beranda tetapi lebih
+ * pendek: latar biru tua dengan foto gedung yang sangat dipudarkan, garis
+ * orbit, jejak lokasi, judul, dan keterangan. Navigasi yang bening berada
+ * di atasnya, sama seperti di beranda (tata letak dipanggil dengan
+ * `sorotan`).
+ *
+ * Di tepi bawahnya menumpang bilah kaca berisi halaman sekelompok, supaya
+ * pengunjung dapat berpindah ke halaman sebelah tanpa kembali ke menu atas.
+ * Halaman yang sedang dibuka ditandai dan tidak dibuat tautan.
+ */
+interface Props {
+  pengaturan: Pengaturan;
+  judul: string;
+  keterangan?: string;
+  /** Jalur halaman indeks kelompok, misalnya "/profil". */
+  induk: string;
+  /** Jalur halaman yang sedang dibuka; sama dengan `induk` pada halaman indeks. */
+  jalur: string;
+}
+
+const { pengaturan: p, judul, keterangan, induk, jalur } = Astro.props;
+const kelompok = menuDari(induk);
+const anak = kelompok?.anak ?? [];
+const sekarang = anak.find((a) => a.jalur === jalur);
+const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
+---
+
+<section class="relative isolate overflow-hidden bg-biru-tua pt-[4.5rem] text-white" data-sorotan-bagian>
+  {
+    adaGedung && (
+      <img
+        src={urlUnggahan("profil", p.foto_depan)}
+        alt=""
+        aria-hidden="true"
+        class="absolute inset-0 -z-20 h-full w-full object-cover opacity-30"
+        data-paralaks
+      />
+    )
+  }
+  <div aria-hidden="true" class="absolute inset-0 -z-10 bg-[linear-gradient(100deg,rgb(10_28_49/0.97)_0%,rgb(10_28_49/0.88)_45%,rgb(15_42_74/0.7)_100%)]"></div>
+  <div aria-hidden="true" class="absolute -top-40 -right-32 -z-10 h-[30rem] w-[30rem] rounded-full bg-biru opacity-60 blur-[110px]"></div>
+  <Orbit nada="terang" class="-right-[18%] top-[10%] h-[22rem] w-[75%] opacity-70" miring={10} bintang={[{ x: 20, y: 70, ukuran: 14 }, { x: 78, y: 12, ukuran: 11 }]} />
+
+  <div class="wadah relative pt-10 pb-24 md:pt-14 md:pb-28">
+    <div class="masuk-bertahap max-w-3xl" data-isi-sorotan>
+      <nav aria-label="Jejak lokasi" class="text-sm text-white/70">
+        <ol class="flex flex-wrap items-center gap-1.5">
+          <li><a href="/" class="hover:text-emas">Beranda</a></li>
+          {
+            kelompok && (
+              <>
+                <li aria-hidden="true">/</li>
+                <li>
+                  {sekarang ? (
+                    <a href={kelompok.jalur} class="hover:text-emas">{kelompok.label}</a>
+                  ) : (
+                    <span aria-current="page" class="font-semibold text-white">{kelompok.label}</span>
+                  )}
+                </li>
+              </>
+            )
+          }
+          {
+            sekarang && (
+              <>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page" class="font-semibold text-white">{sekarang.label}</li>
+              </>
+            )
+          }
+        </ol>
+      </nav>
+      <h1 class="mt-4 text-4xl leading-[1.1] font-extrabold tracking-tight text-balance text-white md:text-5xl">{judul}</h1>
+      <span aria-hidden="true" class="mt-4 block h-1 w-16 rounded-full bg-emas"></span>
+      {keterangan && <p class="mt-4 max-w-2xl text-[15px] leading-relaxed text-white/80 md:text-base">{keterangan}</p>}
+      {/* Isi tambahan di bawah keterangan, misalnya kotak cari berita. */}
+      {Astro.slots.has("default") && <div class="mt-6"><slot /></div>}
+    </div>
+  </div>
+</section>
+
+{
+  anak.length > 0 && (
+    <nav aria-label={`Halaman lain dalam ${kelompok?.label}`} class="wadah relative z-10 -mt-8">
+      <ul class="bilah-anak flex snap-x gap-1.5 overflow-x-auto rounded-2xl bg-white p-1.5 shadow-[0_14px_40px_rgb(10_28_49/0.14)] ring-1 ring-garis" data-bilah-anak>
+        <li class="shrink-0 snap-start">
+          {jalur === induk ? (
+            <span aria-current="page" class="block rounded-xl bg-biru-tua px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-white">Ringkasan</span>
+          ) : (
+            <a href={induk} data-magnet class="block rounded-xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-teks transition hover:bg-biru-muda hover:text-biru">Ringkasan</a>
+          )}
+        </li>
+        {anak.map((a) => (
+          <li class="shrink-0 snap-start">
+            {a.jalur === jalur ? (
+              <span aria-current="page" class="block rounded-xl bg-biru-tua px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-white">{a.label}</span>
+            ) : (
+              <a href={a.jalur} data-magnet class="block rounded-xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-teks transition hover:bg-biru-muda hover:text-biru">{a.label}</a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<script>
+  // Bilah digeser ke butir yang sedang dibuka bila butir itu berada di luar
+  // pandangan — di ponsel, "Tenaga Pendidik" ada jauh di ujung kanan.
+  const bilah = document.querySelector<HTMLElement>("[data-bilah-anak]");
+  const aktif = bilah?.querySelector<HTMLElement>("[aria-current]");
+  if (bilah && aktif) {
+    const k = bilah.getBoundingClientRect();
+    const b = aktif.getBoundingClientRect();
+    if (b.left < k.left || b.right > k.right) {
+      bilah.scrollLeft += b.left - k.left - (k.width - b.width) / 2;
+    }
+  }
+</script>

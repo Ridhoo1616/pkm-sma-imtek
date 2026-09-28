@@ -1,0 +1,182 @@
+---
+/**
+ * Seluruh interaksi beranda dalam satu skrip kecil, tanpa pustaka:
+ *
+ *   - angka pada panel sekolah menghitung naik saat pertama terlihat;
+ *   - bilah kuota peminatan terisi dari nol;
+ *   - garis orbit tergambar saat bagiannya masuk layar;
+ *   - foto sorotan bergerak lebih lambat daripada halaman (paralaks), dan
+ *     garis orbit di atasnya mengikuti kursor sedikit;
+ *   - kartu peminatan, fasilitas, dan berita miring mengikuti kursor
+ *     dengan cahaya yang menyorot di bawah penunjuk;
+ *   - seluruh tombol (kelas tombol-kilau, atau bertanda data-magnet)
+ *     tertarik sedikit ke arah kursor;
+ *   - kartu peminatan dibalik untuk menampilkan rinciannya.
+ *
+ * Membalik kartu BUKAN hiasan, jadi tetap bekerja tanpa gerak: pada setelan
+ * "kurangi gerak" kartunya berganti sisi seketika, bukan berputar.
+ *
+ * Seluruhnya tambahan: tanpa JavaScript, angka, bilah, dan garis tampil
+ * dalam keadaan akhirnya. Pada setelan "kurangi gerak" tidak ada yang
+ * bergerak, dan kemiringan hanya bekerja pada peranti yang punya kursor.
+ */
+---
+
+<script>
+  /* ---------- Kartu peminatan dibalik ----------
+     Sisi yang tidak menghadap pengunjung diberi `inert`, jadi tautan di
+     baliknya tidak dapat disorot Tab maupun dibaca pembaca layar. Fokus
+     dipindah ke tombol di sisi yang baru, supaya pengguna papan tuts tidak
+     tertinggal di sisi yang sudah tersembunyi. */
+  for (const kartu of document.querySelectorAll<HTMLElement>("[data-kartu-balik]")) {
+    const depan = kartu.querySelector<HTMLElement>(".sisi-depan");
+    const belakang = kartu.querySelector<HTMLElement>(".sisi-belakang");
+    const balik = (keBelakang: boolean) => {
+      kartu.classList.toggle("terbalik", keBelakang);
+      depan?.toggleAttribute("inert", keBelakang);
+      belakang?.toggleAttribute("inert", !keBelakang);
+      for (const t of kartu.querySelectorAll("[data-balik]")) t.setAttribute("aria-expanded", String(keBelakang));
+      const sasaran = (keBelakang ? belakang : depan)?.querySelector<HTMLElement>("[data-balik]");
+      // Tunggu separuh putaran supaya sisi barunya sudah menghadap depan.
+      window.setTimeout(() => sasaran?.focus({ preventScroll: true }), 320);
+    };
+    for (const t of kartu.querySelectorAll<HTMLElement>("[data-balik]")) {
+      t.addEventListener("click", () => balik(!kartu.classList.contains("terbalik")));
+    }
+    kartu.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && kartu.classList.contains("terbalik")) balik(false);
+    });
+  }
+
+  const kurangiGerak = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const adaKursor = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  const saatTerlihat = (el: Element, kerjakan: () => void, ambang = 0.3) => {
+    const p = new IntersectionObserver(
+      (entri) => {
+        if (!entri.some((e) => e.isIntersecting)) return;
+        p.disconnect();
+        kerjakan();
+      },
+      { threshold: ambang },
+    );
+    p.observe(el);
+  };
+
+  if (!kurangiGerak) {
+    /* ---------- Angka menghitung naik ---------- */
+    for (const el of document.querySelectorAll<HTMLElement>("[data-hitung]")) {
+      const akhir = Number((el.dataset.hitung ?? "").replace(/\D/g, ""));
+      // Hanya angka murni; "B" pada akreditasi dibiarkan apa adanya.
+      if (!/^[\d.]+$/.test(el.dataset.hitung ?? "") || !akhir) continue;
+      el.textContent = "0";
+      saatTerlihat(el, () => {
+        const mulai = performance.now();
+        const lama = 1400;
+        const langkah = (t: number) => {
+          const k = Math.min((t - mulai) / lama, 1);
+          const halus = 1 - Math.pow(1 - k, 3);
+          el.textContent = Math.round(akhir * halus).toLocaleString("id-ID");
+          if (k < 1) requestAnimationFrame(langkah);
+        };
+        requestAnimationFrame(langkah);
+      });
+    }
+
+    /* ---------- Bilah kuota terisi ---------- */
+    for (const el of document.querySelectorAll<HTMLElement>("[data-bilah]")) {
+      const lebar = el.style.width;
+      el.style.width = "0%";
+      el.style.transition = "width 1.2s cubic-bezier(0.16, 1, 0.3, 1)";
+      saatTerlihat(el, () => requestAnimationFrame(() => (el.style.width = lebar)), 0.6);
+    }
+
+    /* ---------- Garis orbit tergambar ---------- */
+    for (const el of document.querySelectorAll<SVGElement>("[data-orbit]")) {
+      el.classList.add("orbit-siap");
+      saatTerlihat(el, () => el.classList.add("orbit-tergambar"), 0.1);
+    }
+
+    /* ---------- Paralaks sorotan ---------- */
+    const bagian = document.querySelector<HTMLElement>("[data-sorotan-bagian]");
+    const foto = document.querySelector<HTMLElement>("[data-paralaks]");
+    const isi = document.querySelector<HTMLElement>("[data-isi-sorotan]");
+    const orbitSorotan = bagian?.querySelector<SVGElement>("[data-orbit]");
+    let kursorX = 0;
+    let kursorY = 0;
+    let menunggu = false;
+
+    const gambar = () => {
+      menunggu = false;
+      if (!bagian) return;
+      const tinggi = bagian.offsetHeight;
+      const y = Math.min(window.scrollY, tinggi);
+      if (foto) foto.style.transform = `translate3d(0, ${y * 0.28}px, 0)`;
+      if (isi) {
+        isi.style.transform = `translate3d(0, ${y * 0.12}px, 0)`;
+        isi.style.opacity = String(Math.max(1 - y / (tinggi * 0.85), 0));
+      }
+      if (orbitSorotan) {
+        orbitSorotan.style.transform = `translate3d(${kursorX * 18}px, ${kursorY * 12 + y * 0.18}px, 0)`;
+      }
+    };
+    const minta = () => {
+      if (menunggu) return;
+      menunggu = true;
+      requestAnimationFrame(gambar);
+    };
+    window.addEventListener("scroll", minta, { passive: true });
+    if (adaKursor && bagian) {
+      bagian.addEventListener("pointermove", (e) => {
+        const r = bagian.getBoundingClientRect();
+        kursorX = (e.clientX - r.left) / r.width - 0.5;
+        kursorY = (e.clientY - r.top) / r.height - 0.5;
+        minta();
+      });
+    }
+    gambar();
+
+    /* ---------- Tombol magnet ----------
+       Tombolnya mengikuti kursor sejauh sepertiga jaraknya, paling jauh
+       sekitar 10 piksel, dan tulisannya ikut sedikit lebih jauh lagi
+       supaya terasa berlapis. Lepas kursor, tombolnya kembali memantul. */
+    if (adaKursor) {
+      // Setiap tombol bergaya kilau ikut bermagnet dengan sendirinya, supaya
+      // tombol pada halaman baru tidak ketinggalan hanya karena lupa diberi
+      // penanda. data-magnet tetap dipakai untuk tautan yang bukan tombol
+      // kilau: tombol menu atas dan pil sub menu.
+      for (const tombol of document.querySelectorAll<HTMLElement>("[data-magnet], .tombol-kilau")) {
+        tombol.classList.add("magnet");
+        tombol.addEventListener("pointermove", (e) => {
+          const r = tombol.getBoundingClientRect();
+          const dx = e.clientX - (r.left + r.width / 2);
+          const dy = e.clientY - (r.top + r.height / 2);
+          tombol.style.setProperty("--tarik-x", `${Math.max(-10, Math.min(10, dx * 0.3))}px`);
+          tombol.style.setProperty("--tarik-y", `${Math.max(-8, Math.min(8, dy * 0.35))}px`);
+        });
+        tombol.addEventListener("pointerleave", () => {
+          tombol.style.setProperty("--tarik-x", "0px");
+          tombol.style.setProperty("--tarik-y", "0px");
+        });
+      }
+    }
+
+    /* ---------- Kartu miring bercahaya ---------- */
+    if (adaKursor) {
+      for (const kartu of document.querySelectorAll<HTMLElement>("[data-miring]")) {
+        kartu.addEventListener("pointermove", (e) => {
+          const r = kartu.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width;
+          const y = (e.clientY - r.top) / r.height;
+          kartu.style.setProperty("--sorot-x", `${x * 100}%`);
+          kartu.style.setProperty("--sorot-y", `${y * 100}%`);
+          kartu.style.transform =
+            `perspective(900px) rotateX(${(0.5 - y) * 7}deg) rotateY(${(x - 0.5) * 9}deg) translateY(-4px)`;
+        });
+        kartu.addEventListener("pointerleave", () => {
+          kartu.style.transform = "";
+        });
+      }
+    }
+  }
+</script>

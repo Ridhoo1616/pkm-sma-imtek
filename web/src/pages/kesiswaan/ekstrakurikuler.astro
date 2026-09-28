@@ -1,0 +1,94 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import JudulBagian from "../../komponen/JudulBagian.astro";
+import { data } from "../../lib/tembolok";
+import { urlUnggahan } from "@/lib/api";
+import { kelasKartuAkhir } from "@/komponen/Bagian";
+import { IkonBendera, IkonJam, IkonGuru } from "@/komponen/Ikon";
+import type { KegiatanSiswa } from "@/lib/tipe";
+
+const KETERANGAN: Record<string, string> = {
+  Ekstrakurikuler: "Kegiatan pilihan di luar jam pelajaran.",
+  OSIS: "Kegiatan yang dijalankan pengurus OSIS.",
+  Pembinaan: "Kegiatan pembinaan yang diikuti seluruh siswa.",
+};
+
+const [hasil, { profil }] = await Promise.all([
+  data.kegiatanSiswa().catch((): { data: KegiatanSiswa[]; jenis: string[] } => ({ data: [], jenis: [] })),
+  data.profil(),
+]);
+const kelompok = hasil.jenis
+  .map((j) => ({ nama: j, isi: hasil.data.filter((k) => k.jenis === j) }))
+  .filter((g) => g.isi.length > 0);
+---
+
+<Publik sorotan judul="Ekstrakurikuler" deskripsi="Pilihan kegiatan ekstrakurikuler sekolah beserta pembina dan jadwal latihannya.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Ekstrakurikuler"
+    keterangan="Kegiatan yang dapat dipilih siswa sesuai minatnya, beserta pembina dan jadwal latihannya."
+    induk="/kesiswaan"
+    jalur="/kesiswaan/ekstrakurikuler"
+  />
+  <div class="wadah space-y-14 py-12 md:py-16">
+    {
+      kelompok.length === 0 ? (
+        <div class="kaca px-6 py-14 text-center" data-muncul>
+          <span aria-hidden="true" class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-biru-muda text-biru">
+            <IkonBendera ukuran={26} />
+          </span>
+          <p class="mt-4 text-lg font-semibold text-biru-tua">Daftar kegiatan belum diisi</p>
+          <p class="mx-auto mt-2 max-w-xl text-sm text-samar">
+            Kegiatan ditambahkan lewat menu Kegiatan Siswa di panel admin, beserta nama pembina dan jadwalnya.
+          </p>
+        </div>
+      ) : (
+        kelompok.map((g) => (
+          <section data-muncul>
+            <JudulBagian atas={`${g.isi.length} kegiatan`} judul={g.nama} keterangan={KETERANGAN[g.nama]} />
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {g.isi.map((k, i) => (
+                <article
+                  data-miring
+                  data-muncul={String((i % 3) * 0.07)}
+                  class={"kaca kartu-sorot group relative flex flex-col overflow-hidden " + kelasKartuAkhir(i, g.isi.length)}
+                >
+                  <div class="relative h-44 overflow-hidden bg-gradient-to-br from-biru-tua to-biru">
+                    {k.gambar ? (
+                      <img src={urlUnggahan("kegiatan", k.gambar)} alt={k.nama} class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
+                    ) : (
+                      <div class="grid h-full place-items-center text-white/85" aria-hidden="true">
+                        <span class="ikon-kartu grid h-16 w-16 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/15"><IkonBendera ukuran={30} /></span>
+                      </div>
+                    )}
+                  </div>
+                  <div class="flex-1 p-5">
+                    <h3 class="text-base">{k.nama}</h3>
+                    {k.deskripsi && <p class="mt-2 text-sm leading-relaxed text-samar">{k.deskripsi}</p>}
+                    {(k.pembina || k.jadwal) && (
+                      <dl class="mt-4 space-y-2 border-t border-garis pt-3 text-sm">
+                        {k.pembina && (
+                          <div class="flex items-center gap-2">
+                            <dt class="flex shrink-0 items-center gap-1.5 text-samar"><IkonGuru ukuran={15} /> Pembina</dt>
+                            <dd class="font-medium text-teks">{k.pembina}</dd>
+                          </div>
+                        )}
+                        {k.jadwal && (
+                          <div class="flex items-center gap-2">
+                            <dt class="flex shrink-0 items-center gap-1.5 text-samar"><IkonJam ukuran={15} /> Jadwal</dt>
+                            <dd class="font-medium text-teks">{k.jadwal}</dd>
+                          </div>
+                        )}
+                      </dl>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))
+      )
+    }
+  </div>
+</Publik>

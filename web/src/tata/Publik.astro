@@ -1,0 +1,133 @@
+---
+import "../gaya.css";
+import Navigasi from "../komponen/Navigasi.astro";
+import Interaksi from "../komponen/Interaksi.astro";
+import { TeksBerjalan } from "@/komponen/TeksBerjalan";
+import Footer from "@/komponen/Footer";
+import BantuanMelayang from "@/komponen/BantuanMelayang";
+import GulirHalus from "@/komponen/GulirHalus";
+import { PencatatKunjungan } from "@/komponen/PencatatKunjungan";
+import { ClickSpark } from "@/komponen/ClickSpark";
+import { data } from "../lib/tembolok";
+import { belumTerisi } from "@/lib/format";
+import type { Berita, Faq, Jurusan } from "@/lib/tipe";
+
+/**
+ * Tata letak seluruh halaman publik versi Astro. Isinya sama dengan
+ * (publik)/layout.tsx di frontend Next: bilah berjalan, navigasi, kaki
+ * halaman, dan tombol bantuan melayang.
+ *
+ * Yang dikirim sebagai JavaScript hanya bagian yang memang interaktif
+ * (client:*). Bilah berjalan dan kaki halaman dirender menjadi HTML biasa
+ * dari komponen React yang sama, tanpa satu bita pun skrip.
+ */
+interface Props {
+  /** Judul halaman; kosong berarti judul bawaan sekolah. */
+  judul?: string;
+  deskripsi?: string;
+  /** Halaman dibuka sorotan gelap yang naik ke bawah navigasi. */
+  sorotan?: boolean;
+}
+
+const { judul, deskripsi, sorotan = false } = Astro.props;
+
+// Dipakai pengganti usePathname saat komponen React dirender di server.
+globalThis.__jalurAstro = Astro.url.pathname;
+
+const { profil, gagal } = await data.profil();
+const p = profil.pengaturan;
+const nama = p.nama_sekolah || "SMA IMTEK";
+
+// Kegagalan salah satunya tidak boleh mengosongkan seluruh halaman.
+const [berita, faq, jurusan] = await Promise.all([
+  data.berita("?per_halaman=1").then((h) => h.data).catch((): Berita[] => []),
+  data.faq().then((h) => h.data).catch((): Faq[] => []),
+  data.jurusan().then((h) => h.data).catch((): Jurusan[] => []),
+]);
+
+const tagline = belumTerisi(p.tagline ?? "") ? "" : p.tagline;
+const judulPenuh = judul ? `${judul} · ${nama}` : `${nama} · Profil Sekolah & PPDB Online`;
+const keterangan =
+  deskripsi ||
+  tagline ||
+  `Profil ${nama} dan pendaftaran peserta didik baru secara online` + (p.kota ? ` di ${p.kota}` : "") + ".";
+---
+
+<!doctype html>
+<html lang="id" class="h-full antialiased">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{judulPenuh}</title>
+    <meta name="description" content={keterangan} />
+    <meta name="keywords" content={[nama, "PPDB online", "pendaftaran peserta didik baru", p.kota, "SMA swasta"].filter(Boolean).join(", ")} />
+    <meta property="og:title" content={judulPenuh} />
+    <meta property="og:description" content={keterangan} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+  </head>
+  <body class="latar-kaca flex min-h-full flex-col overflow-x-clip">
+    <ClickSpark client:idle sparkColor="#F59E0B" sparkSize={12} sparkRadius={20} sparkCount={8} duration={500} />
+    <GulirHalus client:idle />
+    <PencatatKunjungan client:idle />
+
+    <TeksBerjalan profil={profil} berita={berita} />
+    <Navigasi pengaturan={p} ppdbDibuka={profil.ppdb.dibuka} />
+
+    {
+      gagal && (
+        <div class="bg-amber-50 text-amber-900">
+          <p class="wadah py-2.5 text-center text-sm">
+            Sebagian data belum dapat dimuat karena server belum merespons. Muat ulang halaman ini beberapa saat lagi.
+          </p>
+        </div>
+      )
+    }
+
+    <!-- Sorotan beranda naik ke bawah navigasi yang bening, jadi fotonya
+         terlihat di belakang menu seperti pada rancangannya. -->
+    <main class={"flex-1 " + (sorotan ? "-mt-[4.5rem]" : "")}>
+      <slot />
+    </main>
+
+    <Footer pengaturan={p} />
+    <Interaksi />
+
+    <BantuanMelayang
+      client:idle
+      pengaturan={p}
+      ppdbDibuka={profil.ppdb.dibuka}
+      faq={faq}
+      ppdb={profil.ppdb}
+      jurusan={jurusan}
+      pencocokAi={profil.pencocok_ai === true}
+    />
+
+    <script>
+      // Gerak masuk bagian halaman. Kelas awalnya dipasang di sini, bukan di
+      // HTML: tanpa skrip, seluruh isi halaman tetap terlihat.
+      const bagian = document.querySelectorAll<HTMLElement>("[data-muncul]");
+      if ("IntersectionObserver" in window) {
+        const pengamat = new IntersectionObserver(
+          (entri) => {
+            for (const e of entri) {
+              if (!e.isIntersecting) continue;
+              e.target.classList.add("muncul-tampil");
+              pengamat.unobserve(e.target);
+            }
+          },
+          { rootMargin: "0px 0px -8% 0px" },
+        );
+        for (const el of bagian) {
+          // Yang sudah terlihat saat halaman dibuka tidak disembunyikan dulu.
+          if (el.getBoundingClientRect().top < window.innerHeight) continue;
+          el.classList.add("muncul-siap");
+          const jeda = el.dataset.muncul;
+          if (jeda) el.style.transitionDelay = `${jeda}s`;
+          pengamat.observe(el);
+        }
+      }
+    </script>
+  </body>
+</html>

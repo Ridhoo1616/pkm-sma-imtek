@@ -1,0 +1,21 @@
+---
+import { tombolGelap } from "../lib/gaya";
+import { IkonPanahKanan } from "@/komponen/Ikon";
+
+/** Kotak tautan keluar, dipakai E-Learning dan Jadwal Pelajaran. */
+interface Props {
+  tautan: string;
+  label: string;
+  keterangan?: string;
+}
+const { tautan, label, keterangan } = Astro.props;
+---
+
+<div class="kaca p-6 md:p-8">
+  <p class="text-[15px] leading-relaxed text-teks">{keterangan ?? "Layanan ini berada di luar situs sekolah."}</p>
+  <a href={tautan} target="_blank" rel="noopener noreferrer" class={"mt-5 " + tombolGelap}>
+    {label}
+    <IkonPanahKanan ukuran={15} />
+  </a>
+  <p class="mt-3 text-xs break-all text-samar">{tautan}</p>
+</div>

@@ -1,0 +1,283 @@
+---
+import { MENU } from "@/lib/menu";
+import { urlUnggahan } from "@/lib/api";
+import type { Pengaturan } from "@/lib/tipe";
+
+/**
+ * Navigasi utama berkaca gelap, mengikuti rancangan beranda baru: bilah
+ * bening di atas foto sorotan, menu berupa pil, dan pil putih bagi halaman
+ * yang sedang dibuka.
+ *
+ * Tanpa React. Menu turunan terbuka lewat CSS (:hover dan :focus-within),
+ * dan skrip kecil di bawah hanya menambah tiga hal: membuka dengan klik
+ * untuk layar sentuh, menutup dengan Escape, dan memekatkan bilah saat
+ * halaman digulir. Tanpa JavaScript pun seluruh tautannya tetap dapat
+ * dicapai, termasuk lewat menu layar kecil yang memakai <details>.
+ */
+interface Props {
+  pengaturan: Pengaturan;
+  ppdbDibuka: boolean;
+}
+
+const { pengaturan: p, ppdbDibuka } = Astro.props;
+const jalur = Astro.url.pathname;
+
+const aktif = (j: string) => (j === "/" ? jalur === "/" : jalur.startsWith(j));
+const kelompokAktif = (j: string, anak?: { jalur: string }[]) =>
+  aktif(j) || (anak ?? []).some((a) => aktif(a.jalur));
+const idMenu = (label: string) => `menu-${label.replace(/\s+/g, "-").toLowerCase()}`;
+
+const pil = (terpilih: boolean) =>
+  "flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-semibold transition " +
+  (terpilih ? "bg-white text-biru-tua shadow-sm" : "text-white/85 hover:bg-white/12 hover:text-white");
+---
+
+<header
+  class="navigasi-kaca kaca-gelap tanpa-cetak sticky top-0 z-50 border-x-0 border-t-0"
+  data-navigasi
+>
+  <!-- Bilah kemajuan baca: seberapa jauh halaman sudah digulir. -->
+  <div aria-hidden="true" class="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-emas" data-kemajuan></div>
+  <nav class="wadah flex h-[4.5rem] items-center justify-between gap-4" aria-label="Menu utama">
+    <a href="/" class="flex min-w-0 items-center gap-3">
+      <span
+        class={"grid h-11 w-11 shrink-0 place-items-center rounded-xl " +
+          (p.logo ? "bg-white p-1" : "bg-biru text-lg font-bold text-white")}
+        aria-hidden="true"
+      >
+        {
+          p.logo ? (
+            <img src={urlUnggahan("profil", p.logo)} alt="" class="h-full w-full object-contain" />
+          ) : (
+            (p.nama_singkat || "SI").slice(0, 2).toUpperCase()
+          )
+        }
+      </span>
+      <span class="min-w-0 leading-tight">
+        <strong class="block truncate text-[17px] text-white">{p.nama_sekolah || "SMA IMTEK"}</strong>
+        <small class="block truncate text-[11px] text-white/65">
+          {p.kota || "Kabupaten Tangerang"}{p.akreditasi ? ` · Akreditasi ${p.akreditasi}` : ""}
+        </small>
+      </span>
+    </a>
+
+    <ul class="hidden items-center gap-1 rounded-full bg-white/6 p-1 ring-1 ring-white/10 xl:flex">
+      {
+        MENU.map((m) =>
+          m.anak ? (
+            <li class="kelompok-menu relative" data-kelompok>
+              <button
+                type="button"
+                class={pil(kelompokAktif(m.jalur, m.anak))}
+                aria-expanded="false"
+                aria-controls={idMenu(m.label)}
+              >
+                {m.label}
+                <span aria-hidden="true" class="text-[9px] leading-none">▾</span>
+              </button>
+              <div id={idMenu(m.label)} class="menu-turunan absolute top-full left-0 w-72 pt-3">
+                <ul class="overflow-hidden rounded-2xl border border-garis bg-white py-1.5 shadow-kuat">
+                  <li>
+                    <a
+                      href={m.jalur}
+                      class="block border-b border-garis px-4 py-2.5 text-xs font-bold tracking-wide text-biru uppercase hover:bg-biru-muda"
+                    >
+                      Ringkasan {m.label}
+                    </a>
+                  </li>
+                  {m.anak.map((s) => (
+                    <li>
+                      <a
+                        href={s.jalur}
+                        class={
+                          "block px-4 py-2.5 text-sm hover:bg-biru-muda hover:text-biru " +
+                          (aktif(s.jalur) ? "font-bold text-biru" : "font-medium text-teks")
+                        }
+                      >
+                        {s.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ) : (
+            <li>
+              <a href={m.jalur} class={pil(aktif(m.jalur))} aria-current={aktif(m.jalur) ? "page" : undefined}>
+                {m.label}
+              </a>
+            </li>
+          ),
+        )
+      }
+    </ul>
+
+    <div class="flex shrink-0 items-center gap-2">
+      <a
+        href={ppdbDibuka ? "/ppdb/daftar" : "/ppdb"}
+        data-magnet
+        class="hidden rounded-full bg-emas px-4 py-2 text-[13px] font-bold text-biru-tua transition hover:brightness-105 sm:inline-block"
+      >
+        {ppdbDibuka ? "Daftar PPDB" : "Info PPDB"}
+      </a>
+      <a
+        href="/admin"
+        data-magnet
+        class="hidden rounded-full px-4 py-2 text-[13px] font-bold tracking-wide text-white ring-1 ring-white/60 transition hover:bg-white hover:text-biru-tua md:inline-block"
+      >
+        Masuk
+      </a>
+
+      <button
+        type="button"
+        class="grid h-10 w-10 place-items-center rounded-full text-white ring-1 ring-white/30 xl:hidden"
+        aria-expanded="false"
+        aria-controls="menu-ringkas"
+        aria-label="Buka menu"
+        data-pembuka-ringkas
+      >
+        <span class="space-y-1" aria-hidden="true">
+          <span class="block h-0.5 w-5 bg-current"></span>
+          <span class="block h-0.5 w-5 bg-current"></span>
+          <span class="block h-0.5 w-5 bg-current"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Menu layar kecil. Kelompoknya memakai <details>, jadi dapat dilipat
+       tanpa skrip dan dikenali pembaca layar sebagai daftar yang dapat dibuka. -->
+  <div id="menu-ringkas" class="hidden border-t border-white/10 xl:hidden" data-menu-ringkas>
+    <ul class="wadah flex max-h-[75vh] flex-col gap-1 overflow-y-auto py-3">
+      {
+        MENU.map((m) =>
+          m.anak ? (
+            <li>
+              <details open={kelompokAktif(m.jalur, m.anak)} class="group">
+                <summary
+                  class={
+                    "flex cursor-pointer list-none items-center justify-between rounded-xl px-3.5 py-2.5 font-semibold " +
+                    (kelompokAktif(m.jalur, m.anak) ? "bg-white/12 text-white" : "text-white/85")
+                  }
+                >
+                  {m.label}
+                  <span aria-hidden="true" class="text-xs transition group-open:rotate-180">▾</span>
+                </summary>
+                <div class="mt-1 ml-3 space-y-0.5 border-l-2 border-white/15 pl-3">
+                  <a href={m.jalur} class="block rounded-lg px-3 py-2 text-sm text-white/70 hover:text-white">
+                    Ringkasan {m.label}
+                  </a>
+                  {m.anak.map((s) => (
+                    <a
+                      href={s.jalur}
+                      class={
+                        "block rounded-lg px-3 py-2 text-sm " +
+                        (aktif(s.jalur) ? "bg-white/12 font-bold text-white" : "text-white/80 hover:text-white")
+                      }
+                    >
+                      {s.label}
+                    </a>
+                  ))}
+                </div>
+              </details>
+            </li>
+          ) : (
+            <li>
+              <a
+                href={m.jalur}
+                class={
+                  "block rounded-xl px-3.5 py-2.5 font-semibold " +
+                  (aktif(m.jalur) ? "bg-white/12 text-white" : "text-white/85 hover:text-white")
+                }
+              >
+                {m.label}
+              </a>
+            </li>
+          ),
+        )
+      }
+      <li class="mt-2 flex gap-2">
+        <a
+          href={ppdbDibuka ? "/ppdb/daftar" : "/ppdb"}
+          class="flex-1 rounded-xl bg-emas px-4 py-2.5 text-center text-sm font-bold text-biru-tua"
+        >
+          {ppdbDibuka ? "Daftar PPDB" : "Info PPDB"}
+        </a>
+        <a
+          href="/ppdb/cek"
+          class="flex-1 rounded-xl px-4 py-2.5 text-center text-sm font-semibold text-white ring-1 ring-white/30"
+        >
+          Cek Status
+        </a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<script>
+  const kepala = document.querySelector<HTMLElement>("[data-navigasi]");
+
+  if (kepala) {
+    // Memekat saat digulir.
+    const kemajuan = kepala.querySelector<HTMLElement>("[data-kemajuan]");
+    const periksaGulir = () => {
+      kepala.dataset.tergulir = window.scrollY > 24 ? "ya" : "tidak";
+      const sisa = document.documentElement.scrollHeight - window.innerHeight;
+      if (kemajuan) kemajuan.style.transform = `scaleX(${sisa > 0 ? Math.min(window.scrollY / sisa, 1) : 0})`;
+    };
+    periksaGulir();
+    window.addEventListener("scroll", periksaGulir, { passive: true });
+
+    // Menu turunan: klik membuka dan menutup (layar sentuh tidak punya
+    // hover), Escape dan klik di luar menutup semuanya.
+    const kelompok = [...kepala.querySelectorAll<HTMLElement>("[data-kelompok]")];
+    const tutupSemua = (kecuali?: HTMLElement) => {
+      for (const k of kelompok) {
+        if (k === kecuali) continue;
+        k.dataset.buka = "tidak";
+        k.querySelector("button")?.setAttribute("aria-expanded", "false");
+      }
+    };
+
+    for (const k of kelompok) {
+      const tombol = k.querySelector("button");
+      tombol?.addEventListener("click", () => {
+        const buka = k.dataset.buka !== "ya";
+        tutupSemua(k);
+        k.dataset.buka = buka ? "ya" : "tidak";
+        // Menutup lewat klik harus mengalahkan :hover dan :focus-within,
+        // yang keduanya masih berlaku selama penunjuk ada di atas tombolnya.
+        k.dataset.tutup = buka ? "tidak" : "ya";
+        tombol.setAttribute("aria-expanded", String(buka));
+      });
+      k.addEventListener("mouseleave", () => {
+        k.dataset.tutup = "tidak";
+      });
+      // Fokus yang datang dari luar kelompok (Tab) membuka kembali menunya
+      // sesudah ditutup dengan Escape.
+      k.addEventListener("focusin", (e) => {
+        if (!k.contains(e.relatedTarget as Node | null)) k.dataset.tutup = "tidak";
+      });
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      tutupSemua();
+      for (const k of kelompok) k.dataset.tutup = "ya";
+      (document.activeElement as HTMLElement | null)?.blur();
+    });
+    document.addEventListener("click", (e) => {
+      if (!kepala.contains(e.target as Node)) tutupSemua();
+    });
+
+    // Menu layar kecil.
+    const pembuka = kepala.querySelector<HTMLButtonElement>("[data-pembuka-ringkas]");
+    const ringkas = kepala.querySelector<HTMLElement>("[data-menu-ringkas]");
+    pembuka?.addEventListener("click", () => {
+      const buka = ringkas?.classList.toggle("hidden") === false;
+      pembuka.setAttribute("aria-expanded", String(buka));
+      pembuka.setAttribute("aria-label", buka ? "Tutup menu" : "Buka menu");
+      if (buka) kepala.dataset.tergulir = "ya";
+    });
+  }
+</script>

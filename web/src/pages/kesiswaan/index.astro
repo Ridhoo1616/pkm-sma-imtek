@@ -1,0 +1,27 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import JudulBagian from "../../komponen/JudulBagian.astro";
+import PetaAnak from "../../komponen/PetaAnak.astro";
+import { data } from "../../lib/tembolok";
+
+const { profil } = await data.profil();
+---
+
+<Publik sorotan judul="Kesiswaan" deskripsi="Ekstrakurikuler, OSIS, prestasi siswa, dan pendidikan karakter di sekolah.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Kesiswaan"
+    keterangan="Kegiatan siswa di luar jam pelajaran, organisasi siswa, capaian yang diraih, dan pembinaan karakternya."
+    induk="/kesiswaan"
+    jalur="/kesiswaan"
+  />
+  <section class="wadah py-12 md:py-16" data-muncul>
+    <JudulBagian
+      atas="Kesiswaan"
+      judul="Halaman di dalam menu ini"
+      keterangan="Halaman Prestasi Siswa mengambil dari berita berkategori Prestasi, jadi capaian yang sudah pernah diberitakan langsung ikut tampil."
+    />
+    <PetaAnak induk="/kesiswaan" />
+  </section>
+</Publik>

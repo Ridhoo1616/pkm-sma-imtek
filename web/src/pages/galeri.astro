@@ -1,0 +1,38 @@
+---
+import Publik from "../tata/Publik.astro";
+import KepalaHalaman from "../komponen/KepalaHalaman.astro";
+import { data } from "../lib/tembolok";
+import PetakGaleri from "@/komponen/Galeri";
+import type { Galeri } from "@/lib/tipe";
+
+/** Petak foto beserta penyaring kategori dan tampilan besarnya memakai
+ *  komponen React yang sama dengan halaman OSIS dan Pendidikan Karakter. */
+const [{ profil }, hasil] = await Promise.all([
+  data.profil(),
+  data.galeri().catch(() => ({ data: [] as Galeri[], kategori: [] as string[] })),
+]);
+---
+
+<Publik sorotan judul="Galeri Kegiatan" deskripsi="Dokumentasi foto kegiatan dan suasana sekolah.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Galeri Kegiatan"
+    keterangan="Dokumentasi suasana belajar, kegiatan peserta didik, dan acara sekolah."
+    induk="/galeri"
+    jalur="/galeri"
+  />
+  <section class="wadah py-12 md:py-16">
+    {
+      hasil.data.length === 0 ? (
+        <div class="kaca px-6 py-14 text-center">
+          <p class="text-lg font-semibold text-biru-tua">Belum ada foto di galeri</p>
+          <p class="mt-2 text-sm text-samar">Foto dapat ditambahkan lewat menu Galeri di panel admin.</p>
+        </div>
+      ) : (
+        <div class="kaca p-4 sm:p-6" data-muncul>
+          <PetakGaleri client:visible foto={hasil.data} kategori={hasil.kategori} />
+        </div>
+      )
+    }
+  </section>
+</Publik>

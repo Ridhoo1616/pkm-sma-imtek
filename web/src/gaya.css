@@ -1,0 +1,346 @@
+/* Tema, kelas bantu, dan gerak yang sama dengan frontend Next. Diimpor, bukan
+   disalin, supaya warna dan ukurannya tidak dapat menyimpang antara keduanya. */
+@import "../../frontend/src/app/globals.css";
+
+/* Komponen React lama ikut dirender di sini, jadi kelas Tailwind di dalamnya
+   harus ikut dipindai. Tanpa ini kaki halaman tampil tanpa warna. */
+/* Folder src sendiri juga disebut, bukan diserahkan ke deteksi otomatis:
+   berkas rute bernama "[slug].astro" terlewat oleh pemindai otomatis, dan
+   kelasnya — right-0, w-[58%], mask — tidak pernah dihasilkan. */
+@source "./";
+@source "../../frontend/src/komponen";
+@source "../../frontend/src/lib";
+
+/* ============================================================
+   Rancangan beranda berkaca.
+
+   Kaca hanya terbaca bila ada sesuatu di belakangnya. Karena itu halaman
+   ini diberi latar kelabu kebiruan dengan dua bias cahaya yang lebar, dan
+   kartu kacanya putih setengah tembus di atasnya. Di atas putih polos, kartu
+   kaca terlihat sama saja dengan kartu biasa yang pucat.
+   ============================================================ */
+@theme {
+  --color-latar: #eef2f7;
+  --color-latar-pita: #e4eaf2;
+  --color-biru-langit: #bcd6f5;
+}
+
+@layer base {
+  body.latar-kaca {
+    background:
+      radial-gradient(60rem 40rem at 110% 30%, rgb(188 214 245 / 0.55), transparent 70%),
+      radial-gradient(50rem 36rem at -10% 70%, rgb(245 158 11 / 0.08), transparent 70%),
+      var(--color-latar);
+  }
+}
+
+@utility kaca {
+  background: linear-gradient(150deg, rgb(255 255 255 / 0.82), rgb(255 255 255 / 0.56));
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border: 1px solid rgb(255 255 255 / 0.85);
+  border-radius: 18px;
+  box-shadow:
+    0 14px 38px rgb(15 42 74 / 0.10),
+    inset 0 1px 0 rgb(255 255 255 / 0.9);
+}
+
+/* Kaca di atas latar gelap: sorotan dan bilah navigasi. */
+@utility kaca-gelap {
+  background: rgb(10 28 49 / 0.42);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgb(255 255 255 / 0.14);
+}
+
+/* Garis orbit dan bintang empat sudut di latar. Hiasan murni: tidak
+   menangkap klik, dan disembunyikan dari pembaca layar di markupnya. */
+.orbit {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+
+@keyframes kerlip {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.bintang {
+  animation: kerlip 3.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Navigasi di atas sorotan: bening di puncak halaman, lalu memekat begitu
+   halaman digulir supaya menunya tetap terbaca di atas bagian yang terang. */
+.navigasi-kaca {
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navigasi-kaca[data-tergulir="ya"] {
+  background: rgb(10 28 49 / 0.92);
+  box-shadow: 0 10px 30px rgb(10 28 49 / 0.25);
+}
+
+/* Menu turunan layar lebar: terbuka saat disentuh penunjuk, saat fokus
+   papan tuts ada di dalamnya, atau saat pembukanya diklik (data-buka). */
+.menu-turunan {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s;
+}
+
+@media (hover: hover) {
+  .kelompok-menu:hover .menu-turunan {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+}
+
+.kelompok-menu:focus-within .menu-turunan,
+.kelompok-menu[data-buka="ya"] .menu-turunan {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.kelompok-menu[data-tutup="ya"] .menu-turunan {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Gerak masuk bagian halaman. Keadaan awalnya dipasang skrip, bukan ditulis
+   di HTML, jadi tanpa JavaScript seluruh isi tetap terlihat. */
+.muncul-siap {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.muncul-siap.muncul-tampil {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bintang { animation: none; opacity: 0.7; }
+  .muncul-siap { opacity: 1; transform: none; transition: none; }
+}
+
+/* Foto sorotan yang berganti-ganti. Seluruh foto bertumpuk; yang aktif
+   dipudarkan masuk sambil membesar pelan, supaya pergantiannya terasa
+   seperti satu adegan, bukan slide yang melompat. */
+.foto-sorotan {
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 1.4s ease, transform 8s ease-out;
+}
+
+.foto-sorotan.foto-aktif {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.titik-sorotan { width: 0.625rem; }
+.titik-sorotan.titik-aktif { width: 1.75rem; background: var(--color-emas); }
+
+@media (prefers-reduced-motion: reduce) {
+  .foto-sorotan { transition: none; transform: none; }
+}
+
+/* ============================================================
+   Interaksi beranda. Skripnya di komponen/Interaksi.astro.
+   ============================================================ */
+
+/* Isi sorotan masuk bertahap saat halaman dibuka. Animasi CSS yang berakhir
+   terlihat, jadi tanpa JavaScript pun hasil akhirnya sama. */
+@keyframes masukNaik {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
+
+.masuk-bertahap > * {
+  animation: masukNaik 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.masuk-bertahap > :nth-child(2) { animation-delay: 0.08s; }
+.masuk-bertahap > :nth-child(3) { animation-delay: 0.16s; }
+.masuk-bertahap > :nth-child(4) { animation-delay: 0.24s; }
+.masuk-bertahap > :nth-child(5) { animation-delay: 0.32s; }
+.masuk-bertahap > :nth-child(6) { animation-delay: 0.4s; }
+
+[data-paralaks],
+[data-isi-sorotan] {
+  will-change: transform;
+}
+
+.orbit {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Garis orbit tergambar dari satu ujung. pathLength="1" pada elipsnya
+   membuat panjang garisnya selalu 1, berapa pun ukuran layarnya. */
+.orbit-siap .garis-orbit {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 2.6s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.orbit-siap.orbit-tergambar .garis-orbit {
+  stroke-dashoffset: 0;
+}
+
+/* Tombol: kilau yang menyapu dan panah yang bergeser. */
+.tombol-kilau {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.tombol-kilau::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+}
+.tombol-kilau svg {
+  transition: transform 0.25s ease;
+}
+@media (hover: hover) {
+  .tombol-kilau:hover::after { transform: translateX(120%); }
+  .tombol-kilau:hover svg { transform: translateX(4px); }
+}
+.tombol-kilau:active { transform: translateY(0) scale(0.97); }
+
+/* Sel angka: ikonnya menjadi biru pekat saat disentuh. */
+.sel-angka {
+  transition: background-color 0.25s ease;
+}
+.sel-angka .ikon-angka {
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (hover: hover) {
+  .sel-angka:hover { background: rgb(232 241 250 / 0.55); }
+  .sel-angka:hover .ikon-angka {
+    background: var(--color-biru);
+    color: #fff;
+    transform: scale(1.08) rotate(-6deg);
+  }
+}
+
+/* Kartu yang miring mengikuti kursor, dengan cahaya di bawah penunjuk. */
+.kartu-sorot {
+  transform-style: preserve-3d;
+  /* opacity ikut disebut: tanpa itu gerak masuk (.muncul-siap) kehilangan
+     peralihan pudarnya, karena aturan ini datang belakangan. */
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.kartu-sorot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(22rem circle at var(--sorot-x, 50%) var(--sorot-y, 0%), rgb(245 158 11 / 0.16), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.kartu-sorot .ikon-kartu {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s ease, color 0.3s ease;
+}
+@media (hover: hover) {
+  .kartu-sorot:hover {
+    box-shadow: 0 22px 50px rgb(15 42 74 / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.9);
+  }
+  .kartu-sorot:hover::before { opacity: 1; }
+  .kartu-sorot:hover .ikon-kartu {
+    transform: translateZ(30px) scale(1.08);
+    background: var(--color-biru-tua);
+    color: #fff;
+  }
+}
+.kartu-sorot:focus-visible::before { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .masuk-bertahap > * { animation: none; }
+  .orbit, .kartu-sorot, .tombol-kilau::after { transition: none; }
+  .kartu-sorot:hover .ikon-kartu, .sel-angka:hover .ikon-angka { transform: none; }
+}
+
+/* Tombol magnet. Memakai properti `translate`, bukan `transform`, sehingga
+   tidak bertabrakan dengan skala saat ditekan. Tailwind 4 juga menulis
+   hover:-translate-y-* ke properti `translate`, jadi pada tombol magnet
+   geseran itu digantikan tarikan kursor. */
+.magnet {
+  translate: var(--tarik-x, 0px) var(--tarik-y, 0px) !important;
+  transition: translate 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, box-shadow 0.2s, filter 0.2s !important;
+}
+.magnet > * {
+  display: inline-block;
+  translate: calc(var(--tarik-x, 0px) * 0.35) calc(var(--tarik-y, 0px) * 0.35);
+  transition: translate 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Kartu peminatan dua sisi. Kedua sisinya menempati SATU sel grid yang
+   sama, jadi tinggi kartu mengikuti sisi yang lebih tinggi dan tidak ada
+   yang terpotong — tanpa tinggi tetap yang harus ditebak. */
+.kartu-balik {
+  perspective: 1400px;
+}
+.balik-isi {
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.34, 1.3, 0.64, 1);
+  height: 100%;
+}
+.kartu-balik.terbalik .balik-isi {
+  transform: rotateY(180deg);
+}
+.sisi-kartu {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+/* Kaca tidak dipakai pada kartu dua sisi: backdrop-filter di dalam ruang 3D
+   membuat Chrome menggambar sisi belakangnya tembus. Latarnya dibuat padat. */
+.sisi-depan.kaca {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: linear-gradient(150deg, #fff, #f5f8fc);
+}
+.sisi-belakang {
+  transform: rotateY(180deg);
+  box-shadow: 0 18px 44px rgb(10 28 49 / 0.28);
+  background-image: radial-gradient(28rem 16rem at 100% 0%, rgb(43 92 149 / 0.55), transparent 70%);
+}
+.ikon-putar {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (hover: hover) {
+  [data-balik]:hover .ikon-putar { transform: rotate(180deg); }
+}
+/* Cahaya sorot di atas sisi kartu, bukan di bawahnya: pada kartu dua sisi
+   lapisan ::before tertutup sisi yang padat. */
+.kartu-balik.kartu-sorot::before {
+  z-index: 2;
+}
+.kartu-balik.terbalik.kartu-sorot::before {
+  background: radial-gradient(22rem circle at var(--sorot-x, 50%) var(--sorot-y, 0%), rgb(255 255 255 / 0.10), transparent 45%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balik-isi { transition: none; }
+  .magnet, .magnet > * { translate: none !important; }
+}
+
+/* Bilah halaman sekelompok: dapat digeser mendatar tanpa batang gulir yang
+   menebal di bawah pil-pilnya. */
+.bilah-anak {
+  scrollbar-width: none;
+}
+.bilah-anak::-webkit-scrollbar {
+  display: none;
+}

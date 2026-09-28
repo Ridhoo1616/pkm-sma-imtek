@@ -1,0 +1,46 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import TautanKeluar from "../../komponen/TautanKeluar.astro";
+import { data } from "../../lib/tembolok";
+import { belumTerisi } from "@/lib/format";
+
+const { profil } = await data.profil();
+const tautan = (profil.pengaturan.tautan_elearning ?? "").trim();
+const ada = tautan !== "" && !belumTerisi(tautan);
+---
+
+<Publik sorotan judul="E-Learning / LMS" deskripsi="Pintu masuk ke ruang belajar daring sekolah.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="E-Learning / LMS"
+    keterangan="Ruang belajar daring tempat guru membagikan materi, tugas, dan penilaian."
+    induk="/akademik"
+    jalur="/akademik/elearning"
+  />
+  <section class="wadah py-12 md:py-16">
+    <div class="max-w-2xl" data-muncul>
+      {
+        ada ? (
+          <TautanKeluar
+            tautan={tautan}
+            label="Masuk ke e-learning sekolah"
+            keterangan="Ruang belajar daring sekolah berada di layanan terpisah. Nama pengguna dan kata sandinya diberikan guru kelas masing-masing, bukan oleh situs ini."
+          />
+        ) : (
+          <div class="kaca p-6 md:p-8">
+            <p class="font-semibold text-teks">Alamat e-learning belum dicantumkan</p>
+            <p class="mt-2 text-[15px] leading-relaxed text-samar">
+              Sekolah dapat memakai layanan yang sudah ada, misalnya Google Classroom atau Moodle, lalu mencantumkan alamatnya lewat
+              menu Pengaturan di panel admin. Setelah alamatnya diisi, tombol masuknya muncul di halaman ini.
+            </p>
+            <p class="mt-4 rounded-lg bg-biru-muda px-4 py-3 text-sm leading-relaxed text-biru-tua">
+              Sistem ini tidak menyediakan ruang kelas daring sendiri. Halaman ini hanya menjadi satu pintu masuk yang mudah ditemukan
+              siswa dan orang tua.
+            </p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+</Publik>

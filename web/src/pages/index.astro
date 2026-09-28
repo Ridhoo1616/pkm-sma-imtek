@@ -1,0 +1,643 @@
+---
+import Publik from "../tata/Publik.astro";
+import Orbit from "../komponen/Orbit.astro";
+import JudulBagian from "../komponen/JudulBagian.astro";
+import SambutanKaca from "../komponen/SambutanKaca.astro";
+import { urlUnggahan } from "@/lib/api";
+import { data } from "../lib/tembolok";
+import { tombolEmas, tombolEmasKecil, tombolLangit, tombolGelap } from "../lib/gaya";
+import { alamatLengkap, angka, belumTerisi, kePoinTerisi, persen, tanggalPanjang, tujuanPeta } from "@/lib/format";
+import { kataKeadaanPpdb } from "@/lib/ppdb";
+import { MasalahJawaban } from "@/komponen/MasalahJawaban";
+import {
+  IkonBendera,
+  IkonCentang,
+  IkonFasilitas,
+  IkonFormulir,
+  IkonGuru,
+  IkonLokasi,
+  IkonNaskah,
+  IkonPanahKanan,
+  IkonSiswa,
+} from "@/komponen/Ikon";
+import type { Berita, Fasilitas, Jurusan } from "@/lib/tipe";
+
+/**
+ * Beranda versi Astro, mengikuti rancangan berkaca: sorotan gelap berfoto
+ * gedung, kartu angka kaca yang menumpang di tepi bawahnya, lalu sambutan,
+ * peminatan, fasilitas, berita, dan lokasi dengan garis orbit di latarnya.
+ *
+ * Aturan isinya sama persis dengan beranda Next, dan memang sengaja:
+ *
+ *   - Tidak ada satu angka pun yang dikarang. Angka pada rancangan acuan
+ *     ("10,731" dan seterusnya) hanya contoh tata letak. Yang tampil di sini
+ *     dihitung dari basis data, atau diisi sekolah lewat pengaturan; yang
+ *     nol atau masih bertanda [kurung siku] dibuang, bukan ditulis "0".
+ *   - Kalimat tentang mutu sekolah hanya datang dari sekolah (tagline,
+ *     keunggulan, sambutan). Bagian yang bahannya belum ada tidak muncul,
+ *     kecuali sambutan, yang keadaan kosongnya mengarahkan ke halaman profil.
+ */
+const { profil } = await data.profil();
+const p = profil.pengaturan;
+const nama = p.nama_sekolah || "SMA IMTEK";
+
+const [jurusan, fasilitas, berita, kegiatan] = await Promise.all([
+  data.jurusan().then((h) => h.data).catch((): Jurusan[] => []),
+  data.fasilitas().then((h) => h.data).catch((): Fasilitas[] => []),
+  data.berita("?per_halaman=3").then((h) => h.data).catch((): Berita[] => []),
+  data.kegiatanSiswa().then((h) => h.data).catch((): { jenis: string }[] => []),
+]);
+
+const kataPpdb = kataKeadaanPpdb(profil.ppdb, p);
+const keadaanPpdb = profil.ppdb.keadaan ?? (profil.ppdb.dibuka ? "dibuka" : "belum_mulai");
+const sisaKuota = Math.max(profil.ppdb.kuota - profil.ppdb.terisi, 0);
+// Foto sorotan: foto halaman depan lalu tiga slot tambahan (migrasi 022).
+// Slot kosong dilewati; satu foto berarti tanpa pergantian.
+const fotoSorotan = ["foto_depan", "foto_depan_2", "foto_depan_3", "foto_depan_4"]
+  .map((k) => p[k] ?? "")
+  .filter((n) => n && !belumTerisi(n));
+const adaGedung = fotoSorotan.length > 0;
+const tagline = belumTerisi(p.tagline ?? "") ? "" : p.tagline;
+const keunggulan = kePoinTerisi(p.keunggulan);
+const lokasi = [p.kecamatan, p.kota, p.provinsi].filter(Boolean).join(", ");
+
+/* ---------- Kartu angka ----------
+   Siswa, guru, dan rombel DIISI sekolah (tidak dapat dihitung sistem ini);
+   ekskul, peminatan, dan fasilitas DIHITUNG dari tabelnya. */
+const dariPengaturan = (kunci: string) => {
+  const n = Number((p[kunci] ?? "").replace(/[^0-9]/g, ""));
+  return belumTerisi(p[kunci] ?? "") || !Number.isFinite(n) ? 0 : n;
+};
+const angkaSekolah = [
+  { label: "Siswa aktif", nilai: dariPengaturan("jumlah_siswa"), ikon: IkonSiswa },
+  { label: "Guru & tenaga kependidikan", nilai: dariPengaturan("jumlah_guru"), ikon: IkonGuru },
+  { label: "Peminatan dibuka", nilai: jurusan.length, ikon: IkonNaskah },
+  { label: "Fasilitas belajar", nilai: fasilitas.length, ikon: IkonFasilitas },
+  { label: "Ekstrakurikuler", nilai: kegiatan.filter((g) => g.jenis === "Ekstrakurikuler").length, ikon: IkonBendera },
+].filter((a) => a.nilai > 0);
+
+// Kartu pertama selalu PPDB bila kuotanya sudah ditetapkan, dan kartu
+// terakhir akreditasi bila ada. Di antaranya angka sekolah, paling banyak
+// dua, supaya barisnya tetap empat kartu pada layar lebar.
+const kartuAngka: { label: string; nilai: string; ikon: typeof IkonSiswa; catatan?: string }[] = [];
+if (profil.ppdb.kuota > 0) {
+  kartuAngka.push({
+    label: `Sisa kuota PPDB ${p.ppdb_tahun || ""}`.trim(),
+    nilai: angka(sisaKuota),
+    ikon: IkonFormulir,
+    catatan: `dari ${angka(profil.ppdb.kuota)} tempat`,
+  });
+}
+for (const a of angkaSekolah.slice(0, p.akreditasi ? 2 : 3)) {
+  kartuAngka.push({ label: a.label, nilai: angka(a.nilai), ikon: a.ikon });
+}
+if (p.akreditasi) {
+  kartuAngka.push({ label: "Peringkat akreditasi", nilai: p.akreditasi, ikon: IkonCentang });
+}
+
+
+/* ---------- Lokasi ---------- */
+const alamat = alamatLengkap(p.alamat, p.kode_pos);
+const adaPeta = Boolean(p.peta_embed && !belumTerisi(p.peta_embed));
+const MODA = [
+  { kode: "driving", label: "Mobil" },
+  { kode: "walking", label: "Jalan kaki" },
+  { kode: "two-wheeler", label: "Motor" },
+  { kode: "transit", label: "Angkutan umum" },
+];
+const arah = (moda: string) =>
+  "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(tujuanPeta(p)) + "&travelmode=" + moda;
+
+---
+
+<Publik sorotan>
+  <!-- ======================= Sorotan ======================= -->
+  <!-- Dua peredam di atas foto: dari kiri untuk kolom tulisan, dari bawah
+       untuk kartu angka. Fotonya dikirim sekolah, jadi terangnya tak terduga. -->
+  <section class="relative isolate overflow-hidden bg-biru-tua pt-[4.5rem] text-white" data-sorotan-bagian>
+    {
+      adaGedung ? (
+        <>
+          <div class="absolute -inset-y-[8%] inset-x-0 -z-20" data-sorotan data-paralaks>
+            {fotoSorotan.map((nama_berkas, i) => (
+              <img
+                src={urlUnggahan("profil", nama_berkas)}
+                alt={i === 0 ? `Gedung ${nama}` : ""}
+                aria-hidden={i === 0 ? undefined : "true"}
+                class={"foto-sorotan absolute inset-0 h-full w-full object-cover " + (i === 0 ? "foto-aktif" : "")}
+                fetchpriority={i === 0 ? "high" : "low"}
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+              />
+            ))}
+          </div>
+          <div
+            aria-hidden="true"
+            class="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_28_49/0.92)_0%,rgb(10_28_49/0.75)_38%,rgb(10_28_49/0.3)_65%,rgb(10_28_49/0.15)_100%)]"
+          />
+          <div aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-t from-biru-tua via-biru-tua/10 to-biru-tua/50" />
+        </>
+      ) : (
+        <div aria-hidden="true" class="absolute inset-0 -z-10">
+          <div class="absolute -top-[20%] -left-[10%] h-[700px] w-[700px] rounded-full bg-biru opacity-60 blur-[130px]" />
+          <div class="absolute -right-[10%] -bottom-[20%] h-[800px] w-[800px] rounded-full bg-emas opacity-20 blur-[150px]" />
+        </div>
+      )
+    }
+
+    <Orbit
+      nada="terang"
+      class="-left-[12%] top-[18%] h-[26rem] w-[80%] opacity-80"
+      miring={-12}
+      bintang={[{ x: 6, y: 42, ukuran: 18 }, { x: 70, y: 8, ukuran: 12 }]}
+    />
+
+    <div class="wadah relative flex min-h-[min(42rem,86vh)] flex-col justify-center pt-14 pb-36 md:pb-40">
+      <div data-isi-sorotan class="masuk-bertahap max-w-2xl [&_h1]:[text-shadow:0_2px_18px_rgb(10_28_49/0.8)] [&_p]:[text-shadow:0_1px_12px_rgb(10_28_49/0.85)]">
+        <div class="mb-5 flex flex-wrap gap-2">
+          {
+            [p.status_sekolah, p.akreditasi && `Akreditasi ${p.akreditasi}`, p.npsn && `NPSN ${p.npsn}`]
+              .filter(Boolean)
+              .map((t) => (
+                <span class="kaca-gelap inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold tracking-[0.08em] text-white uppercase">
+                  {t}
+                </span>
+              ))
+          }
+        </div>
+
+        <h1 class="text-5xl leading-[1.05] font-extrabold tracking-tight text-white md:text-7xl">{nama}</h1>
+
+        {
+          lokasi && (
+            <p class="mt-4 flex items-center gap-2 font-semibold text-white">
+              <IkonLokasi ukuran={18} className="shrink-0 text-emas" />
+              {lokasi}
+            </p>
+          )
+        }
+
+        {tagline && <p class="mt-4 max-w-lg text-lg leading-relaxed text-white">{tagline}</p>}
+
+        <!-- Kalimat pengantar yang menerangkan isi situs, bukan memuji
+             sekolahnya. Disembunyikan di ponsel supaya fotonya tetap terlihat. -->
+        <p class="mt-4 hidden max-w-lg leading-relaxed text-white/90 sm:block">
+          Selamat datang di portal {nama}. Kenali sekolahnya lebih dulu — peminatan, sarana belajar, dan kegiatan
+          siswa — lalu daftarkan putra-putri Anda secara online, dari mengisi formulir sampai memantau hasil
+          verifikasinya.
+        </p>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="/profil" class={tombolEmas} data-magnet>Kenali Sekolah Kami</a>
+          <a href="/ppdb" class={tombolLangit} data-magnet>Informasi PPDB</a>
+        </div>
+      </div>
+
+      {
+        fotoSorotan.length > 1 && (
+          <div class="absolute right-4 bottom-28 flex items-center gap-2 md:bottom-32" data-titik-sorotan>
+            {fotoSorotan.map((_, i) => (
+              <button
+                type="button"
+                class={"titik-sorotan h-2.5 rounded-full bg-white/50 transition-all hover:bg-white " + (i === 0 ? "titik-aktif" : "")}
+                aria-label={`Tampilkan foto ${i + 1} dari ${fotoSorotan.length}`}
+                aria-current={i === 0 ? "true" : undefined}
+              />
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- ======================= Angka sekolah dan keadaan PPDB =======================
+       Satu panel putih padat, bukan empat kartu kaca. Kartu kaca yang
+       melintasi tepi bawah foto berubah warna di tengah tingginya — kelabu
+       di atas foto, putih di bawahnya — dan terbaca kotor. Angkanya dipisah
+       garis tipis, lalu keadaan PPDB menjadi baris bawah panel yang sama. -->
+  <section class="wadah relative z-10 -mt-20 md:-mt-24" aria-label="Angka sekolah dan keadaan pendaftaran">
+    <div class="overflow-hidden rounded-[20px] bg-white shadow-[0_18px_50px_rgb(10_28_49/0.16)] ring-1 ring-garis">
+      {
+        kartuAngka.length > 0 && (
+          <dl class="grid grid-cols-2 lg:grid-cols-4">
+            {kartuAngka.map((k, i) => (
+              <div
+                class={
+                  "sel-angka flex flex-col items-start gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-6 " +
+                  // Garis pemisah: kanan untuk kolom kiri pada dua kolom,
+                  // bawah untuk baris pertama; pada empat kolom hanya kanan.
+                  (i % 2 === 0 ? "border-r border-garis " : "") +
+                  (i < 2 ? "border-b border-garis lg:border-b-0 " : "") +
+                  (i === 1 ? "lg:border-r " : "") +
+                  (i === kartuAngka.length - 1 ? "lg:border-r-0" : "")
+                }
+              >
+                <span class="ikon-angka grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru sm:h-12 sm:w-12" aria-hidden="true">
+                  <k.ikon ukuran={22} />
+                </span>
+                <div class="flex min-w-0 flex-col-reverse">
+                  <dt class="mt-1 text-xs leading-snug font-semibold text-samar sm:text-[13px]">
+                    {k.label}
+                    {k.catatan && <span class="block font-normal">{k.catatan}</span>}
+                  </dt>
+                  <dd class="text-2xl leading-none font-extrabold text-biru-tua tabular-nums sm:text-3xl" data-hitung={k.nilai}>{k.nilai}</dd>
+                </div>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+
+      <div class="flex flex-col items-center justify-between gap-4 border-t border-garis bg-latar/60 px-5 py-4 text-center sm:px-6 lg:flex-row lg:text-left">
+        <div class="flex flex-col items-center gap-3 sm:flex-row">
+          <span
+            class={"inline-flex items-center justify-center gap-2 rounded-md px-3 py-1.5 text-xs leading-none font-bold tracking-[0.06em] text-white uppercase " +
+              (kataPpdb.dibuka ? "bg-green-700" : "bg-slate-600")}
+          >
+            {kataPpdb.dibuka && <span class="h-2 w-2 animate-pulse rounded-full bg-white" aria-hidden="true" />}
+            {kataPpdb.lencana}
+          </span>
+          <p class="text-sm leading-relaxed text-teks">
+            Tahun Ajaran <strong class="text-biru-tua">{p.ppdb_tahun || "-"}</strong>
+            {profil.ppdb.dibuka && p.ppdb_selesai && <> · Ditutup <strong>{tanggalPanjang(p.ppdb_selesai)}</strong></>}
+            {keadaanPpdb === "belum_mulai" && p.ppdb_mulai && <> · Mulai {tanggalPanjang(p.ppdb_mulai)}</>}
+            {keadaanPpdb === "sudah_selesai" && p.ppdb_selesai && <> · Ditutup {tanggalPanjang(p.ppdb_selesai)}</>}
+          </p>
+        </div>
+        <div class="flex w-full flex-wrap justify-center gap-2 sm:w-auto">
+          <a href={profil.ppdb.dibuka ? "/ppdb/daftar" : "/ppdb"} class={tombolGelap} data-magnet>
+            {profil.ppdb.dibuka ? "Mulai Daftar" : "Lihat Syarat"}
+            <IkonPanahKanan ukuran={15} />
+          </a>
+          <a href="/ppdb/cek" class="inline-flex items-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-biru-tua ring-1 ring-garis transition hover:ring-biru">
+            Cek Status
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= Sambutan kepala sekolah ======================= -->
+  <SambutanKaca pengaturan={p} />
+
+  <!-- ======================= Keunggulan ======================= -->
+  {
+    keunggulan.length > 0 && (
+      <section class="wadah pb-16 md:pb-24" data-muncul>
+        <JudulBagian atas="Kenapa Di Sini" judul="Yang Ditawarkan Sekolah Ini" keterangan="Disampaikan langsung oleh pihak sekolah." />
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {keunggulan.map((poin) => (
+            <div class="kaca flex gap-3.5 p-5">
+              <span aria-hidden="true" class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-biru-muda text-biru">
+                <IkonCentang ukuran={17} />
+              </span>
+              <p class="text-[15px] leading-relaxed text-teks">{poin}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ======================= Peminatan ======================= -->
+  {
+    jurusan.length > 0 && (
+      <section class="relative pb-16 md:pb-24" aria-labelledby="judul-peminatan" data-muncul>
+        <Orbit
+          class="top-[30%] -right-[20%] h-[70%] w-[90%]"
+          miring={16}
+          bintang={[{ x: 12, y: 30, ukuran: 12 }, { x: 60, y: 90, ukuran: 16 }]}
+        />
+        <div class="wadah relative">
+          <JudulBagian
+            id="judul-peminatan"
+            atas="Pilihan Belajar"
+            judul="Peminatan yang Dibuka"
+            keterangan="Peminatan menentukan mata pelajaran pendalaman yang diambil siswa. Pilihannya ditetapkan saat mendaftar."
+          />
+          <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {jurusan.map((j, i) => {
+              const sisa = Math.max(j.kuota - j.pendaftar, 0);
+              return (
+                <div
+                  data-miring
+                  data-kartu-balik
+                  class="kartu-sorot kartu-balik relative rounded-[18px]"
+                  data-muncul={String(i * 0.08)}
+                >
+                  <div class="balik-isi grid">
+                    {/* ---------- Sisi depan ---------- */}
+                    <article class="sisi-kartu sisi-depan kaca relative flex flex-col items-center p-6 pt-8 text-center" aria-labelledby={`peminatan-${j.id}`}>
+                      <span class="absolute top-4 right-4 rounded-md bg-biru-tua px-2 py-1 text-[10px] leading-none font-bold tracking-[0.08em] text-white">
+                        {j.kode}
+                      </span>
+                      <span class="ikon-kartu grid h-20 w-20 place-items-center rounded-2xl bg-white text-biru-tua shadow-lembut ring-1 ring-garis" aria-hidden="true">
+                        <IkonFasilitas nama={j.ikon} ukuran={42} />
+                      </span>
+                      <h3 id={`peminatan-${j.id}`} class="mt-5 text-lg">{j.nama}</h3>
+                      {j.deskripsi && !belumTerisi(j.deskripsi) && (
+                        <p class="mt-2 text-sm leading-relaxed text-samar">{j.deskripsi}</p>
+                      )}
+                      <div class="mt-5 w-full flex-1 content-end">
+                        <div class="mb-1.5 flex justify-between text-xs font-semibold text-samar">
+                          <span>{angka(j.pendaftar)} pendaftar</span>
+                          <span class="tabular-nums">sisa {angka(sisa)} dari {angka(j.kuota)}</span>
+                        </div>
+                        <div class="h-2 overflow-hidden rounded-full bg-biru-muda">
+                          <div data-bilah class="h-full rounded-full bg-gradient-to-r from-biru to-[#2b5c95]" style={`width:${Math.min(persen(j.pendaftar, j.kuota), 100)}%`} />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        data-balik
+                        aria-expanded="false"
+                        class="mt-5 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-bold text-emas hover:underline"
+                      >
+                        Lihat rincian
+                        <span aria-hidden="true" class="ikon-putar text-base leading-none">↻</span>
+                      </button>
+                    </article>
+
+                    {/* ---------- Sisi belakang: rincian ---------- */}
+                    <div class="sisi-kartu sisi-belakang relative flex flex-col rounded-[18px] bg-biru-tua p-6 text-white" aria-label={`Rincian ${j.nama}`} inert>
+                      <div class="flex items-start justify-between gap-3">
+                        <div>
+                          <p class="text-[11px] font-bold tracking-[0.14em] text-emas uppercase">Rincian {j.kode}</p>
+                          <p class="mt-1 text-lg leading-snug font-bold text-white">{j.nama}</p>
+                        </div>
+                        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 text-white" aria-hidden="true">
+                          <IkonFasilitas nama={j.ikon} ukuran={22} />
+                        </span>
+                      </div>
+
+                      <dl class="mt-5 grid grid-cols-3 gap-2 text-center">
+                        {[
+                          { k: "Kuota", v: angka(j.kuota) },
+                          { k: "Pendaftar", v: angka(j.pendaftar) },
+                          { k: "Sisa", v: angka(sisa) },
+                        ].map((x) => (
+                          <div class="rounded-xl bg-white/8 px-2 py-3 ring-1 ring-white/10">
+                            <dd class="text-xl leading-none font-extrabold text-white tabular-nums">{x.v}</dd>
+                            <dt class="mt-1.5 text-[11px] font-semibold text-white/65">{x.k}</dt>
+                          </div>
+                        ))}
+                      </dl>
+
+                      <p class="mt-4 text-xs text-white/70">
+                        Terisi <strong class="text-white">{Math.min(persen(j.pendaftar, j.kuota), 100)}%</strong>
+                        {p.ppdb_tahun && <> · Tahun ajaran {p.ppdb_tahun}</>}
+                        {profil.ppdb.dibuka && p.ppdb_selesai && <> · Ditutup {tanggalPanjang(p.ppdb_selesai)}</>}
+                      </p>
+
+                      {profil.ppdb.jalur.length > 0 && (
+                        <div class="mt-4">
+                          <p class="text-[11px] font-bold tracking-[0.12em] text-white/60 uppercase">Jalur pendaftaran</p>
+                          <ul class="mt-2 flex flex-wrap gap-1.5">
+                            {profil.ppdb.jalur.map((jl) => (
+                              <li class="rounded-md bg-white/10 px-2 py-1 text-[11px] font-semibold text-white">{jl}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div class="mt-auto flex flex-wrap items-center gap-2 pt-5">
+                        <a href={profil.ppdb.dibuka ? "/ppdb/daftar" : "/ppdb"} class={tombolEmasKecil} data-magnet>
+                          {profil.ppdb.dibuka ? "Daftar Sekarang" : "Lihat Syarat"}
+                          <IkonPanahKanan ukuran={14} />
+                        </a>
+                        <button
+                          type="button"
+                          data-balik
+                          aria-expanded="true"
+                          class="inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 transition hover:bg-white/10"
+                        >
+                          <span aria-hidden="true">↺</span> Kembali
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ======================= Fasilitas ======================= -->
+  {
+    fasilitas.length > 0 && (
+      <section class="bg-latar-pita/80 py-16 md:py-24" aria-labelledby="judul-fasilitas" data-muncul>
+        <div class="wadah">
+          <JudulBagian
+            id="judul-fasilitas"
+            atas="Sarana Belajar"
+            judul="Fasilitas Sekolah"
+            keterangan="Sarana yang menunjang kegiatan belajar sehari-hari."
+          />
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {fasilitas.slice(0, 8).map((f, i) => (
+              <div data-miring class="kaca kartu-sorot relative flex gap-3.5 p-5" data-muncul={String((i % 4) * 0.06)}>
+                <span class="ikon-kartu grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru" aria-hidden="true">
+                  <IkonFasilitas nama={f.ikon} ukuran={20} />
+                </span>
+                <div>
+                  <h3 class="text-[15px] leading-snug">{f.nama}</h3>
+                  {f.deskripsi && <p class="mt-1.5 text-[13px] leading-relaxed text-samar">{f.deskripsi}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+          {
+            fasilitas.length > 8 && (
+              <p class="mt-8 text-center">
+                <a href="/fasilitas" class={tombolGelap}>Lihat semua {fasilitas.length} fasilitas</a>
+              </p>
+            )
+          }
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ======================= Berita ======================= -->
+  {
+    berita.length > 0 && (
+      <section class="wadah py-16 md:py-24" aria-labelledby="judul-berita" data-muncul>
+        <JudulBagian id="judul-berita" atas="Kabar Sekolah" judul="Berita & Kegiatan Terbaru" />
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {berita.map((b, i) => (
+            <a href={`/berita/${b.slug}`} data-miring class="kaca kartu-sorot group relative flex flex-col overflow-hidden" data-muncul={String(i * 0.08)}>
+              <div class="aspect-[16/10] overflow-hidden bg-biru-muda">
+                {b.gambar ? (
+                  <img
+                    src={urlUnggahan("berita", b.gambar)}
+                    alt=""
+                    class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div class="grid h-full place-items-center text-biru/30">
+                    <IkonNaskah ukuran={40} />
+                  </div>
+                )}
+              </div>
+              <div class="flex flex-1 flex-col p-5">
+                <p class="text-xs font-semibold text-samar">
+                  <span class="text-biru">{b.kategori}</span> · {tanggalPanjang(b.dibuat)}
+                </p>
+                <h3 class="mt-2 line-clamp-2 text-base leading-snug">{b.judul}</h3>
+                {b.ringkasan && <p class="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-samar">{b.ringkasan}</p>}
+                <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-emas">
+                  Baca selengkapnya <IkonPanahKanan ukuran={14} />
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+        <p class="mt-8 text-center">
+          <a href="/berita" class="inline-flex items-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-biru-tua ring-1 ring-garis transition hover:ring-biru">
+            Semua berita
+          </a>
+        </p>
+      </section>
+    )
+  }
+
+  <!-- ======================= Lokasi ======================= -->
+  <section class="wadah pb-16 md:pb-24" aria-labelledby="judul-peta" data-muncul>
+    <div class="kaca grid gap-6 p-4 sm:p-6 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
+      {
+        adaPeta ? (
+          <div class="peta-sematan overflow-hidden rounded-2xl ring-1 ring-garis" set:html={p.peta_embed} />
+        ) : (
+          <div class="grid aspect-video place-items-center rounded-2xl border border-dashed border-biru/30 bg-white px-6 text-center">
+            <div class="max-w-sm">
+              <IkonLokasi ukuran={36} className="mx-auto text-biru/40" />
+              <p class="mt-3 text-sm font-semibold text-biru-tua">Peta lokasi sekolah</p>
+              <p class="mt-1.5 text-xs leading-relaxed text-biru/70">
+                Petanya dipasang dengan menempelkan kode sematan Google Maps pada pengaturan Sematan peta.
+              </p>
+            </div>
+          </div>
+        )
+      }
+
+      <div class="self-center py-2 lg:pr-4">
+        <p class="text-xs font-bold tracking-[0.18em] text-biru uppercase">Lokasi</p>
+        <h2 id="judul-peta" class="mt-2 text-2xl md:text-3xl">Seberapa Jauh dari Rumah Anda?</h2>
+        <span aria-hidden="true" class="mt-3 block h-1 w-14 rounded-full bg-emas"></span>
+        {
+          alamat && !belumTerisi(alamat) && (
+            <p class="mt-5 flex items-start gap-2.5 text-[15px] leading-relaxed text-teks">
+              <IkonLokasi ukuran={18} className="mt-1 shrink-0 text-biru" />
+              <span>{alamat}</span>
+            </p>
+          )
+        }
+        <p class="mt-3 text-sm leading-relaxed text-samar">
+          Tekan salah satu tombol. Google Maps terbuka memakai lokasi Anda sendiri lalu menampilkan jarak dan perkiraan
+          waktu tempuhnya. Lokasi Anda tidak dikirim ke server sekolah.
+        </p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          {
+            MODA.map((m, i) => (
+              <a
+                href={arah(m.kode)}
+                target="_blank"
+                rel="noopener noreferrer"
+                class={
+                  i === 0
+                    ? tombolGelap
+                    : "inline-flex items-center rounded-xl bg-white px-4 py-3 text-sm font-semibold text-biru-tua ring-1 ring-garis transition hover:ring-biru"
+                }
+              >
+                {i === 0 ? `Hitung jarak: ${m.label}` : m.label}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= Masalah dan jawabannya ======================= -->
+  <div data-muncul>
+    <MasalahJawaban />
+  </div>
+
+  <!-- ======================= Ajakan mendaftar ======================= -->
+  <section class="wadah pb-4" data-muncul>
+    <div class="relative overflow-hidden rounded-[22px] bg-biru-tua px-7 py-12 text-center text-white md:px-12">
+      <Orbit nada="terang" class="-top-[30%] -left-[10%] h-[160%] w-[120%] opacity-60" miring={-6} bintang={[{ x: 10, y: 55, ukuran: 14 }, { x: 90, y: 42, ukuran: 12 }]} />
+      <div class="relative">
+        <h2 class="text-2xl text-white md:text-3xl">
+          {profil.ppdb.dibuka ? "Pendaftaran sedang dibuka" : "Siapkan dokumen pendaftaran Anda"}
+        </h2>
+        <p class="mx-auto mt-3 max-w-2xl leading-relaxed text-white/80">
+          {
+            profil.ppdb.dibuka
+              ? "Isi formulir dan unggah dokumen dari mana saja. Nomor registrasi diterbitkan seketika, dan status verifikasi dapat dipantau kapan pun."
+              : `${kataPpdb.kalimat} Persyaratannya dapat dibaca lebih dahulu di halaman informasi PPDB.`
+          }
+        </p>
+        <div class="mt-7 flex flex-wrap justify-center gap-3">
+          <a href={profil.ppdb.dibuka ? "/ppdb/daftar" : "/ppdb"} class={tombolEmas} data-magnet>
+            {profil.ppdb.dibuka ? "Isi Formulir PPDB" : "Baca Persyaratan"}
+          </a>
+          <a href="/kontak" class="inline-flex items-center rounded-xl px-6 py-3.5 text-sm font-bold text-white ring-1 ring-white/40 transition hover:bg-white/10">
+            Tanya Panitia
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Pergantian foto sorotan: silang-pudar tiap tujuh detik. Berhenti saat
+    // tab tidak terlihat, dan tidak bergerak sendiri pada setelan "kurangi
+    // gerak" — titiknya tetap dapat diklik untuk berpindah foto.
+    const tumpukan = document.querySelector<HTMLElement>("[data-sorotan]");
+    const foto = tumpukan ? [...tumpukan.querySelectorAll<HTMLImageElement>(".foto-sorotan")] : [];
+    const titik = [...document.querySelectorAll<HTMLButtonElement>("[data-titik-sorotan] button")];
+
+    if (foto.length > 1) {
+      let sekarang = 0;
+      let jam: number | undefined;
+
+      const tampilkan = (i: number) => {
+        sekarang = (i + foto.length) % foto.length;
+        foto.forEach((f, j) => f.classList.toggle("foto-aktif", j === sekarang));
+        titik.forEach((t, j) => {
+          t.classList.toggle("titik-aktif", j === sekarang);
+          if (j === sekarang) t.setAttribute("aria-current", "true");
+          else t.removeAttribute("aria-current");
+        });
+        // Foto berikutnya dimuat lebih dulu supaya tidak muncul setengah jadi.
+        foto[(sekarang + 1) % foto.length].loading = "eager";
+      };
+
+      const kurangiGerak = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const mulai = () => {
+        if (kurangiGerak) return;
+        window.clearInterval(jam);
+        jam = window.setInterval(() => tampilkan(sekarang + 1), 7000);
+      };
+
+      titik.forEach((t, j) =>
+        t.addEventListener("click", () => {
+          tampilkan(j);
+          mulai();
+        }),
+      );
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) window.clearInterval(jam);
+        else mulai();
+      });
+      foto[1].loading = "eager";
+      mulai();
+    }
+  </script>
+</Publik>

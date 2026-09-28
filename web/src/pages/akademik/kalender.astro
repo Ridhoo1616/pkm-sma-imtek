@@ -1,0 +1,40 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import KartuPembuka from "../../komponen/KartuPembuka.astro";
+import { data } from "../../lib/tembolok";
+import KalenderAkademik from "@/komponen/KalenderAkademik";
+import type { Agenda } from "@/lib/tipe";
+
+/**
+ * Kalender memakai komponen React yang sudah ada (pilihan tahun ajaran,
+ * tampilan bulan, penyaring kategori) sebagai bagian interaktif. Skripnya
+ * baru diunduh ketika kalendernya digulir ke dalam layar.
+ */
+const [hasil, { profil }] = await Promise.all([
+  data.agenda().catch((): { data: Agenda[]; kategori: string[] } => ({ data: [], kategori: [] })),
+  data.profil(),
+]);
+---
+
+<Publik sorotan judul="Kalender Akademik" deskripsi="Tanggal kegiatan, ujian, hari libur, dan jadwal PPDB sekolah.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Kalender Akademik"
+    keterangan={`Tanggal kegiatan sekolah tahun pelajaran ${profil.pengaturan.ppdb_tahun || "yang berjalan"}, termasuk ujian, hari libur, dan jadwal PPDB.`}
+    induk="/akademik"
+    jalur="/akademik/kalender"
+  />
+  <div class="wadah space-y-6 py-12 md:py-16">
+    <KartuPembuka
+      atas="Akademik"
+      judul="Kalender Akademik"
+      keterangan="Rangkaian kegiatan pembelajaran, penilaian, dan agenda penting sekolah yang disusun berdasarkan tahun ajaran."
+      gambar="/ilustrasi/kalender.png"
+      alt="Ilustrasi kalender meja beserta tumpukan buku dan tanaman"
+      lebar={1671}
+      tinggi={645}
+    />
+    <KalenderAkademik client:visible agenda={hasil.data} />
+  </div>
+</Publik>

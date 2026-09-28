@@ -1,0 +1,27 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import JudulBagian from "../../komponen/JudulBagian.astro";
+import PetaAnak from "../../komponen/PetaAnak.astro";
+import { data } from "../../lib/tembolok";
+
+const { profil } = await data.profil();
+---
+
+<Publik sorotan judul="Akademik" deskripsi="Kurikulum, jadwal pelajaran, kalender akademik, e-learning, dan perpustakaan digital sekolah.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Akademik"
+    keterangan="Segala yang berkaitan dengan kegiatan belajar: kurikulum yang dipakai, jadwal, tanggal penting, dan layanan penunjangnya."
+    induk="/akademik"
+    jalur="/akademik"
+  />
+  <section class="wadah py-12 md:py-16" data-muncul>
+    <JudulBagian
+      atas="Akademik"
+      judul="Halaman di dalam menu ini"
+      keterangan="Dua di antaranya berupa pintu masuk ke layanan yang sudah dipakai sekolah, jadi tidak ada data yang perlu dicatat dua kali."
+    />
+    <PetaAnak induk="/akademik" />
+  </section>
+</Publik>

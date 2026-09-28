@@ -1,0 +1,127 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import Orbit from "../../komponen/Orbit.astro";
+import { data } from "../../lib/tembolok";
+import { belumTerisi, kePoinTerisi } from "@/lib/format";
+import { Menunggu } from "@/komponen/Halaman";
+import { IkonBersama, IkonGuru, IkonSiswa } from "@/komponen/Ikon";
+
+/**
+ * Visi & Misi. Susunan kartunya sama dengan versi Next — naskah di kolom
+ * kiri, ilustrasi setinggi kartu di kolom kanan yang menempel tepi lewat
+ * margin negatif, `object-contain object-bottom` supaya sosoknya utuh dan
+ * duduk di dasar kartu. Alasan tiap angka ada di halaman Next-nya
+ * (frontend/src/app/(publik)/profil/visi-misi/page.tsx).
+ *
+ * Keterangan ketiga peran menerangkan perannya secara umum, tanpa penilaian
+ * tentang SMA IMTEK.
+ */
+const PELAKU = [
+  {
+    Ikon: IkonGuru,
+    judul: "Guru dan tenaga kependidikan",
+    keterangan:
+      "Menyusun rencana pembelajaran, mengajar di kelas, membina kegiatan siswa, dan mengurus layanan administrasi sekolah.",
+  },
+  {
+    Ikon: IkonSiswa,
+    judul: "Siswa dan siswi",
+    keterangan:
+      "Yang menjalani prosesnya sehari-hari, dan yang pada akhirnya diukur hasil belajarnya beserta perkembangan karakternya.",
+  },
+  {
+    Ikon: IkonBersama,
+    judul: "Dikerjakan bersama",
+    keterangan:
+      "Rumusan di bawah ini menjadi acuan bersama. Perkembangan pelaksanaannya dapat diikuti pada halaman Berita dan Kesiswaan.",
+  },
+];
+
+const { profil } = await data.profil();
+const p = profil.pengaturan;
+const misi = kePoinTerisi(p.misi);
+const adaSemboyan = !belumTerisi(p.tagline ?? "");
+const gambar =
+  "pointer-events-none -my-6 -mr-6 w-36 self-stretch object-contain object-bottom transition duration-700 group-hover:scale-[1.03] sm:w-40 md:-my-7 md:-mr-7 md:w-48 xl:w-56";
+---
+
+<Publik sorotan judul="Visi & Misi" deskripsi="Arah yang dituju sekolah beserta langkah-langkah mencapainya.">
+  <KepalaHalaman
+    pengaturan={p}
+    judul="Visi & Misi"
+    keterangan="Visi adalah keadaan yang dituju sekolah; misi adalah langkah yang dikerjakan untuk mencapainya."
+    induk="/profil"
+    jalur="/profil/visi-misi"
+  />
+
+  <section class="relative py-12 md:py-16">
+    <Orbit class="top-[12%] -left-[10%] h-[70%] w-[120%]" miring={-6} bintang={[{ x: 6, y: 55, ukuran: 14 }, { x: 94, y: 40, ukuran: 12 }]} />
+    <div class="wadah relative grid auto-rows-fr gap-8 lg:grid-cols-2 lg:gap-10">
+      <section aria-labelledby="judul-visi" class="kaca group relative flex h-full gap-4 overflow-hidden border-l-4 !border-l-emas p-6 md:gap-6 md:p-7" data-muncul>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-bold tracking-[0.18em] text-biru uppercase">Arah</p>
+          <h2 id="judul-visi" class="mt-1.5 text-2xl font-bold">Visi</h2>
+          <span aria-hidden="true" class="mt-3 block h-1 w-12 rounded-full bg-emas"></span>
+          {
+            belumTerisi(p.visi) ? (
+              <div class="mt-5"><Menunggu apa="Rumusan visi" polos /></div>
+            ) : (
+              <p class="mt-5 text-lg leading-relaxed font-semibold text-biru-tua">{p.visi}</p>
+            )
+          }
+        </div>
+        <img src="/ilustrasi/visi.png" alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis" width="384" height="426" class={gambar} />
+      </section>
+
+      <section aria-labelledby="judul-misi" class="kaca group relative flex h-full gap-4 overflow-hidden p-6 md:gap-6 md:p-7" data-muncul="0.08">
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-bold tracking-[0.18em] text-biru uppercase">Langkah</p>
+          <h2 id="judul-misi" class="mt-1.5 text-2xl font-bold">Misi</h2>
+          <span aria-hidden="true" class="mt-3 block h-1 w-12 rounded-full bg-emas"></span>
+          {
+            misi.length === 0 ? (
+              <div class="mt-5"><Menunggu apa="Rumusan misi" polos /></div>
+            ) : (
+              <ol class="mt-4 divide-y divide-garis">
+                {misi.map((m, i) => (
+                  <li class="flex gap-3 py-3.5">
+                    <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-biru-tua text-xs font-bold text-white tabular-nums">{i + 1}</span>
+                    <span class="text-[15px] leading-relaxed text-teks">{m}</span>
+                  </li>
+                ))}
+              </ol>
+            )
+          }
+        </div>
+        <img src="/ilustrasi/misi.png" alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar" width="314" height="434" class={gambar} />
+      </section>
+    </div>
+  </section>
+
+  <section class="wadah pb-8" aria-labelledby="judul-pelaku" data-muncul>
+    <h2 id="judul-pelaku" class="text-xs font-bold tracking-[0.18em] text-biru uppercase">Yang Menjalankannya</h2>
+    <div class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        PELAKU.map((pel, i) => (
+          <div data-miring data-muncul={String(i * 0.07)} class="kaca kartu-sorot relative flex h-full gap-4 p-5">
+            <span aria-hidden="true" class="ikon-kartu grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru">
+              <pel.Ikon ukuran={26} />
+            </span>
+            <div class="min-w-0">
+              <h3 class="text-base leading-snug">{pel.judul}</h3>
+              <p class="mt-1.5 text-sm leading-relaxed text-samar">{pel.keterangan}</p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+    {
+      adaSemboyan && (
+        <p class="mt-5 text-sm leading-relaxed text-samar">
+          Semboyan yang dipakai sekolah: <span class="font-tangan text-xl font-semibold text-biru-tua">{p.tagline}</span>
+        </p>
+      )
+    }
+  </section>
+</Publik>

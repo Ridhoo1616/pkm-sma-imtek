@@ -1,0 +1,40 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import TautanKeluar from "../../komponen/TautanKeluar.astro";
+import { data } from "../../lib/tembolok";
+import { belumTerisi } from "@/lib/format";
+import { Menunggu, Naskah } from "@/komponen/Halaman";
+
+const { profil } = await data.profil();
+const p = profil.pengaturan;
+const tautan = (p.tautan_jadwal ?? "").trim();
+const adaTautan = tautan !== "" && !belumTerisi(tautan);
+const adaKeterangan = !belumTerisi(p.jadwal_keterangan ?? "");
+---
+
+<Publik sorotan judul="Jadwal Pelajaran" deskripsi="Jadwal pelajaran yang berlaku pada semester ini.">
+  <KepalaHalaman
+    pengaturan={p}
+    judul="Jadwal Pelajaran"
+    keterangan="Jadwal yang berlaku pada semester ini, beserta siapa yang dapat dihubungi bila ada perubahan."
+    induk="/akademik"
+    jalur="/akademik/jadwal"
+  />
+  <section class="wadah py-12 md:py-16">
+    <div class="max-w-2xl space-y-6" data-muncul>
+      {adaKeterangan && <div class="kaca p-6"><Naskah isi={p.jadwal_keterangan} /></div>}
+      {
+        adaTautan ? (
+          <TautanKeluar
+            tautan={tautan}
+            label="Buka jadwal pelajaran"
+            keterangan="Jadwal pelajaran disimpan sebagai berkas terpisah supaya sekolah dapat menggantinya tanpa mengubah halaman ini."
+          />
+        ) : (
+          <div class="kaca p-6 md:p-8"><Menunggu apa="Jadwal pelajaran" polos /></div>
+        )
+      }
+    </div>
+  </section>
+</Publik>

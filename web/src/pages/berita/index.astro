@@ -1,0 +1,148 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import { data } from "../../lib/tembolok";
+import { urlUnggahan } from "@/lib/api";
+import { tanggalPanjang } from "@/lib/format";
+import { kelasKartuAkhir } from "@/komponen/Bagian";
+import { IkonNaskah, IkonPanahKanan } from "@/komponen/Ikon";
+import type { HalamanBerita } from "@/lib/tipe";
+
+/**
+ * Daftar berita dengan pencarian, penyaring kategori, dan halaman bernomor.
+ * Semuanya lewat alamat (?cari=, ?kategori=, ?halaman=), bukan skrip, jadi
+ * setiap keadaan dapat dibagikan dan diindeks mesin pencari.
+ */
+const PER_HALAMAN = 9;
+const q = Astro.url.searchParams;
+const halaman = Math.max(Number(q.get("halaman")) || 1, 1);
+const kategori = q.get("kategori") ?? "";
+const cari = q.get("cari") ?? "";
+
+const params = new URLSearchParams({ halaman: String(halaman), per_halaman: String(PER_HALAMAN) });
+if (kategori) params.set("kategori", kategori);
+if (cari) params.set("cari", cari);
+
+const [{ profil }, hasil] = await Promise.all([
+  data.profil(),
+  data
+    .berita(`?${params.toString()}`)
+    .catch((): HalamanBerita => ({ data: [], total: 0, halaman: 1, per_halaman: PER_HALAMAN, kategori: [] })),
+]);
+const jumlahHalaman = Math.max(Math.ceil(hasil.total / PER_HALAMAN), 1);
+
+const tautan = (ubah: Record<string, string>) => {
+  const u = new URLSearchParams();
+  const gabung: Record<string, string> = { kategori, cari, halaman: "1", ...ubah };
+  for (const [k, v] of Object.entries(gabung)) if (v && v !== "1") u.set(k, v);
+  const s = u.toString();
+  return s ? `/berita?${s}` : "/berita";
+};
+const pil = (aktif: boolean) =>
+  "rounded-full px-3.5 py-1.5 text-sm font-semibold transition " +
+  (aktif ? "bg-emas text-biru-tua" : "bg-white/10 text-white ring-1 ring-white/20 hover:bg-white/20");
+---
+
+<Publik sorotan judul="Berita & Pengumuman" deskripsi="Kegiatan, prestasi, dan pengumuman resmi sekolah.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Berita & Pengumuman"
+    keterangan="Kabar kegiatan, prestasi peserta didik, dan pengumuman resmi seputar penerimaan peserta didik baru."
+    induk="/berita"
+    jalur="/berita"
+  >
+    <div class="flex flex-col gap-4">
+      <form action="/berita" method="get" class="flex max-w-md gap-2" role="search">
+        {kategori && <input type="hidden" name="kategori" value={kategori} />}
+        <input
+          type="search"
+          name="cari"
+          value={cari}
+          placeholder="Cari judul atau isi berita..."
+          aria-label="Cari berita"
+          class="w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-teks shadow-lembut focus:ring-2 focus:ring-emas"
+        />
+        <button type="submit" class="tombol-kilau shrink-0 rounded-xl bg-emas px-5 py-3 text-sm font-bold text-biru-tua">Cari</button>
+      </form>
+      {
+        hasil.kategori.length > 0 && (
+          <div class="flex flex-wrap gap-2">
+            <a href={tautan({ kategori: "" })} class={pil(!kategori)} data-magnet>Semua</a>
+            {hasil.kategori.map((k) => (
+              <a href={tautan({ kategori: k })} class={pil(kategori === k)} data-magnet aria-current={kategori === k ? "true" : undefined}>{k}</a>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </KepalaHalaman>
+
+  <section class="wadah py-12 md:py-16">
+    {
+      hasil.data.length === 0 ? (
+        <div class="kaca px-6 py-14 text-center" data-muncul>
+          <span aria-hidden="true" class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-biru-muda text-biru"><IkonNaskah ukuran={26} /></span>
+          <p class="mt-4 text-lg font-semibold text-biru-tua">{cari ? `Tidak ada berita yang cocok dengan "${cari}"` : "Belum ada berita"}</p>
+          <p class="mt-2 text-sm text-samar">
+            {cari ? "Coba kata kunci lain, atau lihat seluruh berita." : "Berita akan muncul di sini setelah ditambahkan lewat panel admin."}
+          </p>
+        </div>
+      ) : (
+        <>
+          <p class="mb-6 text-sm text-samar">
+            Menampilkan <strong class="text-biru-tua">{hasil.data.length}</strong> dari {hasil.total} berita
+            {kategori && ` pada kategori ${kategori}`}
+            {cari && ` untuk pencarian "${cari}"`}.
+          </p>
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {hasil.data.map((b, i) => (
+              <a
+                href={`/berita/${b.slug}`}
+                data-miring
+                data-muncul={String((i % 3) * 0.07)}
+                class={"kaca kartu-sorot group relative flex flex-col overflow-hidden " + kelasKartuAkhir(i, hasil.data.length)}
+              >
+                <div class="relative h-48 overflow-hidden bg-gradient-to-br from-biru-tua to-biru">
+                  {b.gambar ? (
+                    <img src={urlUnggahan("berita", b.gambar)} alt={b.judul} class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
+                  ) : (
+                    <div class="grid h-full place-items-center text-white/80" aria-hidden="true"><IkonNaskah ukuran={36} /></div>
+                  )}
+                  <span class="absolute top-3 left-3 rounded-md bg-white px-2 py-1 text-[10px] leading-none font-bold tracking-[0.08em] text-biru-tua uppercase">{b.kategori}</span>
+                </div>
+                <div class="flex flex-1 flex-col p-5">
+                  <p class="text-xs font-semibold text-samar">{tanggalPanjang(b.dibuat)}</p>
+                  <h2 class="mt-1.5 text-base leading-snug text-balance">{b.judul}</h2>
+                  {b.ringkasan && <p class="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-samar">{b.ringkasan}</p>}
+                  <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-emas">
+                    Baca selengkapnya <span class="transition group-hover:translate-x-1"><IkonPanahKanan ukuran={14} /></span>
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          {jumlahHalaman > 1 && (
+            <nav aria-label="Halaman berita" class="mt-12 flex flex-wrap items-center justify-center gap-2">
+              {halaman > 1 && <a href={tautan({ halaman: String(halaman - 1) })} data-magnet class="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-biru-tua ring-1 ring-garis hover:ring-biru">Sebelumnya</a>}
+              {Array.from({ length: jumlahHalaman }, (_, i) => i + 1).map((n) => (
+                <a
+                  href={tautan({ halaman: String(n) })}
+                  aria-current={n === halaman ? "page" : undefined}
+                  data-magnet
+                  class={
+                    "min-w-10 rounded-xl px-3.5 py-2.5 text-center text-sm font-semibold tabular-nums " +
+                    (n === halaman ? "bg-biru-tua text-white" : "bg-white text-biru-tua ring-1 ring-garis hover:ring-biru")
+                  }
+                >
+                  {n}
+                </a>
+              ))}
+              {halaman < jumlahHalaman && <a href={tautan({ halaman: String(halaman + 1) })} data-magnet class="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-biru-tua ring-1 ring-garis hover:ring-biru">Berikutnya</a>}
+            </nav>
+          )}
+        </>
+      )
+    }
+  </section>
+</Publik>

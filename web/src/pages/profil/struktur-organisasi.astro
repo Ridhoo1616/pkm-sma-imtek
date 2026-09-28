@@ -1,0 +1,106 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import JudulBagian from "../../komponen/JudulBagian.astro";
+import { data } from "../../lib/tembolok";
+import { urlUnggahan } from "@/lib/api";
+import { belumTerisi } from "@/lib/format";
+import { Menunggu, Naskah } from "@/komponen/Halaman";
+import { IkonGuru } from "@/komponen/Ikon";
+import { kelasKartuAkhir } from "@/komponen/Bagian";
+import type { Tenaga } from "@/lib/tipe";
+
+const [{ profil }, tenaga] = await Promise.all([
+  data.profil(),
+  data.tenaga().then((h) => h.data).catch((): Tenaga[] => []),
+]);
+const p = profil.pengaturan;
+const bagan = p.struktur_organisasi ?? "";
+const adaBagan = Boolean(bagan && !belumTerisi(bagan));
+const adaKeterangan = !belumTerisi(p.struktur_keterangan ?? "");
+// Diambil dari tenaga pendidik berkategori Pimpinan, supaya cukup diperbarui
+// di satu tempat.
+const pimpinan = tenaga.filter((t) => t.kategori === "Pimpinan");
+---
+
+<Publik sorotan judul="Struktur Organisasi" deskripsi="Susunan pimpinan sekolah dan pembagian tugasnya.">
+  <KepalaHalaman
+    pengaturan={p}
+    judul="Struktur Organisasi"
+    keterangan="Susunan pimpinan sekolah beserta pembagian tugas yang berlaku pada tahun pelajaran ini."
+    induk="/profil"
+    jalur="/profil/struktur-organisasi"
+  />
+
+  <div class="wadah space-y-16 py-12 md:py-16">
+    <section data-muncul>
+      <JudulBagian atas="Bagan" judul="Bagan Struktur Organisasi" />
+      {
+        adaBagan ? (
+          <figure class="kaca overflow-hidden">
+            <a href={urlUnggahan("profil", bagan)} target="_blank" rel="noopener noreferrer" class="group block cursor-zoom-in bg-white">
+              <img
+                src={urlUnggahan("profil", bagan)}
+                alt="Bagan struktur organisasi sekolah"
+                class="w-full object-contain transition duration-500 group-hover:scale-[1.02]"
+                loading="lazy"
+                decoding="async"
+              />
+            </a>
+            {adaKeterangan && (
+              <figcaption class="border-t border-garis px-6 py-4 text-sm leading-relaxed text-samar">
+                {p.struktur_keterangan}
+              </figcaption>
+            )}
+          </figure>
+        ) : (
+          <div class="mx-auto max-w-3xl space-y-4">
+            {/* Kerangka berukuran sama supaya tata letaknya sudah final. */}
+            <div class="kaca grid aspect-[4/3] w-full place-items-center border-dashed px-6 text-center">
+              <div>
+                <p class="text-sm font-semibold text-biru-tua">Tempat bagan struktur organisasi</p>
+                <p class="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-biru/70">
+                  Gambar mendatar, perbandingan sisi 4:3, paling tidak 1200 piksel lebarnya. Diunggah lewat menu Pengaturan di panel admin.
+                </p>
+              </div>
+            </div>
+            <div class="kaca p-6 md:p-8">
+              <Menunggu apa="Bagan struktur organisasi" polos />
+            </div>
+            {adaKeterangan && (
+              <div class="kaca p-6">
+                <Naskah isi={p.struktur_keterangan} />
+              </div>
+            )}
+          </div>
+        )
+      }
+    </section>
+
+    {
+      pimpinan.length > 0 && (
+        <section data-muncul>
+          <JudulBagian
+            atas="Pimpinan"
+            judul="Unsur Pimpinan Sekolah"
+            keterangan="Diambil dari data tenaga pendidik berkategori Pimpinan, jadi cukup diperbarui di satu tempat."
+          />
+          <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {pimpinan.map((t, i) => (
+              <div data-miring data-muncul={String((i % 3) * 0.07)} class={"kaca kartu-sorot relative flex items-center gap-4 p-5 " + kelasKartuAkhir(i, pimpinan.length)}>
+                <span class="ikon-kartu grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-biru-muda text-biru" aria-hidden="true">
+                  {t.foto ? <img src={urlUnggahan("profil", t.foto)} alt="" class="h-full w-full object-cover" loading="lazy" /> : <IkonGuru ukuran={26} />}
+                </span>
+                <div class="min-w-0">
+                  <p class="font-bold text-biru-tua">{t.nama}</p>
+                  {t.jabatan && <p class="mt-0.5 text-sm text-biru">{t.jabatan}</p>}
+                  {t.nip && <p class="mt-1 text-xs text-samar tabular-nums">NIP {t.nip}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Publik>

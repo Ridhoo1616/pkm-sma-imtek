@@ -1,0 +1,39 @@
+---
+import { anakMenu } from "@/lib/menu";
+import { IkonPanahKanan } from "@/komponen/Ikon";
+
+/**
+ * Kartu penunjuk ke halaman-halaman turunan sebuah kelompok menu. Dibaca
+ * dari susunan menu yang sama dengan navigasi atas, jadi tidak pernah
+ * menyebut halaman yang tidak ada di menu.
+ */
+interface Props {
+  induk: string;
+}
+const anak = anakMenu(Astro.props.induk);
+---
+
+{
+  anak.length > 0 && (
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {anak.map((a, i) => (
+        <a
+          href={a.jalur}
+          data-miring
+          data-muncul={String((i % 3) * 0.07)}
+          class="kaca kartu-sorot group relative flex flex-col p-6"
+        >
+          <span class="ikon-kartu grid h-11 w-11 place-items-center rounded-xl bg-biru-muda text-base font-extrabold text-biru tabular-nums" aria-hidden="true">
+            {String(i + 1).padStart(2, "0")}
+          </span>
+          <h3 class="mt-4 text-lg leading-snug">{a.label}</h3>
+          {a.keterangan && <p class="mt-2 flex-1 text-sm leading-relaxed text-samar">{a.keterangan}</p>}
+          <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-emas">
+            Buka halaman
+            <span class="transition group-hover:translate-x-1"><IkonPanahKanan ukuran={14} /></span>
+          </span>
+        </a>
+      ))}
+    </div>
+  )
+}

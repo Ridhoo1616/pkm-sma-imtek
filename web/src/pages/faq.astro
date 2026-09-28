@@ -1,0 +1,48 @@
+---
+import Publik from "../tata/Publik.astro";
+import KepalaHalaman from "../komponen/KepalaHalaman.astro";
+import { data } from "../lib/tembolok";
+import { belumTerisi } from "@/lib/format";
+import DaftarFaq from "@/komponen/DaftarFaq";
+import { tombolEmasKecil, tombolPutih } from "../lib/gaya";
+import type { Faq } from "@/lib/tipe";
+
+/** Butir PPDB di menu atas. Daftarnya (pencarian, kategori, buka-tutup)
+ *  memakai komponen React yang sudah ada. */
+const [{ profil }, faq] = await Promise.all([
+  data.profil(),
+  data.faq().catch(() => ({ data: [] as Faq[], kategori: [] as string[], pengantar: "" })),
+]);
+---
+
+<Publik
+  sorotan
+  judul="Tanya Jawab PPDB"
+  deskripsi="Pertanyaan yang sering diajukan orang tua dan calon peserta didik tentang pendaftaran, berkas, biaya, tes seleksi, dan pengumuman."
+>
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Tanya Jawab"
+    keterangan="Jawaban atas pertanyaan yang paling sering diajukan orang tua dan calon peserta didik. Yang bertanda kuning adalah yang paling sering ditanyakan."
+    induk="/ppdb"
+    jalur="/faq"
+  />
+  <section class="wadah max-w-4xl py-12 md:py-16">
+    <div class="kaca p-4 sm:p-6" data-muncul>
+      <DaftarFaq client:visible daftar={faq.data} kategori={faq.kategori} />
+    </div>
+    <div class="mt-10 overflow-hidden rounded-[18px] bg-biru-tua px-6 py-6 text-white" data-muncul>
+      <p class="text-[15px] leading-relaxed text-white/90">
+        {
+          faq.pengantar && !belumTerisi(faq.pengantar)
+            ? faq.pengantar
+            : "Belum menemukan jawabannya? Hubungi panitia lewat tombol WhatsApp di pojok kanan bawah, atau kirim pertanyaan dari halaman Kontak."
+        }
+      </p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href="/kontak" class={tombolEmasKecil}>Kirim pertanyaan</a>
+        <a href="/ppdb" class={tombolPutih}>Baca ketentuan PPDB</a>
+      </div>
+    </div>
+  </section>
+</Publik>

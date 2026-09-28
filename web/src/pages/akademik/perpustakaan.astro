@@ -1,0 +1,79 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import JudulBagian from "../../komponen/JudulBagian.astro";
+import { data } from "../../lib/tembolok";
+import { urlUnggahan } from "@/lib/api";
+import { belumTerisi } from "@/lib/format";
+import { Naskah } from "@/komponen/Halaman";
+import { kelasKartuAkhir } from "@/komponen/Bagian";
+import { IkonNaskah, IkonPanahKanan } from "@/komponen/Ikon";
+import type { Pustaka } from "@/lib/tipe";
+
+const [hasil, { profil }] = await Promise.all([
+  data.pustaka().catch((): { data: Pustaka[]; kategori: string[] } => ({ data: [], kategori: [] })),
+  data.profil(),
+]);
+const pengantar = profil.pengaturan.perpustakaan_keterangan ?? "";
+const kelompok = hasil.kategori
+  .map((k) => ({ nama: k, koleksi: hasil.data.filter((p) => p.kategori === k) }))
+  .filter((g) => g.koleksi.length > 0);
+---
+
+<Publik sorotan judul="Perpustakaan Digital" deskripsi="Katalog koleksi digital yang dapat dibaca siswa.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Perpustakaan Digital"
+    keterangan="Koleksi bacaan yang dapat dibuka siswa dari mana saja, baik berkas milik sekolah maupun koleksi di layanan lain."
+    induk="/akademik"
+    jalur="/akademik/perpustakaan"
+  />
+  <div class="wadah space-y-12 py-12 md:py-16">
+    {!belumTerisi(pengantar) && <div class="kaca max-w-3xl p-6" data-muncul><Naskah isi={pengantar} /></div>}
+    {
+      kelompok.length === 0 ? (
+        <div class="kaca px-6 py-14 text-center" data-muncul>
+          <span aria-hidden="true" class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-biru-muda text-biru">
+            <IkonNaskah ukuran={26} />
+          </span>
+          <p class="mt-4 text-lg font-semibold text-biru-tua">Koleksi belum diisi</p>
+          <p class="mx-auto mt-2 max-w-xl text-sm text-samar">
+            Koleksi ditambahkan lewat menu Perpustakaan di panel admin. Setiap koleksi memerlukan tautan atau berkas, supaya tidak ada
+            judul yang tidak bisa dibuka.
+          </p>
+        </div>
+      ) : (
+        kelompok.map((g) => (
+          <section data-muncul>
+            <JudulBagian atas={`${g.koleksi.length} koleksi`} judul={g.nama} />
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {g.koleksi.map((p, i) => (
+                <a
+                  href={p.berkas ? urlUnggahan("pustaka", p.berkas) : p.tautan}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-miring
+                  data-muncul={String((i % 3) * 0.06)}
+                  class={"kaca kartu-sorot group relative flex flex-col p-5 " + kelasKartuAkhir(i, g.koleksi.length)}
+                >
+                  <span class="ikon-kartu grid h-11 w-11 place-items-center rounded-xl bg-biru-muda text-biru" aria-hidden="true">
+                    <IkonNaskah ukuran={22} />
+                  </span>
+                  <h3 class="mt-4 text-base leading-snug">{p.judul}</h3>
+                  <p class="mt-1.5 text-sm text-samar">
+                    {[p.penulis, p.tahun ? String(p.tahun) : ""].filter(Boolean).join(" · ") || "Penulis tidak dicantumkan"}
+                  </p>
+                  {p.keterangan && <p class="mt-3 flex-1 text-sm leading-relaxed text-samar">{p.keterangan}</p>}
+                  <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-emas">
+                    {p.berkas ? "Buka berkas" : "Buka di layanan lain"}
+                    <span class="transition group-hover:translate-x-1"><IkonPanahKanan ukuran={14} /></span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))
+      )
+    }
+  </div>
+</Publik>

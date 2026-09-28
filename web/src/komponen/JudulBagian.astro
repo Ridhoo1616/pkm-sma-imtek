@@ -1,0 +1,20 @@
+---
+/**
+ * Judul bagian beranda: tulisan kecil di atas, judul, garis emas, dan satu
+ * kalimat keterangan, semuanya rata tengah seperti pada rancangannya.
+ */
+interface Props {
+  atas: string;
+  judul: string;
+  keterangan?: string;
+  id?: string;
+}
+const { atas, judul, keterangan, id } = Astro.props;
+---
+
+<div class="mx-auto mb-10 max-w-2xl text-center">
+  <p class="text-xs font-bold tracking-[0.18em] text-biru uppercase">{atas}</p>
+  <h2 id={id} class="mt-2 text-2xl md:text-3xl">{judul}</h2>
+  <span aria-hidden="true" class="mx-auto mt-3 block h-1 w-14 rounded-full bg-emas"></span>
+  {keterangan && <p class="mt-4 leading-relaxed text-samar">{keterangan}</p>}
+</div>

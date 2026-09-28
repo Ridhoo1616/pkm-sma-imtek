@@ -1,0 +1,40 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import SambutanKaca from "../../komponen/SambutanKaca.astro";
+import JudulBagian from "../../komponen/JudulBagian.astro";
+import PetaAnak from "../../komponen/PetaAnak.astro";
+import { data } from "../../lib/tembolok";
+
+/**
+ * Halaman pengantar kelompok Profil Sekolah: sambutan kepala sekolah yang
+ * utuh, lalu kartu penunjuk ke halaman-halaman di dalam menu ini.
+ */
+const { profil } = await data.profil();
+const p = profil.pengaturan;
+---
+
+<Publik
+  sorotan
+  judul="Profil Sekolah"
+  deskripsi="Sambutan kepala sekolah beserta pengantar ke sejarah, data sekolah, visi dan misi, sarana, struktur organisasi, dan tenaga pendidik."
+>
+  <KepalaHalaman
+    pengaturan={p}
+    judul="Profil Sekolah"
+    keterangan={`Mengenal ${p.nama_sekolah || "sekolah"} lebih dekat: riwayat, arah, orang-orang, dan sarana yang dimilikinya.`}
+    induk="/profil"
+    jalur="/profil"
+  />
+
+  <SambutanKaca pengaturan={p} lengkap />
+
+  <section class="wadah pb-8" data-muncul>
+    <JudulBagian
+      atas="Profil Sekolah"
+      judul="Halaman di dalam menu ini"
+      keterangan="Setiap bagian dibuat terpisah supaya mudah dicari dan mudah diperbarui panitia."
+    />
+    <PetaAnak induk="/profil" />
+  </section>
+</Publik>

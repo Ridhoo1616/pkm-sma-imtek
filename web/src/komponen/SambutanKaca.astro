@@ -1,0 +1,101 @@
+---
+import Orbit from "./Orbit.astro";
+import { urlUnggahan } from "@/lib/api";
+import { belumTerisi, keParagraf } from "@/lib/format";
+import { IkonGuru, IkonPanahKanan } from "@/komponen/Ikon";
+import type { Pengaturan } from "@/lib/tipe";
+import { tombolGelap } from "../lib/gaya";
+
+/**
+ * Sambutan kepala sekolah berkaca: potret di kiri, naskah di kanan dengan
+ * gedung sekolah yang dipudarkan di belakangnya.
+ *
+ * Beranda memakai dua paragraf pertama beserta tombol ke halaman Profil;
+ * halaman Profil memakai seluruh naskahnya (`lengkap`). Selama sekolah
+ * belum mengirim naskah, yang tampil kalimat pengarah, bukan naskah contoh.
+ */
+interface Props {
+  pengaturan: Pengaturan;
+  lengkap?: boolean;
+}
+
+const { pengaturan: p, lengkap = false } = Astro.props;
+const adaFotoKepsek = Boolean(p.foto_kepsek && !belumTerisi(p.foto_kepsek));
+const adaNamaKepsek = !belumTerisi(p.kepala_sekolah ?? "");
+const paragrafSambutan = belumTerisi(p.sambutan_kepsek ?? "") ? [] : keParagraf(p.sambutan_kepsek);
+---
+
+  <section class="relative py-16 md:py-24" aria-labelledby="judul-sambutan" data-muncul>
+    <Orbit
+      class="top-[8%] -left-[6%] h-[80%] w-[112%]"
+      miring={-8}
+      bintang={[{ x: 4, y: 62, ukuran: 14 }, { x: 95, y: 30, ukuran: 16 }, { x: 88, y: 50, ukuran: 10 }]}
+    />
+    <div class="wadah relative">
+      <div class="kaca relative grid overflow-hidden md:grid-cols-[minmax(0,17rem)_1fr] lg:grid-cols-[minmax(0,20rem)_1fr]">
+        <div class="relative flex min-h-64 items-end justify-center bg-gradient-to-b from-biru-muda to-white/40">
+          {
+            adaFotoKepsek ? (
+              <img
+                src={urlUnggahan("profil", p.foto_kepsek)}
+                alt={adaNamaKepsek ? `Foto ${p.kepala_sekolah}, Kepala Sekolah` : "Foto Kepala Sekolah"}
+                class="h-full max-h-96 w-full object-cover object-top transition duration-700 hover:scale-[1.04]"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <IkonGuru ukuran={80} className="mb-16 text-biru/25" />
+            )
+          }
+        </div>
+
+        <div class="relative p-6 md:p-10">
+          <img
+            src="/ilustrasi/gedung-sambutan.jpg"
+            alt=""
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-0 h-full w-full object-cover object-right-bottom opacity-60"
+            loading="lazy"
+            decoding="async"
+          />
+          <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-gradient-to-r from-white via-white/92 to-white/50" />
+
+          <div class="relative">
+            <p class="text-xs font-bold tracking-[0.18em] text-biru uppercase">Sambutan</p>
+            <h2 id="judul-sambutan" class="mt-2 text-2xl md:text-3xl">Kepala Sekolah</h2>
+            <span aria-hidden="true" class="mt-3 block h-1 w-14 rounded-full bg-emas"></span>
+
+            {
+              paragrafSambutan.length > 0 ? (
+                <div class="mt-5 max-w-2xl space-y-3">
+                  {(lengkap ? paragrafSambutan : paragrafSambutan.slice(0, 2)).map((baris, i) => (
+                    <p class={"text-[15px] leading-relaxed " + (i === 0 ? "font-semibold text-biru-tua" : "text-teks")}>{baris}</p>
+                  ))}
+                </div>
+              ) : (
+                <p class="mt-5 max-w-2xl text-[15px] leading-relaxed text-teks">
+                  Sambutan kepala sekolah akan dimuat di bagian ini. Sementara itu, profil sekolah beserta arah dan
+                  langkah yang dituju dapat dibaca lebih dulu di halaman Profil Sekolah.
+                </p>
+              )
+            }
+
+            <p class="mt-5 text-sm">
+              <strong class="text-biru-tua">{adaNamaKepsek ? p.kepala_sekolah : "Kepala Sekolah"}</strong>
+              {adaNamaKepsek && <span class="text-samar"> · Kepala Sekolah</span>}
+            </p>
+
+            {
+              !lengkap && (
+                <a href="/profil" class={"mt-6 " + tombolGelap} data-magnet>
+                  {paragrafSambutan.length > 0 ? "Baca Selengkapnya" : "Buka Profil Sekolah"}
+                  <IkonPanahKanan ukuran={15} />
+                </a>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+

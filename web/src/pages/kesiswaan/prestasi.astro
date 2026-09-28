@@ -1,0 +1,74 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import { data } from "../../lib/tembolok";
+import { urlUnggahan } from "@/lib/api";
+import { tanggalPanjang } from "@/lib/format";
+import { kelasKartuAkhir } from "@/komponen/Bagian";
+import { IkonBendera, IkonPanahKanan } from "@/komponen/Ikon";
+import type { HalamanBerita } from "@/lib/tipe";
+
+/** Prestasi = berita berkategori Prestasi, jadi cukup ditulis sekali. */
+const [hasil, { profil }] = await Promise.all([
+  data
+    .berita("?kategori=Prestasi&per_halaman=24")
+    .catch((): HalamanBerita => ({ data: [], total: 0, halaman: 1, per_halaman: 24, kategori: [] })),
+  data.profil(),
+]);
+---
+
+<Publik sorotan judul="Prestasi Siswa" deskripsi="Capaian peserta didik pada lomba dan kegiatan di luar sekolah.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Prestasi Siswa"
+    keterangan="Capaian peserta didik pada lomba akademik, olahraga, dan kegiatan lain di luar sekolah."
+    induk="/kesiswaan"
+    jalur="/kesiswaan/prestasi"
+  />
+  <div class="wadah py-12 md:py-16">
+    {
+      hasil.data.length === 0 ? (
+        <div class="kaca px-6 py-14 text-center" data-muncul>
+          <p class="text-lg font-semibold text-biru-tua">Belum ada prestasi yang dimuat</p>
+          <p class="mx-auto mt-2 max-w-xl text-sm text-samar">
+            Prestasi ditulis sebagai berita berkategori Prestasi lewat menu Berita di panel admin, sehingga langsung tampil di halaman
+            ini dan di halaman berita.
+          </p>
+        </div>
+      ) : (
+        <>
+          <p class="text-sm text-samar" data-muncul>
+            <strong class="text-biru-tua">{hasil.total}</strong> capaian tercatat, terbaru lebih dahulu.
+          </p>
+          <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {hasil.data.map((b, i) => (
+              <a
+                href={`/berita/${b.slug}`}
+                data-miring
+                data-muncul={String((i % 3) * 0.07)}
+                class={"kaca kartu-sorot group relative flex flex-col overflow-hidden " + kelasKartuAkhir(i, hasil.data.length)}
+              >
+                <div class="relative h-44 overflow-hidden bg-gradient-to-br from-biru-tua to-biru">
+                  {b.gambar ? (
+                    <img src={urlUnggahan("berita", b.gambar)} alt={b.judul} class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
+                  ) : (
+                    <div class="grid h-full place-items-center text-white/85" aria-hidden="true"><IkonBendera ukuran={34} /></div>
+                  )}
+                  <span class="absolute top-3 left-3 rounded-md bg-emas px-2 py-1 text-[10px] leading-none font-bold tracking-[0.08em] text-biru-tua uppercase">Prestasi</span>
+                </div>
+                <div class="flex flex-1 flex-col p-5">
+                  <p class="text-xs font-semibold text-samar">{tanggalPanjang(b.dibuat)}</p>
+                  <h2 class="mt-1.5 text-base leading-snug">{b.judul}</h2>
+                  {b.ringkasan && <p class="mt-2 flex-1 text-sm leading-relaxed text-samar">{b.ringkasan}</p>}
+                  <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-emas">
+                    Baca selengkapnya <span class="transition group-hover:translate-x-1"><IkonPanahKanan ukuran={14} /></span>
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </>
+      )
+    }
+  </div>
+</Publik>
