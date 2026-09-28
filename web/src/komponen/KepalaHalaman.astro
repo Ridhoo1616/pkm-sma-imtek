@@ -1,5 +1,7 @@
 ---
 import Orbit from "./Orbit.astro";
+import AlurPpdb from "./AlurPpdb.astro";
+import type { TahapAlur } from "../lib/alur";
 import { urlUnggahan } from "@/lib/api";
 import { belumTerisi } from "@/lib/format";
 import { menuDari } from "@/lib/menu";
@@ -24,11 +26,21 @@ interface Props {
   induk: string;
   /** Jalur halaman yang sedang dibuka; sama dengan `induk` pada halaman indeks. */
   jalur: string;
+  /**
+   * Halaman PPDB: bilah sub menu diganti penunjuk alur lima langkah, dan
+   * ini langkah yang sedang dibuka.
+   */
+  langkah?: TahapAlur;
+  ppdbDibuka?: boolean;
 }
 
-const { pengaturan: p, judul, keterangan, induk, jalur } = Astro.props;
+const { pengaturan: p, judul, keterangan, induk, jalur, langkah, ppdbDibuka = false } = Astro.props;
 const kelompok = menuDari(induk);
 const anak = kelompok?.anak ?? [];
+// "Ringkasan" hanya ditambahkan bila tidak ada anak yang menunjuk halaman
+// indeks itu sendiri. Pada PPDB, "Ketentuan & Jadwal" adalah /ppdb, dan
+// tanpa pemeriksaan ini bilahnya memuat dua pil menuju alamat yang sama.
+const perluRingkasan = !anak.some((a) => a.jalur === induk);
 const sekarang = anak.find((a) => a.jalur === jalur);
 const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
 ---
@@ -87,17 +99,19 @@ const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
   </div>
 </section>
 
+{langkah && <AlurPpdb aktif={langkah} ppdbDibuka={ppdbDibuka} />}
+
 {
-  anak.length > 0 && (
+  !langkah && anak.length > 0 && (
     <nav aria-label={`Halaman lain dalam ${kelompok?.label}`} class="wadah relative z-10 -mt-8">
       <ul class="bilah-anak flex snap-x gap-1.5 overflow-x-auto rounded-2xl bg-white p-1.5 shadow-[0_14px_40px_rgb(10_28_49/0.14)] ring-1 ring-garis" data-bilah-anak>
-        <li class="shrink-0 snap-start">
+        {perluRingkasan && <li class="shrink-0 snap-start">
           {jalur === induk ? (
             <span aria-current="page" class="block rounded-xl bg-biru-tua px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-white">Ringkasan</span>
           ) : (
             <a href={induk} data-magnet class="block rounded-xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-teks transition hover:bg-biru-muda hover:text-biru">Ringkasan</a>
           )}
-        </li>
+        </li>}
         {anak.map((a) => (
           <li class="shrink-0 snap-start">
             {a.jalur === jalur ? (

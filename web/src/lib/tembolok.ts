@@ -44,5 +44,7 @@ export const data = {
   agenda: () => sekali("agenda", () => api.agenda()),
   pustaka: () => sekali("pustaka", () => api.pustaka()),
   galeri: () => sekali("galeri", () => api.galeri()),
+  biaya: () => sekali("biaya", () => api.biaya()),
+  infoUjian: () => sekali("infoUjian", () => api.infoUjian()),
   halamanDetail: (slug: string) => sekali(`halaman:${slug}`, () => api.halamanDetail(slug)),
 };

@@ -1,0 +1,28 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import { data } from "../../lib/tembolok";
+import CekStatus from "@/komponen/CekStatus";
+
+/** Cek status memakai komponen CekStatus yang sudah ada; ?no= mengisi
+ *  nomor registrasi lebih dulu, sama seperti versi Next. */
+const { profil } = await data.profil();
+const nomorAwal = Astro.url.searchParams.get("no") ?? "";
+---
+
+<Publik sorotan judul="Cek Status Pendaftaran" deskripsi="Pantau hasil verifikasi berkas dengan nomor registrasi dan tanggal lahir.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Cek Status Pendaftaran"
+    keterangan="Masukkan nomor registrasi dan tanggal lahir yang Anda gunakan saat mendaftar. Keduanya diperlukan agar data pribadi tidak dapat dibuka oleh orang lain."
+    induk="/ppdb"
+    jalur="/ppdb/cek"
+    langkah="pantau"
+    ppdbDibuka={profil.ppdb.dibuka}
+  />
+  <section class="wadah py-12 md:py-16">
+    <div class="kaca mx-auto max-w-3xl p-4 sm:p-6 md:p-8">
+      <CekStatus client:load nomorAwal={nomorAwal} />
+    </div>
+  </section>
+</Publik>

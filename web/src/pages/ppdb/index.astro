@@ -1,0 +1,390 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import JudulBagian from "../../komponen/JudulBagian.astro";
+import { data } from "../../lib/tembolok";
+import { tombolEmas, tombolPutih } from "../../lib/gaya";
+import { DOKUMEN } from "@/lib/dokumen";
+import { BATAS_UNGGAH } from "@/lib/unggah";
+import { angka, belumTerisi, kePoin, persen, rupiah, tanggalPanjang } from "@/lib/format";
+import { kataKeadaanPpdb } from "@/lib/ppdb";
+import {
+  IkonBendera,
+  IkonCentang,
+  IkonFasilitas,
+  IkonFormulir,
+  IkonGuru,
+  IkonKalender,
+  IkonNaskah,
+  IkonPanahKanan,
+  IkonSiswa,
+} from "@/komponen/Ikon";
+import type { Jurusan } from "@/lib/tipe";
+
+/**
+ * Ketentuan & Jadwal PPDB. Isi dan aturannya sama dengan
+ * frontend/src/app/(publik)/ppdb/page.tsx: pos biaya yang belum ditetapkan
+ * tetap tampil dan ditandai (bukan disembunyikan), alur bawaan dipakai
+ * selama sekolah belum menulis alurnya sendiri, dan persyaratan tambahan
+ * hanya muncul bila sudah diisi.
+ *
+ * Yang baru hanya keterangan waktu pada jadwal ("sudah lewat", "12 hari
+ * lagi"), dan itu dihitung dari tanggal pada pengaturan — bukan dikarang.
+ */
+const KETERANGAN_JALUR: Record<string, { teks: string; ikon: typeof IkonSiswa }> = {
+  Reguler: { teks: "Jalur umum berdasarkan nilai rapor dan kelengkapan berkas.", ikon: IkonSiswa },
+  Prestasi: {
+    teks: "Untuk calon peserta didik dengan prestasi akademik maupun non-akademik. Sertifikat wajib diunggah.",
+    ikon: IkonBendera,
+  },
+  Afirmasi: {
+    teks: "Untuk calon peserta didik dari keluarga berpenghasilan rendah atau penyandang disabilitas.",
+    ikon: IkonGuru,
+  },
+  "Perpindahan Tugas Orang Tua": { teks: "Untuk anak yang orang tuanya berpindah tugas ke wilayah sekolah.", ikon: IkonFasilitas },
+};
+const ALUR_BAWAAN = [
+  "Isi formulir pendaftaran online dan unggah dokumen yang diminta.",
+  "Nomor registrasi diterbitkan seketika setelah formulir terkirim. Simpan nomor tersebut.",
+  "Panitia memverifikasi kelengkapan dan kesesuaian berkas.",
+  "Pantau hasil verifikasi lewat menu Cek Status memakai nomor registrasi dan tanggal lahir.",
+  "Peserta yang diterima melakukan daftar ulang sesuai ketentuan sekolah.",
+];
+
+const [{ profil }, jurusan, biaya] = await Promise.all([
+  data.profil(),
+  data.jurusan().then((h) => h.data).catch((): Jurusan[] => []),
+  data.biaya().catch(() => null),
+]);
+const p = profil.pengaturan;
+const ppdb = profil.ppdb;
+const kataPpdb = kataKeadaanPpdb(ppdb, p);
+const sisa = Math.max(ppdb.kuota - ppdb.terisi, 0);
+const terisi = Math.min(persen(ppdb.terisi, ppdb.kuota), 100);
+const alur = belumTerisi(p.ppdb_alur) ? [] : kePoin(p.ppdb_alur);
+const syarat = belumTerisi(p.ppdb_syarat) ? [] : kePoin(p.ppdb_syarat);
+
+// Keterangan waktu pada jadwal, dihitung terhadap hari ini.
+const hariIni = new Date();
+hariIni.setHours(0, 0, 0, 0);
+const selisihHari = (teks?: string) => {
+  if (!teks) return null;
+  const t = new Date(teks.replace(" ", "T"));
+  if (Number.isNaN(t.getTime())) return null;
+  t.setHours(0, 0, 0, 0);
+  return Math.round((t.getTime() - hariIni.getTime()) / 86_400_000);
+};
+const keteranganWaktu = (n: number | null) =>
+  n === null ? null : n < 0 ? { teks: "Sudah lewat", lewat: true } : n === 0 ? { teks: "Hari ini", lewat: false } : { teks: `${angka(n)} hari lagi`, lewat: false };
+const jadwal = [
+  { k: "Pendaftaran dibuka", v: p.ppdb_mulai, ket: "Formulir online mulai dapat diisi." },
+  { k: "Pendaftaran ditutup", v: p.ppdb_selesai, ket: "Batas akhir pengisian formulir dan unggah berkas." },
+  { k: "Pengumuman hasil", v: p.ppdb_pengumuman, ket: "Hasil verifikasi dapat dilihat lewat menu Cek Status." },
+]
+  .filter((t) => t.v)
+  .map((t) => ({ ...t, waktu: keteranganWaktu(selisihHari(t.v)) }));
+// Tahap yang sedang berjalan: yang pertama belum lewat.
+const indeksBerjalan = jadwal.findIndex((t) => t.waktu && !t.waktu.lewat);
+
+// Lingkaran persentase terisi.
+const KELILING = 2 * Math.PI * 34;
+---
+
+<Publik sorotan judul="Informasi PPDB" deskripsi="Jadwal, persyaratan, jalur, dan alur pendaftaran peserta didik baru.">
+  <KepalaHalaman
+    pengaturan={p}
+    judul={`PPDB Tahun Ajaran ${p.ppdb_tahun || ""}`.trim()}
+    keterangan="Seluruh tahap pendaftaran dilakukan secara online. Bacalah persyaratan dan jadwal berikut sebelum mengisi formulir."
+    induk="/ppdb"
+    jalur="/ppdb"
+    langkah="ketentuan"
+    ppdbDibuka={ppdb.dibuka}
+  >
+    <div class="flex flex-wrap items-center gap-3">
+      <span
+        class={"inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-xs leading-none font-bold tracking-[0.06em] text-white uppercase " +
+          (kataPpdb.dibuka ? "bg-green-700" : "bg-slate-600")}
+      >
+        {kataPpdb.dibuka && <span class="h-2 w-2 animate-pulse rounded-full bg-white" aria-hidden="true" />}
+        {kataPpdb.lencana}
+      </span>
+      {ppdb.dibuka && <a href="/ppdb/daftar" class={tombolEmas}>Isi Formulir Pendaftaran <IkonPanahKanan ukuran={15} /></a>}
+      <a href="/ppdb/cek" class={"tombol-kilau " + tombolPutih}>Cek Status Pendaftaran</a>
+    </div>
+  </KepalaHalaman>
+
+  <div class="wadah py-12 md:py-16">
+    <!-- ================= Angka PPDB ================= -->
+    {
+      ppdb.kuota > 0 && (
+        <section class="overflow-hidden rounded-[20px] bg-white shadow-[0_18px_50px_rgb(10_28_49/0.12)] ring-1 ring-garis" aria-label="Angka pendaftaran" data-muncul>
+          <dl class="grid grid-cols-2 lg:grid-cols-4">
+            {[
+              { k: "Kuota keseluruhan", v: angka(ppdb.kuota), ikon: IkonFormulir },
+              { k: "Sudah mendaftar", v: angka(ppdb.terisi), ikon: IkonSiswa },
+              { k: "Sisa kuota", v: angka(sisa), ikon: IkonCentang },
+            ].map((s, i) => (
+              <div class={"sel-angka flex items-center gap-4 px-5 py-6 sm:px-6 " + (i % 2 === 0 ? "border-r border-garis " : "") + (i < 2 ? "border-b border-garis lg:border-b-0 " : "") + (i === 1 ? "lg:border-r" : "")}>
+                <span class="ikon-angka grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru" aria-hidden="true"><s.ikon ukuran={22} /></span>
+                <div class="flex flex-col-reverse">
+                  <dt class="mt-1 text-xs font-semibold text-samar sm:text-[13px]">{s.k}</dt>
+                  <dd class="text-3xl leading-none font-extrabold text-biru-tua tabular-nums" data-hitung={s.v}>{s.v}</dd>
+                </div>
+              </div>
+            ))}
+            <div class="sel-angka flex items-center gap-4 px-5 py-6 sm:px-6">
+              <svg viewBox="0 0 80 80" class="h-16 w-16 shrink-0 -rotate-90" aria-hidden="true">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--color-biru-muda)" stroke-width="9" />
+                <circle
+                  cx="40" cy="40" r="34" fill="none" stroke="var(--color-emas)" stroke-width="9" stroke-linecap="round"
+                  stroke-dasharray={KELILING} stroke-dashoffset={KELILING * (1 - terisi / 100)}
+                  class="cincin-terisi" style={`--keliling:${KELILING}`}
+                />
+              </svg>
+              <div class="flex flex-col-reverse">
+                <dt class="mt-1 text-xs font-semibold text-samar sm:text-[13px]">Kuota terisi</dt>
+                <dd class="text-3xl leading-none font-extrabold text-biru-tua tabular-nums">{terisi}%</dd>
+              </div>
+            </div>
+          </dl>
+        </section>
+      )
+    }
+
+    <div class="mt-14 grid gap-12 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
+      <div class="space-y-14">
+        <!-- ================= Jadwal ================= -->
+        <section data-muncul>
+          <JudulBagian atas="Waktu" judul="Jadwal Pendaftaran" />
+          <ol class="relative space-y-4">
+            <span aria-hidden="true" class="absolute top-4 bottom-4 left-[19px] w-0.5 bg-garis"></span>
+            {jadwal.map((t, i) => {
+              const berjalan = i === indeksBerjalan;
+              return (
+                <li class="relative flex gap-4">
+                  <span
+                    aria-hidden="true"
+                    class={"relative z-10 mt-4 grid h-10 w-10 shrink-0 place-items-center rounded-full ring-4 ring-latar " +
+                      (t.waktu?.lewat ? "bg-emas text-biru-tua" : berjalan ? "bg-biru-tua text-white" : "bg-white text-biru")}
+                  >
+                    {berjalan && <span class="absolute inset-0 animate-ping rounded-full bg-biru/30" style="animation-duration:2.4s" />}
+                    <span class="relative">{t.waktu?.lewat ? <IkonCentang ukuran={16} /> : <IkonKalender ukuran={16} />}</span>
+                  </span>
+                  <div class={"kaca flex-1 p-5 " + (berjalan ? "ring-2 ring-biru/30" : "")}>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <p class="font-bold text-biru-tua">{t.k}</p>
+                      {t.waktu && (
+                        <span class={"rounded-md px-2 py-1 text-[11px] leading-none font-bold tracking-[0.06em] uppercase " + (t.waktu.lewat ? "bg-slate-600 text-white" : "bg-biru-tua text-white")}>
+                          {t.waktu.teks}
+                        </span>
+                      )}
+                    </div>
+                    <p class="mt-1 text-lg font-semibold text-teks">{tanggalPanjang(t.v)}</p>
+                    <p class="mt-0.5 text-sm text-samar">{t.ket}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+          {
+            p.ppdb_biaya && (
+              <p class="mt-6 flex items-center gap-3 rounded-xl bg-biru-tua px-5 py-4 text-sm text-white">
+                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-emas text-biru-tua" aria-hidden="true"><IkonFormulir ukuran={18} /></span>
+                <span><strong>Biaya pendaftaran:</strong> {p.ppdb_biaya}</span>
+              </p>
+            )
+          }
+        </section>
+
+        <!-- ================= Arahan langkah berikutnya ================= -->
+        <section data-muncul>
+          {
+            ppdb.dibuka ? (
+              <div class="relative overflow-hidden rounded-[18px] bg-gradient-to-br from-amber-50 to-white p-6 ring-1 ring-amber-300">
+                <p class="flex flex-wrap items-center gap-2 text-base font-bold text-biru-tua">
+                  <span class="rounded-md bg-amber-700 px-2 py-1 text-[11px] leading-none font-bold tracking-[0.06em] text-white uppercase">Langkah berikutnya</span>
+                  Isi formulir pendaftaran
+                </p>
+                <p class="mt-2 max-w-2xl text-sm leading-relaxed text-teks">
+                  Pendaftaran sedang dibuka. Siapkan dokumen yang diminta, lalu isi formulir lima langkah. Nomor registrasi terbit begitu formulirnya terkirim.
+                </p>
+                <a href="/ppdb/daftar" class={"mt-4 " + tombolEmas}>Daftar Sekarang <IkonPanahKanan ukuran={15} /></a>
+              </div>
+            ) : (
+              <div class="kaca p-6">
+                <p class="text-base font-bold text-biru-tua">Pendaftaran sedang ditutup</p>
+                <p class="mt-2 max-w-2xl text-sm leading-relaxed text-teks">
+                  Perhatikan tanggal pada jadwal di atas. Bila Anda sudah pernah mendaftar, hasil verifikasinya tetap dapat dipantau di halaman Cek Status.
+                </p>
+                <a href="/ppdb/cek" class={"mt-4 tombol-kilau " + tombolPutih}>Cek Status</a>
+              </div>
+            )
+          }
+        </section>
+
+        <!-- ================= Rincian biaya ================= -->
+        {
+          biaya && biaya.data.length > 0 && (
+            <section data-muncul>
+              <JudulBagian atas="Biaya" judul="Rincian Biaya" />
+              {!biaya.lengkap && (
+                <p class="mb-4 rounded-xl border border-dashed border-amber-400 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-biru-tua">
+                  Sebagian besaran biaya belum ditetapkan sekolah. Yang sudah tertera di bawah ini sudah final; yang bertanda belum ditetapkan akan diumumkan panitia.
+                </p>
+              )}
+              <div class="kaca overflow-hidden">
+                <table class="w-full text-sm">
+                  <thead class="bg-biru-tua text-left text-white">
+                    <tr>
+                      <th class="px-5 py-3 font-semibold">Pos biaya</th>
+                      <th class="px-5 py-3 font-semibold">Tahap</th>
+                      <th class="px-5 py-3 text-right font-semibold">Jumlah</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-garis">
+                    {biaya.data.map((b) => (
+                      <tr class="transition hover:bg-white/80">
+                        <td class="px-5 py-3.5">
+                          <p class="font-semibold text-teks">
+                            {b.nama}
+                            {!b.wajib && <span class="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-samar">opsional</span>}
+                          </p>
+                          {b.keterangan && !belumTerisi(b.keterangan) && <p class="mt-0.5 text-xs leading-relaxed text-samar">{b.keterangan}</p>}
+                        </td>
+                        <td class="px-5 py-3.5 text-samar">{b.tahap}</td>
+                        <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                          {b.ditetapkan ? (
+                            <>
+                              <span class="font-bold text-biru-tua tabular-nums">{rupiah(b.jumlah)}</span>
+                              <span class="block text-xs text-samar">{b.satuan}</span>
+                            </>
+                          ) : (
+                            <span class="text-xs font-semibold text-amber-700">Belum ditetapkan</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  {biaya.total_tahap.length > 0 && biaya.lengkap && (
+                    <tfoot class="border-t-2 border-garis bg-biru-muda/60">
+                      {biaya.total_tahap.map((t) => (
+                        <tr>
+                          <td class="px-5 py-2.5 font-semibold text-teks" colspan="2">Total {t.tahap.toLowerCase()}</td>
+                          <td class="px-5 py-2.5 text-right font-bold text-biru-tua tabular-nums">{rupiah(t.total)}</td>
+                        </tr>
+                      ))}
+                    </tfoot>
+                  )}
+                </table>
+              </div>
+              {biaya.catatan && !belumTerisi(biaya.catatan) && <p class="mt-4 text-sm leading-relaxed whitespace-pre-line text-samar">{biaya.catatan}</p>}
+              <p class="mt-4 rounded-xl bg-biru-muda px-5 py-4 text-sm leading-relaxed text-biru-tua">
+                Tidak ada biaya di luar daftar ini. Bila ada pihak yang meminta pembayaran lain atas nama sekolah, laporkan kepada panitia lewat halaman Kontak.
+              </p>
+            </section>
+          )
+        }
+
+        <!-- ================= Jalur ================= -->
+        {
+          ppdb.jalur.length > 0 && (
+            <section data-muncul>
+              <JudulBagian atas="Pilihan" judul="Jalur Pendaftaran" keterangan="Pilih satu jalur yang sesuai dengan keadaan Anda." />
+              <div class="grid gap-4 sm:grid-cols-2">
+                {ppdb.jalur.map((j, i) => {
+                  const k = KETERANGAN_JALUR[j];
+                  const Ikon = k?.ikon ?? IkonNaskah;
+                  return (
+                    <div data-miring data-muncul={String((i % 2) * 0.06)} class={"kaca kartu-sorot relative flex gap-4 p-5 " + (i === ppdb.jalur.length - 1 && ppdb.jalur.length % 2 === 1 ? "sm:col-span-2" : "")}>
+                      <span class="ikon-kartu grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru" aria-hidden="true"><Ikon ukuran={22} /></span>
+                      <div>
+                        <h3 class="text-base">{j}</h3>
+                        {k && <p class="mt-1.5 text-sm leading-relaxed text-samar">{k.teks}</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )
+        }
+
+        <!-- ================= Alur ================= -->
+        <section data-muncul>
+          <JudulBagian atas="Tahapan" judul="Alur Pendaftaran" />
+          <ol class="space-y-3">
+            {(alur.length > 0 ? alur : ALUR_BAWAAN).map((a, i) => (
+              <li class="kaca group flex gap-4 p-5 transition hover:-translate-y-0.5" data-muncul={String(i * 0.05)}>
+                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-biru-tua text-sm font-bold text-white tabular-nums transition group-hover:bg-emas group-hover:text-biru-tua">{i + 1}</span>
+                <span class="pt-1.5 text-[15px] leading-relaxed">{a}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      <!-- ================= Kolom samping ================= -->
+      <aside class="space-y-8 lg:sticky lg:top-28 lg:self-start">
+        <section class="kaca overflow-hidden" data-muncul>
+          <h2 class="flex items-center gap-3 border-b border-garis/70 px-6 py-4 text-base">
+            <span class="grid h-9 w-9 place-items-center rounded-lg bg-biru-tua text-white" aria-hidden="true"><IkonNaskah ukuran={18} /></span>
+            Dokumen yang Diunggah
+          </h2>
+          <ul class="divide-y divide-garis/70">
+            {DOKUMEN.map((d) => (
+              <li class="px-6 py-4 transition hover:bg-white/70">
+                <div class="flex items-start justify-between gap-3">
+                  <p class="text-[15px] font-semibold text-teks">{d.nama}</p>
+                  <span class={"inline-flex shrink-0 items-center justify-center rounded-md px-2 py-1 text-[11px] leading-none font-bold tracking-[0.06em] text-white uppercase " + (d.wajib ? "bg-red-700" : "bg-slate-600")}>
+                    {d.wajib ? "Wajib" : "Opsional"}
+                  </span>
+                </div>
+                <p class="mt-0.5 text-xs text-samar">{d.tipe}, maksimal {BATAS_UNGGAH}.{d.catatan ? ` ${d.catatan}` : ""}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {
+          syarat.length > 0 && (
+            <section class="kaca overflow-hidden" data-muncul>
+              <h2 class="border-b border-garis/70 px-6 py-4 text-base">Persyaratan Tambahan</h2>
+              <ul class="space-y-2.5 px-6 py-5 text-sm leading-relaxed">
+                {syarat.map((s) => (
+                  <li class="flex gap-2.5"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-biru" aria-hidden="true" /><span>{s}</span></li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {
+          jurusan.length > 0 && (
+            <section class="kaca overflow-hidden" data-muncul>
+              <h2 class="flex items-center gap-3 border-b border-garis/70 px-6 py-4 text-base">
+                <span class="grid h-9 w-9 place-items-center rounded-lg bg-biru-tua text-white" aria-hidden="true"><IkonSiswa ukuran={18} /></span>
+                Kuota per Peminatan
+              </h2>
+              <ul class="divide-y divide-garis/70">
+                {jurusan.map((j) => (
+                  <li class="px-6 py-4">
+                    <div class="flex items-baseline justify-between gap-3">
+                      <p class="flex items-center gap-2 text-[15px] font-semibold text-teks">
+                        <IkonFasilitas nama={j.ikon} ukuran={16} className="shrink-0 text-biru" />
+                        {j.nama}
+                      </p>
+                      <p class="text-sm text-samar tabular-nums">{angka(j.pendaftar)} / {angka(j.kuota)}</p>
+                    </div>
+                    <div class="mt-2 h-2 overflow-hidden rounded-full bg-biru-muda">
+                      <div data-bilah class="h-full rounded-full bg-gradient-to-r from-biru to-[#2b5c95]" style={`width:${Math.min(persen(j.pendaftar, j.kuota), 100)}%`} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+      </aside>
+    </div>
+  </div>
+</Publik>

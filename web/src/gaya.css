@@ -279,8 +279,12 @@
   translate: var(--tarik-x, 0px) var(--tarik-y, 0px) !important;
   transition: translate 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, box-shadow 0.2s, filter 0.2s !important;
 }
-.magnet > * {
-  display: inline-block;
+/* Hanya ikon panahnya yang ikut bergeser lebih jauh. Aturan ini sempat
+   berlaku untuk SEMUA anak (`.magnet > *` beserta display: inline-block),
+   dan itu merusak tautan yang anaknya punya tata letak sendiri: pada
+   penunjuk alur PPDB, bulatan nomornya kehilangan grid-nya sehingga angka
+   keluar dari lingkaran, dan labelnya kehilangan flex-col. */
+.magnet > svg {
   translate: calc(var(--tarik-x, 0px) * 0.35) calc(var(--tarik-y, 0px) * 0.35);
   transition: translate 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -333,7 +337,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .balik-isi { transition: none; }
-  .magnet, .magnet > * { translate: none !important; }
+  .magnet, .magnet > svg { translate: none !important; }
 }
 
 /* Bilah halaman sekelompok: dapat digeser mendatar tanpa batang gulir yang
@@ -343,4 +347,15 @@
 }
 .bilah-anak::-webkit-scrollbar {
   display: none;
+}
+
+/* Lingkaran persentase kuota terisi: terisi dari nol saat halaman dibuka. */
+@keyframes isiCincin {
+  from { stroke-dashoffset: var(--keliling); }
+}
+.cincin-terisi {
+  animation: isiCincin 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cincin-terisi { animation: none; }
 }

@@ -1,0 +1,87 @@
+---
+import { IkonCentang } from "@/komponen/Ikon";
+import type { TahapAlur } from "../lib/alur";
+
+/**
+ * Penunjuk alur PPDB lima langkah, pengganti bilah sub menu pada halaman
+ * PPDB. Susunan dan aturannya sama dengan PenunjukAlur.tsx di frontend Next:
+ * langkah yang sedang dibuka ditandai dan bukan tautan; "Isi formulir"
+ * redup dan tidak dapat diklik selama pendaftaran ditutup.
+ *
+ * Langkah SEBELUM langkah aktif diberi tanda centang. Tanda itu menunjuk
+ * urutan membaca, bukan catatan bahwa pengunjung sudah mengerjakannya —
+ * situs ini tidak tahu apa yang sudah dikerjakan pengunjung tanpa masuk.
+ */
+interface Props {
+  aktif: TahapAlur;
+  ppdbDibuka: boolean;
+}
+
+const TAHAP: { kunci: TahapAlur; label: string; jalur: string }[] = [
+  { kunci: "ketentuan", label: "Baca ketentuan", jalur: "/ppdb" },
+  { kunci: "daftar", label: "Isi formulir", jalur: "/ppdb/daftar" },
+  { kunci: "pantau", label: "Verifikasi berkas", jalur: "/ppdb/cek" },
+  { kunci: "tes", label: "Tes seleksi", jalur: "/ppdb/ujian" },
+  { kunci: "hasil", label: "Hasil seleksi", jalur: "/ppdb/cek" },
+];
+
+const { aktif, ppdbDibuka } = Astro.props;
+const indeksAktif = TAHAP.findIndex((t) => t.kunci === aktif);
+---
+
+<nav aria-label="Alur pendaftaran" class="wadah tanpa-cetak relative z-10 -mt-9">
+  <ol class="bilah-anak flex snap-x items-stretch overflow-x-auto rounded-2xl bg-white p-2 shadow-[0_14px_40px_rgb(10_28_49/0.14)] ring-1 ring-garis" data-bilah-anak>
+    {
+      TAHAP.map((t, i) => {
+        const sekarang = i === indeksAktif;
+        const lewat = i < indeksAktif;
+        const bisa = t.kunci !== "daftar" || ppdbDibuka;
+        const bulatan =
+          "relative grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold tabular-nums transition " +
+          (sekarang
+            ? "bg-biru-tua text-white ring-4 ring-emas/40"
+            : lewat
+              ? "bg-emas text-biru-tua"
+              : bisa
+                ? "bg-biru-muda text-biru group-hover:bg-biru group-hover:text-white"
+                : "bg-slate-100 text-slate-400");
+        const isi = (
+          <>
+            <span class={bulatan} aria-hidden="true">
+              {sekarang && <span class="absolute inset-0 animate-ping rounded-full bg-emas/40" style="animation-duration:2.4s" />}
+              <span class="relative">{lewat ? <IkonCentang ukuran={15} /> : i + 1}</span>
+            </span>
+            <span class="flex flex-col leading-tight">
+              <span class="text-[10px] font-bold tracking-[0.12em] text-samar uppercase">Langkah {i + 1}</span>
+              <span class={"text-sm font-semibold whitespace-nowrap " + (sekarang ? "text-biru-tua" : bisa ? "text-teks" : "text-slate-400")}>
+                {t.label}
+              </span>
+            </span>
+          </>
+        );
+        const gaya =
+          "group flex snap-start items-center gap-2.5 rounded-xl px-3 py-2.5 transition " +
+          (sekarang ? "bg-biru-muda" : bisa ? "hover:bg-biru-muda/60" : "cursor-not-allowed");
+        return (
+          <li class="flex shrink-0 items-center">
+            {bisa && !sekarang ? (
+              <a href={t.jalur} class={gaya} data-magnet>{isi}</a>
+            ) : (
+              <span
+                class={gaya}
+                aria-current={sekarang ? "step" : undefined}
+                aria-disabled={!bisa && !sekarang ? "true" : undefined}
+                title={!bisa && !sekarang ? "Pendaftaran sedang ditutup, jadi formulirnya tidak dapat diisi." : undefined}
+              >
+                {isi}
+              </span>
+            )}
+            {i < TAHAP.length - 1 && (
+              <span aria-hidden="true" class={"mx-1 h-0.5 w-6 shrink-0 rounded-full lg:w-10 " + (i < indeksAktif ? "bg-emas" : "bg-garis")} />
+            )}
+          </li>
+        );
+      })
+    }
+  </ol>
+</nav>

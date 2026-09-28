@@ -1,0 +1,67 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import { data } from "../../lib/tembolok";
+import { belumTerisi } from "@/lib/format";
+import Ujian from "@/komponen/Ujian";
+import { IkonJam, IkonKalender, IkonNaskah } from "@/komponen/Ikon";
+
+/**
+ * Tes seleksi. Pengerjaannya komponen Ujian yang sudah ada: waktu dihitung
+ * server, jawaban tersimpan otomatis, kunci jawaban tidak pernah dikirim ke
+ * peramban. Keadaan "belum dibuka" dirender di server.
+ */
+const [info, { profil }] = await Promise.all([data.infoUjian().catch(() => null), data.profil()]);
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow");
+---
+
+<Publik sorotan judul="Tes Seleksi Online" deskripsi="Kerjakan tes seleksi PPDB secara online.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Tes Seleksi Online"
+    keterangan="Dikerjakan langsung di peramban. Jawaban tersimpan otomatis, dan waktunya dihitung server."
+    induk="/ppdb"
+    jalur="/ppdb/ujian"
+    langkah="tes"
+    ppdbDibuka={profil.ppdb.dibuka}
+  />
+  <section class="wadah max-w-3xl py-12 md:py-16">
+    {
+      info && !info.dibuka ? (
+        <div class="kaca space-y-4 p-6 text-center md:p-8">
+          <span aria-hidden="true" class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-biru-muda text-biru"><IkonKalender ukuran={26} /></span>
+          <h2 class="text-lg">Tes seleksi belum dibuka</h2>
+          <p class="text-sm leading-relaxed text-samar">
+            Belum ada jadwal tes yang sedang berjalan. Perhatikan pengumuman dari panitia, atau pantau halaman Info PPDB.
+          </p>
+          {info.info && !belumTerisi(info.info) && (
+            <p class="rounded-xl bg-biru-muda px-5 py-4 text-left text-sm leading-relaxed whitespace-pre-line text-biru-tua">{info.info}</p>
+          )}
+        </div>
+      ) : (
+        <>
+          {info?.paket && (
+            <dl class="mb-6 grid overflow-hidden rounded-[18px] bg-white shadow-lembut ring-1 ring-garis sm:grid-cols-3">
+              {[
+                { k: "Nama tes", v: info.paket.nama, ikon: IkonNaskah },
+                { k: "Lama pengerjaan", v: `${info.paket.durasi_menit} menit`, ikon: IkonJam },
+                { k: "Jumlah soal", v: `${info.paket.jumlah_soal} butir`, ikon: IkonKalender },
+              ].map((x, i) => (
+                <div class={"flex items-center gap-3 p-5 " + (i < 2 ? "border-b border-garis sm:border-r sm:border-b-0" : "")}>
+                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru" aria-hidden="true"><x.ikon ukuran={18} /></span>
+                  <div class="flex flex-col-reverse">
+                    <dt class="text-xs text-samar">{x.k}</dt>
+                    <dd class="font-semibold text-teks tabular-nums">{x.v}</dd>
+                  </div>
+                </div>
+              ))}
+            </dl>
+          )}
+          <div class="kaca p-4 sm:p-6 md:p-8">
+            <Ujian client:load />
+          </div>
+        </>
+      )
+    }
+  </section>
+</Publik>

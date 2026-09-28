@@ -1,0 +1,63 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import { data } from "../../lib/tembolok";
+import { tombolGelap, tombolPutih } from "../../lib/gaya";
+import { kataKeadaanPpdb } from "@/lib/ppdb";
+import FormulirPpdb from "@/komponen/FormulirPpdb";
+import type { Jurusan } from "@/lib/tipe";
+
+/**
+ * Formulir pendaftaran. Isinya komponen FormulirPpdb yang sudah diuji —
+ * lima langkah, pemeriksaan NIK/NISN, unggah berkas dengan kemajuan —
+ * dipakai apa adanya (client:load, sebab formulir inilah isi halamannya).
+ * Kirimannya menuju /api/ppdb/daftar di asal yang sama, yang diteruskan
+ * server Astro ke backend.
+ */
+const [{ profil }, jurusan] = await Promise.all([
+  data.profil(),
+  data.jurusan().then((h) => h.data).catch((): Jurusan[] => []),
+]);
+const p = profil.pengaturan;
+const dibuka = profil.ppdb.dibuka;
+const kataPpdb = kataKeadaanPpdb(profil.ppdb, p);
+---
+
+<Publik sorotan judul="Formulir Pendaftaran PPDB" deskripsi="Isi formulir pendaftaran peserta didik baru dan unggah dokumen secara online.">
+  <KepalaHalaman
+    pengaturan={p}
+    judul={dibuka ? "Formulir Pendaftaran PPDB" : kataPpdb.lencana}
+    keterangan={dibuka
+      ? `Tahun Ajaran ${p.ppdb_tahun ?? ""}. Isian bertanda bintang wajib diisi. Pengisian dibagi menjadi lima langkah, dan Anda dapat berpindah antar langkah kapan saja sebelum mengirim.`
+      : "Formulir pendaftaran hanya dapat diisi selama masa pendaftaran berlangsung."}
+    induk="/ppdb"
+    jalur="/ppdb/daftar"
+    langkah="daftar"
+    ppdbDibuka={dibuka}
+  />
+
+  <section class="wadah py-12 md:py-16">
+    {
+      dibuka ? (
+        <div class="kaca mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
+          <FormulirPpdb
+            client:load
+            jurusan={jurusan}
+            sumber={profil.ppdb.sumber}
+            jalur={profil.ppdb.jalur}
+            tahunAjaran={p.ppdb_tahun ?? ""}
+            namaSekolah={p.nama_sekolah ?? "sekolah"}
+          />
+        </div>
+      ) : (
+        <div class="kaca mx-auto max-w-2xl p-7 text-center">
+          <p class="text-[15px] leading-relaxed text-teks">{kataPpdb.kalimat}</p>
+          <div class="mt-7 flex flex-wrap justify-center gap-3">
+            <a href="/ppdb" class={tombolGelap}>Baca Informasi PPDB</a>
+            <a href="/ppdb/cek" class={"tombol-kilau " + tombolPutih}>Cek Status Pendaftaran</a>
+          </div>
+        </div>
+      )
+    }
+  </section>
+</Publik>
