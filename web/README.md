@@ -4,7 +4,8 @@ Pengganti bertahap frontend Next di `../frontend`. Yang sudah dipindah: **berand
 (rancangan berkaca) dan **seluruh menu Profil Sekolah** (`/profil`, sejarah, data
 sekolah, visi & misi, `/fasilitas`, struktur organisasi, tenaga pendidik), **Akademik**
 (e-learning, jadwal, kalender, perpustakaan), **Kesiswaan** (ekstrakurikuler, prestasi),
-dan `/halaman/[slug]` (Kurikulum, OSIS, Pendidikan Karakter). Halaman lain untuk sementara dialihkan ke frontend Next oleh
+`/halaman/[slug]` (Kurikulum, OSIS, Pendidikan Karakter), Berita, Galeri, Kontak, FAQ, dan
+**PPDB** (ketentuan, formulir, cek status, tes seleksi). Yang masih di Next hanya panel admin. Halaman lain untuk sementara dialihkan ke frontend Next oleh
 `src/pages/[...jalur].ts`; begitu halamannya dibuat di `src/pages`, pengalihan itu
 berhenti sendiri untuk alamat tersebut.
 
