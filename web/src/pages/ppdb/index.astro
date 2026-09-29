@@ -151,12 +151,17 @@ const KELILING = 2 * Math.PI * 34;
       )
     }
 
+    <!-- min-w-0 pada kedua kolom: anak petak grid bawaannya tidak mau lebih
+         sempit daripada isinya, dan tabel biaya yang tidak boleh terlipat
+         mendorong kolomnya sampai 434 piksel di layar 390 piksel. -->
     <div class="mt-14 grid gap-12 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
-      <div class="space-y-14">
+      <div class="min-w-0 space-y-14">
         <!-- ================= Jadwal ================= -->
         <section data-muncul>
           <JudulBagian atas="Waktu" judul="Jadwal Pendaftaran" />
-          <ol class="relative space-y-4">
+          <!-- overflow-x-clip: cincin berdenyut pada tahap yang sedang berjalan
+               membesar dua kali lipat dan sempat menjulur keluar layar ponsel. -->
+          <ol class="relative space-y-4 overflow-x-clip">
             <span aria-hidden="true" class="absolute top-4 bottom-4 left-[19px] w-0.5 bg-garis"></span>
             {jadwal.map((t, i) => {
               const berjalan = i === indeksBerjalan;
@@ -232,8 +237,8 @@ const KELILING = 2 * Math.PI * 34;
                   Sebagian besaran biaya belum ditetapkan sekolah. Yang sudah tertera di bawah ini sudah final; yang bertanda belum ditetapkan akan diumumkan panitia.
                 </p>
               )}
-              <div class="kaca overflow-hidden">
-                <table class="w-full text-sm">
+              <div class="kaca overflow-x-auto">
+                <table class="w-full min-w-[30rem] text-sm">
                   <thead class="bg-biru-tua text-left text-white">
                     <tr>
                       <th class="px-5 py-3 font-semibold">Pos biaya</th>
@@ -324,7 +329,7 @@ const KELILING = 2 * Math.PI * 34;
       </div>
 
       <!-- ================= Kolom samping ================= -->
-      <aside class="space-y-8 lg:sticky lg:top-28 lg:self-start">
+      <aside class="min-w-0 space-y-8 lg:sticky lg:top-28 lg:self-start">
         <section class="kaca overflow-hidden" data-muncul>
           <h2 class="flex items-center gap-3 border-b border-garis/70 px-6 py-4 text-base">
             <span class="grid h-9 w-9 place-items-center rounded-lg bg-biru-tua text-white" aria-hidden="true"><IkonNaskah ukuran={18} /></span>

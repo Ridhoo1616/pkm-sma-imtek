@@ -29,6 +29,12 @@ const warna = nada === "terang" ? "255 255 255" : "15 42 74";
 const BINTANG = "M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z";
 ---
 
+<!-- Bingkai pemotong mendatar. Garis orbit sengaja lebih lebar daripada
+     bagiannya, dan di ponsel elemen yang menjulur keluar layar membuat
+     peramban melebarkan halaman: seluruh halaman, navigasi ikut, dapat
+     digeser ke samping. overflow-x: clip memotong hanya ke samping, jadi
+     orbit yang menjulur ke atas atau ke bawah bagiannya tetap utuh. -->
+<div class="pointer-events-none absolute inset-0 overflow-x-clip" aria-hidden="true">
 <svg
   class={`orbit ${kelas}`}
   data-orbit
@@ -75,3 +81,4 @@ const BINTANG = "M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 1
     })
   }
 </svg>
+</div>

@@ -72,6 +72,29 @@
     overflow-y: overlay;
   }
 
+  /* Lembar gaya yang diminta Lenis (gulir halus). Tanpa ini aturan
+     scroll-behavior: smooth di atas ikut berlaku SELAMA Lenis berjalan:
+     Lenis menggeser halaman sedikit demi sedikit tiap bingkai, lalu
+     peramban menghaluskan lagi setiap geseran kecil itu, sehingga gulirnya
+     tertinggal dua kali dan terasa berat. Diukur: satu putaran roda 500
+     piksel baru berhenti sesudah 1,1 detik. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  .lenis.lenis-scrolling iframe {
+    pointer-events: none;
+  }
+
   /* Kustomisasi Scrollbar */
   ::-webkit-scrollbar {
     width: 8px;

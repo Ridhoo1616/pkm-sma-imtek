@@ -126,7 +126,9 @@ const keterangan =
   <body class="latar-kaca flex min-h-full flex-col overflow-x-clip">
     <LayarPembuka logo={p.logo} namaSekolah={p.nama_sekolah} />
     <ClickSpark client:idle sparkColor="#F59E0B" sparkSize={12} sparkRadius={20} sparkCount={8} duration={500} />
-    <GulirHalus client:idle />
+    <!-- lerp 0,3: diukur, satu putaran roda 500 piksel berhenti dalam 0,33 detik;
+         dengan bawaan Next (0,08) 1,1 detik, dan dikeluhkan terasa berat. -->
+    <GulirHalus client:idle lerp={0.3} />
     <PencatatKunjungan client:idle />
 
     <TeksBerjalan profil={profil} berita={berita} />

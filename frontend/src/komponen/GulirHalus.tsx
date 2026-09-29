@@ -11,7 +11,12 @@ import Lenis from "lenis";
  * yang lebih enak digulir cepat, dan gulir berinersia justru memperlambat
  * pekerjaan verifikasi.
  */
-export default function GulirHalus() {
+/**
+ * `lerp` = seberapa cepat halaman menyusul roda tetikus tiap bingkai; makin
+ * kecil makin halus tetapi makin tertinggal. Bawaan 0,08 dipilih untuk
+ * frontend Next (499e156); situs Astro memakai nilai yang lebih ringan.
+ */
+export default function GulirHalus({ lerp = 0.08 }: { lerp?: number }) {
   useEffect(() => {
     // Pengguna yang mematikan animasi di sistemnya tidak mendapat inersia.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -21,17 +26,16 @@ export default function GulirHalus() {
       // membuat halaman masih bergerak 754 milidetik sesudah jari berhenti,
       // dan itulah yang membuat situsnya terasa berat.
       //
-      // lerp mendekatkan posisi sebanyak 55% tiap bingkai, bukan mengejar
-      // jadwal waktu tertentu, sehingga gulirnya mengikuti jari dan berhenti
-      // segera setelah jari berhenti. Dengan nilai ini halaman hanya bergerak
-      // 173 milidetik setelah roda dilepas, turun dari 754 milidetik. Halusnya
-      // masih terasa karena loncatan tiap klik roda tetap diperhalus, tetapi
-      // rasa meluncur yang membuat situsnya terasa berat sudah hilang.
-      // Lerp diperkecil menjadi 0.08 agar efek gulir jauh lebih halus dan
-      // panjang (smooth/buttery scroll), sesuai tren landing page modern.
+      // lerp mendekatkan posisi sebagian tiap bingkai, bukan mengejar jadwal
+      // waktu tertentu, sehingga gulirnya berhenti segera setelah jari
+      // berhenti. Riwayatnya: 0,55 dipilih karena situsnya terasa berat
+      // (173 milidetik sesudah roda dilepas, dari 754); 499e156 menurunkannya
+      // ke 0,08 untuk gulir yang lebih panjang dan halus. Nilai itu tetap
+      // bawaan frontend Next; situs Astro mengirim nilainya sendiri lewat
+      // properti `lerp`.
       // Ini akan membuat pengunjung membaca konten perlahan karena gulirannya
       // tidak instan berhenti melainkan meluncur pelan.
-      lerp: 0.08,
+      lerp,
       // Gulir sentuh dibiarkan bawaan peramban. Mengambil alih gulir di ponsel
       // hampir selalu terasa lebih buruk daripada gulir asli sistemnya.
       syncTouch: false,
@@ -50,7 +54,7 @@ export default function GulirHalus() {
       jalan = false;
       lenis.destroy();
     };
-  }, []);
+  }, [lerp]);
 
   return null;
 }
