@@ -36,6 +36,12 @@ export default function GulirHalus({ lerp = 0.08 }: { lerp?: number }) {
       // Ini akan membuat pengunjung membaca konten perlahan karena gulirannya
       // tidak instan berhenti melainkan meluncur pelan.
       lerp,
+      // Kotak yang dapat digulir sendiri — menu ponsel, panel bantuan, kotak
+      // tanya, jendela di panel, daftar sekolah asal — digulir oleh kotak
+      // itu, bukan oleh halaman. Tanpa ini Lenis merebut setiap putaran roda
+      // untuk halaman: menunya diam, halaman di belakangnya yang bergerak.
+      // Usapan jari tidak terkena karena syncTouch mati.
+      allowNestedScroll: true,
       // Gulir sentuh dibiarkan bawaan peramban. Mengambil alih gulir di ponsel
       // hampir selalu terasa lebih buruk daripada gulir asli sistemnya.
       syncTouch: false,

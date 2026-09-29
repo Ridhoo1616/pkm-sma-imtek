@@ -148,7 +148,9 @@ const pil = (terpilih: boolean) =>
   <!-- Menu layar kecil. Kelompoknya memakai <details>, jadi dapat dilipat
        tanpa skrip dan dikenali pembaca layar sebagai daftar yang dapat dibuka. -->
   <div id="menu-ringkas" class="hidden border-t border-white/10 xl:hidden" data-menu-ringkas>
-    <ul class="wadah flex max-h-[75vh] flex-col gap-1 overflow-y-auto py-3">
+    <!-- overscroll-contain: sampai di ujung menu, usapan tidak berlanjut
+         menggulir halaman di belakangnya. -->
+    <ul class="wadah flex max-h-[75vh] flex-col gap-1 overflow-y-auto overscroll-contain py-3">
       {
         MENU.map((m) =>
           m.anak ? (
