@@ -127,6 +127,16 @@ yang ditulis ulang. Demo yang tampilannya berbeda dari aplikasinya menyesatkan
 penilai, dan perbedaannya tidak akan terlihat sampai keduanya dibuka
 berdampingan.
 
+Demo dirakit ulang dengan `alat/demo/rakit.sh`: basis data disalin ke basis
+data sekali pakai, lalu situs Astro dan panel Next yang sebenarnya dijalankan
+dan ditangkap menjadi HTML statis di bawah `/pkm-sma-imtek/`. Backend diganti
+`alat/demo/api-demo.js`, yang menjawab `/api/*` di peramban dari
+`docs/demo/data.json` dan localStorage. Tambah atau ubah titik API di backend
+berarti `api-demo.js` ikut disesuaikan, supaya menu yang sama di demo tidak
+menjawab "Fitur ini tidak tersedia pada demo". Halaman publik di demo adalah
+tangkapan saat dirakit, jadi perubahan dari panel demo hanya tampil di panel
+dan di komponen interaktif (Cek Status, tes, formulir).
+
 ## Pesan commit
 
 Ditulis berbahasa Indonesia, menerangkan **sebabnya**, bukan hanya apanya.

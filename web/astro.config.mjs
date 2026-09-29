@@ -42,7 +42,13 @@ function alamatApiPeramban() {
       // relatif, React melaporkan ketidakcocokan hidrasi pada setiap
       // komponen interaktif yang memuat gambar (misalnya daftar guru).
       // /unggahan/* diteruskan ke backend oleh src/pages/[...jalur].ts.
-      let hasil = kode.replace("`${ALAMAT_API}/unggahan/", "`/unggahan/");
+      //
+      // Di peramban alamatnya diberi awalan demo GitHub Pages bila ada (lihat
+      // src/shim/dasar.ts); pada pemasangan sekolah awalannya kosong.
+      let hasil = kode.replace(
+        "`${ALAMAT_API}/unggahan/",
+        diServer ? "`/unggahan/" : '`${globalThis.__DASAR_DEMO ?? ""}/unggahan/',
+      );
       if (!diServer) {
         hasil = hasil.replace("process.env.NEXT_PUBLIC_API_URL", '""');
       }

@@ -84,6 +84,10 @@ if (!pengembangan) {
 }
 
 const nextConfig: NextConfig = {
+  // Hanya untuk merakit demo GitHub Pages, yang disajikan di bawah
+  // /pkm-sma-imtek/ (lihat alat/demo). Pada pemasangan sekolah variabelnya
+  // tidak ada dan panel tetap di /admin.
+  basePath: process.env.DASAR_DEMO || undefined,
   async headers() {
     return [{ source: "/:path*", headers: kepala }];
   },

@@ -1,4 +1,5 @@
 import type { AnchorHTMLAttributes, ReactNode } from "react";
+import { denganDasar } from "./dasar";
 
 /**
  * Pengganti next/link untuk komponen React lama yang dirender Astro.
@@ -33,5 +34,5 @@ export default function Link({
       ? href
       : (href.pathname ?? "") +
         (href.query ? "?" + new URLSearchParams(href.query).toString() : "");
-  return <a href={alamat} {...sisa} />;
+  return <a href={denganDasar(alamat)} {...sisa} />;
 }
