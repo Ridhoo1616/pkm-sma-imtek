@@ -15,8 +15,11 @@ npm run dev            # http://localhost:4321
 npm run build && npm run start
 ```
 
-Yang harus menyala: backend Go (8090) dan, selama masa pindah, frontend Next (3000).
-Alamat keduanya: `NEXT_PUBLIC_API_URL` dan `SITUS_LAMA` (lihat `.env.example`).
+Susunan di komputer sekolah (`jalankan.command`): situs Astro di **3000**, panel admin
+Next di **3001**, backend Go di 8090. Astro meneruskan `/admin` ke Next tanpa mengganti
+alamatnya (`SITUS_LAMA_DITERUSKAN=ya`), jadi panel tetap dibuka di `localhost:3000/admin`,
+asal yang sudah diizinkan `CORS_ORIGINS` backend. Saat pengembangan di porta lain,
+biarkan setelan itu kosong: `/admin` lalu dialihkan ke alamat Next sendiri.
 
 Hal yang perlu diketahui:
 

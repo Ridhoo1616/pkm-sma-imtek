@@ -56,7 +56,14 @@ export default defineConfig({
   // Bilah alat Astro menutupi tengah bawah layar saat dev; tampilannya
   // dibuat sama dengan versi produksi.
   devToolbar: { enabled: false },
-  adapter: node({ mode: "standalone" }),
+  adapter: node({
+    mode: "standalone",
+    // Batas badan permintaan. Bawaannya 1 GB, dan rute penerus membaca
+    // seluruh badannya ke memori sebelum meneruskan ke backend, jadi satu
+    // kiriman raksasa cukup untuk menghabiskan memori server. Formulir PPDB
+    // yang paling besar: enam berkas x 3 MB ditambah isiannya, di bawah 20 MB.
+    bodySizeLimit: 25 * 1024 * 1024,
+  }),
   integrations: [react()],
   // Font, ilustrasi, dan ikon situs dipakai bersama dengan frontend Next.
   publicDir: "../frontend/public",
