@@ -268,6 +268,8 @@ func (a *Aplikasi) tanganiCekStatus(w http.ResponseWriter, r *http.Request) {
 	// verifikasi, mengunduh kartu peserta, mengerjakan tes, lalu melihat
 	// nilainya. Menyebarnya ke beberapa halaman hanya menambah bingung.
 	jawab["ujian"] = a.keadaanUjianPendaftar(noReg, status)
+	// Surat yang diterbitkan untuk pendaftar ini dan boleh diunduhnya sendiri.
+	jawab["surat"] = a.suratPendaftar(noReg)
 
 	kirimJSON(w, http.StatusOK, jawab)
 }

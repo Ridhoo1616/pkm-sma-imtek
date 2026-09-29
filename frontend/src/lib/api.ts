@@ -937,6 +937,73 @@ export const api = {
       token: true,
     }),
 
+  /* ---------- surat keluar ---------- */
+  jenisSurat: () =>
+    permintaan<{
+      data: import("./tipe").JenisSurat[];
+      atur_ulang: string[];
+      penanda_naskah: string[];
+    }>("/api/admin/jenis-surat", { token: true }),
+  simpanJenisSurat: (isi: unknown) =>
+    permintaan<{ pesan: string; id: number }>("/api/admin/jenis-surat", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  ubahJenisSurat: (id: number, isi: unknown) =>
+    permintaan<{ pesan: string }>(`/api/admin/jenis-surat/${id}`, {
+      metode: "PUT",
+      isi,
+      token: true,
+    }),
+  hapusJenisSurat: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/jenis-surat/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+  daftarSurat: (kueri = "") =>
+    permintaan<{
+      data: import("./tipe").Surat[];
+      total: number;
+      halaman: number;
+      per_halaman: number;
+    }>(`/api/admin/surat${kueri}`, { token: true }),
+  /** Nomor yang AKAN didapat surat berikutnya; belum dipesan. */
+  pratinjauNomor: (jenisId: number, tanggal: string) =>
+    permintaan<{ nomor_surat: string; nomor_urut: number; periode: string }>(
+      `/api/admin/surat/pratinjau-nomor?jenis_id=${jenisId}&tanggal=${encodeURIComponent(tanggal)}`,
+      { token: true },
+    ),
+  buatSurat: (isi: unknown) =>
+    permintaan<{ pesan: string; id: number; nomor_surat: string }>("/api/admin/surat", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  buatSuratMassal: (isi: unknown) =>
+    permintaan<{ pesan?: string; jumlah: number }>("/api/admin/surat/massal", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  ubahSurat: (id: number, isi: unknown) =>
+    permintaan<{ pesan: string }>(`/api/admin/surat/${id}`, {
+      metode: "PUT",
+      isi,
+      token: true,
+    }),
+  batalSurat: (id: number, batal: boolean, alasan: string) =>
+    permintaan<{ pesan: string }>(`/api/admin/surat/${id}/batal`, {
+      metode: "PATCH",
+      isi: { batal, alasan },
+      token: true,
+    }),
+  hapusSurat: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/surat/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
   /* ---------- tanya jawab (panitia) ---------- */
   faqAdmin: () =>
     permintaan<{ data: import("./tipe").Faq[]; kategori: string[] }>(
@@ -1109,6 +1176,57 @@ export async function unduhKartuAdmin(
   }
   return {
     nama: `kartu-peserta-${noRegistrasi}.pdf`,
+    blob: await jawaban.blob(),
+  };
+}
+
+/** Surat keluar dari panel panitia. */
+export async function unduhSuratAdmin(
+  id: number,
+  nomor: string,
+): Promise<{ nama: string; blob: Blob }> {
+  const t = ambilToken();
+  const jawaban = await fetch(`${ALAMAT_API}/api/admin/surat/${id}/pdf`, {
+    headers: t ? { Authorization: `Bearer ${t}` } : {},
+    cache: "no-store",
+  });
+  if (!jawaban.ok) {
+    throw new GalatApi(jawaban.status, { pesan: "Surat gagal dibuat." });
+  }
+  return {
+    nama: `surat-${nomor.replace(/[^A-Za-z0-9]+/g, "-")}.pdf`,
+    blob: await jawaban.blob(),
+  };
+}
+
+/** Surat untuk pendaftar; kuncinya sama dengan Cek Status. */
+export async function unduhSuratPendaftar(isi: {
+  no_registrasi: string;
+  tanggal_lahir: string;
+  id: number;
+  nomor: string;
+}): Promise<{ nama: string; blob: Blob }> {
+  const jawaban = await fetch(`${ALAMAT_API}/api/ppdb/surat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      no_registrasi: isi.no_registrasi,
+      tanggal_lahir: isi.tanggal_lahir,
+      id: isi.id,
+    }),
+    cache: "no-store",
+  });
+  if (!jawaban.ok) {
+    let pesan = "Surat gagal diunduh.";
+    try {
+      pesan = ((await jawaban.json()) as IsiGalat).pesan || pesan;
+    } catch {
+      /* jawaban bukan JSON; pesan bawaan dipakai */
+    }
+    throw new GalatApi(jawaban.status, { pesan });
+  }
+  return {
+    nama: `surat-${isi.nomor.replace(/[^A-Za-z0-9]+/g, "-")}.pdf`,
     blob: await jawaban.blob(),
   };
 }

@@ -21,7 +21,7 @@ import {
   MonitorSmartphone, Briefcase, Building, 
   Calendar, Activity, Book, Newspaper, 
   Image as ImageIcon, MessageCircleQuestion, Mail, 
-  Settings, UserCog, GraduationCap, type LucideIcon 
+  Settings, UserCog, GraduationCap, FileText, type LucideIcon 
 } from "lucide-react";
 
 /**
@@ -38,6 +38,7 @@ const KELOMPOK: {
       { jalur: "/admin/pendaftar", label: "Pendaftar", khususAdmin: false, ikon: Users },
       { jalur: "/admin/laporan", label: "Laporan Promosi", khususAdmin: false, ikon: TrendingUp },
       { jalur: "/admin/notifikasi", label: "Notifikasi", khususAdmin: false, ikon: Bell },
+      { jalur: "/admin/surat", label: "Surat", khususAdmin: false, ikon: FileText },
       { jalur: "/admin/soal", label: "Bank Soal", khususAdmin: false, ikon: Database },
       { jalur: "/admin/ujian", label: "Tes Seleksi", khususAdmin: false, ikon: CheckSquare },
       { jalur: "/admin/biaya", label: "Rincian Biaya", khususAdmin: true, ikon: Receipt },

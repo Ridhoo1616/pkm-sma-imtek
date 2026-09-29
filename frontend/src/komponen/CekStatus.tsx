@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { api, unduhBukti, unduhKartu, GalatApi } from "@/lib/api";
+import { api, unduhBukti, unduhKartu, unduhSuratPendaftar, GalatApi } from "@/lib/api";
 import { bukaBlob } from "@/lib/berkas";
 import { Teks, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import { PesanGalat } from "@/komponen/Memuat";
@@ -35,6 +35,7 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
   const [mengunduh, setMengunduh] = useState(false);
   const [mengunduhKartu, setMengunduhKartu] = useState(false);
   const [galatBukti, setGalatBukti] = useState("");
+  const [mengunduhSurat, setMengunduhSurat] = useState<number | null>(null);
 
   async function cari(e: React.FormEvent) {
     e.preventDefault();
@@ -93,6 +94,25 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
       );
     } finally {
       setMengunduhKartu(false);
+    }
+  }
+
+  async function ambilSurat(id: number, nomor: string) {
+    if (!hasil) return;
+    setGalatBukti("");
+    setMengunduhSurat(id);
+    try {
+      const { nama, blob } = await unduhSuratPendaftar({
+        no_registrasi: hasil.no_registrasi,
+        tanggal_lahir: tgl,
+        id,
+        nomor,
+      });
+      bukaBlob(nama, blob);
+    } catch (e) {
+      setGalatBukti(e instanceof GalatApi ? e.message : "Surat gagal diunduh.");
+    } finally {
+      setMengunduhSurat(null);
     }
   }
 
@@ -241,6 +261,36 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
                       "Tes seleksi belum dapat Anda kerjakan saat ini."}
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* Surat yang diterbitkan panitia untuk pendaftar ini, misalnya
+                surat keterangan diterima. Hanya jenis surat yang diizinkan
+                tampil di sini, dan surat yang dibatalkan tidak ikut. */}
+            {hasil.surat && hasil.surat.length > 0 && (
+              <div className="tanpa-cetak space-y-3 border-t border-garis pt-4">
+                <p className="text-xs font-semibold tracking-wide text-samar uppercase">
+                  Surat untuk Anda
+                </p>
+                <ul className="divide-y divide-garis rounded-lg border border-garis">
+                  {hasil.surat.map((s) => (
+                    <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-teks">{s.perihal || s.jenis}</p>
+                        <p className="text-xs text-samar">
+                          Nomor {s.nomor_surat} · {tanggalPanjang(s.tanggal_surat)}
+                        </p>
+                      </div>
+                      <Tombol
+                        jenis="kedua"
+                        onClick={() => ambilSurat(s.id, s.nomor_surat)}
+                        sedangJalan={mengunduhSurat === s.id}
+                      >
+                        {mengunduhSurat === s.id ? "Menyiapkan..." : "Unduh Surat (PDF)"}
+                      </Tombol>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 

@@ -218,6 +218,57 @@ export interface StatusPendaftaran {
   pengumuman: string;
   /** Keadaan tes seleksi bagi pendaftar ini. */
   ujian: KeadaanUjian;
+  /** Surat yang diterbitkan untuk pendaftar ini dan boleh diunduhnya. */
+  surat?: SuratPendaftar[];
+}
+
+export interface SuratPendaftar {
+  id: number;
+  jenis: string;
+  nomor_surat: string;
+  perihal: string;
+  tanggal_surat: string;
+}
+
+/** Jenis surat: urutan nomor, format nomor, dan naskah bawaannya. */
+export interface JenisSurat {
+  id: number;
+  nama: string;
+  kode: string;
+  format_nomor: string;
+  atur_ulang: "tahunan" | "bulanan" | "tidak";
+  untuk_pendaftar: boolean;
+  tampil_di_cek_status: boolean;
+  perihal_bawaan: string;
+  tujuan_bawaan: string;
+  isi_bawaan: string;
+  penanda_tangan_nama: string;
+  penanda_tangan_jabatan: string;
+  penanda_tangan_nip: string;
+  aktif: boolean;
+  urutan: number;
+  jumlah_surat: number;
+}
+
+export interface Surat {
+  id: number;
+  jenis_id: number;
+  nama_jenis: string;
+  periode: string;
+  nomor_urut: number;
+  nomor_surat: string;
+  tanggal_surat: string;
+  perihal: string;
+  tujuan: string;
+  lampiran: string;
+  isi: string;
+  pendaftar_id: number | null;
+  nama_pendaftar: string;
+  no_registrasi: string;
+  dibatalkan: boolean;
+  alasan_batal: string;
+  dibuat_oleh: string;
+  dibuat: string;
 }
 
 export interface ButirPengaturan {

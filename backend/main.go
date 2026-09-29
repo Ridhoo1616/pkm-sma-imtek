@@ -147,6 +147,8 @@ func (a *Aplikasi) rute() http.Handler {
 		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiCekStatus))
 	m.HandleFunc("POST /api/ppdb/bukti", a.batasiIP(a.batas.identitasIP,
 		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiBuktiPendaftar))
+	m.HandleFunc("POST /api/ppdb/surat", a.batasiIP(a.batas.identitasIP,
+		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiPdfSuratPendaftar))
 	m.HandleFunc("POST /api/ppdb/kartu", a.batasiIP(a.batas.identitasIP,
 		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiKartuPendaftar))
 
@@ -205,6 +207,22 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("POST /api/admin/fasilitas", a.wajibMasuk(a.tanganiSimpanFasilitas))
 	m.HandleFunc("PUT /api/admin/fasilitas/{id}", a.wajibMasuk(a.tanganiUbahFasilitas))
 	m.HandleFunc("DELETE /api/admin/fasilitas/{id}", a.wajibMasuk(a.tanganiHapusFasilitas))
+
+	/* ---- surat keluar ---- */
+	// Menerbitkan dan menyunting surat pekerjaan panitia; format nomor dan
+	// jenis suratnya keputusan sekolah, jadi hanya admin.
+	m.HandleFunc("GET /api/admin/jenis-surat", a.wajibMasuk(a.tanganiDaftarJenisSurat))
+	m.HandleFunc("POST /api/admin/jenis-surat", a.wajibAdmin(a.tanganiSimpanJenisSurat))
+	m.HandleFunc("PUT /api/admin/jenis-surat/{id}", a.wajibAdmin(a.tanganiUbahJenisSurat))
+	m.HandleFunc("DELETE /api/admin/jenis-surat/{id}", a.wajibAdmin(a.tanganiHapusJenisSurat))
+	m.HandleFunc("GET /api/admin/surat", a.wajibMasuk(a.tanganiDaftarSurat))
+	m.HandleFunc("GET /api/admin/surat/pratinjau-nomor", a.wajibMasuk(a.tanganiPratinjauNomor))
+	m.HandleFunc("POST /api/admin/surat", a.wajibMasuk(a.tanganiBuatSurat))
+	m.HandleFunc("POST /api/admin/surat/massal", a.wajibMasuk(a.tanganiBuatSuratMassal))
+	m.HandleFunc("PUT /api/admin/surat/{id}", a.wajibMasuk(a.tanganiUbahSurat))
+	m.HandleFunc("PATCH /api/admin/surat/{id}/batal", a.wajibMasuk(a.tanganiBatalSurat))
+	m.HandleFunc("DELETE /api/admin/surat/{id}", a.wajibAdmin(a.tanganiHapusSurat))
+	m.HandleFunc("GET /api/admin/surat/{id}/pdf", a.wajibMasuk(a.tanganiPdfSuratAdmin))
 
 	/* ---- rincian biaya ---- */
 	m.HandleFunc("GET /api/admin/biaya", a.wajibMasuk(a.tanganiDaftarBiayaAdmin))
