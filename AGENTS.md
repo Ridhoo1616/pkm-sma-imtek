@@ -44,8 +44,15 @@ dipakai.** Migrasi dijalankan otomatis saat backend dinyalakan, dan migrasi
 yang gagal **menghentikan server** — situsnya mati.
 
 ```bash
-pg_dump sma_imtek > ~/Desktop/cadangan-$(date +%F).sql
+pg_dump sma_imtek > ~/Cadangan-SMA-IMTEK/sebelum-migrasi-$(date +%F).sql
 ```
+
+**Jangan simpan cadangan di Desktop atau Documents.** Di Mac yang
+menyalakan iCloud Drive untuk kedua folder itu, isinya ikut terunggah ke
+iCloud, dan cadangan memuat NIK serta Kartu Keluarga pendaftar. Folder
+`~/Cadangan-SMA-IMTEK` tidak tersinkron; cadangan harian otomatisnya dibuat
+`alat/cadangan-harian.sh` (cara memasang jadwalnya ada di
+`alat/id.smaimtek.cadangan.plist`).
 
 **Jangan menguji jalur tulis terhadap basis data yang sedang dipakai.** Buat
 basis data sekali pakai, pakai, lalu buang:

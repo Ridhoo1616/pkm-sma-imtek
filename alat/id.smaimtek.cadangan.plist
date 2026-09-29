@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Cadangan harian SMA IMTEK, pukul 12.30. Bila laptop sedang tidur pada jam
+  itu, launchd menjalankannya begitu laptop bangun.
+
+  Memasang (sekali saja):
+    sed "s#__AKAR__#$HOME/pkm-sma-imtek#" alat/id.smaimtek.cadangan.plist \
+      > ~/Library/LaunchAgents/id.smaimtek.cadangan.plist
+    launchctl load ~/Library/LaunchAgents/id.smaimtek.cadangan.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>id.smaimtek.cadangan</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>__AKAR__/alat/cadangan-harian.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>12</integer><key>Minute</key><integer>30</integer></dict>
+  <key>StandardErrorPath</key><string>/tmp/id.smaimtek.cadangan.err</string>
+</dict>
+</plist>

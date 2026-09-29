@@ -619,6 +619,12 @@ Yang perlu diketahui sebelum hari pelaksanaan:
 
 ## 7. Mencadangkan data
 
+Di Mac, keduanya dicadangkan otomatis setiap hari pukul 12.30 oleh
+`alat/cadangan-harian.sh` ke `~/Cadangan-SMA-IMTEK` (disimpan 14 hari). Cara
+memasang jadwalnya ada di kepala `alat/id.smaimtek.cadangan.plist`. Folder itu
+sengaja bukan Desktop atau Documents, yang ikut tersinkron bila iCloud Drive
+menyala. Di server, jalankan skrip yang sama dari cron, atau perintah berikut.
+
 Dua hal yang harus dicadangkan bersamaan:
 
 ```bash
