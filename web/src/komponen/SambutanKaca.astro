@@ -1,6 +1,6 @@
 ---
+import { gambar, srcsetGambar } from "../lib/gambar";
 import Orbit from "./Orbit.astro";
-import { urlUnggahan } from "@/lib/api";
 import { belumTerisi, keParagraf } from "@/lib/format";
 import { IkonGuru, IkonPanahKanan } from "@/komponen/Ikon";
 import type { Pengaturan } from "@/lib/tipe";
@@ -37,7 +37,9 @@ const paragrafSambutan = belumTerisi(p.sambutan_kepsek ?? "") ? [] : keParagraf(
           {
             adaFotoKepsek ? (
               <img
-                src={urlUnggahan("profil", p.foto_kepsek)}
+                src={gambar("profil", p.foto_kepsek, 640)}
+                srcset={srcsetGambar("profil", p.foto_kepsek, [320, 640, 1024])}
+                sizes="(min-width: 768px) 20rem, 100vw"
                 alt={adaNamaKepsek ? `Foto ${p.kepala_sekolah}, Kepala Sekolah` : "Foto Kepala Sekolah"}
                 class="h-full max-h-96 w-full object-cover object-top transition duration-700 hover:scale-[1.04]"
                 loading="lazy"

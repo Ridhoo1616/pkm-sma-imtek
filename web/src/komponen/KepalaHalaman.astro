@@ -1,8 +1,8 @@
 ---
+import { gambar, srcsetGambar } from "../lib/gambar";
 import Orbit from "./Orbit.astro";
 import AlurPpdb from "./AlurPpdb.astro";
 import type { TahapAlur } from "../lib/alur";
-import { urlUnggahan } from "@/lib/api";
 import { belumTerisi } from "@/lib/format";
 import { menuDari } from "@/lib/menu";
 import type { Pengaturan } from "@/lib/tipe";
@@ -49,7 +49,9 @@ const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
   {
     adaGedung && (
       <img
-        src={urlUnggahan("profil", p.foto_depan)}
+        src={gambar("profil", p.foto_depan, 1280)}
+        srcset={srcsetGambar("profil", p.foto_depan, [800, 1280, 1920])}
+        sizes="100vw"
         alt=""
         aria-hidden="true"
         class="absolute inset-0 -z-20 h-full w-full object-cover opacity-30"

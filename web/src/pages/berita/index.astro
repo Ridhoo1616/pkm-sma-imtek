@@ -1,8 +1,8 @@
 ---
+import { gambar, srcsetGambar } from "../../lib/gambar";
 import Publik from "../../tata/Publik.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import { data } from "../../lib/tembolok";
-import { urlUnggahan } from "@/lib/api";
 import { tanggalPanjang } from "@/lib/format";
 import { kelasKartuAkhir } from "@/komponen/Bagian";
 import { IkonNaskah, IkonPanahKanan } from "@/komponen/Ikon";
@@ -104,7 +104,7 @@ const pil = (aktif: boolean) =>
               >
                 <div class="relative h-48 overflow-hidden bg-gradient-to-br from-biru-tua to-biru">
                   {b.gambar ? (
-                    <img src={urlUnggahan("berita", b.gambar)} alt={b.judul} class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
+                    <img src={gambar("berita", b.gambar, 640)} srcset={srcsetGambar("berita", b.gambar, [480, 640, 800])} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt={b.judul} class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
                   ) : (
                     <div class="grid h-full place-items-center text-white/80" aria-hidden="true"><IkonNaskah ukuran={36} /></div>
                   )}

@@ -1,4 +1,5 @@
 ---
+import { gambar, srcsetGambar } from "../../lib/gambar";
 import Publik from "../../tata/Publik.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import JudulBagian from "../../komponen/JudulBagian.astro";
@@ -40,7 +41,9 @@ const pimpinan = tenaga.filter((t) => t.kategori === "Pimpinan");
           <figure class="kaca overflow-hidden">
             <a href={urlUnggahan("profil", bagan)} target="_blank" rel="noopener noreferrer" class="group block cursor-zoom-in bg-white">
               <img
-                src={urlUnggahan("profil", bagan)}
+                src={gambar("profil", bagan, 1600)}
+                srcset={srcsetGambar("profil", bagan, [1024, 1600, 1920])}
+                sizes="(min-width: 1200px) 1168px, 100vw"
                 alt="Bagan struktur organisasi sekolah"
                 class="w-full object-contain transition duration-500 group-hover:scale-[1.02]"
                 loading="lazy"
@@ -89,7 +92,7 @@ const pimpinan = tenaga.filter((t) => t.kategori === "Pimpinan");
             {pimpinan.map((t, i) => (
               <div data-miring data-muncul={String((i % 3) * 0.07)} class={"kaca kartu-sorot relative flex items-center gap-4 p-5 " + kelasKartuAkhir(i, pimpinan.length)}>
                 <span class="ikon-kartu grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-biru-muda text-biru" aria-hidden="true">
-                  {t.foto ? <img src={urlUnggahan("profil", t.foto)} alt="" class="h-full w-full object-cover" loading="lazy" /> : <IkonGuru ukuran={26} />}
+                  {t.foto ? <img src={gambar("profil", t.foto, 160)} alt="" class="h-full w-full object-cover" loading="lazy" /> : <IkonGuru ukuran={26} />}
                 </span>
                 <div class="min-w-0">
                   <p class="font-bold text-biru-tua">{t.nama}</p>

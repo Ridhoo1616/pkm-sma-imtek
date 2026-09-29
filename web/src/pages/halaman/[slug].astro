@@ -1,8 +1,8 @@
 ---
+import { gambar as gambarUnggahan, srcsetGambar } from "../../lib/gambar";
 import Publik from "../../tata/Publik.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import { data } from "../../lib/tembolok";
-import { urlUnggahan } from "@/lib/api";
 import { bagianNaskah, belumTerisi, kalimatPertama, kePoinTerisi } from "@/lib/format";
 import { Menunggu, Naskah } from "@/komponen/Halaman";
 import PetakGaleri from "@/komponen/Galeri";
@@ -138,7 +138,7 @@ const induk = h ? INDUK[h.kelompok] : undefined;
 
           <article data-muncul>
             {h.gambar && (
-              <img src={urlUnggahan("profil", h.gambar)} alt={h.judul} class="mb-6 aspect-video w-full rounded-[18px] bg-biru-muda object-cover" loading="lazy" decoding="async" />
+              <img src={gambarUnggahan("profil", h.gambar, 1280)} srcset={srcsetGambar("profil", h.gambar, [800, 1280, 1920])} sizes="(min-width: 1200px) 1168px, 100vw" alt={h.judul} class="mb-6 aspect-video w-full rounded-[18px] bg-biru-muda object-cover" loading="lazy" decoding="async" />
             )}
             {adaNaskah ? (
               <div class="kaca p-6 md:p-10"><div class="max-w-3xl"><Naskah isi={h.isi} /></div></div>

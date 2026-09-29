@@ -1,8 +1,9 @@
 ---
+import { gambar, srcsetGambar } from "../../lib/gambar";
 import Publik from "../../tata/Publik.astro";
 import Orbit from "../../komponen/Orbit.astro";
 import { data } from "../../lib/tembolok";
-import { api, urlUnggahan, GalatApi } from "@/lib/api";
+import { api, GalatApi } from "@/lib/api";
 import { angka, keParagraf, tanggalPanjang } from "@/lib/format";
 import { kelasKartuAkhir } from "@/komponen/Bagian";
 import { IkonNaskah, IkonPanahKanan } from "@/komponen/Ikon";
@@ -27,9 +28,15 @@ const b = hasil?.data;
 const paragraf = b ? keParagraf(b.isi) : [];
 ---
 
-<Publik sorotan judul={b ? b.judul : "Berita tidak ditemukan"} deskripsi={b ? b.ringkasan || b.judul : undefined}>
+<Publik
+  sorotan
+  judul={b ? b.judul : "Berita tidak ditemukan"}
+  deskripsi={b ? b.ringkasan || b.judul : undefined}
+  jenis="article"
+  pratinjau={b?.gambar ? `/gambar/berita/${encodeURIComponent(b.gambar)}?pola=og` : undefined}
+>
   <section class="relative isolate overflow-hidden bg-biru-tua pt-[4.5rem] text-white" data-sorotan-bagian>
-    {b?.gambar && <img src={urlUnggahan("berita", b.gambar)} alt="" aria-hidden="true" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-25 blur-sm" data-paralaks />}
+    {b?.gambar && <img src={gambar("berita", b.gambar, 800)} alt="" aria-hidden="true" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-25 blur-sm" data-paralaks />}
     <div aria-hidden="true" class="absolute inset-0 -z-10 bg-[linear-gradient(100deg,rgb(10_28_49/0.97)_0%,rgb(10_28_49/0.9)_50%,rgb(15_42_74/0.75)_100%)]"></div>
     <Orbit nada="terang" class="-right-[18%] top-[10%] h-[22rem] w-[75%] opacity-70" miring={10} bintang={[{ x: 20, y: 70, ukuran: 14 }]} />
     <div class="wadah relative pt-10 pb-28 md:pt-14 md:pb-36">
@@ -67,7 +74,7 @@ const paragraf = b ? keParagraf(b.isi) : [];
       <article class="wadah relative z-10 -mt-20 md:-mt-28">
         <div class="mx-auto max-w-4xl overflow-hidden rounded-[20px] bg-gradient-to-br from-biru-tua to-biru shadow-[0_20px_50px_rgb(10_28_49/0.25)]" data-muncul>
           {b.gambar ? (
-            <img src={urlUnggahan("berita", b.gambar)} alt={b.judul} class="aspect-video w-full object-cover" decoding="async" />
+            <img src={gambar("berita", b.gambar, 1280)} srcset={srcsetGambar("berita", b.gambar, [800, 1280, 1920])} sizes="(min-width: 960px) 896px, 100vw" alt={b.judul} class="aspect-video w-full object-cover" decoding="async" />
           ) : (
             <div class="grid aspect-[21/9] place-items-center text-white/70" aria-hidden="true"><IkonNaskah ukuran={48} /></div>
           )}
@@ -94,7 +101,7 @@ const paragraf = b ? keParagraf(b.isi) : [];
                 <a href={`/berita/${t.slug}`} data-miring data-muncul={String(i * 0.07)} class={"kaca kartu-sorot group relative flex flex-col overflow-hidden " + kelasKartuAkhir(i, hasil.terkait.length)}>
                   <div class="h-40 overflow-hidden bg-gradient-to-br from-biru-tua to-biru">
                     {t.gambar ? (
-                      <img src={urlUnggahan("berita", t.gambar)} alt={t.judul} class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" />
+                      <img src={gambar("berita", t.gambar, 640)} srcset={srcsetGambar("berita", t.gambar, [480, 640, 800])} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt={t.judul} class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" />
                     ) : (
                       <div class="grid h-full place-items-center text-white/80" aria-hidden="true"><IkonNaskah ukuran={30} /></div>
                     )}

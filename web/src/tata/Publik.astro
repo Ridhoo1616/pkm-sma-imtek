@@ -10,7 +10,9 @@ import GulirHalus from "@/komponen/GulirHalus";
 import { PencatatKunjungan } from "@/komponen/PencatatKunjungan";
 import { ClickSpark } from "@/komponen/ClickSpark";
 import { data } from "../lib/tembolok";
-import { belumTerisi } from "@/lib/format";
+import { alamatLengkap, belumTerisi } from "@/lib/format";
+import { gambar, gambarPratinjau } from "../lib/gambar";
+import { ALAMAT_SITUS, asalSitus } from "../lib/situs";
 import type { Berita, Faq, Jurusan } from "@/lib/tipe";
 
 /**
@@ -28,9 +30,13 @@ interface Props {
   deskripsi?: string;
   /** Halaman dibuka sorotan gelap yang naik ke bawah navigasi. */
   sorotan?: boolean;
+  /** Gambar pratinjau tautan khusus halaman ini (berita); kosong = foto sekolah. */
+  pratinjau?: string;
+  /** "article" untuk berita, selain itu "website". */
+  jenis?: "website" | "article";
 }
 
-const { judul, deskripsi, sorotan = false } = Astro.props;
+const { judul, deskripsi, sorotan = false, pratinjau, jenis = "website" } = Astro.props;
 
 // Dipakai pengganti usePathname saat komponen React dirender di server.
 globalThis.__jalurAstro = Astro.url.pathname;
@@ -47,6 +53,37 @@ const [berita, faq, jurusan] = await Promise.all([
 ]);
 
 const tagline = belumTerisi(p.tagline ?? "") ? "" : p.tagline;
+const asal = asalSitus(Astro.url);
+// Pratinjau saat tautan dibagikan (WhatsApp, Instagram, Facebook): foto
+// halaman bila ada, foto sekolah bila tidak. Harus alamat mutlak.
+const fotoSekolah = p.foto_depan && !belumTerisi(p.foto_depan) ? gambarPratinjau(p.foto_depan) : "";
+const gambarBagikan = pratinjau || fotoSekolah ? asal + (pratinjau || fotoSekolah) : "";
+
+// Data terstruktur sekolah untuk mesin pencari. Hanya isian yang sudah diisi
+// sekolah; yang masih [kurung siku] tidak ikut, sama seperti di halaman.
+const isi = (v?: string) => (v && !belumTerisi(v) ? v : undefined);
+const sosial = [p.instagram, p.facebook, p.youtube, p.tiktok].filter((v) => isi(v));
+const dataSekolah = {
+  "@context": "https://schema.org",
+  "@type": "HighSchool",
+  name: nama,
+  url: asal,
+  logo: p.logo ? asal + gambar("profil", p.logo, 320) : undefined,
+  image: fotoSekolah ? asal + fotoSekolah : undefined,
+  telephone: isi(p.telepon),
+  email: isi(p.email),
+  address: isi(p.alamat)
+    ? {
+        "@type": "PostalAddress",
+        streetAddress: alamatLengkap(p.alamat, p.kode_pos),
+        addressLocality: isi(p.kota),
+        addressRegion: isi(p.provinsi),
+        postalCode: isi(p.kode_pos),
+        addressCountry: "ID",
+      }
+    : undefined,
+  sameAs: sosial.length ? sosial : undefined,
+};
 const judulPenuh = judul ? `${judul} · ${nama}` : `${nama} · Profil Sekolah & PPDB Online`;
 const keterangan =
   deskripsi ||
@@ -64,7 +101,25 @@ const keterangan =
     <meta name="keywords" content={[nama, "PPDB online", "pendaftaran peserta didik baru", p.kota, "SMA swasta"].filter(Boolean).join(", ")} />
     <meta property="og:title" content={judulPenuh} />
     <meta property="og:description" content={keterangan} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={jenis} />
+    <meta property="og:site_name" content={nama} />
+    <meta property="og:url" content={asal + Astro.url.pathname} />
+    {ALAMAT_SITUS && <link rel="canonical" href={ALAMAT_SITUS + Astro.url.pathname} />}
+    {
+      gambarBagikan && (
+        <>
+          <meta property="og:image" content={gambarBagikan} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:image" content={gambarBagikan} />
+        </>
+      )
+    }
+    <meta name="theme-color" content="#0a1c31" />
+    <!-- "<" di-escape: nilai pengaturan yang memuat "</script>" tidak boleh
+         dapat menutup tag ini dan menyisipkan skrip. -->
+    <script type="application/ld+json" set:html={JSON.stringify(dataSekolah).replace(/</g, "\\u003c")} />
     <meta property="og:locale" content="id_ID" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
   </head>

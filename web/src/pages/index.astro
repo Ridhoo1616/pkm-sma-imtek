@@ -1,9 +1,9 @@
 ---
+import { gambar, srcsetGambar } from "../lib/gambar";
 import Publik from "../tata/Publik.astro";
 import Orbit from "../komponen/Orbit.astro";
 import JudulBagian from "../komponen/JudulBagian.astro";
 import SambutanKaca from "../komponen/SambutanKaca.astro";
-import { urlUnggahan } from "@/lib/api";
 import { data } from "../lib/tembolok";
 import { tombolEmas, tombolEmasKecil, tombolLangit, tombolGelap } from "../lib/gaya";
 import { alamatLengkap, angka, belumTerisi, kePoinTerisi, persen, tanggalPanjang, tujuanPeta } from "@/lib/format";
@@ -121,7 +121,9 @@ const arah = (moda: string) =>
           <div class="absolute -inset-y-[8%] inset-x-0 -z-20" data-sorotan data-paralaks>
             {fotoSorotan.map((nama_berkas, i) => (
               <img
-                src={urlUnggahan("profil", nama_berkas)}
+                src={gambar("profil", nama_berkas, 1600)}
+                srcset={srcsetGambar("profil", nama_berkas, [800, 1280, 1600, 1920])}
+                sizes="100vw"
                 alt={i === 0 ? `Gedung ${nama}` : ""}
                 aria-hidden={i === 0 ? undefined : "true"}
                 class={"foto-sorotan absolute inset-0 h-full w-full object-cover " + (i === 0 ? "foto-aktif" : "")}
@@ -472,7 +474,7 @@ const arah = (moda: string) =>
               <div class="aspect-[16/10] overflow-hidden bg-biru-muda">
                 {b.gambar ? (
                   <img
-                    src={urlUnggahan("berita", b.gambar)}
+                    src={gambar("berita", b.gambar, 640)} srcset={srcsetGambar("berita", b.gambar, [480, 640, 800])} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                     alt=""
                     class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     loading="lazy"

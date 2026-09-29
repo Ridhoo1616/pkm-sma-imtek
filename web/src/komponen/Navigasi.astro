@@ -1,6 +1,6 @@
 ---
+import { gambar } from "../lib/gambar";
 import { MENU } from "@/lib/menu";
-import { urlUnggahan } from "@/lib/api";
 import type { Pengaturan } from "@/lib/tipe";
 
 /**
@@ -47,7 +47,7 @@ const pil = (terpilih: boolean) =>
       >
         {
           p.logo ? (
-            <img src={urlUnggahan("profil", p.logo)} alt="" class="h-full w-full object-contain" />
+            <img src={gambar("profil", p.logo, 160)} alt="" class="h-full w-full object-contain" />
           ) : (
             (p.nama_singkat || "SI").slice(0, 2).toUpperCase()
           )

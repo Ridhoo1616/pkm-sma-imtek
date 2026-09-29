@@ -1,9 +1,9 @@
 ---
+import { gambar, srcsetGambar } from "../../lib/gambar";
 import Publik from "../../tata/Publik.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import JudulBagian from "../../komponen/JudulBagian.astro";
 import { data } from "../../lib/tembolok";
-import { urlUnggahan } from "@/lib/api";
 import { kelasKartuAkhir } from "@/komponen/Bagian";
 import { IkonBendera, IkonJam, IkonGuru } from "@/komponen/Ikon";
 import type { KegiatanSiswa } from "@/lib/tipe";
@@ -56,7 +56,7 @@ const kelompok = hasil.jenis
                 >
                   <div class="relative h-44 overflow-hidden bg-gradient-to-br from-biru-tua to-biru">
                     {k.gambar ? (
-                      <img src={urlUnggahan("kegiatan", k.gambar)} alt={k.nama} class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
+                      <img src={gambar("kegiatan", k.gambar, 640)} srcset={srcsetGambar("kegiatan", k.gambar, [480, 640, 800])} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt={k.nama} class="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
                     ) : (
                       <div class="grid h-full place-items-center text-white/85" aria-hidden="true">
                         <span class="ikon-kartu grid h-16 w-16 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/15"><IkonBendera ukuran={30} /></span>
