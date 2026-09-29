@@ -1,0 +1,1 @@
+function e(){return typeof window>`u`?``:globalThis.__DASAR_DEMO??``}function t(t){let n=e();return!n||!t.startsWith(`/`)||t.startsWith(`//`)||t.startsWith(n+`/`)?t:n+t}function n(t){let n=e();return!n||!t.startsWith(n)?t:t.slice(n.length)||`/`}export{n,t};

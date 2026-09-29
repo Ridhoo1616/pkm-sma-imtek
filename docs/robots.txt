@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /unggahan/
+Disallow: /ppdb/ujian
+
+Sitemap: https://ridhoo1616.github.io/pkm-sma-imtek/sitemap.xml

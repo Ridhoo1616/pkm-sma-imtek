@@ -1,0 +1,1 @@
+import{t as e}from"./dasar.Dd32US3M.js";import{t}from"./jsx-runtime.D7zcSYNz.js";var n=t();function r({href:t,prefetch:r,replace:i,scroll:a,shallow:o,passHref:s,legacyBehavior:c,...l}){let u=typeof t==`string`?t:(t.pathname??``)+(t.query?`?`+new URLSearchParams(t.query).toString():``);return(0,n.jsx)(`a`,{href:e(u),...l})}export{r as t};
