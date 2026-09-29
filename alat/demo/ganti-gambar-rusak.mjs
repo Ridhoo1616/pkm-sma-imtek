@@ -12,6 +12,8 @@ import { join } from "node:path";
 
 const API = process.env.API ?? "http://localhost:8190";
 const UNGGAHAN = process.env.UNGGAHAN;
+// HANYA="berita,galeri" membatasi folder yang disentuh.
+const HANYA = process.env.HANYA ? process.env.HANYA.split(",") : null;
 // sharp diambil dari node_modules situs Astro, tempat ia sudah terpasang.
 const sharp = createRequire(join(process.env.WEB, "package.json"))("sharp");
 
@@ -38,7 +40,8 @@ for (const p of (await ambil("/api/admin/pendaftar?per_halaman=200", token)).dat
 
 const butir = [
   ...berkasPendaftar,
-  ...(await ambil("/api/berita?per_halaman=50")).data.map((b) => ["berita", b.gambar, b.judul]),
+  // Daftar admin, supaya berita yang masih draf ikut.
+  ...(await ambil("/api/admin/berita?per_halaman=100", token)).data.map((b) => ["berita", b.gambar, b.judul]),
   ...(await ambil("/api/galeri")).data.map((g) => ["galeri", g.gambar, g.judul]),
   ...(await ambil("/api/fasilitas")).data.map((f) => ["fasilitas", f.gambar, f.nama]),
 ];
@@ -84,7 +87,7 @@ function pdfPengganti(judul) {
 
 let jumlah = 0;
 for (const [folder, nama, judul] of butir) {
-  if (!nama) continue;
+  if (!nama || (HANYA && !HANYA.includes(folder))) continue;
   const jalur = join(UNGGAHAN, folder, nama);
   let isi;
   try {
