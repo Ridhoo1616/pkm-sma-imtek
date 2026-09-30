@@ -159,9 +159,12 @@ const KELILING = 2 * Math.PI * 34;
         <!-- ================= Jadwal ================= -->
         <section data-muncul>
           <JudulBagian atas="Waktu" judul="Jadwal Pendaftaran" />
-          <!-- overflow-x-clip: cincin berdenyut pada tahap yang sedang berjalan
-               membesar dua kali lipat dan sempat menjulur keluar layar ponsel. -->
-          <ol class="relative space-y-4 overflow-x-clip">
+          <!-- Daftar ini sengaja TIDAK dipotong (overflow-x-clip): potongan itu
+               memenggal sisi kiri cincin berdenyut sehingga lingkarannya tidak
+               utuh. Geser samping di ponsel sudah dicegah oleh html
+               { overflow-x: clip } di gaya.css, dan denyutnya (.denyut) hanya
+               membesar 1,6 kali, jadi tetap muat di tepi layar. -->
+          <ol class="relative space-y-4">
             <span aria-hidden="true" class="absolute top-4 bottom-4 left-[19px] w-0.5 bg-garis"></span>
             {jadwal.map((t, i) => {
               const berjalan = i === indeksBerjalan;
@@ -172,7 +175,7 @@ const KELILING = 2 * Math.PI * 34;
                     class={"relative z-10 mt-4 grid h-10 w-10 shrink-0 place-items-center rounded-full ring-4 ring-latar " +
                       (t.waktu?.lewat ? "bg-emas text-biru-tua" : berjalan ? "bg-biru-tua text-white" : "bg-white text-biru")}
                   >
-                    {berjalan && <span class="absolute inset-0 animate-ping rounded-full bg-biru/30" style="animation-duration:2.4s" />}
+                    {berjalan && <span class="denyut absolute inset-0 rounded-full bg-biru/30" />}
                     <span class="relative">{t.waktu?.lewat ? <IkonCentang ukuran={16} /> : <IkonKalender ukuran={16} />}</span>
                   </span>
                   <div class={"kaca flex-1 p-5 " + (berjalan ? "ring-2 ring-biru/30" : "")}>
@@ -329,7 +332,11 @@ const KELILING = 2 * Math.PI * 34;
       </div>
 
       <!-- ================= Kolom samping ================= -->
-      <aside class="min-w-0 space-y-8 lg:sticky lg:top-28 lg:self-start">
+      <!-- Tidak sticky: kolom ini lebih tinggi daripada layar laptop, dan
+           kolom sticky yang lebih tinggi daripada layar baru memperlihatkan
+           bagian bawahnya (Kuota per Peminatan) setelah halaman digulir
+           sampai habis. -->
+      <aside class="min-w-0 space-y-8">
         <section class="kaca overflow-hidden" data-muncul>
           <h2 class="flex items-center gap-3 border-b border-garis/70 px-6 py-4 text-base">
             <span class="grid h-9 w-9 place-items-center rounded-lg bg-biru-tua text-white" aria-hidden="true"><IkonNaskah ukuran={18} /></span>

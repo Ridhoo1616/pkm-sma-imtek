@@ -368,3 +368,18 @@
 @media (prefers-reduced-motion: reduce) {
   .cincin-terisi { animation: none; }
 }
+
+/* Cincin berdenyut pada tahap jadwal yang sedang berjalan. Pengganti
+   animate-ping (membesar 2 kali): 1,6 kali cukup terlihat, dan pada tahap
+   di tepi kiri daftar lingkarannya tetap utuh di dalam jarak tepi layar
+   ponsel, tanpa perlu dipotong. */
+@keyframes denyut {
+  0% { transform: scale(1); opacity: 0.9; }
+  75%, 100% { transform: scale(1.6); opacity: 0; }
+}
+.denyut {
+  animation: denyut 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .denyut { animation: none; }
+}
