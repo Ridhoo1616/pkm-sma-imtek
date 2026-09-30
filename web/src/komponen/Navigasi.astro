@@ -255,6 +255,16 @@ const pil = (terpilih: boolean) =>
       k.addEventListener("mouseleave", () => {
         k.dataset.tutup = "tidak";
       });
+      // Hanya satu menu turunan yang boleh terbuka. Menu yang dibuka dengan
+      // klik tetap terbuka lewat data-buka dan :focus-within (tombolnya masih
+      // memegang fokus), jadi saat penunjuk pindah ke menu lain yang terbuka
+      // karena :hover, keduanya tampil bertumpuk. Masuk ke kelompok lain
+      // menutup yang lain dan melepas fokus yang tertinggal di sana.
+      k.addEventListener("mouseenter", () => {
+        tutupSemua(k);
+        const f = document.activeElement as HTMLElement | null;
+        if (f && !k.contains(f) && kelompok.some((x) => x.contains(f))) f.blur();
+      });
       // Fokus yang datang dari luar kelompok (Tab) membuka kembali menunya
       // sesudah ditutup dengan Escape.
       k.addEventListener("focusin", (e) => {
