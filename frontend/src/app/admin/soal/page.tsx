@@ -32,6 +32,19 @@ const KOSONG = {
 
 const HURUF = ["A", "B", "C", "D", "E"];
 
+/** Dipakai sebelum daftar dari server datang; isinya sama dengan
+ *  DaftarMapel di backend/mapel.go. */
+const MAPEL_AWAL = [
+  "Matematika",
+  "Bahasa Indonesia",
+  "Bahasa Inggris",
+  "IPA",
+  "IPS",
+  "Pendidikan Agama",
+  "Pengetahuan Umum",
+  "Tes Potensi Akademik",
+];
+
 export default function HalamanSoal() {
   const kabar = useKabar();
   const [saring, setSaring] = useState("");
@@ -49,6 +62,15 @@ export default function HalamanSoal() {
   const [hapusTarget, setHapusTarget] = useState<Soal | null>(null);
   const [menghapus, setMenghapus] = useState(false);
   const [galatHapus, setGalatHapus] = useState("");
+  const [impor, setImpor] = useState(false);
+
+  const mapelBaku = data?.mapel_baku ?? MAPEL_AWAL;
+  const stok = data?.stok ?? {};
+  // Nama lama yang belum baku tetap dapat disaring sampai soalnya diubah.
+  const opsiSaring = [
+    ...mapelBaku,
+    ...(data?.mata_pelajaran ?? []).filter((m) => !mapelBaku.includes(m)),
+  ].map((m) => ({ nilai: m, label: `${m} (${stok[m] ?? 0} aktif)` }));
 
   function buka(s?: Soal) {
     setGalatKolom({});
@@ -120,7 +142,14 @@ export default function HalamanSoal() {
       <KepalaPanel
         judul="Bank Soal"
         keterangan="Soal pilihan ganda untuk tes seleksi. Soal yang diambil tiap peserta dipilih dari yang berkeadaan aktif, dan susunannya diacak per peserta."
-        aksi={<Tombol onClick={() => buka()}>Tambah Soal</Tombol>}
+        aksi={
+          <div className="flex flex-wrap gap-2">
+            <Tombol jenis="kedua" onClick={() => setImpor(true)}>
+              Impor dari Excel
+            </Tombol>
+            <Tombol onClick={() => buka()}>Tambah Soal</Tombol>
+          </div>
+        }
       />
 
       <div className="mb-5 flex flex-wrap items-end gap-4">
@@ -130,7 +159,7 @@ export default function HalamanSoal() {
             label="Saring mata pelajaran"
             nilai={saring}
             ubah={setSaring}
-            opsi={data?.mata_pelajaran ?? []}
+            opsi={opsiSaring}
             kosong="Semua mata pelajaran"
           />
         </div>
@@ -139,6 +168,18 @@ export default function HalamanSoal() {
           soal aktif siap dipakai
         </p>
       </div>
+
+      <ul className="mb-5 flex flex-wrap gap-2 text-xs">
+        {mapelBaku.map((m) => (
+          <li
+            key={m}
+            className="rounded-full border border-garis bg-white px-3 py-1 text-samar"
+          >
+            {m}{" "}
+            <strong className="text-teks tabular-nums">{stok[m] ?? 0}</strong>
+          </li>
+        ))}
+      </ul>
 
       {memuat ? (
         <Memuat />
@@ -207,15 +248,19 @@ export default function HalamanSoal() {
         <form onSubmit={simpan} className="space-y-5">
           {ringkasan.length > 0 && <RingkasanGalat daftar={ringkasan} />}
 
-          <Teks
+          <Pilihan
             nama="mata_pelajaran"
             label="Mata pelajaran"
             wajib
-            maks={60}
             nilai={isi.mata_pelajaran}
             ubah={(v) => setIsi((s) => ({ ...s, mata_pelajaran: v }))}
+            opsi={
+              isi.mata_pelajaran && !mapelBaku.includes(isi.mata_pelajaran)
+                ? [...mapelBaku, isi.mata_pelajaran]
+                : mapelBaku
+            }
+            kosong="-- Pilih mata pelajaran --"
             galat={galatKolom.mata_pelajaran}
-            contoh="Matematika"
           />
 
           <AreaTeks
@@ -305,6 +350,17 @@ export default function HalamanSoal() {
         </form>
       </Jendela>
 
+      {impor && (
+        <JendelaImpor
+          tutup={() => setImpor(false)}
+          selesai={(pesan) => {
+            kabar.beri(pesan);
+            setImpor(false);
+            muatUlang();
+          }}
+        />
+      )}
+
       <Konfirmasi
         terbuka={hapusTarget !== null}
         tutup={() => setHapusTarget(null)}
@@ -322,5 +378,140 @@ export default function HalamanSoal() {
         lanjut={hapus}
       />
     </>
+  );
+}
+
+/**
+ * Impor banyak soal sekaligus. Berkas dari Excel dibaca di peramban lalu
+ * dikirim sebagai teks; panitia juga boleh menempel langsung dari Excel.
+ * Satu baris salah menggagalkan seluruh impor supaya tidak ada soal ganda
+ * saat berkasnya dibetulkan lalu diimpor ulang.
+ */
+function JendelaImpor({
+  tutup,
+  selesai,
+}: {
+  tutup: () => void;
+  selesai: (pesan: string) => void;
+}) {
+  const [csv, setCsv] = useState("");
+  const [namaBerkas, setNamaBerkas] = useState("");
+  const [aktif, setAktif] = useState(true);
+  const [mengirim, setMengirim] = useState(false);
+  const [galat, setGalat] = useState<string[]>([]);
+
+  async function bacaBerkas(e: React.ChangeEvent<HTMLInputElement>) {
+    const berkas = e.target.files?.[0];
+    if (!berkas) return;
+    setGalat([]);
+    if (!/\.(csv|txt)$/i.test(berkas.name)) {
+      setGalat([
+        "Pilih berkas .csv. Di Excel: File > Save As > CSV UTF-8 (Comma delimited).",
+      ]);
+      return;
+    }
+    setNamaBerkas(berkas.name);
+    setCsv(await berkas.text());
+  }
+
+  async function kirim(e: React.FormEvent) {
+    e.preventDefault();
+    setGalat([]);
+    setMengirim(true);
+    try {
+      const hasil = await api.imporSoal({ csv, aktif });
+      selesai(hasil.pesan);
+    } catch (e) {
+      if (e instanceof GalatApi) {
+        setGalat(e.daftar.length ? [e.message, ...e.daftar] : [e.message]);
+      } else {
+        setGalat(["Soal gagal diimpor."]);
+      }
+    } finally {
+      setMengirim(false);
+    }
+  }
+
+  const jumlahBaris = csv.trim() ? csv.trim().split(/\r?\n/).length : 0;
+
+  return (
+    <Jendela terbuka tutup={tutup} judul="Impor Soal dari Excel" lebar="max-w-3xl">
+      <form onSubmit={kirim} className="space-y-5">
+        {galat.length > 0 && <RingkasanGalat daftar={galat} />}
+
+        <ol className="list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-samar">
+          <li>
+            Unduh{" "}
+            <a href="/templat/templat-soal.csv" download className="font-semibold text-biru underline">
+              templat soal
+            </a>
+            ,{" "}
+            <a
+              href="/templat/contoh-soal-seleksi.csv"
+              download
+              className="font-semibold text-biru underline"
+            >
+              60 contoh soal setara SMP
+            </a>
+            , atau{" "}
+            <a
+              href="/templat/latihan-soal-40.csv"
+              download
+              className="font-semibold text-biru underline"
+            >
+              40 soal latihan tes
+            </a>
+            , lalu buka di Excel.
+          </li>
+          <li>
+            Satu baris satu soal. Kolom <em>mata_pelajaran</em> diisi salah satu
+            dari: {MAPEL_AWAL.join(", ")}. Kolom <em>jawaban</em> diisi huruf A
+            sampai E.
+          </li>
+          <li>
+            Simpan sebagai <strong>CSV UTF-8</strong>, lalu pilih berkasnya di
+            bawah. Bisa juga blok seluruh tabel di Excel, salin, lalu tempel.
+          </li>
+        </ol>
+
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold">Berkas CSV</span>
+          <input
+            type="file"
+            accept=".csv,.txt,text/csv"
+            onChange={bacaBerkas}
+            className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-biru-muda file:px-4 file:py-2 file:font-semibold file:text-biru"
+          />
+          {namaBerkas && (
+            <span className="mt-1 block text-xs text-samar">{namaBerkas} terbaca.</span>
+          )}
+        </label>
+
+        <AreaTeks
+          nama="csv"
+          label="Atau tempel dari Excel"
+          baris={8}
+          nilai={csv}
+          ubah={(v) => {
+            setCsv(v);
+            setNamaBerkas("");
+          }}
+          bantuan={jumlahBaris ? `${jumlahBaris} baris, termasuk baris judul bila ada.` : undefined}
+        />
+
+        <Centang nama="aktif_impor" nilai={aktif} ubah={setAktif}>
+          Langsung aktifkan soal hasil impor
+        </Centang>
+
+        <div className="flex justify-end gap-3 border-t border-garis pt-5">
+          <Tombol type="button" jenis="kedua" onClick={tutup}>
+            Batal
+          </Tombol>
+          <Tombol type="submit" sedangJalan={mengirim} disabled={csv.trim() === ""}>
+            Impor Soal
+          </Tombol>
+        </div>
+      </form>
+    </Jendela>
   );
 }

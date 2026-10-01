@@ -106,9 +106,16 @@ func (a *Aplikasi) tanganiDaftarSoal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	stok, err := stokMapel(a.db)
+	if err != nil {
+		a.galatServer(w, "menghitung soal per mata pelajaran", err)
+		return
+	}
 	kirimJSON(w, http.StatusOK, map[string]any{
 		"data":           daftar,
 		"mata_pelajaran": mapels,
+		"mapel_baku":     DaftarMapel,
+		"stok":           stok,
 		"jumlah_aktif":   jumlahSoalAktif(a),
 	})
 }
@@ -144,8 +151,14 @@ func (p *permintaanSoal) periksa() *Validasi {
 	p.Jawaban = strings.ToUpper(strings.TrimSpace(p.Jawaban))
 	p.Pembahasan = strings.TrimSpace(p.Pembahasan)
 
-	v.wajib("mata_pelajaran", "Mata pelajaran", p.MataPelajaran)
-	v.panjangMaks("mata_pelajaran", "Mata pelajaran", p.MataPelajaran, 60)
+	if v.wajib("mata_pelajaran", "Mata pelajaran", p.MataPelajaran) != "" {
+		if m := mapelBaku(p.MataPelajaran); m != "" {
+			p.MataPelajaran = m
+		} else {
+			v.tambah("mata_pelajaran", fmt.Sprintf("Mata pelajaran %q tidak dikenal. Pilih salah satu: %s.",
+				potong(p.MataPelajaran, 40), strings.Join(DaftarMapel, ", ")))
+		}
+	}
 	v.wajib("pertanyaan", "Pertanyaan", p.Pertanyaan)
 	v.panjangMaks("pertanyaan", "Pertanyaan", p.Pertanyaan, 4000)
 	v.wajib("pilihan_a", "Pilihan A", p.PilihanA)
@@ -273,6 +286,9 @@ type PaketUjian struct {
 	Aktif         bool    `json:"aktif"`
 	JumlahPeserta int     `json:"jumlah_peserta"`
 	JumlahSelesai int     `json:"jumlah_selesai"`
+	// Komposisi kosong berarti soal diambil acak dari seluruh mata pelajaran,
+	// seperti sebelum komposisi ada.
+	Komposisi []KomposisiMapel `json:"komposisi"`
 }
 
 func (a *Aplikasi) tanganiDaftarPaket(w http.ResponseWriter, r *http.Request) {
@@ -306,9 +322,27 @@ func (a *Aplikasi) tanganiDaftarPaket(w http.ResponseWriter, r *http.Request) {
 		a.galatServer(w, "membaca paket ujian", err)
 		return
 	}
+	komposisi, err := komposisiPaket(a.db, 0)
+	if err != nil {
+		a.galatServer(w, "membaca komposisi paket", err)
+		return
+	}
+	for i := range daftar {
+		daftar[i].Komposisi = komposisi[daftar[i].ID]
+		if daftar[i].Komposisi == nil {
+			daftar[i].Komposisi = []KomposisiMapel{}
+		}
+	}
+	stok, err := stokMapel(a.db)
+	if err != nil {
+		a.galatServer(w, "menghitung soal per mata pelajaran", err)
+		return
+	}
 	kirimJSON(w, http.StatusOK, map[string]any{
 		"data":         daftar,
 		"jumlah_aktif": jumlahSoalAktif(a),
+		"mapel_baku":   DaftarMapel,
+		"stok":         stok,
 	})
 }
 
@@ -331,6 +365,9 @@ type permintaanPaket struct {
 	NilaiMinimum int    `json:"nilai_minimum"`
 	Keterangan   string `json:"keterangan"`
 	Aktif        bool   `json:"aktif"`
+	// Bila terisi, jumlah_soal dihitung dari komposisi dan nilai kiriman
+	// diabaikan.
+	Komposisi []KomposisiMapel `json:"komposisi"`
 }
 
 func (p *permintaanPaket) periksa(a *Aplikasi) (*Validasi, *time.Time, *time.Time) {
@@ -346,6 +383,12 @@ func (p *permintaanPaket) periksa(a *Aplikasi) (*Validasi, *time.Time, *time.Tim
 	}
 	v.wajib("tahun_ajaran", "Tahun ajaran", p.TahunAjaran)
 
+	var total int
+	p.Komposisi, total = periksaKomposisi(v, p.Komposisi)
+	if len(p.Komposisi) > 0 {
+		p.JumlahSoal = total
+	}
+
 	if p.DurasiMenit < 5 || p.DurasiMenit > 300 {
 		v.tambah("durasi_menit", "Durasi harus antara 5 dan 300 menit.")
 	}
@@ -359,7 +402,15 @@ func (p *permintaanPaket) periksa(a *Aplikasi) (*Validasi, *time.Time, *time.Tim
 	// Paket tidak boleh dibuka bila bank soalnya belum cukup. Kalau tetap
 	// dibuka, peserta pertama yang masuk akan mendapat galat, dan itu terjadi
 	// justru saat ujian sudah dimulai.
-	if p.Aktif {
+	if p.Aktif && len(p.Komposisi) > 0 {
+		stok, err := stokMapel(a.db)
+		if err == nil {
+			if kurang := kekuranganStok(p.Komposisi, stok); len(kurang) > 0 {
+				v.tambah("komposisi", "Bank soal belum cukup: "+strings.Join(kurang, "; ")+
+					". Tambah soal dulu, atau kurangi jumlahnya.")
+			}
+		}
+	} else if p.Aktif {
 		if tersedia := jumlahSoalAktif(a); tersedia < p.JumlahSoal {
 			v.tambah("jumlah_soal", fmt.Sprintf(
 				"Bank soal aktif baru berisi %d soal, sedangkan paket ini meminta %d. "+
@@ -420,13 +471,25 @@ func (a *Aplikasi) tanganiSimpanPaket(w http.ResponseWriter, r *http.Request) {
 		kirimGalatValidasi(w, v)
 		return
 	}
+	tx, err := a.db.Begin()
+	if err != nil {
+		a.galatServer(w, "menyimpan paket ujian", err)
+		return
+	}
+	defer tx.Rollback()
 	var id int
-	err := a.db.QueryRow(
+	err = tx.QueryRow(
 		`INSERT INTO paket_ujian (nama, tahun_ajaran, durasi_menit, jumlah_soal,
 		                          acak_soal, mulai, selesai, nilai_minimum, keterangan, aktif)
 		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
 		p.Nama, p.TahunAjaran, p.DurasiMenit, p.JumlahSoal, p.AcakSoal,
 		mulai, selesai, p.NilaiMinimum, p.Keterangan, p.Aktif).Scan(&id)
+	if err == nil {
+		err = simpanKomposisi(tx, id, p.Komposisi)
+	}
+	if err == nil {
+		err = tx.Commit()
+	}
 	if err != nil {
 		a.galatServer(w, "menyimpan paket ujian", err)
 		return
@@ -448,7 +511,13 @@ func (a *Aplikasi) tanganiUbahPaket(w http.ResponseWriter, r *http.Request) {
 		kirimGalatValidasi(w, v)
 		return
 	}
-	hasil, err := a.db.Exec(
+	tx, err := a.db.Begin()
+	if err != nil {
+		a.galatServer(w, "mengubah paket ujian", err)
+		return
+	}
+	defer tx.Rollback()
+	hasil, err := tx.Exec(
 		`UPDATE paket_ujian SET nama=$1, tahun_ajaran=$2, durasi_menit=$3, jumlah_soal=$4,
 		                        acak_soal=$5, mulai=$6, selesai=$7, nilai_minimum=$8,
 		                        keterangan=$9, aktif=$10
@@ -461,6 +530,16 @@ func (a *Aplikasi) tanganiUbahPaket(w http.ResponseWriter, r *http.Request) {
 	}
 	if n, _ := hasil.RowsAffected(); n == 0 {
 		kirimGalat(w, http.StatusNotFound, "Paket ujian tidak ditemukan.")
+		return
+	}
+	// Sesi yang sudah dimulai tidak terpengaruh: susunan soalnya sudah
+	// dibekukan di sesi_soal.
+	if err := simpanKomposisi(tx, id, p.Komposisi); err != nil {
+		a.galatServer(w, "menyimpan komposisi paket", err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		a.galatServer(w, "mengubah paket ujian", err)
 		return
 	}
 	kirimJSON(w, http.StatusOK, map[string]string{"pesan": "Paket ujian berhasil disimpan."})
@@ -528,6 +607,12 @@ func (a *Aplikasi) tanganiHasilUjian(w http.ResponseWriter, r *http.Request) {
 	}
 	defer baris.Close()
 
+	perMapel, mapel, err := nilaiPerMapel(a.db, id)
+	if err != nil {
+		a.galatServer(w, "menghitung nilai per mata pelajaran", err)
+		return
+	}
+
 	hasil := []map[string]any{}
 	var jumlahLulus int
 	for baris.Next() {
@@ -549,7 +634,7 @@ func (a *Aplikasi) tanganiHasilUjian(w http.ResponseWriter, r *http.Request) {
 			"sesi_id": sesiID, "pendaftar_id": pendaftarID,
 			"no_registrasi": noReg, "nama_lengkap": nama, "nama_jurusan": jurusan,
 			"status": status, "jumlah_benar": benar, "jumlah_soal": total,
-			"skor": skor, "lulus": lulus,
+			"skor": skor, "lulus": lulus, "per_mapel": perMapel[sesiID],
 			"mulai_pada":   mulai.Format(time.RFC3339),
 			"selesai_pada": waktuAtauNil(selesai),
 		})
@@ -563,6 +648,7 @@ func (a *Aplikasi) tanganiHasilUjian(w http.ResponseWriter, r *http.Request) {
 		"data":          hasil,
 		"nilai_minimum": nilaiMinimum,
 		"jumlah_lulus":  jumlahLulus,
+		"mapel":         mapel,
 	})
 }
 
@@ -592,6 +678,11 @@ func (a *Aplikasi) paketBerlaku() (PaketUjian, error) {
 	}
 	p.Mulai = waktuAtauNil(mulai)
 	p.Selesai = waktuAtauNil(selesai)
+	komposisi, err := komposisiPaket(a.db, p.ID)
+	if err != nil {
+		return p, err
+	}
+	p.Komposisi = komposisi[p.ID]
 	return p, nil
 }
 
@@ -790,12 +881,22 @@ func (a *Aplikasi) mulaiAtauLanjutkanSesi(ctx context.Context, pendaftarID int, 
 	}
 
 	// Sesi baru.
-	var tersedia int
-	if err := t.QueryRow("SELECT COUNT(*) FROM soal WHERE aktif = true").Scan(&tersedia); err != nil {
-		return s, err
-	}
-	if tersedia < paket.JumlahSoal {
-		return s, GalatSoalKurang
+	if len(paket.Komposisi) > 0 {
+		stok, err := stokMapel(t)
+		if err != nil {
+			return s, err
+		}
+		if len(kekuranganStok(paket.Komposisi, stok)) > 0 {
+			return s, GalatSoalKurang
+		}
+	} else {
+		var tersedia int
+		if err := t.QueryRow("SELECT COUNT(*) FROM soal WHERE aktif = true").Scan(&tersedia); err != nil {
+			return s, err
+		}
+		if tersedia < paket.JumlahSoal {
+			return s, GalatSoalKurang
+		}
 	}
 
 	batas := time.Now().Add(time.Duration(paket.DurasiMenit) * time.Minute)
@@ -820,12 +921,29 @@ func (a *Aplikasi) mulaiAtauLanjutkanSesi(ctx context.Context, pendaftarID int, 
 	if paket.AcakSoal {
 		urut = "random()"
 	}
-	if _, err := t.Exec(
-		`INSERT INTO sesi_soal (sesi_id, soal_id, urutan)
-		 SELECT $1, id, row_number() OVER ()
-		 FROM (SELECT id FROM soal WHERE aktif = true ORDER BY `+urut+` LIMIT $2) pilihan`,
-		s.ID, paket.JumlahSoal); err != nil {
-		return s, err
+	if len(paket.Komposisi) == 0 {
+		if _, err := t.Exec(
+			`INSERT INTO sesi_soal (sesi_id, soal_id, urutan)
+			 SELECT $1, id, row_number() OVER ()
+			 FROM (SELECT id FROM soal WHERE aktif = true ORDER BY `+urut+` LIMIT $2) pilihan`,
+			s.ID, paket.JumlahSoal); err != nil {
+			return s, err
+		}
+	}
+	// Dengan komposisi, soal dikelompokkan per mata pelajaran sesuai urutan
+	// DaftarMapel, dan yang diacak hanya pilihan serta urutan di dalam
+	// kelompoknya. Peserta mengerjakan per bagian seperti lembar ujian kertas.
+	mulaiUrut := 0
+	for _, k := range paket.Komposisi {
+		if _, err := t.Exec(
+			`INSERT INTO sesi_soal (sesi_id, soal_id, urutan)
+			 SELECT $1, id, $3 + row_number() OVER ()
+			 FROM (SELECT id FROM soal WHERE aktif = true AND mata_pelajaran = $4
+			       ORDER BY `+urut+` LIMIT $2) pilihan`,
+			s.ID, k.Jumlah, mulaiUrut, k.MataPelajaran); err != nil {
+			return s, err
+		}
+		mulaiUrut += k.Jumlah
 	}
 
 	return s, t.Commit()

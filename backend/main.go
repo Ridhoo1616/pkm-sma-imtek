@@ -246,6 +246,7 @@ func (a *Aplikasi) rute() http.Handler {
 	/* ---- bank soal dan paket ujian ---- */
 	m.HandleFunc("GET /api/admin/soal", a.wajibMasuk(a.tanganiDaftarSoal))
 	m.HandleFunc("POST /api/admin/soal", a.wajibMasuk(a.tanganiSimpanSoal))
+	m.HandleFunc("POST /api/admin/soal/impor", a.wajibMasuk(a.tanganiImporSoal))
 	m.HandleFunc("PUT /api/admin/soal/{id}", a.wajibMasuk(a.tanganiUbahSoal))
 	m.HandleFunc("DELETE /api/admin/soal/{id}", a.wajibMasuk(a.tanganiHapusSoal))
 

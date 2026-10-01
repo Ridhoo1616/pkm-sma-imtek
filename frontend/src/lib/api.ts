@@ -835,8 +835,16 @@ export const api = {
     permintaan<{
       data: import("./tipe").Soal[];
       mata_pelajaran: string[] | null;
+      mapel_baku: string[];
+      stok: Record<string, number>;
       jumlah_aktif: number;
     }>(`/api/admin/soal${kueri}`, { token: true }),
+  imporSoal: (isi: { csv: string; aktif: boolean }) =>
+    permintaan<{ pesan: string; masuk: number }>("/api/admin/soal/impor", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
   simpanSoal: (isi: unknown) =>
     permintaan<{ pesan: string; id: number }>("/api/admin/soal", {
       metode: "POST",
@@ -857,7 +865,12 @@ export const api = {
 
   /* ---------- paket ujian ---------- */
   paketUjian: () =>
-    permintaan<{ data: import("./tipe").PaketUjian[]; jumlah_aktif: number }>(
+    permintaan<{
+      data: import("./tipe").PaketUjian[];
+      jumlah_aktif: number;
+      mapel_baku: string[];
+      stok: Record<string, number>;
+    }>(
       "/api/admin/paket-ujian",
       { token: true },
     ),
@@ -893,9 +906,13 @@ export const api = {
         lulus: boolean;
         mulai_pada: string;
         selesai_pada: string | null;
+        per_mapel:
+          | { mata_pelajaran: string; benar: number; soal: number; skor: number }[]
+          | null;
       }[];
       nilai_minimum: number;
       jumlah_lulus: number;
+      mapel: string[];
     }>(`/api/admin/paket-ujian/${id}/hasil`, { token: true }),
 
   /* ---------- notifikasi ---------- */

@@ -15,7 +15,7 @@ import {
   Tombol,
   RingkasanGalat,
 } from "@/komponen/Medan";
-import type { PaketUjian } from "@/lib/tipe";
+import type { PaketUjian, KomposisiMapel } from "@/lib/tipe";
 
 /**
  * Paket ujian: jadwal tes seleksi beserta hasilnya.
@@ -25,7 +25,18 @@ import type { PaketUjian } from "@/lib/tipe";
  * panitia tidak sempat membuka tes yang pasti gagal saat peserta masuk.
  */
 
+/** Saran tes seleksi SMA: 50 soal dalam 90 menit, kira-kira 1,8 menit per
+ *  soal. Matematika paling banyak karena paling membedakan kemampuan. */
+const SARAN: Record<string, number> = {
+  Matematika: 15,
+  "Bahasa Indonesia": 10,
+  "Bahasa Inggris": 10,
+  IPA: 10,
+  IPS: 5,
+};
+
 const KOSONG = {
+  komposisi: {} as Record<string, number>,
   nama: "",
   tahun_ajaran: "",
   durasi_menit: 60,
@@ -63,12 +74,20 @@ export default function HalamanUjian() {
   const [galatHapus, setGalatHapus] = useState("");
   const [lihatHasil, setLihatHasil] = useState<PaketUjian | null>(null);
 
+  const mapelBaku = data?.mapel_baku ?? Object.keys(SARAN);
+  const stok = data?.stok ?? {};
+  const totalKomposisi = Object.values(isi.komposisi).reduce((a, n) => a + (n || 0), 0);
+  const pakaiKomposisi = totalKomposisi > 0;
+
   function buka(p?: PaketUjian) {
     setGalatKolom({});
     setRingkasan([]);
     if (p) {
       setUbahId(p.id);
       setIsi({
+        komposisi: Object.fromEntries(
+          (p.komposisi ?? []).map((k: KomposisiMapel) => [k.mata_pelajaran, k.jumlah]),
+        ),
         nama: p.nama,
         tahun_ajaran: p.tahun_ajaran,
         durasi_menit: p.durasi_menit,
@@ -93,8 +112,14 @@ export default function HalamanUjian() {
     setRingkasan([]);
     setMenyimpan(true);
     try {
+      const kirim = {
+        ...isi,
+        komposisi: Object.entries(isi.komposisi)
+          .filter(([, n]) => n > 0)
+          .map(([mata_pelajaran, jumlah]) => ({ mata_pelajaran, jumlah })),
+      };
       const hasil =
-        ubahId === null ? await api.simpanPaket(isi) : await api.ubahPaket(ubahId, isi);
+        ubahId === null ? await api.simpanPaket(kirim) : await api.ubahPaket(ubahId, kirim);
       kabar.beri(hasil.pesan);
       setJendela(false);
       muatUlang();
@@ -167,7 +192,14 @@ export default function HalamanUjian() {
                 {p.mulai ? tanggalJam(p.mulai) : "kapan saja"}
                 {p.selesai && <> &rarr; {tanggalJam(p.selesai)}</>}
               </td>
-              <td className="px-4 py-3 text-right tabular-nums">{p.jumlah_soal}</td>
+              <td className="px-4 py-3 text-right tabular-nums">
+                {p.jumlah_soal}
+                {p.komposisi?.length > 0 && (
+                  <span className="block text-xs text-samar">
+                    {p.komposisi.map((k) => `${k.mata_pelajaran} ${k.jumlah}`).join(" · ")}
+                  </span>
+                )}
+              </td>
               <td className="px-4 py-3 text-right tabular-nums">{p.durasi_menit}m</td>
               <td className="px-4 py-3 text-right tabular-nums">{p.nilai_minimum}</td>
               <td className="px-4 py-3 text-right text-xs tabular-nums">
@@ -252,14 +284,27 @@ export default function HalamanUjian() {
               ubah={(v) => setIsi((s) => ({ ...s, nilai_minimum: Number(v) || 0 }))}
               galat={galatKolom.nilai_minimum}
             />
-            <Teks
-              nama="jumlah_soal"
-              label="Jumlah soal per peserta"
-              tipe="number"
-              nilai={String(isi.jumlah_soal)}
-              ubah={(v) => setIsi((s) => ({ ...s, jumlah_soal: Number(v) || 0 }))}
-              galat={galatKolom.jumlah_soal}
-            />
+            {pakaiKomposisi ? (
+              <div>
+                <p className="mb-1.5 text-sm font-semibold">Jumlah soal per peserta</p>
+                <p className="rounded-lg border border-garis bg-slate-50 px-4 py-2.5 font-bold tabular-nums">
+                  {totalKomposisi}
+                  <span className="ml-2 text-xs font-normal text-samar">
+                    dihitung dari komposisi
+                  </span>
+                </p>
+              </div>
+            ) : (
+              <Teks
+                nama="jumlah_soal"
+                label="Jumlah soal per peserta"
+                tipe="number"
+                nilai={String(isi.jumlah_soal)}
+                ubah={(v) => setIsi((s) => ({ ...s, jumlah_soal: Number(v) || 0 }))}
+                galat={galatKolom.jumlah_soal}
+                bantuan="Diambil acak dari semua mata pelajaran. Isi komposisi di bawah agar jumlahnya per mata pelajaran."
+              />
+            )}
             <Teks
               nama="durasi_menit"
               label="Lama pengerjaan (menit)"
@@ -286,6 +331,74 @@ export default function HalamanUjian() {
               galat={galatKolom.selesai}
             />
           </div>
+
+          <fieldset className="rounded-lg border border-garis p-4">
+            <legend className="px-1 text-sm font-semibold">Komposisi per mata pelajaran</legend>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs text-samar">
+                Isi 0 untuk mata pelajaran yang tidak diujikan. Soal dikelompokkan
+                per mata pelajaran dan diacak di dalam kelompoknya.
+              </p>
+              <div className="flex gap-2">
+                <Tombol
+                  type="button"
+                  jenis="halus"
+                  onClick={() =>
+                    setIsi((s) => ({
+                      ...s,
+                      komposisi: { ...SARAN },
+                      durasi_menit: s.durasi_menit < 90 ? 90 : s.durasi_menit,
+                    }))
+                  }
+                >
+                  Pakai saran 50 soal
+                </Tombol>
+                {pakaiKomposisi && (
+                  <Tombol
+                    type="button"
+                    jenis="halus"
+                    onClick={() => setIsi((s) => ({ ...s, komposisi: {} }))}
+                  >
+                    Kosongkan
+                  </Tombol>
+                )}
+              </div>
+            </div>
+            <div className="grid gap-x-5 gap-y-2 sm:grid-cols-2">
+              {mapelBaku.map((m) => {
+                const n = isi.komposisi[m] ?? 0;
+                const kurang = n > (stok[m] ?? 0);
+                return (
+                  <label key={m} className="flex items-center justify-between gap-3 text-sm">
+                    <span>
+                      {m}
+                      <span
+                        className={`block text-xs ${kurang ? "font-semibold text-red-700" : "text-samar"}`}
+                      >
+                        {stok[m] ?? 0} soal aktif di bank soal
+                      </span>
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={200}
+                      value={n || ""}
+                      placeholder="0"
+                      onChange={(e) => {
+                        const v = Math.max(0, Number(e.target.value) || 0);
+                        setIsi((s) => ({ ...s, komposisi: { ...s.komposisi, [m]: v } }));
+                      }}
+                      className={`w-20 rounded-lg border px-3 py-1.5 text-right tabular-nums ${kurang ? "border-red-300 bg-red-50" : "border-garis"}`}
+                      aria-label={`Jumlah soal ${m}`}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+            {galatKolom.komposisi && (
+              <p className="mt-3 text-sm text-red-700">{galatKolom.komposisi}</p>
+            )}
+          </fieldset>
 
           <AreaTeks
             nama="keterangan"
@@ -376,7 +489,17 @@ function HasilPaket({
             dari {data.data.length} peserta memenuhi nilai minimum{" "}
             {data.nilai_minimum}.
           </p>
-          <Tabel kepala={["No. registrasi", "Nama", "Peminatan", "Benar", "Nilai", "Keadaan"]}>
+          <Tabel
+            kepala={[
+              "No. registrasi",
+              "Nama",
+              "Peminatan",
+              ...(data.mapel ?? []),
+              "Benar",
+              "Nilai",
+              "Keadaan",
+            ]}
+          >
             {data.data.map((h) => (
               <tr key={h.sesi_id} className="hover:bg-slate-50">
                 <td className="px-4 py-3 font-semibold whitespace-nowrap">
@@ -384,6 +507,23 @@ function HasilPaket({
                 </td>
                 <td className="px-4 py-3">{h.nama_lengkap}</td>
                 <td className="px-4 py-3 text-xs text-samar">{h.nama_jurusan}</td>
+                {(data.mapel ?? []).map((m) => {
+                  const n = h.per_mapel?.find((x) => x.mata_pelajaran === m);
+                  return (
+                    <td key={m} className="px-4 py-3 text-right tabular-nums">
+                      {n ? (
+                        <>
+                          {n.skor.toFixed(0)}
+                          <span className="block text-xs text-samar">
+                            {n.benar}/{n.soal}
+                          </span>
+                        </>
+                      ) : (
+                        "–"
+                      )}
+                    </td>
+                  );
+                })}
                 <td className="px-4 py-3 text-right tabular-nums">
                   {h.jumlah_benar}/{h.jumlah_soal}
                 </td>

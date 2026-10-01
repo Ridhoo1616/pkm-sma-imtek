@@ -355,6 +355,13 @@ export interface PaketUjian {
   aktif: boolean;
   jumlah_peserta: number;
   jumlah_selesai: number;
+  /** Kosong berarti soal diambil acak dari seluruh mata pelajaran. */
+  komposisi: KomposisiMapel[];
+}
+
+export interface KomposisiMapel {
+  mata_pelajaran: string;
+  jumlah: number;
 }
 
 /** Satu soal seperti yang dilihat peserta. Kunci jawabannya tidak ada di sini

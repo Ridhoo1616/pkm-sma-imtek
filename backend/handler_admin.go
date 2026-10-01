@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -242,7 +243,10 @@ var urutanDiizinkan = map[string]string{
 	"no_registrasi": "p.no_registrasi ASC",
 }
 
-func (a *Aplikasi) ambilPendaftar(f penyaringPendaftar, semuaTahun bool) (hasilPendaftar, error) {
+// syaratPendaftar menyusun bagian WHERE dari penyaring. Dipakai bersama oleh
+// daftar pendaftar dan ekspor CSV supaya isi berkas selalu sama dengan daftar
+// yang sedang disaring di layar.
+func syaratPendaftar(f penyaringPendaftar, semuaTahun bool) (string, []any, *penomoran) {
 	n := &penomoran{}
 	syarat := []string{"1 = 1"}
 	arg := []any{}
@@ -275,8 +279,11 @@ func (a *Aplikasi) ambilPendaftar(f penyaringPendaftar, semuaTahun bool) (hasilP
 		pola := "%" + cari + "%"
 		arg = append(arg, pola, pola, pola, pola)
 	}
-	dimana := " WHERE " + strings.Join(syarat, " AND ")
+	return " WHERE " + strings.Join(syarat, " AND "), arg, n
+}
 
+func (a *Aplikasi) ambilPendaftar(f penyaringPendaftar, semuaTahun bool) (hasilPendaftar, error) {
+	dimana, arg, n := syaratPendaftar(f, semuaTahun)
 	hasil := hasilPendaftar{Halaman: f.Halaman, PerHalaman: f.PerHalaman, Data: []RingkasPendaftar{}}
 	if err := a.db.QueryRow(
 		"SELECT COUNT(*) FROM pendaftar p"+dimana, arg...).Scan(&hasil.Total); err != nil {
@@ -600,21 +607,117 @@ func (a *Aplikasi) tanganiHapusPendaftar(w http.ResponseWriter, r *http.Request)
 
 /* ================= ekspor CSV ================= */
 
-// tanganiEksporPendaftar mengirim berkas CSV agar data dapat dibuka di Excel
-// atau LibreOffice untuk keperluan laporan sekolah.
+// kolomEkspor satu kolom berkas CSV: judulnya dan ungkapan SQL yang selalu
+// menghasilkan teks. angka menandai nomor yang wajib tetap teks di Excel
+// (NISN, NIK, nomor HP) supaya nol di depannya tidak hilang dan nomor
+// panjang tidak berubah menjadi 8,12E+11.
+type kolomEkspor struct {
+	judul string
+	sql   string
+	angka bool
+}
+
+var daftarKolomEkspor = []kolomEkspor{
+	{"No. Registrasi", "p.no_registrasi", false},
+	{"Tahun Ajaran", "p.tahun_ajaran", false},
+	{"Jalur", "p.jalur", false},
+	{"Peminatan", "COALESCE(j.nama, '')", false},
+	{"Status", "p.status", false},
+	{"Nama Lengkap", "p.nama_lengkap", false},
+	{"NISN", "COALESCE(p.nisn, '')", true},
+	{"NIK", "COALESCE(p.nik, '')", true},
+	{"Jenis Kelamin", "CASE WHEN p.jenis_kelamin = 'P' THEN 'Perempuan' ELSE 'Laki-laki' END", false},
+	{"Tempat Lahir", "p.tempat_lahir", false},
+	{"Tanggal Lahir", "to_char(p.tanggal_lahir, 'DD/MM/YYYY')", false},
+	{"Agama", "p.agama", false},
+	{"Anak Ke", "COALESCE(p.anak_ke, '')", false},
+	{"Jumlah Saudara", "COALESCE(p.jumlah_saudara, '')", false},
+	{"Alamat", "p.alamat", false},
+	{"Kelurahan/Desa", "COALESCE(p.kelurahan, '')", false},
+	{"Kecamatan", "COALESCE(p.kecamatan, '')", false},
+	{"Kabupaten/Kota", "COALESCE(p.kota, '')", false},
+	{"Provinsi", "COALESCE(p.provinsi, '')", false},
+	{"Kode Pos", "COALESCE(p.kode_pos, '')", true},
+	{"No. HP Siswa", "p.no_hp", true},
+	{"Email", "COALESCE(p.email, '')", false},
+	{"Asal Sekolah", "p.asal_sekolah", false},
+	{"NPSN Asal Sekolah", "COALESCE(p.npsn_sekolah, '')", true},
+	{"Tahun Lulus", "COALESCE(p.tahun_lulus, '')", false},
+	{"Nilai Rata-rata", "COALESCE(replace(p.nilai_rata2::text, '.', ','), '')", false},
+	{"Nama Ayah", "p.nama_ayah", false},
+	{"Pekerjaan Ayah", "COALESCE(p.pekerjaan_ayah, '')", false},
+	{"Pendidikan Ayah", "COALESCE(p.pendidikan_ayah, '')", false},
+	{"Nama Ibu", "p.nama_ibu", false},
+	{"Pekerjaan Ibu", "COALESCE(p.pekerjaan_ibu, '')", false},
+	{"Pendidikan Ibu", "COALESCE(p.pendidikan_ibu, '')", false},
+	{"Penghasilan Orang Tua", "COALESCE(p.penghasilan, '')", false},
+	{"No. HP Orang Tua", "COALESCE(p.no_hp_ortu, '')", true},
+	{"Nama Wali", "COALESCE(p.nama_wali, '')", false},
+	{"Sumber Informasi", "COALESCE(p.sumber_informasi, '')", false},
+	{"Keterangan Sumber", "COALESCE(p.catatan_sumber, '')", false},
+	{"Catatan Panitia", "COALESCE(p.catatan_admin, '')", false},
+	{"Waktu Mendaftar", "to_char(p.created_at, 'DD/MM/YYYY HH24:MI')", false},
+}
+
+// selAngka membungkus nomor menjadi ="0812..." sehingga Excel menyimpannya
+// sebagai teks. Hanya dipakai bila isinya benar-benar angka.
+func selAngka(isi string) string {
+	if isi == "" {
+		return ""
+	}
+	for _, c := range isi {
+		if (c < '0' || c > '9') && c != '+' {
+			return selAman(isi)
+		}
+	}
+	return `="` + isi + `"`
+}
+
+// selAman mencegah isian pendaftar dijalankan sebagai rumus saat berkas
+// dibuka di Excel (misalnya nama yang diawali "=HYPERLINK(").
+func selAman(isi string) string {
+	if isi != "" && strings.ContainsRune("=+-@\t\r", rune(isi[0])) {
+		return "'" + isi
+	}
+	return isi
+}
+
+// tanganiEksporPendaftar mengirim seluruh data pendaftar yang sedang disaring
+// sebagai CSV untuk Excel atau LibreOffice. Pemisahnya titik koma dan desimal
+// memakai koma karena begitulah Excel berbahasa Indonesia membacanya; dengan
+// koma, seluruh baris masuk ke satu kolom.
 func (a *Aplikasi) tanganiEksporPendaftar(w http.ResponseWriter, r *http.Request) {
 	f := a.penyaringDariKueri(r)
-	f.Halaman, f.PerHalaman = 1, 5000
 	semua := r.URL.Query().Get("tahun_ajaran") == "semua"
+	dimana, arg, _ := syaratPendaftar(f, semua)
 
-	hasil, err := a.ambilPendaftar(f, semua)
+	urut, ada := urutanDiizinkan[f.Urut]
+	if !ada {
+		urut = urutanDiizinkan["terlama"]
+	}
+
+	ungkapan := make([]string, len(daftarKolomEkspor))
+	judul := make([]string, 0, len(daftarKolomEkspor)+1)
+	judul = append(judul, "No.")
+	for i, k := range daftarKolomEkspor {
+		ungkapan[i] = k.sql
+		judul = append(judul, k.judul)
+	}
+
+	baris, err := a.db.Query("SELECT "+strings.Join(ungkapan, ", ")+
+		" FROM pendaftar p LEFT JOIN jurusan j ON j.id = p.jurusan_id"+dimana+
+		" ORDER BY "+urut, arg...)
 	if err != nil {
 		a.galatServer(w, "mengambil data untuk ekspor", err)
 		return
 	}
+	defer baris.Close()
 
-	namaBerkas := fmt.Sprintf("pendaftar-%s-%s.csv",
-		strings.ReplaceAll(f.TahunAjaran, "/", "-"), time.Now().Format("20060102"))
+	label := "semua-tahun"
+	if !semua {
+		label = strings.ReplaceAll(f.TahunAjaran, "/", "-")
+	}
+	namaBerkas := fmt.Sprintf("pendaftar-%s-%s.csv", label, time.Now().Format("20060102"))
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	w.Header().Set("Content-Disposition", `attachment; filename="`+namaBerkas+`"`)
 
@@ -622,27 +725,34 @@ func (a *Aplikasi) tanganiEksporPendaftar(w http.ResponseWriter, r *http.Request
 	w.Write([]byte{0xEF, 0xBB, 0xBF})
 
 	tulis := csv.NewWriter(w)
+	tulis.Comma = ';'
+	tulis.UseCRLF = true
 	defer tulis.Flush()
+	tulis.Write(judul)
 
-	tulis.Write([]string{
-		"No. Registrasi", "Tahun Ajaran", "Jalur", "Peminatan", "Nama Lengkap", "NISN",
-		"Jenis Kelamin", "Tanggal Lahir", "Asal Sekolah", "No. HP", "Email",
-		"Nilai Rata-rata", "Sumber Informasi", "Status", "Waktu Mendaftar",
-	})
-	for _, p := range hasil.Data {
-		nilai := ""
-		if p.NilaiRata2 != nil {
-			nilai = strconv.FormatFloat(*p.NilaiRata2, 'f', 2, 64)
+	isi := make([]string, len(daftarKolomEkspor))
+	tujuan := make([]any, len(isi))
+	for i := range isi {
+		tujuan[i] = &isi[i]
+	}
+	for no := 1; baris.Next(); no++ {
+		if err := baris.Scan(tujuan...); err != nil {
+			log.Printf("ekspor CSV terhenti di baris %d: %v", no, err)
+			return
 		}
-		jk := "Laki-laki"
-		if p.JenisKelamin == "P" {
-			jk = "Perempuan"
+		sel := make([]string, 0, len(isi)+1)
+		sel = append(sel, strconv.Itoa(no))
+		for i, k := range daftarKolomEkspor {
+			if k.angka {
+				sel = append(sel, selAngka(strings.TrimSpace(isi[i])))
+			} else {
+				sel = append(sel, selAman(isi[i]))
+			}
 		}
-		tulis.Write([]string{
-			p.NoRegistrasi, p.TahunAjaran, p.Jalur, p.NamaJurusan, p.NamaLengkap, p.NISN,
-			jk, p.TanggalLahir, p.AsalSekolah, p.NoHP, p.Email,
-			nilai, p.SumberInfo, p.Status, p.Dibuat,
-		})
+		tulis.Write(sel)
+	}
+	if err := baris.Err(); err != nil {
+		log.Printf("ekspor CSV terhenti: %v", err)
 	}
 }
 
