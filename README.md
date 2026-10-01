@@ -77,6 +77,10 @@ frontend-nya dapat dipindah ke layanan lain tanpa menyentuh logika data.
 
 Dibutuhkan **Go 1.24+**, **Node.js 20+**, dan **PostgreSQL 14+**.
 
+Panduan ringkas berbentuk PDF, termasuk susunan tiga porta (situs Astro 3000,
+panel Next 3001, backend 8090) dan cara menyiapkan tes dengan 40 soal latihan:
+**[dokumentasi/panduan-menjalankan.pdf](dokumentasi/panduan-menjalankan.pdf)**.
+
 ```bash
 # 1. Backend
 cd backend

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Panduan Menjalankan Sistem SMA IMTEK</title>
+<!-- Sumber PDF panduan-menjalankan.pdf. Cetak ulang dengan Chrome:
+     "Google Chrome" --headless --no-pdf-header-footer \
+       --print-to-pdf=panduan-menjalankan.pdf panduan-menjalankan.html -->
+<style>
+  @page { size: A4; margin: 18mm 18mm 20mm; }
+  :root { --biru: #0f2a4a; --garis: #d7dde5; --samar: #5b6575; --latar: #f4f6f9; }
+  * { box-sizing: border-box; }
+  body { font: 10.5pt/1.55 "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1c2430; margin: 0; }
+  h1 { font-size: 22pt; color: var(--biru); margin: 0 0 4pt; line-height: 1.2; }
+  h2 { font-size: 14pt; color: var(--biru); margin: 20pt 0 6pt; padding-bottom: 3pt; border-bottom: 1.5pt solid var(--biru); break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 12pt 0 4pt; break-after: avoid; }
+  p, li { margin: 0 0 5pt; }
+  ul, ol { padding-left: 16pt; margin: 0 0 6pt; }
+  code { font: 9pt Menlo, Consolas, monospace; background: var(--latar); padding: 0.5pt 3pt; border-radius: 3pt; }
+  pre { font: 8.8pt/1.5 Menlo, Consolas, monospace; background: #0f1b2b; color: #e6edf5; padding: 8pt 10pt; border-radius: 5pt; margin: 4pt 0 8pt; white-space: pre-wrap; break-inside: avoid; }
+  pre .k { color: #8fb3d9; }
+  table { width: 100%; border-collapse: collapse; margin: 4pt 0 8pt; font-size: 9.6pt; break-inside: avoid; }
+  th, td { border: 0.75pt solid var(--garis); padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { background: var(--latar); }
+  a { color: #1d4f91; text-decoration: none; }
+  .sampul { border-left: 5pt solid var(--biru); padding: 4pt 0 4pt 14pt; margin-bottom: 14pt; }
+  .samar { color: var(--samar); }
+  .kotak { border: 1pt solid var(--garis); background: var(--latar); border-radius: 5pt; padding: 7pt 10pt; margin: 6pt 0 10pt; break-inside: avoid; }
+  .awas { border-color: #e2b4a8; background: #fdf3f0; }
+  .tautan td:first-child { width: 30%; font-weight: 600; }
+  .ganti { break-before: page; }
+</style>
+</head>
+<body>
+
+<div class="sampul">
+  <h1>Panduan Menjalankan Sistem<br>Profil Sekolah &amp; PPDB SMA IMTEK</h1>
+  <p class="samar">PkM Universitas Pamulang · Teknik Informatika · Pembaruan 2 Oktober 2026</p>
+</div>
+
+<h2>1. Tautan</h2>
+<table class="tautan">
+  <tr><td>Kode sumber (GitHub)</td><td><a href="https://github.com/Ridhoo1616/pkm-sma-imtek">github.com/Ridhoo1616/pkm-sma-imtek</a></td></tr>
+  <tr><td>Demo langsung, tanpa memasang apa pun</td><td><a href="https://ridhoo1616.github.io/pkm-sma-imtek/">ridhoo1616.github.io/pkm-sma-imtek</a><br><span class="samar">Panel: tambahkan <code>/admin</code>. Akun demo <code>admin</code> / <code>admin123</code>. Data demo tersimpan di peramban masing-masing.</span></td></tr>
+  <tr><td>Unduh kode (ZIP)</td><td><a href="https://github.com/Ridhoo1616/pkm-sma-imtek/archive/refs/heads/main.zip">github.com/Ridhoo1616/pkm-sma-imtek/archive/refs/heads/main.zip</a></td></tr>
+  <tr><td>40 soal latihan tes</td><td><a href="https://github.com/Ridhoo1616/pkm-sma-imtek/blob/main/frontend/public/templat/latihan-soal-40.csv">frontend/public/templat/latihan-soal-40.csv</a></td></tr>
+</table>
+
+<h2>2. Susunan sistem</h2>
+<p>Sistem terdiri atas tiga program yang berjalan bersamaan, ditambah basis data PostgreSQL.</p>
+<table>
+  <tr><th>Bagian</th><th>Folder</th><th>Porta</th><th>Isi</th></tr>
+  <tr><td>Backend (Go)</td><td><code>backend/</code></td><td>8090</td><td>API JSON, basis data, cetak PDF, tes seleksi</td></tr>
+  <tr><td>Situs sekolah (Astro)</td><td><code>web/</code></td><td>3000</td><td>Seluruh halaman publik dan PPDB. Meneruskan <code>/admin</code> ke panel</td></tr>
+  <tr><td>Panel admin (Next.js)</td><td><code>frontend/</code></td><td>3001</td><td>Panel panitia; dibuka lewat <code>localhost:3000/admin</code></td></tr>
+  <tr><td>PostgreSQL</td><td>–</td><td>5432</td><td>Basis data <code>sma_imtek</code></td></tr>
+</table>
+
+<h2>3. Yang perlu dipasang</h2>
+<table>
+  <tr><th>Perangkat</th><th>Versi</th><th>Unduh</th></tr>
+  <tr><td>Git</td><td>apa saja</td><td><a href="https://git-scm.com/downloads">git-scm.com/downloads</a></td></tr>
+  <tr><td>Go</td><td>1.27 atau lebih baru</td><td><a href="https://go.dev/dl/">go.dev/dl</a></td></tr>
+  <tr><td>Node.js</td><td>20 atau lebih baru</td><td><a href="https://nodejs.org/">nodejs.org</a></td></tr>
+  <tr><td>PostgreSQL</td><td>14 atau lebih baru</td><td><a href="https://www.postgresql.org/download/">postgresql.org/download</a> (Mac: Postgres.app)</td></tr>
+</table>
+<p>Periksa hasil pemasangan di terminal:</p>
+<pre>go version
+node -v
+psql --version</pre>
+
+<h2>4. Mengambil kode</h2>
+<pre>git clone https://github.com/Ridhoo1616/pkm-sma-imtek.git
+cd pkm-sma-imtek</pre>
+<p>Tanpa Git: unduh ZIP dari tautan di bagian 1, lalu ekstrak.</p>
+
+<h2>5. Menyiapkan basis data</h2>
+<p>Cukup membuat basis data dan penggunanya. Tabel dan data awal dibuat otomatis oleh backend saat pertama kali menyala. Jalankan <code>psql -U postgres</code>, lalu:</p>
+<pre>CREATE ROLE ppdb LOGIN PASSWORD 'ganti-dengan-sandi-anda';
+CREATE DATABASE sma_imtek OWNER ppdb ENCODING 'UTF8';</pre>
+
+<h2>6. Menjalankan backend (terminal 1)</h2>
+<pre>cd backend
+cp .env.example .env        <span class="k"># Windows: copy .env.example .env</span></pre>
+<p>Buka <code>backend/.env</code>, lalu isi minimal:</p>
+<pre>DB_USER=ppdb
+DB_PASS=ganti-dengan-sandi-anda
+DB_NAME=sma_imtek
+JWT_SECRET=isi-acak-panjang       <span class="k"># contoh: openssl rand -base64 48</span>
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000</pre>
+<p>Kemudian jalankan:</p>
+<pre>go run .</pre>
+<p>Berhasil bila muncul <code>server berjalan di :8090</code>. Periksa di peramban: <a href="http://localhost:8090/api/sehat">localhost:8090/api/sehat</a> menjawab <code>{"status":"baik"}</code>.</p>
+
+<h2>7. Menjalankan panel admin (terminal 2)</h2>
+<pre>cd frontend
+npm install
+echo NEXT_PUBLIC_API_URL=http://localhost:8090 &gt; .env.local   <span class="k"># Windows: pakai Notepad</span>
+npm run build
+npm run start -- -p 3001</pre>
+<p><code>npm install</code> di folder ini wajib dikerjakan lebih dulu, karena situs Astro di langkah berikutnya ikut memakai kode dan pustaka dari folder <code>frontend</code>.</p>
+
+<h2>8. Menjalankan situs sekolah (terminal 3)</h2>
+<pre>cd web
+npm install
+npm run build</pre>
+<p>Lalu nyalakan dengan alamat backend dan panel admin.</p>
+<p><b>macOS / Linux:</b></p>
+<pre>HOST=localhost PORT=3000 NEXT_PUBLIC_API_URL=http://localhost:8090 \
+SITUS_LAMA=http://localhost:3001 SITUS_LAMA_DITERUSKAN=ya npm run start</pre>
+<p><b>Windows (PowerShell):</b></p>
+<pre>$env:HOST="localhost"; $env:PORT="3000"; $env:NEXT_PUBLIC_API_URL="http://localhost:8090"
+$env:SITUS_LAMA="http://localhost:3001"; $env:SITUS_LAMA_DITERUSKAN="ya"; npm run start</pre>
+
+<div class="kotak">
+  <b>Sudah jalan.</b> Buka <a href="http://localhost:3000">http://localhost:3000</a> untuk situs sekolah dan
+  <a href="http://localhost:3000/admin">http://localhost:3000/admin</a> untuk panel panitia.<br>
+  Akun bawaan: <code>admin</code> / <code>admin123</code>.
+</div>
+<div class="kotak awas">
+  <b>Wajib:</b> segera ganti sandi <code>admin</code> lewat menu <i>Ganti Sandi</i>. Hash sandi bawaan ada di repositori publik, jadi siapa pun yang tahu alamat panel dapat masuk selama sandinya belum diganti.
+</div>
+
+<h3>Untuk pengembangan (kode berubah langsung terlihat)</h3>
+<p>Ganti <code>npm run build</code> + <code>npm run start</code> dengan mode dev:</p>
+<pre>cd frontend &amp;&amp; npm run dev -- -p 3001
+cd web &amp;&amp; npm run dev                  <span class="k"># http://localhost:4321</span></pre>
+<p>Pada mode dev, Astro di porta 4321 dan <code>/admin</code> dialihkan ke <code>localhost:3001/admin</code>. Tambahkan <code>http://localhost:3001</code> ke <code>CORS_ORIGINS</code> di <code>backend/.env</code>, lalu nyalakan ulang backend.</p>
+
+<h2 class="ganti">9. Menyiapkan tes seleksi dengan 40 soal latihan</h2>
+<p>Berkas <code>frontend/public/templat/latihan-soal-40.csv</code> berisi 40 soal pilihan ganda setara SMP, lengkap dengan kunci dan pembahasan. Kunci jawabannya tersebar merata (A sampai E masing-masing 8).</p>
+<table>
+  <tr><th>Mata pelajaran</th><th>Jumlah soal</th></tr>
+  <tr><td>Matematika</td><td>12</td></tr>
+  <tr><td>Bahasa Indonesia</td><td>8</td></tr>
+  <tr><td>Bahasa Inggris</td><td>8</td></tr>
+  <tr><td>IPA</td><td>8</td></tr>
+  <tr><td>IPS</td><td>4</td></tr>
+  <tr><th>Jumlah</th><th>40</th></tr>
+</table>
+<ol>
+  <li><b>Impor soal.</b> Panel → <i>Bank Soal</i> → <i>Impor dari Excel</i>. Tautan <i>40 soal latihan tes</i> di jendela itu mengunduh berkasnya. Pilih berkasnya, lalu kirim. Satu baris yang salah membuat seluruh impor ditolak, dan pesannya menyebutkan nomor barisnya.</li>
+  <li><b>Buat paket ujian.</b> Panel → <i>Tes Seleksi</i> → <i>Tambah Paket Ujian</i>. Isi nama, tahun ajaran, nilai minimum, lama pengerjaan (saran: 60 menit), serta jadwal dibuka dan ditutup. Pada <i>Komposisi per mata pelajaran</i> isi 12 / 8 / 8 / 8 / 4 seperti tabel di atas.</li>
+  <li><b>Aktifkan paket</b>, lalu pada menu <i>Pengaturan</i> setel <code>ujian_aktif</code> menjadi <code>1</code>.</li>
+  <li><b>Peserta mengerjakan</b> lewat halaman <i>Cek Status</i> setelah berkas pendaftarannya diverifikasi panitia.</li>
+</ol>
+<p>Hal yang perlu diketahui: waktu dihitung server (memuat ulang halaman tidak menambah waktu), jawaban tersimpan satu per satu, soal diacak di dalam kelompok mata pelajarannya, kunci jawaban tidak pernah dikirim ke peramban peserta, dan hasilnya dapat dilihat per mata pelajaran.</p>
+
+<h2>10. Bila ada masalah</h2>
+<table>
+  <tr><th>Gejala</th><th>Penyebab yang paling sering</th></tr>
+  <tr><td><code>basis data tidak merespons</code> saat backend menyala</td><td>PostgreSQL belum jalan, atau <code>DB_USER</code>/<code>DB_PASS</code>/<code>DB_NAME</code> di <code>.env</code> salah</td></tr>
+  <tr><td><code>SSL is not enabled on the server</code></td><td>Setel <code>DB_SSLMODE=disable</code> di <code>backend/.env</code></td></tr>
+  <tr><td>Halaman tampil, tetapi data kosong</td><td>Backend mati, atau <code>NEXT_PUBLIC_API_URL</code> salah</td></tr>
+  <tr><td>Formulir gagal: "tidak dapat menghubungi server"</td><td>Alamat situs belum ada di <code>CORS_ORIGINS</code>. <code>localhost</code> dan <code>127.0.0.1</code> dihitung berbeda</td></tr>
+  <tr><td><code>/admin</code> tidak terbuka</td><td>Panel Next (porta 3001) belum menyala, atau <code>SITUS_LAMA</code> tidak menunjuk ke sana</td></tr>
+  <tr><td><code>port already in use</code></td><td>Program lama masih berjalan. Tutup terminalnya, atau hentikan prosesnya</td></tr>
+  <tr><td><code>JWT_SECRET wajib diisi</code></td><td>Isi <code>JWT_SECRET</code> dengan nilai acak</td></tr>
+</table>
+<p>Panduan lengkap, termasuk pemasangan di server sungguhan dan pencadangan data, ada di <code>PANDUAN-INSTALASI.md</code> dan <code>deploy/README.md</code> di repositori.</p>
+
+</body>
+</html>
