@@ -6,7 +6,7 @@
 /Contents 4 0 R>>
 endobj
 4 0 obj
-<</Length 8825>>
+<</Length 8839>>
 stream
 0 J
 0 j
@@ -21,7 +21,7 @@ q 0.071 0.314 0.561 rg BT 190.68 788.20 Td (KARTU PESERTA TES SELEKSI) Tj ET Q
 BT /Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 11.00 Tf ET
 BT /Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 11.00 Tf ET
 BT /Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 11.00 Tf ET
-BT 266.78 745.85 Td (SMA IMTEK) Tj ET
+BT 246.30 745.85 Td (SMA Swasta IMTEK) Tj ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 8.00 Tf ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 8.00 Tf ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 8.00 Tf ET
@@ -171,7 +171,7 @@ q 0.420 0.447 0.502 rg BT 128.00 157.41 Td (Kartu ini wajib dibawa saat tes sele
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 6.00 Tf ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 6.00 Tf ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 6.00 Tf ET
-q 0.420 0.447 0.502 rg BT 224.45 144.24 Td (Dicetak 2 Oktober 2026 dari sistem PPDB SMA IMTEK) Tj ET Q
+q 0.420 0.447 0.502 rg BT 213.78 144.24 Td (Dicetak 2 Oktober 2026 dari sistem PPDB SMA Swasta IMTEK) Tj ET Q
 
 endstream
 endobj
@@ -184,14 +184,14 @@ endobj
 endobj
 5 0 obj
 <</Type /Font
-/BaseFont /Helvetica-Bold
+/BaseFont /Helvetica
 /Subtype /Type1
 /Encoding /WinAnsiEncoding
 >>
 endobj
 6 0 obj
 <</Type /Font
-/BaseFont /Helvetica
+/BaseFont /Helvetica-Bold
 /Subtype /Type1
 /Encoding /WinAnsiEncoding
 >>
@@ -241,8 +241,8 @@ endobj
 <<
 /ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
 /Font <<
-/F0a76705d18e0494dd24cb573e53aa0a8c710ec99 6 0 R
-/Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 5 0 R
+/F0a76705d18e0494dd24cb573e53aa0a8c710ec99 5 0 R
+/Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 6 0 R
 >>
 /XObject <<
 /I3feae9321ad3d4a74e8545302f69d8f20ab91d3f 7 0 R
@@ -255,8 +255,8 @@ endobj
 11 0 obj
 <<
 /Producer (þÿ F P D F   1 . 7)
-/CreationDate (D:20261002081307)
-/ModDate (D:20261002081307)
+/CreationDate (D:20261002170850)
+/ModDate (D:20261002170850)
 >>
 endobj
 12 0 obj
@@ -273,18 +273,18 @@ endobj
 xref
 0 13
 0000000000 65535 f 
-0000008962 00000 n 
-0000011610 00000 n 
+0000008976 00000 n 
+0000011624 00000 n 
 0000000009 00000 n 
 0000000087 00000 n 
-0000009049 00000 n 
-0000009150 00000 n 
-0000009246 00000 n 
-0000009603 00000 n 
-0000010420 00000 n 
-0000010792 00000 n 
-0000011918 00000 n 
-0000012032 00000 n 
+0000009063 00000 n 
+0000009159 00000 n 
+0000009260 00000 n 
+0000009617 00000 n 
+0000010434 00000 n 
+0000010806 00000 n 
+0000011932 00000 n 
+0000012046 00000 n 
 trailer
 <<
 /Size 13
@@ -292,5 +292,5 @@ trailer
 /Info 11 0 R
 >>
 startxref
-12130
+12144
 %%EOF

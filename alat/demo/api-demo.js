@@ -16,8 +16,8 @@
 (() => {
   "use strict";
   const DASAR = globalThis.__DASAR_DEMO || "";
-  const KUNCI = "demo_pkm_v6";
-  const KUNCI_GAMBAR = "demo_pkm_v6_gambar";
+  const KUNCI = "demo_pkm_v7";
+  const KUNCI_GAMBAR = "demo_pkm_v7_gambar";
 
   // GitHub Pages menyajikan /admin/masuk sebagai /admin/masuk/ (folder berisi
   // index.html). Aplikasinya dirender untuk jalur tanpa garis miring akhir,
@@ -62,6 +62,9 @@
       notifikasi: a["/api/admin/notifikasi"].data,
       "tanya-buntu": a["/api/admin/tanya-buntu"].data,
       sekolah: a["/api/admin/sekolah"].data,
+      "bkk-mitra": (a["/api/admin/bkk/mitra"] || { data: [] }).data,
+      "bkk-lowongan": (a["/api/admin/bkk/lowongan"] || { data: [] }).data,
+      "bkk-lamaran": (a["/api/admin/bkk/lamaran"] || { data: [] }).data,
     };
     const pendaftar = {};
     for (const [id, r] of Object.entries(D.detail.pendaftar)) pendaftar[id] = r.data;
@@ -1460,6 +1463,244 @@
     di("PUT", `/api/admin/${nama}/{id}`, async ({ kepala, p, badan }) => (pengguna(kepala, cfg.admin), ubahUmum(nama, Number(p.id), badan)));
     di("DELETE", `/api/admin/${nama}/{id}`, ({ kepala, p }) => hapusUmum(nama, Number(p.id), pengguna(kepala, cfg.admin)));
   }
+
+  /* ---------- Bursa Kerja Khusus, sama dengan backend/bkk.go ---------- */
+
+  const STATUS_LAMARAN = ["Diajukan", "Diteruskan", "Wawancara", "Diterima", "Ditolak"];
+  const JENIS_LOWONGAN = ["Penuh Waktu", "Kontrak", "Paruh Waktu", "Magang"];
+  const mitraDari = (id) => kol("bkk-mitra").find((m) => m.id === id);
+  const lowonganDibuka = (l) => {
+    const m = mitraDari(l.mitra_id);
+    return l.status === "buka" && !!m && m.aktif && (!l.batas_lamar || l.batas_lamar >= hariIni());
+  };
+  function lowonganLengkap(l) {
+    const m = mitraDari(l.mitra_id) || {};
+    const lamaran = kol("bkk-lamaran").filter((s) => s.lowongan_id === l.id);
+    return {
+      ...l, nama_mitra: m.nama || "", logo_mitra: m.logo || "", bidang_mitra: m.bidang || "",
+      dibuka: lowonganDibuka(l), jumlah_pelamar: lamaran.length, diterima: lamaran.filter((s) => s.status === "Diterima").length,
+    };
+  }
+  function mitraLengkap(m) {
+    const lowongan = kol("bkk-lowongan").filter((l) => l.mitra_id === m.id);
+    const ids = new Set(lowongan.map((l) => l.id));
+    return {
+      ...m, lowongan_dibuka: lowongan.filter(lowonganDibuka).length, jumlah_lowongan: lowongan.length,
+      tersalurkan: kol("bkk-lamaran").filter((s) => ids.has(s.lowongan_id) && s.status === "Diterima").length,
+    };
+  }
+  const urutLowongan = (d) =>
+    [...d].sort((a, b) => Number(b.dibuka) - Number(a.dibuka) || String(a.batas_lamar || "9999").localeCompare(String(b.batas_lamar || "9999")) || b.id - a.id);
+  function isianTeks(badan) {
+    const isi = {};
+    if (badan instanceof FormData) {
+      for (const [k, v] of badan.entries()) if (!(v instanceof File)) isi[k] = String(v).trim();
+    } else for (const [k, v] of Object.entries(badan || {})) isi[k] = typeof v === "string" ? v.trim() : v;
+    return isi;
+  }
+  function periksaLamaran(isi) {
+    const k = {};
+    if (!(Number(isi.lowongan_id) > 0)) k.lowongan_id = "Pilih lowongan yang dilamar.";
+    if (!isi.nama) k.nama = "Nama lengkap wajib diisi.";
+    if (!isi.tanggal_lahir) k.tanggal_lahir = "Tanggal lahir wajib diisi.";
+    if (!isi.nisn) k.nisn = "NISN wajib diisi.";
+    else if (!/^\d{10}$/.test(isi.nisn)) k.nisn = `NISN harus 10 angka, yang Anda tulis ${isi.nisn.length} angka.`;
+    else if (isi.tanggal_lahir && isi.nisn.slice(0, 3) !== isi.tanggal_lahir.slice(1, 4)) {
+      k.nisn = `Tiga angka pertama NISN harus sama dengan tiga angka terakhir tahun lahir, yaitu ${isi.tanggal_lahir.slice(1, 4)}.`;
+    }
+    if (!["L", "P"].includes(String(isi.jenis_kelamin || "").toUpperCase())) k.jenis_kelamin = "Jenis kelamin wajib dipilih.";
+    const th = Number(isi.tahun_lulus);
+    if (!isi.tahun_lulus) k.tahun_lulus = "Tahun lulus wajib diisi.";
+    else if (!(th >= 1990 && th <= new Date().getFullYear() + 1)) k.tahun_lulus = `Tahun lulus harus berupa angka 1990 sampai ${new Date().getFullYear() + 1}.`;
+    if (!isi.telepon) k.telepon = "Nomor HP/WhatsApp wajib diisi.";
+    else if (!/^[0-9+\-\s()]{9,25}$/.test(isi.telepon)) k.telepon = "Nomor HP/WhatsApp tidak valid (gunakan 9-15 angka).";
+    return k;
+  }
+  function catatLamaran(isi, cv, sumber) {
+    const daftar = kol("bkk-lamaran");
+    if (daftar.some((s) => s.lowongan_id === Number(isi.lowongan_id) && s.nisn === isi.nisn)) {
+      galat(409, "NISN ini sudah tercatat melamar lowongan yang sama. Pantau lamarannya di halaman Cek Lamaran.");
+    }
+    const l = kol("bkk-lowongan").find((x) => x.id === Number(isi.lowongan_id)) || tidakAda("Lowongan");
+    const id = idBaru(daftar);
+    const kode = `BKK-${String(new Date().getFullYear()).slice(2)}-${String(id).padStart(4, "0")}`;
+    const w = waktuSetempat(sekarang());
+    daftar.push({
+      id, kode, lowongan_id: l.id, posisi: l.posisi, nama_mitra: (mitraDari(l.mitra_id) || {}).nama || "",
+      nama: isi.nama, nisn: isi.nisn, tanggal_lahir: isi.tanggal_lahir, jenis_kelamin: String(isi.jenis_kelamin).toUpperCase(),
+      tahun_lulus: Number(isi.tahun_lulus), telepon: isi.telepon, email: isi.email || "", alamat: isi.alamat || "",
+      ringkasan: isi.ringkasan || "", cv, status: "Diajukan", catatan: "", sumber, dibuat: w, diubah: w,
+    });
+    return kode;
+  }
+
+  // --- publik ---
+  di("GET", "/api/bkk/lowongan", () => {
+    const d = urutLowongan(kol("bkk-lowongan").filter(lowonganDibuka)).map((l) => ({ ...lowonganLengkap(l), jumlah_pelamar: 0, diterima: 0 }));
+    return {
+      data: d,
+      angka: { mitra: kol("bkk-mitra").filter((m) => m.aktif).length, lowongan_dibuka: d.length, tersalurkan: kol("bkk-lamaran").filter((s) => s.status === "Diterima").length },
+    };
+  });
+  di("GET", "/api/bkk/lowongan/{id}", ({ p }) => {
+    const l = kol("bkk-lowongan").find((x) => x.id === Number(p.id));
+    if (!l || l.status === "draf") tidakAda("Lowongan");
+    return { ...lowonganLengkap(l), jumlah_pelamar: 0, diterima: 0 };
+  });
+  di("GET", "/api/bkk/mitra", () => ({
+    data: kol("bkk-mitra").filter((m) => m.aktif).map(mitraLengkap)
+      .map(({ kontak_nama, kontak_telepon, kontak_email, ...m }) => ({ ...m, jumlah_lowongan: 0 })),
+  }));
+  di("POST", "/api/bkk/lamar", async ({ badan }) => {
+    const isi = isianTeks(badan);
+    const k = periksaLamaran(isi);
+    if (isi.setuju !== "1") k.setuju = "Centang pernyataan bahwa data yang diisi benar dan boleh diteruskan ke perusahaan.";
+    const l = kol("bkk-lowongan").find((x) => x.id === Number(isi.lowongan_id));
+    if (l && !lowonganDibuka(l)) galat(409, "Lowongan ini sudah tidak menerima lamaran.");
+    if (Object.keys(k).length) galat(422, "Data yang dikirim belum benar.", k);
+    const berkas = badan instanceof FormData ? badan.get("cv") : null;
+    const cv = berkas instanceof File && berkas.size ? await simpanBerkas(berkas, "bkk-cv") : "";
+    const kode = catatLamaran(isi, cv, "daring");
+    return [201, { pesan: "Lamaran terkirim. Petugas BKK akan memeriksanya sebelum diteruskan ke perusahaan.", kode }];
+  });
+  di("POST", "/api/bkk/cek", ({ badan }) => {
+    const nisn = String(badan.nisn || "").replace(/\s/g, "");
+    const k = {};
+    if (!nisn) k.nisn = "NISN wajib diisi.";
+    if (!badan.tanggal_lahir) k.tanggal_lahir = "Tanggal lahir wajib diisi.";
+    if (Object.keys(k).length) galat(422, "Data yang dikirim belum benar.", k);
+    const d = kol("bkk-lamaran").filter((s) => s.nisn === nisn && String(s.tanggal_lahir).slice(0, 10) === badan.tanggal_lahir);
+    if (!d.length) galat(404, "Lamaran tidak ditemukan. Periksa kembali NISN dan tanggal lahir yang Anda pakai saat melamar.");
+    return {
+      data: [...d].sort((a, b) => b.id - a.id).map((s) => ({
+        kode: s.kode, nama: s.nama, posisi: s.posisi, nama_mitra: s.nama_mitra, status: s.status, catatan: s.catatan,
+        dibuat: String(s.dibuat).slice(0, 10), diubah: String(s.diubah).slice(0, 10),
+      })),
+    };
+  });
+
+  // --- panel ---
+  di("GET", "/api/admin/bkk/mitra", ({ kepala }) => (pengguna(kepala), { data: kol("bkk-mitra").map(mitraLengkap) }));
+  const simpanMitra = async (badan, lama) => {
+    const isi = isianTeks(badan);
+    const k = {};
+    if (!isi.nama) k.nama = "Nama perusahaan wajib diisi.";
+    if (isi.situs && !/^https?:\/\//.test(isi.situs)) k.situs = "Situs perusahaan harus dimulai dengan http:// atau https://.";
+    if (Object.keys(k).length) galat(422, "Data yang dikirim belum benar.", k);
+    const berkas = badan instanceof FormData ? badan.get("logo") : null;
+    let logo = lama ? lama.logo : "";
+    if (berkas instanceof File && berkas.size) logo = await simpanBerkas(berkas, "bkk-mitra");
+    else if (isi.hapus_logo === "1") logo = "";
+    return {
+      nama: isi.nama, bidang: isi.bidang || "", alamat: isi.alamat || "", kontak_nama: isi.kontak_nama || "",
+      kontak_telepon: isi.kontak_telepon || "", kontak_email: isi.kontak_email || "", situs: isi.situs || "", logo, aktif: isi.aktif === "1",
+    };
+  };
+  di("POST", "/api/admin/bkk/mitra", async ({ kepala, badan }) => {
+    pengguna(kepala);
+    const m = { id: idBaru(kol("bkk-mitra")), ...(await simpanMitra(badan)) };
+    kol("bkk-mitra").push(m);
+    return [201, { pesan: "Mitra berhasil ditambahkan.", id: m.id }];
+  });
+  di("PUT", "/api/admin/bkk/mitra/{id}", async ({ kepala, p, badan }) => {
+    pengguna(kepala);
+    const m = kol("bkk-mitra").find((x) => x.id === Number(p.id)) || tidakAda("Mitra");
+    Object.assign(m, await simpanMitra(badan, m));
+    return { pesan: "Mitra berhasil diperbarui." };
+  });
+  di("DELETE", "/api/admin/bkk/mitra/{id}", ({ kepala, p }) => {
+    pengguna(kepala, true);
+    const i = kol("bkk-mitra").findIndex((x) => x.id === Number(p.id));
+    if (i < 0) tidakAda("Mitra");
+    if (kol("bkk-lowongan").some((l) => l.mitra_id === Number(p.id))) {
+      galat(409, "Mitra ini sudah pernah membuka lowongan, jadi tidak dapat dihapus tanpa menghapus riwayat penyalurannya. Nonaktifkan saja mitranya.");
+    }
+    kol("bkk-mitra").splice(i, 1);
+    return { pesan: "Mitra berhasil dihapus." };
+  });
+
+  di("GET", "/api/admin/bkk/lowongan", ({ kepala }) => (
+    pengguna(kepala), { data: urutLowongan(kol("bkk-lowongan")).map(lowonganLengkap), jenis: JENIS_LOWONGAN, status: ["draf", "buka", "tutup"] }
+  ));
+  const periksaLowongan = (isi) => {
+    const k = {};
+    if (!mitraDari(Number(isi.mitra_id))) k.mitra_id = "Pilih perusahaan mitra yang membuka lowongan ini.";
+    if (!isi.posisi) k.posisi = "Posisi wajib diisi.";
+    if (isi.jenis && !JENIS_LOWONGAN.includes(isi.jenis)) k.jenis = "Jenis pekerjaan tidak valid.";
+    if (isi.kuota !== "" && isi.kuota != null && !(Number(isi.kuota) >= 1 && Number(isi.kuota) <= 10000)) k.kuota = "Jumlah yang dibutuhkan harus berupa angka 1 sampai 10000.";
+    if (Object.keys(k).length) galat(422, "Data yang dikirim belum benar.", k);
+    return {
+      mitra_id: Number(isi.mitra_id), posisi: isi.posisi, jenis: isi.jenis || "Penuh Waktu", lokasi: isi.lokasi || "",
+      deskripsi: isi.deskripsi || "", kualifikasi: isi.kualifikasi || "", gaji: isi.gaji || "",
+      kuota: isi.kuota ? Number(isi.kuota) : null, batas_lamar: isi.batas_lamar || null, status: isi.status || "draf",
+    };
+  };
+  di("POST", "/api/admin/bkk/lowongan", ({ kepala, badan }) => {
+    pengguna(kepala);
+    const l = { id: idBaru(kol("bkk-lowongan")), ...periksaLowongan(isianTeks(badan)), dibuat: hariIni() };
+    kol("bkk-lowongan").push(l);
+    return [201, { pesan: "Lowongan berhasil disimpan.", id: l.id }];
+  });
+  di("PUT", "/api/admin/bkk/lowongan/{id}", ({ kepala, p, badan }) => {
+    pengguna(kepala);
+    const l = kol("bkk-lowongan").find((x) => x.id === Number(p.id)) || tidakAda("Lowongan");
+    Object.assign(l, periksaLowongan(isianTeks(badan)));
+    const m = mitraDari(l.mitra_id) || {};
+    for (const s of kol("bkk-lamaran")) if (s.lowongan_id === l.id) Object.assign(s, { posisi: l.posisi, nama_mitra: m.nama || "" });
+    return { pesan: "Lowongan berhasil diperbarui." };
+  });
+  di("DELETE", "/api/admin/bkk/lowongan/{id}", ({ kepala, p }) => {
+    pengguna(kepala, true);
+    const i = kol("bkk-lowongan").findIndex((x) => x.id === Number(p.id));
+    if (i < 0) tidakAda("Lowongan");
+    if (kol("bkk-lamaran").some((s) => s.lowongan_id === Number(p.id))) {
+      galat(409, "Lowongan ini sudah punya pelamar, jadi tidak dapat dihapus tanpa menghapus riwayat penyalurannya. Ubah statusnya menjadi Ditutup.");
+    }
+    kol("bkk-lowongan").splice(i, 1);
+    return { pesan: "Lowongan berhasil dihapus." };
+  });
+
+  di("GET", "/api/admin/bkk/lamaran", ({ kepala, q }) => {
+    pengguna(kepala);
+    const semua = kol("bkk-lamaran");
+    const low = Number(q.get("lowongan")) || 0;
+    const st = q.get("status");
+    const d = [...semua]
+      .filter((s) => (!low || s.lowongan_id === low) && (!st || s.status === st) && cocokCari(s, q.get("cari"), ["nama", "nisn", "kode"]))
+      .sort((a, b) => b.id - a.id);
+    const ringkasan = Object.fromEntries(STATUS_LAMARAN.map((x) => [x, semua.filter((s) => s.status === x).length]));
+    const tahun = [...new Set(semua.map((s) => s.tahun_lulus))].sort((a, b) => b - a);
+    const per_tahun = tahun.map((t) => {
+      const di_tahun = semua.filter((s) => s.tahun_lulus === t);
+      return {
+        tahun_lulus: t, pelamar: new Set(di_tahun.map((s) => s.nisn)).size,
+        tersalurkan: new Set(di_tahun.filter((s) => s.status === "Diterima").map((s) => s.nisn)).size,
+      };
+    });
+    return { data: d, status: STATUS_LAMARAN, ringkasan, per_tahun };
+  });
+  di("POST", "/api/admin/bkk/lamaran", ({ kepala, badan }) => {
+    pengguna(kepala);
+    const isi = isianTeks(badan);
+    const k = periksaLamaran(isi);
+    if (Object.keys(k).length) galat(422, "Data yang dikirim belum benar.", k);
+    const kode = catatLamaran(isi, "", "manual");
+    return [201, { pesan: `Lamaran ${kode} tercatat.`, kode }];
+  });
+  di("PATCH", "/api/admin/bkk/lamaran/{id}", ({ kepala, p, badan }) => {
+    pengguna(kepala);
+    const s = kol("bkk-lamaran").find((x) => x.id === Number(p.id)) || tidakAda("Lamaran");
+    if (!STATUS_LAMARAN.includes(badan.status)) galat(422, "Data yang dikirim belum benar.", { status: "Status tidak valid." });
+    Object.assign(s, { status: badan.status, catatan: String(badan.catatan || "").trim(), diubah: waktuSetempat(sekarang()) });
+    return { pesan: `Lamaran diperbarui menjadi ${badan.status}.` };
+  });
+  di("DELETE", "/api/admin/bkk/lamaran/{id}", ({ kepala, p }) => {
+    pengguna(kepala, true);
+    const i = kol("bkk-lamaran").findIndex((x) => x.id === Number(p.id));
+    if (i < 0) tidakAda("Lamaran");
+    kol("bkk-lamaran").splice(i, 1);
+    return { pesan: "Lamaran berhasil dihapus." };
+  });
 
   /* ---------- penjawab ---------- */
 

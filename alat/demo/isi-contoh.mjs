@@ -30,7 +30,7 @@ const JENIS = [
   {
     "nama": "Surat Undangan",
     "kode": "UND",
-    "format_nomor": "{urut:3}/{kode}/SMA-IMTEK/{bulan_romawi}/{tahun}",
+    "format_nomor": "{urut:3}/{kode}/SMAS-IMTEK/{bulan_romawi}/{tahun}",
     "atur_ulang": "tahunan",
     "untuk_pendaftar": false,
     "tampil_di_cek_status": false,
@@ -128,4 +128,59 @@ for (const [p, salah] of [[daftar[1], 6], [daftar[2], 22]]) {
   }
   await panggil("POST", "/api/ppdb/ujian/selesai", undefined, mulai.token);
 }
+/* ---------- Bursa Kerja Khusus ----------
+   Nama perusahaannya sengaja berawalan "Contoh" supaya tidak terbaca
+   sebagai mitra sungguhan sekolah. */
+
+async function formulir(jalur, isi) {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(isi)) fd.append(k, v);
+  const j = await fetch(API + jalur, { method: "POST", headers: { Authorization: `Bearer ${T}` }, body: fd });
+  const hasil = await j.json().catch(() => ({}));
+  if (!j.ok) throw new Error(`POST ${jalur}: ${j.status} ${JSON.stringify(hasil)}`);
+  return hasil;
+}
+const mitra1 = await formulir("/api/admin/bkk/mitra", {
+  nama: "PT Contoh Manufaktur Nusantara", bidang: "Manufaktur", alamat: "Kawasan industri, Kabupaten Tangerang",
+  kontak_nama: "Bagian HRD", kontak_telepon: "021-0000000", aktif: "1",
+});
+const mitra2 = await formulir("/api/admin/bkk/mitra", {
+  nama: "PT Contoh Ritel Sejahtera", bidang: "Ritel", alamat: "Kabupaten Tangerang", aktif: "1",
+});
+const low1 = await panggil("POST", "/api/admin/bkk/lowongan", {
+  mitra_id: mitra1.id, posisi: "Operator Produksi", jenis: "Kontrak", lokasi: "Kabupaten Tangerang",
+  deskripsi: "Menjalankan mesin produksi sesuai prosedur kerja dan menjaga kebersihan area kerja.",
+  kualifikasi: "Lulusan SMA/sederajat\nSehat jasmani dan rohani\nBersedia bekerja dengan sistem giliran",
+  gaji: "Sesuai UMK", kuota: "5", batas_lamar: "2027-06-30", status: "buka",
+}, T);
+await panggil("POST", "/api/admin/bkk/lowongan", {
+  mitra_id: mitra2.id, posisi: "Kasir", jenis: "Penuh Waktu", lokasi: "Kabupaten Tangerang",
+  deskripsi: "Melayani transaksi pembayaran pelanggan dan merapikan laporan kas harian.",
+  kualifikasi: "Lulusan SMA/sederajat\nTeliti dan ramah\nTerbiasa memakai komputer", kuota: "2", status: "buka",
+}, T);
+await panggil("POST", "/api/admin/bkk/lowongan", {
+  mitra_id: mitra2.id, posisi: "Staf Gudang", jenis: "Magang", lokasi: "Kabupaten Tangerang", status: "tutup",
+}, T);
+// Tiga lamaran pada tahap berbeda, supaya ringkasan penyaluran ada isinya.
+for (const [nama, nisn, lahir, jk] of [
+  ["Contoh Lulusan Satu", "0071234598", "2007-05-12", "L"],
+  ["Contoh Lulusan Dua", "0061234597", "2006-02-03", "P"],
+  ["Contoh Lulusan Tiga", "0071234596", "2007-08-21", "L"],
+]) {
+  await panggil("POST", "/api/admin/bkk/lamaran", {
+    lowongan_id: String(low1.id), nama, nisn, tanggal_lahir: lahir, jenis_kelamin: jk, tahun_lulus: "2025", telepon: "081200000000",
+  }, T);
+}
+const lamaran = (await panggil("GET", "/api/admin/bkk/lamaran", undefined, T)).data;
+for (const [nisn, status, catatan] of [
+  ["0071234598", "Diterima", "Mulai bekerja sesuai surat panggilan perusahaan."],
+  ["0061234597", "Wawancara", "Wawancara di kantor perusahaan; jadwal dikirim lewat WhatsApp."],
+]) {
+  const s = lamaran.find((x) => x.nisn === nisn);
+  await panggil("PATCH", `/api/admin/bkk/lamaran/${s.id}`, { status, catatan }, T);
+}
+await panggil("PUT", "/api/admin/pengaturan", { pengaturan: {
+  bkk_keterangan: "Bursa Kerja Khusus (BKK) adalah layanan sekolah yang membantu lulusan mendapatkan pekerjaan: mengumumkan lowongan dari perusahaan mitra, menerima lamaran, meneruskannya ke perusahaan, dan mencatat lulusan yang tersalurkan.",
+} }, T);
+
 console.log("contoh data demo terisi");
