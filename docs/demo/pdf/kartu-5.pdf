@@ -6,7 +6,7 @@
 /Contents 4 0 R>>
 endobj
 4 0 obj
-<</Length 8839>>
+<</Length 8837>>
 stream
 0 J
 0 j
@@ -142,7 +142,7 @@ q 0.420 0.447 0.502 rg BT 39.69 295.31 Td (Lama pengerjaan) Tj ET Q
 BT /Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 9.00 Tf ET
 BT /Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 9.00 Tf ET
 BT /Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 9.00 Tf ET
-BT 211.65 294.31 Td (30 menit) Tj ET
+BT 211.65 294.31 Td (60 menit) Tj ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 8.00 Tf ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 8.00 Tf ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 8.00 Tf ET
@@ -150,7 +150,7 @@ q 0.420 0.447 0.502 rg BT 39.69 278.30 Td (Jumlah soal) Tj ET Q
 BT /Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 9.00 Tf ET
 BT /Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 9.00 Tf ET
 BT /Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 9.00 Tf ET
-BT 211.65 277.30 Td (6 butir) Tj ET
+BT 211.65 277.30 Td (40 butir) Tj ET
 0.824 0.847 0.878 RG
 0.85 w
 65.48 252.14 m 529.80 252.14 l S
@@ -171,7 +171,7 @@ q 0.420 0.447 0.502 rg BT 128.00 157.41 Td (Kartu ini wajib dibawa saat tes sele
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 6.00 Tf ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 6.00 Tf ET
 BT /F0a76705d18e0494dd24cb573e53aa0a8c710ec99 6.00 Tf ET
-q 0.420 0.447 0.502 rg BT 218.78 144.24 Td (Dicetak 30 September 2026 dari sistem PPDB SMA IMTEK) Tj ET Q
+q 0.420 0.447 0.502 rg BT 224.45 144.24 Td (Dicetak 2 Oktober 2026 dari sistem PPDB SMA IMTEK) Tj ET Q
 
 endstream
 endobj
@@ -184,14 +184,14 @@ endobj
 endobj
 5 0 obj
 <</Type /Font
-/BaseFont /Helvetica-Bold
+/BaseFont /Helvetica
 /Subtype /Type1
 /Encoding /WinAnsiEncoding
 >>
 endobj
 6 0 obj
 <</Type /Font
-/BaseFont /Helvetica
+/BaseFont /Helvetica-Bold
 /Subtype /Type1
 /Encoding /WinAnsiEncoding
 >>
@@ -241,8 +241,8 @@ endobj
 <<
 /ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
 /Font <<
-/Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 5 0 R
-/F0a76705d18e0494dd24cb573e53aa0a8c710ec99 6 0 R
+/F0a76705d18e0494dd24cb573e53aa0a8c710ec99 5 0 R
+/Ff5d2de5f3a71699ae4b2d83179e62d09e6fc4126 6 0 R
 >>
 /XObject <<
 /Ifafb1826741405a321458b3e4a1159dcae3e13bf 7 0 R
@@ -255,8 +255,8 @@ endobj
 11 0 obj
 <<
 /Producer (þÿ F P D F   1 . 7)
-/CreationDate (D:20260930151010)
-/ModDate (D:20260930151010)
+/CreationDate (D:20261002072707)
+/ModDate (D:20261002072707)
 >>
 endobj
 12 0 obj
@@ -273,18 +273,18 @@ endobj
 xref
 0 13
 0000000000 65535 f 
-0000008976 00000 n 
-0000011617 00000 n 
+0000008974 00000 n 
+0000011615 00000 n 
 0000000009 00000 n 
 0000000087 00000 n 
-0000009063 00000 n 
-0000009164 00000 n 
-0000009260 00000 n 
-0000009614 00000 n 
-0000010431 00000 n 
-0000010799 00000 n 
-0000011925 00000 n 
-0000012039 00000 n 
+0000009061 00000 n 
+0000009157 00000 n 
+0000009258 00000 n 
+0000009612 00000 n 
+0000010429 00000 n 
+0000010797 00000 n 
+0000011923 00000 n 
+0000012037 00000 n 
 trailer
 <<
 /Size 13
@@ -292,5 +292,5 @@ trailer
 /Info 11 0 R
 >>
 startxref
-12137
+12135
 %%EOF
