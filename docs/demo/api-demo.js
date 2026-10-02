@@ -1623,4 +1623,63 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pasangPenanda);
   else pasangPenanda();
+
+  /* ---------- penyaring daftar berita ---------- */
+
+  // Di aplikasi, ?kategori= dan ?cari= disaring server Astro. Demo hanya
+  // berisi tangkapan halaman tanpa penyaring, jadi tombol kategori dulu hanya
+  // mengganti alamat sementara ketujuh berita tetap tampil. Penyaringnya
+  // diulang di sini atas kartu yang sudah ada di halaman.
+  function saringBerita() {
+    if (location.pathname.replace(/\/+$/, "") !== DASAR + "/berita") return;
+    const q = new URLSearchParams(location.search);
+    const kat = q.get("kategori") || "";
+    const cari = (q.get("cari") || "").trim().toLowerCase();
+    if (!kat && !cari) return;
+    const kartu = [...document.querySelectorAll('main a[href*="/berita/"]')].filter((a) => a.querySelector("h2"));
+    if (!kartu.length) return;
+    let tampil = 0;
+    for (const a of kartu) {
+      // textContent, bukan innerText: label kategori ditampilkan huruf besar lewat CSS.
+      const label = (a.querySelector("span.absolute")?.textContent || "").trim();
+      const cocok = (!kat || label === kat) && (!cari || a.textContent.toLowerCase().includes(cari));
+      a.style.display = cocok ? "" : "none";
+      if (cocok) tampil++;
+    }
+    // Tombol kategori: kelas tombol aktif dipindah ke yang dipilih.
+    const pil = [...document.querySelectorAll("a[data-magnet]")].filter((a) => /\/berita(\?|$)/.test(a.getAttribute("href") || ""));
+    const aktif = pil.find((a) => a.className.includes("bg-emas"));
+    const pasif = pil.find((a) => !a.className.includes("bg-emas"));
+    if (aktif && pasif) {
+      const [kAktif, kPasif] = [aktif.className, pasif.className];
+      for (const a of pil) {
+        const k = new URL(a.href).searchParams.get("kategori") || "";
+        const dipilih = k === kat;
+        a.className = dipilih ? kAktif : kPasif;
+        if (dipilih) a.setAttribute("aria-current", "true");
+        else a.removeAttribute("aria-current");
+        // Pencarian yang sedang berjalan ikut dibawa saat ganti kategori.
+        const u = new URL(a.href);
+        if (cari) u.searchParams.set("cari", q.get("cari"));
+        a.href = u.pathname + u.search;
+      }
+    }
+    const kotak = document.querySelector('form[role="search"]');
+    if (kotak) {
+      const isian = kotak.querySelector('input[name="cari"]');
+      if (isian) isian.value = q.get("cari") || "";
+      if (kat && !kotak.querySelector('input[name="kategori"]')) {
+        kotak.insertAdjacentHTML("afterbegin", `<input type="hidden" name="kategori">`);
+        kotak.querySelector('input[name="kategori"]').value = kat;
+      }
+    }
+    const ringkas = [...document.querySelectorAll("main p")].find((p) => p.textContent.trim().startsWith("Menampilkan"));
+    if (ringkas) {
+      ringkas.textContent = tampil
+        ? `Menampilkan ${tampil} dari ${tampil} berita${kat ? ` pada kategori ${kat}` : ""}${cari ? ` untuk pencarian "${q.get("cari")}"` : ""}.`
+        : `Tidak ada berita${kat ? ` pada kategori ${kat}` : ""}${cari ? ` yang cocok dengan "${q.get("cari")}"` : ""}.`;
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", saringBerita);
+  else saringBerita();
 })();
