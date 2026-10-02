@@ -3,7 +3,7 @@ import { MENU } from "@/lib/menu";
 import { api } from "@/lib/api";
 import { data } from "../lib/tembolok";
 import { asalSitus } from "../lib/situs";
-import type { Berita, Halaman } from "@/lib/tipe";
+import type { Berita, Halaman, LowonganBkk } from "@/lib/tipe";
 
 /**
  * Peta situs untuk mesin pencari: seluruh halaman menu, halaman naskah, dan
@@ -22,11 +22,13 @@ export const GET: APIRoute = async ({ url }) => {
   }
   jalur.delete("/ppdb/ujian");
 
-  const [berita, halaman] = await Promise.all([
+  const [berita, halaman, lowongan] = await Promise.all([
     data.berita("?per_halaman=100").then((h) => h.data).catch((): Berita[] => []),
     api.halaman().then((h) => h.data).catch((): Halaman[] => []),
+    data.lowonganBkk().then((h) => h.data).catch((): LowonganBkk[] => []),
   ]);
   for (const h of halaman) jalur.add(`/halaman/${h.slug}`);
+  for (const l of lowongan) jalur.add(`/bkk/lowongan/${l.id}`);
 
   const baris = [
     ...[...jalur].map((j) => `<url><loc>${esc(asal + j)}</loc></url>`),

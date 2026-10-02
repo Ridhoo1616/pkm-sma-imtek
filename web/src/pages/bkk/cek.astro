@@ -1,0 +1,23 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import { data } from "../../lib/tembolok";
+import CekLamaran from "@/komponen/CekLamaran";
+
+const { profil } = await data.profil();
+---
+
+<Publik sorotan judul="Cek Lamaran" deskripsi="Pantau tahap lamaran kerja lewat Bursa Kerja Khusus dengan NISN dan tanggal lahir.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Cek Lamaran"
+    keterangan="Masukkan NISN dan tanggal lahir yang Anda pakai saat melamar. Seluruh lamaran Anda tampil beserta tahap dan catatan dari petugas BKK."
+    induk="/bkk"
+    jalur="/bkk/cek"
+  />
+  <section class="wadah py-12 md:py-16">
+    <div class="kaca mx-auto max-w-3xl p-4 sm:p-6 md:p-8">
+      <CekLamaran client:load />
+    </div>
+  </section>
+</Publik>

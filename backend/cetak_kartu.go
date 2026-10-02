@@ -78,7 +78,7 @@ func (a *Aplikasi) ambilDataKartu(kolom string, nilai ...any) (dataKartu, error)
 	d.RuangUjian = ruang.String
 	d.KursiUjian = kursi.String
 
-	d.NamaSekolah = a.atur("nama_sekolah", "SMA IMTEK")
+	d.NamaSekolah = a.namaLengkapSekolah()
 	d.AlamatSek = a.atur("alamat")
 	d.TataTertib = a.atur("ujian_info")
 

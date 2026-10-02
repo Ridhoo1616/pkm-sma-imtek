@@ -444,6 +444,21 @@ export function IkonFormulir(p: Props) {
   );
 }
 
+export function IkonKoper(p: Props) {
+  return (
+    <Bungkus
+      {...p}
+      isi={
+        <>
+          <rect x="3.6" y="7.4" width="16.8" height="12.4" rx="2.2" />
+          <path d="M9 7.4V5.6c0-.8.6-1.4 1.4-1.4h3.2c.8 0 1.4.6 1.4 1.4v1.8" />
+          <path d="M3.6 12.6h16.8M10.6 12.6v1.6h2.8v-1.6" />
+        </>
+      }
+    />
+  );
+}
+
 export function IkonPanahKiri(p: Props) {
   return <Bungkus {...p} isi={<path d="M14.6 5.4L8 12l6.6 6.6" />} />;
 }

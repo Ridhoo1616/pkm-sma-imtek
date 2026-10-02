@@ -681,7 +681,7 @@ function JendelaBatal({ surat, tutup, selesai }: { surat: Surat; tutup: () => vo
 const JENIS_KOSONG = {
   nama: "",
   kode: "",
-  format_nomor: "{urut:3}/{kode}/SMA-IMTEK/{bulan_romawi}/{tahun}",
+  format_nomor: "{urut:3}/{kode}/SMAS-IMTEK/{bulan_romawi}/{tahun}",
   atur_ulang: "tahunan" as JenisSurat["atur_ulang"],
   untuk_pendaftar: false,
   tampil_di_cek_status: false,

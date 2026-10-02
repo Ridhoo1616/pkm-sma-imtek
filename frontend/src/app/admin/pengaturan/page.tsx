@@ -22,6 +22,7 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
     keterangan: "Nama dan data pokok yang tampil di seluruh halaman.",
     kunci: [
       "nama_sekolah",
+      "nama_lengkap_sekolah",
       "nama_singkat",
       "tagline",
       "npsn",
@@ -94,6 +95,12 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
       "jadwal_keterangan",
       "perpustakaan_keterangan",
     ],
+  },
+  {
+    judul: "Bursa Kerja Khusus",
+    keterangan:
+      "Naskah pembuka halaman BKK dan kontak petugasnya. Lowongan, mitra, dan lamaran dikelola di menu Bursa Kerja Khusus.",
+    kunci: ["bkk_keterangan", "bkk_kontak"],
   },
   {
     judul: "Notifikasi & Daftar Ulang",
@@ -188,6 +195,7 @@ const AREA_TEKS = [
   "struktur_keterangan",
   "jadwal_keterangan",
   "perpustakaan_keterangan",
+  "bkk_keterangan",
 ];
 
 const TANGGAL = ["ppdb_mulai", "ppdb_selesai", "ppdb_pengumuman"];
@@ -211,6 +219,10 @@ function labelDari(kunci: string): string {
     peta_embed: "Sematan peta (kode iframe)",
     peta_koordinat: "Koordinat lokasi (lintang,bujur)",
     nama_singkat: "Nama singkat",
+    nama_sekolah: "Nama sekolah (ringkas)",
+    nama_lengkap_sekolah: "Nama resmi lengkap",
+    bkk_keterangan: "Pengantar halaman BKK",
+    bkk_kontak: "Nomor WhatsApp/telepon petugas BKK",
     foto_depan: "Foto halaman depan",
     foto_depan_2: "Foto sorotan kedua",
     foto_depan_3: "Foto sorotan ketiga",

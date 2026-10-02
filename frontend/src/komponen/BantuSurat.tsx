@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
-import { tanggalPanjang } from "@/lib/format";
+import { namaLengkapSekolah, tanggalPanjang } from "@/lib/format";
 
 /**
  * Alat bantu halaman Surat untuk petugas yang tidak terbiasa dengan kode.
@@ -87,10 +87,10 @@ function dariFormat(format: string): { bagian: Bagian[]; pemisah: string } | nul
 }
 
 export const BENTUK_NOMOR = [
-  "{urut:3}/{kode}/SMA-IMTEK/{bulan_romawi}/{tahun}",
+  "{urut:3}/{kode}/SMAS-IMTEK/{bulan_romawi}/{tahun}",
   "{urut:3}/{kode}/{bulan_romawi}/{tahun}",
-  "{kode}/{urut:3}/SMA-IMTEK/{tahun}",
-  "{urut:3}/SMA-IMTEK/{tahun}",
+  "{kode}/{urut:3}/SMAS-IMTEK/{tahun}",
+  "{urut:3}/SMAS-IMTEK/{tahun}",
 ];
 
 /**
@@ -202,7 +202,7 @@ export function PenyusunNomor({ nilai, ubah, kode, aturUlang, galat }: { nilai: 
                   <button
                     key={k}
                     type="button"
-                    onClick={() => ganti([...bagian, k === "urut" ? { jenis: "urut", lebar: 3 } : k === "teks" ? { jenis: "teks", isi: "SMA-IMTEK" } : { jenis: k }])}
+                    onClick={() => ganti([...bagian, k === "urut" ? { jenis: "urut", lebar: 3 } : k === "teks" ? { jenis: "teks", isi: "SMAS-IMTEK" } : { jenis: k }])}
                     className="rounded-full border border-biru/30 bg-biru-muda px-2 py-0.5 font-semibold text-biru hover:border-biru"
                   >
                     + {NAMA_BAGIAN[k]}
@@ -242,9 +242,9 @@ export function PenyusunNomor({ nilai, ubah, kode, aturUlang, galat }: { nilai: 
    ============================================================= */
 
 export const ISIAN = [
-  { kode: "nomor_surat", label: "Nomor surat", contoh: "001/UND/SMA-IMTEK/IX/2026", pendaftar: false },
+  { kode: "nomor_surat", label: "Nomor surat", contoh: "001/UND/SMAS-IMTEK/IX/2026", pendaftar: false },
   { kode: "tanggal_surat", label: "Tanggal surat", contoh: "29 September 2026", pendaftar: false },
-  { kode: "nama_sekolah", label: "Nama sekolah", contoh: "SMA IMTEK", pendaftar: false },
+  { kode: "nama_sekolah", label: "Nama sekolah", contoh: "SMA Swasta IMTEK", pendaftar: false },
   { kode: "tahun_ajaran", label: "Tahun ajaran", contoh: "2027/2028", pendaftar: false },
   { kode: "nama_lengkap", label: "Nama pendaftar", contoh: "Siti Aminah Zahra", pendaftar: true },
   { kode: "no_registrasi", label: "No. registrasi", contoh: "PPDB-2728-0003", pendaftar: true },
@@ -392,7 +392,7 @@ export function LembarSurat({
       <div className="rounded-lg bg-slate-100 p-3 sm:p-5">
         <div className="mx-auto max-w-[42rem] rounded bg-white px-6 py-6 text-[13.5px] text-slate-900 shadow sm:px-10">
           <div className="border-b-2 border-slate-800 pb-2 text-center">
-            <p className="text-base font-bold uppercase">{sekolah.nama_sekolah || "SMA IMTEK"}</p>
+            <p className="text-base font-bold uppercase">{namaLengkapSekolah(sekolah)}</p>
             {sekolah.alamat && <p className="text-xs text-slate-600">{sekolah.alamat}</p>}
           </div>
           <p className="mt-4 text-right">

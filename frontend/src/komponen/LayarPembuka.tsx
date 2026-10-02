@@ -8,7 +8,7 @@ interface LayarPembukaProps {
   namaSekolah?: string;
 }
 
-export function LayarPembuka({ logoUrl, namaSekolah = "SMA IMTEK" }: LayarPembukaProps) {
+export function LayarPembuka({ logoUrl, namaSekolah = "SMAS IMTEK" }: LayarPembukaProps) {
   const [tampil, setTampil] = useState(false);
   const [hilang, setHilang] = useState(false);
 

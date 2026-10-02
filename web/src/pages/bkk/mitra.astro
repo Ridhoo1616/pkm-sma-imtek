@@ -1,0 +1,68 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import { gambar } from "../../lib/gambar";
+import { data } from "../../lib/tembolok";
+import { kelasKartuAkhir } from "@/komponen/Bagian";
+import { IkonFasilitas, IkonLokasi, IkonPanahKanan } from "@/komponen/Ikon";
+import type { MitraBkk } from "@/lib/tipe";
+
+/** Perusahaan mitra yang aktif. Kontak narahubung tidak pernah dikirim ke sini. */
+const [{ profil }, hasil] = await Promise.all([
+  data.profil(),
+  data.mitraBkk().catch(() => ({ data: [] as MitraBkk[] })),
+]);
+const mitra = hasil.data;
+---
+
+<Publik sorotan judul="Mitra Industri" deskripsi="Perusahaan dan instansi yang bekerja sama dengan Bursa Kerja Khusus sekolah dalam penyaluran lulusan.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Mitra Industri"
+    keterangan="Perusahaan dan instansi yang bekerja sama dengan sekolah dalam menyalurkan lulusan ke dunia kerja."
+    induk="/bkk"
+    jalur="/bkk/mitra"
+  />
+  <div class="wadah py-12 md:py-16">
+    {
+      mitra.length === 0 ? (
+        <div class="kaca px-6 py-14 text-center" data-muncul>
+          <span aria-hidden="true" class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-biru-muda text-biru">
+            <IkonFasilitas ukuran={26} />
+          </span>
+          <p class="mt-4 text-lg font-semibold text-biru-tua">Daftar mitra belum diisi</p>
+          <p class="mx-auto mt-2 max-w-xl text-sm text-samar">Mitra ditambahkan petugas BKK lewat panel admin.</p>
+        </div>
+      ) : (
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {mitra.map((m, i) => (
+            <article data-miring data-muncul={String((i % 3) * 0.06)} class={"kaca kartu-sorot flex flex-col p-5 " + kelasKartuAkhir(i, mitra.length)}>
+              <div class="flex items-center gap-4">
+                <span class="ikon-kartu grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-biru-muda text-biru" aria-hidden="true">
+                  {m.logo ? <img src={gambar("bkk-mitra", m.logo, 160)} alt="" class="h-full w-full bg-white object-contain p-1" /> : <IkonFasilitas ukuran={24} />}
+                </span>
+                <div class="min-w-0">
+                  <h2 class="text-base leading-snug">{m.nama}</h2>
+                  {m.bidang && <p class="text-sm text-samar">{m.bidang}</p>}
+                </div>
+              </div>
+              {m.alamat && <p class="mt-4 flex gap-1.5 text-sm text-samar"><span class="mt-0.5 shrink-0"><IkonLokasi ukuran={14} /></span>{m.alamat}</p>}
+              <div class="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5 text-sm">
+                {m.lowongan_dibuka > 0 ? (
+                  <a href="/bkk/lowongan" class="inline-flex items-center gap-1.5 font-bold text-emas">
+                    {m.lowongan_dibuka} lowongan dibuka <IkonPanahKanan ukuran={14} />
+                  </a>
+                ) : (
+                  <span class="text-samar">Belum ada lowongan dibuka</span>
+                )}
+                {m.situs && (
+                  <a href={m.situs} target="_blank" rel="noopener noreferrer" class="font-semibold text-biru hover:underline">Situs</a>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</Publik>

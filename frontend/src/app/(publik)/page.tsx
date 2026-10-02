@@ -200,7 +200,7 @@ export default async function Beranda() {
               </div>
 
               <h1 className="text-4xl leading-[1.12] font-bold text-balance text-white md:text-6xl">
-                {p.nama_sekolah || "SMA IMTEK"}
+                {p.nama_sekolah || "SMAS IMTEK"}
               </h1>
 
               {p.tagline && !belumTerisi(p.tagline) && (

@@ -9,7 +9,7 @@ import (
 func TestSusunNomor(t *testing.T) {
 	tgl := time.Date(2026, 9, 29, 0, 0, 0, 0, time.UTC)
 	kasus := []struct{ format, harap string }{
-		{"{urut:3}/{kode}/SMA-IMTEK/{bulan_romawi}/{tahun}", "007/UND/SMA-IMTEK/IX/2026"},
+		{"{urut:3}/{kode}/SMAS-IMTEK/{bulan_romawi}/{tahun}", "007/UND/SMAS-IMTEK/IX/2026"},
 		{"{urut}/PPDB/{tahun_ajaran}", "7/PPDB/2027/2028"},
 		{"SK-{urut:4}-{bulan}.{tahun}", "SK-0007-09.2026"},
 	}

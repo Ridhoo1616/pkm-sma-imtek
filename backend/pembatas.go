@@ -158,6 +158,7 @@ type pembatasPublik struct {
 	// identitasGagal mengunci per NOMOR REGISTRASI, menghitung kegagalan.
 	identitasGagal *pembatasLaju
 	daftarIP       *pembatasLaju
+	lamarBkkIP     *pembatasLaju
 	pesanIP        *pembatasLaju
 	tanyaBuntuIP   *pembatasLaju
 	kunjunganIP    *pembatasLaju
@@ -172,7 +173,10 @@ func pembatasPublikBaru() *pembatasPublik {
 		identitasIP:    pembatasLajuBaru(60, 10*time.Minute),
 		identitasGagal: pembatasLajuBaru(10, time.Hour),
 		daftarIP:       pembatasLajuBaru(20, time.Hour),
-		pesanIP:        pembatasLajuBaru(10, time.Hour),
+		// Satu lulusan melamar beberapa lowongan sekaligus, tetapi tidak
+		// puluhan dalam satu jam.
+		lamarBkkIP: pembatasLajuBaru(15, time.Hour),
+		pesanIP:    pembatasLajuBaru(10, time.Hour),
 		// Kotak tanya memang dipakai berkali-kali dalam satu kunjungan,
 		// jadi batasnya lebih longgar daripada formulir kontak.
 		tanyaBuntuIP:  pembatasLajuBaru(40, time.Hour),

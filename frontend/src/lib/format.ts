@@ -88,6 +88,22 @@ export function warnaStatus(status: string): JenisLencana {
   }
 }
 
+/** Warna tahap penyaluran lamaran Bursa Kerja Khusus. */
+export function warnaLamaran(status: string): JenisLencana {
+  switch (status) {
+    case "Diterima":
+      return "hijau";
+    case "Diteruskan":
+      return "biru";
+    case "Wawancara":
+      return "emas";
+    case "Ditolak":
+      return "merah";
+    default:
+      return "abu";
+  }
+}
+
 /**
  * Isi berita disimpan sebagai teks biasa. Baris kosong menjadi pemisah
  * paragraf, sehingga naskah tetap terbaca tanpa perlu HTML dari basis data
@@ -239,6 +255,17 @@ export function nomorWa(nomor: string): string {
 export function belumTerisi(nilai: string): boolean {
   const t = (nilai || "").trim();
   return t === "" || (t.startsWith("[") && t.endsWith("]"));
+}
+
+/**
+ * Nama resmi lengkap sekolah ("SMA Swasta IMTEK") untuk kalimat dan dokumen.
+ * Tempat sempit seperti bilah menu memakai `nama_sekolah` yang ringkas
+ * ("SMAS IMTEK"). Lihat migrasi 025.
+ */
+export function namaLengkapSekolah(p: { nama_sekolah?: string; nama_lengkap_sekolah?: string }): string {
+  const lengkap = p.nama_lengkap_sekolah ?? "";
+  if (!belumTerisi(lengkap)) return lengkap.trim();
+  return (p.nama_sekolah || "").trim() || "SMA Swasta IMTEK";
 }
 
 /**

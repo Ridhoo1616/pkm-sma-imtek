@@ -6,7 +6,7 @@ import { belumTerisi } from "@/lib/format";
 export async function generateMetadata(): Promise<Metadata> {
   const { profil } = await muatProfil();
   const p = profil.pengaturan;
-  const nama = p.nama_sekolah || "SMA IMTEK";
+  const nama = p.nama_sekolah || "SMAS IMTEK";
 
   return {
     title: {

@@ -1,0 +1,52 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import JudulBagian from "../../komponen/JudulBagian.astro";
+import KartuLowongan from "../../komponen/KartuLowongan.astro";
+import { data } from "../../lib/tembolok";
+import { IkonKoper } from "@/komponen/Ikon";
+import type { LowonganBkk } from "@/lib/tipe";
+
+/** Seluruh lowongan yang sedang dibuka, dikelompokkan menurut jenisnya. */
+const [{ profil }, hasil] = await Promise.all([
+  data.profil(),
+  data.lowonganBkk().catch(() => ({ data: [] as LowonganBkk[] })),
+]);
+const URUTAN = ["Penuh Waktu", "Kontrak", "Paruh Waktu", "Magang"];
+const kelompok = URUTAN.map((j) => ({ jenis: j, isi: hasil.data.filter((l) => l.jenis === j) })).filter((g) => g.isi.length);
+---
+
+<Publik sorotan judul="Lowongan Kerja" deskripsi="Lowongan kerja dari perusahaan mitra Bursa Kerja Khusus yang sedang dibuka bagi lulusan.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Lowongan Kerja"
+    keterangan="Lowongan dari perusahaan mitra yang sedang dibuka. Lamaran dikirim langsung dari halaman tiap lowongan dan diperiksa petugas BKK sebelum diteruskan."
+    induk="/bkk"
+    jalur="/bkk/lowongan"
+  />
+  <div class="wadah space-y-12 py-12 md:py-16">
+    {
+      kelompok.length === 0 ? (
+        <div class="kaca px-6 py-14 text-center" data-muncul>
+          <span aria-hidden="true" class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-biru-muda text-biru">
+            <IkonKoper ukuran={26} />
+          </span>
+          <p class="mt-4 text-lg font-semibold text-biru-tua">Belum ada lowongan yang dibuka</p>
+          <p class="mx-auto mt-2 max-w-xl text-sm text-samar">
+            Lowongan baru diumumkan di halaman ini begitu perusahaan mitra membukanya. Lamaran yang sudah dikirim tetap dapat dipantau di
+            halaman <a href="/bkk/cek" class="font-semibold text-biru underline">Cek Lamaran</a>.
+          </p>
+        </div>
+      ) : (
+        kelompok.map((g) => (
+          <section data-muncul>
+            <JudulBagian atas={`${g.isi.length} lowongan`} judul={g.jenis} />
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {g.isi.map((l, i) => <KartuLowongan l={l} i={i} jumlah={g.isi.length} />)}
+            </div>
+          </section>
+        ))
+      )
+    }
+  </div>
+</Publik>

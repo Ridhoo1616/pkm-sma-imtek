@@ -23,7 +23,7 @@ import { LEBAR } from "../../../lib/gambar";
  */
 export const prerender = false;
 
-const FOLDER_PUBLIK = new Set(["profil", "berita", "galeri", "fasilitas", "kegiatan"]);
+const FOLDER_PUBLIK = new Set(["profil", "berita", "galeri", "fasilitas", "kegiatan", "bkk-mitra"]);
 const API = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8090").replace(/\/$/, "");
 const TEMBOLOK = join(process.cwd(), ".tembolok-gambar");
 

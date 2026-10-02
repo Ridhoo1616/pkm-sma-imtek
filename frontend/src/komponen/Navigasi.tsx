@@ -185,7 +185,7 @@ export default function Navigasi({
             </span>
             <span className="leading-tight">
               <strong className="block text-[19px] text-biru-tua">
-                {pengaturan.nama_sekolah || "SMA IMTEK"}
+                {pengaturan.nama_sekolah || "SMAS IMTEK"}
               </strong>
               <small className="text-[11px] text-samar">
                 {pengaturan.kota || "Kabupaten Tangerang"}

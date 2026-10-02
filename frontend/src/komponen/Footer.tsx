@@ -14,6 +14,7 @@ import { anakMenu } from "@/lib/menu";
 import {
   alamatLengkap,
   belumTerisi,
+  namaLengkapSekolah,
   pesanTanyaPpdb,
   tautanPeta,
   tautanWa,
@@ -49,7 +50,8 @@ import {
 export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
   const p = pengaturan;
   const tahun = new Date().getFullYear();
-  const nama = p.nama_sekolah || "SMA IMTEK";
+  const nama = p.nama_sekolah || "SMAS IMTEK";
+  const namaLengkap = namaLengkapSekolah(p);
   const alamat = alamatLengkap(p.alamat, p.kode_pos);
   const wa = tautanWa(p.whatsapp ?? "", pesanTanyaPpdb(nama));
 
@@ -108,6 +110,9 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
             </span>
             <span className="leading-tight">
               <strong className="block text-xl text-white">{nama}</strong>
+              {namaLengkap !== nama && (
+                <small className="block text-[13px] text-white/80">{namaLengkap}</small>
+              )}
               <small className="text-[13px] text-white/60">
                 {p.kota || "Kabupaten Tangerang"}
                 {p.akreditasi ? ` · Akreditasi ${p.akreditasi}` : ""}
@@ -271,7 +276,7 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
       <div className="border-t border-white/10">
         <div className="wadah flex flex-col gap-2 pt-5 pb-24 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between sm:pr-52 sm:pb-5">
           <p>
-            © {tahun} {nama}. Seluruh hak dilindungi.
+            © {tahun} {namaLengkap}. Seluruh hak dilindungi.
           </p>
           <p>
             Dikembangkan oleh mahasiswa Pengabdian Kepada Masyarakat (PkM)

@@ -6,7 +6,7 @@ import JudulBagian from "../komponen/JudulBagian.astro";
 import SambutanKaca from "../komponen/SambutanKaca.astro";
 import { data } from "../lib/tembolok";
 import { tombolEmas, tombolEmasKecil, tombolLangit, tombolGelap } from "../lib/gaya";
-import { alamatLengkap, angka, belumTerisi, kePoinTerisi, persen, tanggalPanjang, tujuanPeta } from "@/lib/format";
+import { alamatLengkap, angka, belumTerisi, kePoinTerisi, namaLengkapSekolah, persen, tanggalPanjang, tujuanPeta } from "@/lib/format";
 import { kataKeadaanPpdb } from "@/lib/ppdb";
 import { MasalahJawaban } from "@/komponen/MasalahJawaban";
 import {
@@ -39,7 +39,8 @@ import type { Berita, Fasilitas, Jurusan } from "@/lib/tipe";
  */
 const { profil } = await data.profil();
 const p = profil.pengaturan;
-const nama = p.nama_sekolah || "SMA IMTEK";
+const nama = p.nama_sekolah || "SMAS IMTEK";
+const namaLengkap = namaLengkapSekolah(p);
 
 const [jurusan, fasilitas, berita, kegiatan] = await Promise.all([
   data.jurusan().then((h) => h.data).catch((): Jurusan[] => []),
@@ -124,7 +125,7 @@ const arah = (moda: string) =>
                 src={gambar("profil", nama_berkas, 1600)}
                 srcset={srcsetGambar("profil", nama_berkas, [800, 1280, 1600, 1920])}
                 sizes="100vw"
-                alt={i === 0 ? `Gedung ${nama}` : ""}
+                alt={i === 0 ? `Gedung ${namaLengkap}` : ""}
                 aria-hidden={i === 0 ? undefined : "true"}
                 class={"foto-sorotan absolute inset-0 h-full w-full object-cover " + (i === 0 ? "foto-aktif" : "")}
                 fetchpriority={i === 0 ? "high" : "low"}
@@ -168,7 +169,10 @@ const arah = (moda: string) =>
           }
         </div>
 
-        <h1 class="text-5xl leading-[1.05] font-extrabold tracking-tight text-white md:text-7xl">{nama}</h1>
+        <h1 class="text-5xl leading-[1.05] font-extrabold tracking-tight text-white md:text-7xl">
+          {nama}
+          {namaLengkap !== nama && <span class="mt-2 block text-xl font-bold tracking-normal text-emas md:text-2xl">{namaLengkap}</span>}
+        </h1>
 
         {
           lokasi && (
@@ -184,7 +188,7 @@ const arah = (moda: string) =>
         <!-- Kalimat pengantar yang menerangkan isi situs, bukan memuji
              sekolahnya. Disembunyikan di ponsel supaya fotonya tetap terlihat. -->
         <p class="mt-4 hidden max-w-lg leading-relaxed text-white/90 sm:block">
-          Selamat datang di portal {nama}. Kenali sekolahnya lebih dulu — peminatan, sarana belajar, dan kegiatan
+          Selamat datang di portal {namaLengkap}. Kenali sekolahnya lebih dulu — peminatan, sarana belajar, dan kegiatan
           siswa — lalu daftarkan putra-putri Anda secara online, dari mengisi formulir sampai memantau hasil
           verifikasinya.
         </p>

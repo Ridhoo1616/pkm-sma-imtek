@@ -12,7 +12,7 @@ import (
 // mungkin ditambahkan kemudian tidak akan ikut terkirim karena daftar ini
 // bersifat izin-eksplisit, bukan larangan-eksplisit.
 var pengaturanPublik = []string{
-	"nama_sekolah", "nama_singkat", "tagline", "npsn", "akreditasi", "status_sekolah",
+	"nama_sekolah", "nama_lengkap_sekolah", "nama_singkat", "tagline", "npsn", "akreditasi", "status_sekolah",
 	"kepala_sekolah", "sambutan_kepsek", "visi", "misi", "sejarah", "yayasan",
 	"keunggulan",
 	"alamat", "kelurahan", "kecamatan", "kota", "provinsi", "kode_pos",
@@ -23,6 +23,8 @@ var pengaturanPublik = []string{
 	"foto_kepsek", "struktur_organisasi", "struktur_keterangan",
 	"tautan_elearning", "tautan_jadwal", "jadwal_keterangan",
 	"perpustakaan_keterangan",
+	// Bursa Kerja Khusus. Lihat migrasi 025.
+	"bkk_keterangan", "bkk_kontak",
 	// Angka sekolah pada kartu sorotan beranda. Lihat migrasi 019.
 	"jumlah_siswa", "jumlah_guru", "jumlah_rombel",
 	"ppdb_status", "ppdb_tahun", "ppdb_mulai", "ppdb_selesai",

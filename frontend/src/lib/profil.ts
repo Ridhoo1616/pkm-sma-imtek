@@ -8,7 +8,8 @@ import type { Profil } from "./tipe";
  */
 const CADANGAN: Profil = {
   pengaturan: {
-    nama_sekolah: "SMA IMTEK",
+    nama_sekolah: "SMAS IMTEK",
+    nama_lengkap_sekolah: "SMA Swasta IMTEK",
     nama_singkat: "SI",
     kota: "Kabupaten Tangerang",
   },

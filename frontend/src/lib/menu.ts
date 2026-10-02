@@ -153,6 +153,28 @@ export const MENU: MenuUtama[] = [
       },
     ],
   },
+  {
+    jalur: "/bkk",
+    label: "BKK",
+    keterangan: "Bursa Kerja Khusus: penyaluran lulusan ke dunia kerja.",
+    anak: [
+      {
+        jalur: "/bkk/lowongan",
+        label: "Lowongan Kerja",
+        keterangan: "Lowongan dari perusahaan mitra yang sedang dibuka.",
+      },
+      {
+        jalur: "/bkk/mitra",
+        label: "Mitra Industri",
+        keterangan: "Perusahaan dan instansi yang bekerja sama dengan sekolah.",
+      },
+      {
+        jalur: "/bkk/cek",
+        label: "Cek Lamaran",
+        keterangan: "Memantau tahap lamaran dengan NISN dan tanggal lahir.",
+      },
+    ],
+  },
   { jalur: "/berita", label: "Berita" },
   { jalur: "/galeri", label: "Galeri" },
   { jalur: "/kontak", label: "Kontak" },

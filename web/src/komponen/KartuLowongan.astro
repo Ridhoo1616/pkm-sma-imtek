@@ -1,0 +1,42 @@
+---
+import { gambar } from "../lib/gambar";
+import { tanggalPanjang } from "@/lib/format";
+import { kelasKartuAkhir } from "@/komponen/Bagian";
+import { IkonKoper, IkonLokasi, IkonPanahKanan } from "@/komponen/Ikon";
+import type { LowonganBkk } from "@/lib/tipe";
+
+/** Satu kartu lowongan, dipakai halaman BKK dan daftar lowongan. */
+interface Props {
+  l: LowonganBkk;
+  i: number;
+  jumlah: number;
+}
+const { l, i, jumlah } = Astro.props;
+---
+
+<a
+  href={`/bkk/lowongan/${l.id}`}
+  data-miring
+  data-muncul={String((i % 3) * 0.06)}
+  class={"kaca kartu-sorot group relative flex flex-col p-5 " + kelasKartuAkhir(i, jumlah)}
+>
+  <div class="flex items-center gap-3">
+    <span class="ikon-kartu grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-biru-muda text-biru" aria-hidden="true">
+      {l.logo_mitra ? <img src={gambar("bkk-mitra", l.logo_mitra, 160)} alt="" class="h-full w-full bg-white object-contain p-1" /> : <IkonKoper ukuran={22} />}
+    </span>
+    <div class="min-w-0">
+      <p class="truncate text-sm font-semibold text-samar">{l.nama_mitra}</p>
+      <span class="inline-block rounded-md bg-biru-tua px-2 py-1 text-[11px] leading-none font-bold tracking-[0.06em] text-white uppercase">{l.jenis}</span>
+    </div>
+  </div>
+  <h3 class="mt-4 text-lg leading-snug">{l.posisi}</h3>
+  <ul class="mt-2 flex-1 space-y-1 text-sm text-samar">
+    {l.lokasi && <li class="flex items-center gap-1.5"><IkonLokasi ukuran={14} /> {l.lokasi}</li>}
+    {l.gaji && <li>Gaji: {l.gaji}</li>}
+    <li>{l.batas_lamar ? `Lamar sebelum ${tanggalPanjang(l.batas_lamar)}` : "Dibuka sampai kuota terpenuhi"}</li>
+  </ul>
+  <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-emas">
+    Lihat & lamar
+    <span class="transition group-hover:translate-x-1"><IkonPanahKanan ukuran={14} /></span>
+  </span>
+</a>

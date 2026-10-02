@@ -10,7 +10,7 @@ import GulirHalus from "@/komponen/GulirHalus";
 import { PencatatKunjungan } from "@/komponen/PencatatKunjungan";
 import { ClickSpark } from "@/komponen/ClickSpark";
 import { data } from "../lib/tembolok";
-import { alamatLengkap, belumTerisi } from "@/lib/format";
+import { alamatLengkap, belumTerisi, namaLengkapSekolah } from "@/lib/format";
 import { gambar, gambarPratinjau } from "../lib/gambar";
 import { ALAMAT_SITUS, asalSitus } from "../lib/situs";
 import type { Berita, Faq, Jurusan } from "@/lib/tipe";
@@ -43,7 +43,8 @@ globalThis.__jalurAstro = Astro.url.pathname;
 
 const { profil, gagal } = await data.profil();
 const p = profil.pengaturan;
-const nama = p.nama_sekolah || "SMA IMTEK";
+const nama = p.nama_sekolah || "SMAS IMTEK";
+const namaLengkap = namaLengkapSekolah(p);
 
 // Kegagalan salah satunya tidak boleh mengosongkan seluruh halaman.
 const [berita, faq, jurusan] = await Promise.all([
@@ -66,7 +67,8 @@ const sosial = [p.instagram, p.facebook, p.youtube, p.tiktok].filter((v) => isi(
 const dataSekolah = {
   "@context": "https://schema.org",
   "@type": "HighSchool",
-  name: nama,
+  name: namaLengkap,
+  alternateName: namaLengkap !== nama ? nama : undefined,
   url: asal,
   logo: p.logo ? asal + gambar("profil", p.logo, 320) : undefined,
   image: fotoSekolah ? asal + fotoSekolah : undefined,
@@ -88,7 +90,7 @@ const judulPenuh = judul ? `${judul} · ${nama}` : `${nama} · Profil Sekolah & 
 const keterangan =
   deskripsi ||
   tagline ||
-  `Profil ${nama} dan pendaftaran peserta didik baru secara online` + (p.kota ? ` di ${p.kota}` : "") + ".";
+  `Profil ${namaLengkap} dan pendaftaran peserta didik baru secara online` + (p.kota ? ` di ${p.kota}` : "") + ".";
 ---
 
 <!doctype html>
@@ -98,7 +100,7 @@ const keterangan =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{judulPenuh}</title>
     <meta name="description" content={keterangan} />
-    <meta name="keywords" content={[nama, "PPDB online", "pendaftaran peserta didik baru", p.kota, "SMA swasta"].filter(Boolean).join(", ")} />
+    <meta name="keywords" content={[nama, namaLengkap !== nama ? namaLengkap : "", "PPDB online", "pendaftaran peserta didik baru", p.kota, "SMA swasta"].filter(Boolean).join(", ")} />
     <meta property="og:title" content={judulPenuh} />
     <meta property="og:description" content={keterangan} />
     <meta property="og:type" content={jenis} />

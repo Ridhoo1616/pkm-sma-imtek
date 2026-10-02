@@ -190,7 +190,7 @@ func (a *Aplikasi) buatNotifikasi(pendaftarID int, jenis string, tambahan map[st
 	nilai := map[string]string{
 		"nama":          nama,
 		"no_registrasi": noReg,
-		"sekolah":       a.atur("nama_sekolah", "SMA IMTEK"),
+		"sekolah":       a.atur("nama_sekolah", "SMAS IMTEK"),
 		"tahun_ajaran":  a.atur("ppdb_tahun"),
 		"catatan":       "",
 		"status":        "",

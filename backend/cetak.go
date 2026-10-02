@@ -246,7 +246,7 @@ func (a *Aplikasi) rakitPdfBukti(d dataBukti) ([]byte, error) {
 }
 
 func (a *Aplikasi) kopSekolah() []core.Row {
-	namaSekolah := strings.ToUpper(a.atur("nama_sekolah", "SEKOLAH"))
+	namaSekolah := strings.ToUpper(a.namaLengkapSekolah())
 	baris := []core.Row{
 		text.NewRow(7, namaSekolah, props.Text{
 			Size: 15, Style: fontstyle.Bold, Align: align.Center, Color: warnaBiru,

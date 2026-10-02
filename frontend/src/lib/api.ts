@@ -366,6 +366,31 @@ export const api = {
       { segarkanSetiap: CACHE_PUBLIK },
     ),
 
+  /* ---------- Bursa Kerja Khusus (publik) ---------- */
+  lowonganBkk: () =>
+    permintaan<{
+      data: import("./tipe").LowonganBkk[];
+      angka: { mitra: number; lowongan_dibuka: number; tersalurkan: number };
+    }>("/api/bkk/lowongan", { segarkanSetiap: CACHE_PUBLIK }),
+  lowonganBkkDetail: (id: number) =>
+    permintaan<import("./tipe").LowonganBkk>(`/api/bkk/lowongan/${id}`, {
+      segarkanSetiap: CACHE_PUBLIK,
+    }),
+  mitraBkk: () =>
+    permintaan<{ data: import("./tipe").MitraBkk[] }>("/api/bkk/mitra", {
+      segarkanSetiap: CACHE_PUBLIK,
+    }),
+  lamarBkk: (formulir: FormData) =>
+    permintaan<{ pesan: string; kode: string }>("/api/bkk/lamar", {
+      metode: "POST",
+      formulir,
+    }),
+  cekLamaranBkk: (isi: { nisn: string; tanggal_lahir: string }) =>
+    permintaan<{ data: import("./tipe").LamaranSaya[] }>("/api/bkk/cek", {
+      metode: "POST",
+      isi,
+    }),
+
   /* ---------- PPDB ---------- */
   daftar: (formulir: FormData, kabarkan?: (k: KemajuanUnggahan) => void) =>
     kirimBerkasPendaftaran(formulir, kabarkan),
@@ -751,6 +776,76 @@ export const api = {
     }),
   hapusPustaka: (id: number) =>
     permintaan<{ pesan: string }>(`/api/admin/pustaka/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+
+  /* ---------- Bursa Kerja Khusus (panel) ---------- */
+  mitraBkkAdmin: () =>
+    permintaan<{ data: import("./tipe").MitraBkk[] }>("/api/admin/bkk/mitra", {
+      token: true,
+    }),
+  simpanMitraBkk: (formulir: FormData) =>
+    permintaan<{ pesan: string }>("/api/admin/bkk/mitra", {
+      metode: "POST",
+      formulir,
+      token: true,
+    }),
+  ubahMitraBkk: (id: number, formulir: FormData) =>
+    permintaan<{ pesan: string }>(`/api/admin/bkk/mitra/${id}`, {
+      metode: "PUT",
+      formulir,
+      token: true,
+    }),
+  hapusMitraBkk: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/bkk/mitra/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+  lowonganBkkAdmin: () =>
+    permintaan<{
+      data: import("./tipe").LowonganBkk[];
+      jenis: string[];
+      status: string[];
+    }>("/api/admin/bkk/lowongan", { token: true }),
+  simpanLowonganBkk: (isi: Record<string, string | number>) =>
+    permintaan<{ pesan: string }>("/api/admin/bkk/lowongan", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  ubahLowonganBkk: (id: number, isi: Record<string, string | number>) =>
+    permintaan<{ pesan: string }>(`/api/admin/bkk/lowongan/${id}`, {
+      metode: "PUT",
+      isi,
+      token: true,
+    }),
+  hapusLowonganBkk: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/bkk/lowongan/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+  lamaranBkkAdmin: (kueri = "") =>
+    permintaan<{
+      data: import("./tipe").LamaranBkk[];
+      status: import("./tipe").StatusLamaran[];
+      ringkasan: Record<string, number>;
+      per_tahun: { tahun_lulus: number; pelamar: number; tersalurkan: number }[];
+    }>(`/api/admin/bkk/lamaran${kueri}`, { token: true }),
+  tambahLamaranBkk: (isi: Record<string, string>) =>
+    permintaan<{ pesan: string; kode: string }>("/api/admin/bkk/lamaran", {
+      metode: "POST",
+      isi,
+      token: true,
+    }),
+  ubahLamaranBkk: (id: number, isi: { status: string; catatan: string }) =>
+    permintaan<{ pesan: string }>(`/api/admin/bkk/lamaran/${id}`, {
+      metode: "PATCH",
+      isi,
+      token: true,
+    }),
+  hapusLamaranBkk: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/bkk/lamaran/${id}`, {
       metode: "DELETE",
       token: true,
     }),

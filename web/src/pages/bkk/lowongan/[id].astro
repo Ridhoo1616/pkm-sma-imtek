@@ -1,0 +1,125 @@
+---
+import Publik from "../../../tata/Publik.astro";
+import KepalaHalaman from "../../../komponen/KepalaHalaman.astro";
+import { gambar } from "../../../lib/gambar";
+import { data } from "../../../lib/tembolok";
+import { api, GalatApi } from "@/lib/api";
+import { keParagraf, kePoin, tanggalPanjang } from "@/lib/format";
+import { IkonKoper, IkonLokasi, IkonKalender, IkonCentang } from "@/komponen/Ikon";
+import FormulirLamaran from "@/komponen/FormulirLamaran";
+
+/**
+ * Satu lowongan beserta formulir lamarannya. Lowongan yang sudah ditutup
+ * tetap dapat dibuka dari tautan lamanya, tetapi formulirnya diganti
+ * keterangan, supaya pelamar tidak mengisi formulir yang pasti ditolak.
+ */
+const id = Number(Astro.params.id);
+const [{ profil }, l] = await Promise.all([
+  data.profil(),
+  Number.isInteger(id) && id > 0
+    ? api.lowonganBkkDetail(id).catch((e) => {
+        if (e instanceof GalatApi && e.status === 404) return null;
+        throw e;
+      })
+    : Promise.resolve(null),
+]);
+if (!l) Astro.response.status = 404;
+const rincian = l
+  ? [
+      { ikon: IkonKoper, label: "Jenis", nilai: l.jenis },
+      { ikon: IkonLokasi, label: "Lokasi", nilai: l.lokasi },
+      { ikon: IkonCentang, label: "Dibutuhkan", nilai: l.kuota ? `${l.kuota} orang` : "" },
+      { ikon: IkonKalender, label: "Batas lamaran", nilai: l.batas_lamar ? tanggalPanjang(l.batas_lamar) : "" },
+    ].filter((r) => r.nilai)
+  : [];
+---
+
+<Publik
+  sorotan
+  judul={l ? `${l.posisi} — ${l.nama_mitra}` : "Lowongan tidak ditemukan"}
+  deskripsi={l ? `Lowongan ${l.posisi} di ${l.nama_mitra} lewat Bursa Kerja Khusus.` : undefined}
+>
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul={l ? l.posisi : "Lowongan tidak ditemukan"}
+    keterangan={l ? `${l.nama_mitra}${l.bidang_mitra ? " · " + l.bidang_mitra : ""}` : "Lowongan ini tidak ada atau belum diumumkan."}
+    induk="/bkk"
+    jalur="/bkk/lowongan"
+  />
+  {
+    !l ? (
+      <div class="wadah py-16 text-center">
+        <a href="/bkk/lowongan" class="font-semibold text-biru underline">Lihat lowongan yang sedang dibuka</a>
+      </div>
+    ) : (
+      <div class="wadah grid gap-8 py-12 md:py-16 lg:grid-cols-[2fr_3fr] lg:items-start">
+        <aside class="space-y-6 lg:sticky lg:top-24" data-muncul>
+          <div class="kaca p-6">
+            <div class="flex items-center gap-4">
+              <span class="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-biru-muda text-biru" aria-hidden="true">
+                {l.logo_mitra ? <img src={gambar("bkk-mitra", l.logo_mitra, 160)} alt="" class="h-full w-full bg-white object-contain p-1.5" /> : <IkonKoper ukuran={28} />}
+              </span>
+              <div>
+                <p class="text-lg font-bold text-biru-tua">{l.nama_mitra}</p>
+                {l.bidang_mitra && <p class="text-sm text-samar">{l.bidang_mitra}</p>}
+              </div>
+            </div>
+            <dl class="mt-6 divide-y divide-garis text-sm">
+              {rincian.map((r) => (
+                <div class="flex items-center justify-between gap-4 py-3">
+                  <dt class="flex items-center gap-2 text-samar"><r.ikon ukuran={15} /> {r.label}</dt>
+                  <dd class="text-right font-semibold">{r.nilai}</dd>
+                </div>
+              ))}
+              {l.gaji && (
+                <div class="flex items-center justify-between gap-4 py-3">
+                  <dt class="text-samar">Kisaran gaji</dt>
+                  <dd class="text-right font-semibold">{l.gaji}</dd>
+                </div>
+              )}
+            </dl>
+          </div>
+          {l.deskripsi && (
+            <div class="kaca p-6">
+              <h2 class="text-lg">Deskripsi pekerjaan</h2>
+              <div class="mt-3 space-y-3 text-sm leading-relaxed text-teks">
+                {keParagraf(l.deskripsi).map((p) => <p class="whitespace-pre-line">{p}</p>)}
+              </div>
+            </div>
+          )}
+          {l.kualifikasi && (
+            <div class="kaca p-6">
+              <h2 class="text-lg">Kualifikasi</h2>
+              <ul class="mt-3 space-y-2 text-sm leading-relaxed">
+                {kePoin(l.kualifikasi).map((k) => (
+                  <li class="flex gap-2.5">
+                    <span class="mt-1 text-green-700"><IkonCentang ukuran={14} /></span>
+                    <span>{k}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </aside>
+
+        <section data-muncul="0.06">
+          <h2 class="mb-4 text-2xl">Kirim lamaran</h2>
+          {l.dibuka ? (
+            <FormulirLamaran client:visible lowonganId={l.id} posisi={l.posisi} />
+          ) : (
+            <div class="kaca px-6 py-12 text-center">
+              <p class="text-lg font-semibold text-biru-tua">Lowongan ini sudah tidak menerima lamaran</p>
+              <p class="mx-auto mt-2 max-w-md text-sm text-samar">
+                Lamaran yang sudah dikirim tetap diproses dan dapat dipantau di halaman Cek Lamaran.
+              </p>
+              <div class="mt-6 flex flex-wrap justify-center gap-3">
+                <a href="/bkk/lowongan" class="rounded-lg bg-biru px-5 py-2.5 text-sm font-semibold text-white hover:bg-biru-tua">Lowongan lain</a>
+                <a href="/bkk/cek" class="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-biru-tua ring-1 ring-garis hover:ring-biru">Cek Lamaran</a>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+    )
+  }
+</Publik>

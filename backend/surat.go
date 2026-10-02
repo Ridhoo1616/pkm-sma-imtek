@@ -40,8 +40,8 @@ import (
      {bulan_romawi}  bulan angka Romawi: IX
      {tahun}         tahun empat angka: 2026
      {tahun_ajaran}  tahun ajaran PPDB dari pengaturan: 2027/2028
-   Contoh: "{urut:3}/{kode}/SMA-IMTEK/{bulan_romawi}/{tahun}"
-           menjadi "007/UND/SMA-IMTEK/IX/2026".
+   Contoh: "{urut:3}/{kode}/SMAS-IMTEK/{bulan_romawi}/{tahun}"
+           menjadi "007/UND/SMAS-IMTEK/IX/2026".
 
    Nomor yang sudah terbit tidak pernah berubah. Surat yang keliru
    DIBATALKAN, bukan dihapus, supaya buku agendanya tidak berlubang; hanya
@@ -477,7 +477,7 @@ func (a *Aplikasi) nilaiNaskah(d *dataPendaftarSurat, nomor string, tanggal time
 	n := map[string]string{
 		"nomor_surat":   nomor,
 		"tanggal_surat": tanggalIndonesia(tanggal.Format("2006-01-02")),
-		"nama_sekolah":  a.atur("nama_sekolah", "SMA IMTEK"),
+		"nama_sekolah":  a.namaLengkapSekolah(),
 		"tahun_ajaran":  a.atur("ppdb_tahun"),
 	}
 	if d != nil {

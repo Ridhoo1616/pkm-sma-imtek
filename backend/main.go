@@ -129,6 +129,17 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/kegiatan-siswa", a.tanganiKegiatanPublik)
 	m.HandleFunc("GET /api/pustaka", a.tanganiPustakaPublik)
 
+	/* ---- Bursa Kerja Khusus ----
+	   Lamaran membawa CV dan data diri, jadi dibatasi seketat formulir
+	   pendaftaran. Cek lamaran mengunci per NISN, lihat bkk.go. */
+	m.HandleFunc("GET /api/bkk/lowongan", a.tanganiLowonganBkkPublik)
+	m.HandleFunc("GET /api/bkk/lowongan/{id}", a.tanganiLowonganBkkDetail)
+	m.HandleFunc("GET /api/bkk/mitra", a.tanganiMitraBkkPublik)
+	m.HandleFunc("POST /api/bkk/lamar", a.batasiIP(a.batas.lamarBkkIP,
+		"Terlalu banyak lamaran dikirim dari jaringan Anda.", a.tanganiLamarBkk))
+	m.HandleFunc("POST /api/bkk/cek", a.batasiIP(a.batas.identitasIP,
+		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiCekLamaranBkk))
+
 	// Pencarian sekolah asal untuk formulir pendaftaran. Terbuka tanpa token
 	// karena yang memakainya calon pendaftar; isinya data sekolah yang memang
 	// publik, tanpa data pribadi sama sekali.
@@ -302,6 +313,19 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("PUT /api/admin/pustaka/{id}", a.wajibMasuk(a.tanganiUbahPustaka))
 	m.HandleFunc("DELETE /api/admin/pustaka/{id}", a.wajibMasuk(a.tanganiHapusPustaka))
 
+	m.HandleFunc("GET /api/admin/bkk/mitra", a.wajibMasuk(a.tanganiMitraBkkAdmin))
+	m.HandleFunc("POST /api/admin/bkk/mitra", a.wajibMasuk(a.tanganiSimpanMitraBkk))
+	m.HandleFunc("PUT /api/admin/bkk/mitra/{id}", a.wajibMasuk(a.tanganiUbahMitraBkk))
+	m.HandleFunc("DELETE /api/admin/bkk/mitra/{id}", a.wajibAdmin(a.tanganiHapusMitraBkk))
+	m.HandleFunc("GET /api/admin/bkk/lowongan", a.wajibMasuk(a.tanganiLowonganBkkAdmin))
+	m.HandleFunc("POST /api/admin/bkk/lowongan", a.wajibMasuk(a.tanganiSimpanLowonganBkk))
+	m.HandleFunc("PUT /api/admin/bkk/lowongan/{id}", a.wajibMasuk(a.tanganiUbahLowonganBkk))
+	m.HandleFunc("DELETE /api/admin/bkk/lowongan/{id}", a.wajibAdmin(a.tanganiHapusLowonganBkk))
+	m.HandleFunc("GET /api/admin/bkk/lamaran", a.wajibMasuk(a.tanganiLamaranBkkAdmin))
+	m.HandleFunc("POST /api/admin/bkk/lamaran", a.wajibMasuk(a.tanganiTambahLamaranBkk))
+	m.HandleFunc("PATCH /api/admin/bkk/lamaran/{id}", a.wajibMasuk(a.tanganiUbahLamaranBkk))
+	m.HandleFunc("DELETE /api/admin/bkk/lamaran/{id}", a.wajibAdmin(a.tanganiHapusLamaranBkk))
+
 	m.HandleFunc("GET /api/admin/pengaturan", a.wajibAdmin(a.tanganiDaftarPengaturan))
 	m.HandleFunc("POST /api/admin/pengaturan/gambar", a.wajibAdmin(a.tanganiUnggahGambarPengaturan))
 	m.HandleFunc("DELETE /api/admin/pengaturan/gambar/{kunci}", a.wajibAdmin(a.tanganiHapusGambarPengaturan))
@@ -334,7 +358,8 @@ func (a *Aplikasi) sajikanUnggahan() http.Handler {
 		jalur := strings.TrimPrefix(r.URL.Path, "/unggahan/")
 		bersih := filepath.Clean("/" + jalur)
 
-		if strings.HasPrefix(bersih, "/pendaftar/") {
+		// CV pelamar BKK sama pribadinya dengan dokumen pendaftar.
+		if strings.HasPrefix(bersih, "/pendaftar/") || strings.HasPrefix(bersih, "/"+folderCvBkk+"/") {
 			a.wajibMasuk(func(w http.ResponseWriter, r *http.Request) {
 				// Dokumen pribadi tidak boleh disimpan di cache bersama.
 				w.Header().Set("Cache-Control", "private, no-store")

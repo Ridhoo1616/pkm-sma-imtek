@@ -537,6 +537,83 @@ export interface Pustaka {
   aktif: boolean;
 }
 
+/* ---------- Bursa Kerja Khusus ---------- */
+
+export interface MitraBkk {
+  id: number;
+  nama: string;
+  bidang: string;
+  alamat: string;
+  /** Tiga kontak ini hanya ada pada jawaban panel admin. */
+  kontak_nama?: string;
+  kontak_telepon?: string;
+  kontak_email?: string;
+  situs: string;
+  logo: string;
+  aktif: boolean;
+  lowongan_dibuka: number;
+  jumlah_lowongan: number;
+  tersalurkan: number;
+}
+
+export interface LowonganBkk {
+  id: number;
+  mitra_id: number;
+  nama_mitra: string;
+  logo_mitra: string;
+  bidang_mitra: string;
+  posisi: string;
+  jenis: string;
+  lokasi: string;
+  deskripsi: string;
+  kualifikasi: string;
+  gaji: string;
+  kuota: number | null;
+  batas_lamar: string | null;
+  status: "draf" | "buka" | "tutup";
+  /** Status buka, batas lamaran belum lewat, dan mitranya aktif. */
+  dibuka: boolean;
+  jumlah_pelamar: number;
+  diterima: number;
+  dibuat: string;
+}
+
+export type StatusLamaran = "Diajukan" | "Diteruskan" | "Wawancara" | "Diterima" | "Ditolak";
+
+export interface LamaranBkk {
+  id: number;
+  kode: string;
+  lowongan_id: number;
+  posisi: string;
+  nama_mitra: string;
+  nama: string;
+  nisn: string;
+  tanggal_lahir: string;
+  jenis_kelamin: "L" | "P";
+  tahun_lulus: number;
+  telepon: string;
+  email: string;
+  alamat: string;
+  ringkasan: string;
+  cv: string;
+  status: StatusLamaran;
+  catatan: string;
+  sumber: "daring" | "manual";
+  dibuat: string;
+  diubah: string;
+}
+
+export interface LamaranSaya {
+  kode: string;
+  nama: string;
+  posisi: string;
+  nama_mitra: string;
+  status: StatusLamaran;
+  catatan: string;
+  dibuat: string;
+  diubah: string;
+}
+
 /* ---------- daftar rujukan sekolah asal ---------- */
 
 export interface SekolahRujukan {

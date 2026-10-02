@@ -21,7 +21,8 @@ import {
   MonitorSmartphone, Briefcase, Building, 
   Calendar, Activity, Book, Newspaper, 
   Image as ImageIcon, MessageCircleQuestion, Mail, 
-  Settings, UserCog, GraduationCap, FileText, type LucideIcon 
+  Settings, UserCog, GraduationCap, FileText, Handshake, ClipboardList,
+  type LucideIcon 
 } from "lucide-react";
 
 /**
@@ -63,6 +64,14 @@ const KELOMPOK: {
     ],
   },
   {
+    judul: "Bursa Kerja Khusus",
+    butir: [
+      { jalur: "/admin/bkk/lamaran", label: "Lamaran & Penyaluran", khususAdmin: false, ikon: ClipboardList },
+      { jalur: "/admin/bkk/lowongan", label: "Lowongan Kerja", khususAdmin: false, ikon: Briefcase },
+      { jalur: "/admin/bkk/mitra", label: "Mitra BKK", khususAdmin: false, ikon: Handshake },
+    ],
+  },
+  {
     judul: "Isi Situs",
     butir: [
       { jalur: "/admin/berita", label: "Berita", khususAdmin: false, ikon: Newspaper },
@@ -91,7 +100,7 @@ export default function KerangkaAdmin({ children }: { children: ReactNode }) {
 
   const [logo, setLogo] = useState<string>("");
   const [namaSingkat, setNamaSingkat] = useState<string>("SI");
-  const [namaSekolah, setNamaSekolah] = useState<string>("SMA IMTEK");
+  const [namaSekolah, setNamaSekolah] = useState<string>("SMAS IMTEK");
 
   // Ambil profil sekolah untuk logo
   useEffect(() => {

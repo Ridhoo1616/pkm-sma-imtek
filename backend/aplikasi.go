@@ -83,6 +83,16 @@ func (a *Aplikasi) atur(kunci string, bawaan ...string) string {
 	return nilai
 }
 
+// namaLengkapSekolah dipakai pada dokumen resmi: kop surat, bukti
+// pendaftaran, dan kartu peserta. Nama ringkas (`nama_sekolah`, misalnya
+// "SMAS IMTEK") tetap dipakai di tempat sempit seperti bilah menu.
+func (a *Aplikasi) namaLengkapSekolah() string {
+	if v := a.atur("nama_lengkap_sekolah"); v != "" && !dalamKurungSiku(v) {
+		return v
+	}
+	return a.atur("nama_sekolah", "SMA Swasta IMTEK")
+}
+
 // ppdbDibuka menyatukan tiga syarat seperti versi PHP: status harus "buka",
 // dan hari ini harus berada di dalam rentang tanggal pendaftaran.
 func (a *Aplikasi) ppdbDibuka() bool {
