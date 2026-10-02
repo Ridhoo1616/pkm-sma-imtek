@@ -88,6 +88,9 @@ const nextConfig: NextConfig = {
   // /pkm-sma-imtek/ (lihat alat/demo). Pada pemasangan sekolah variabelnya
   // tidak ada dan panel tetap di /admin.
   basePath: process.env.DASAR_DEMO || undefined,
+  // Tautan biasa (<a href="/templat/...">) tidak diberi awalan basePath oleh
+  // Next, jadi awalannya ikut disediakan untuk komponen.
+  env: { NEXT_PUBLIC_DASAR: process.env.DASAR_DEMO || "" },
   async headers() {
     return [{ source: "/:path*", headers: kepala }];
   },

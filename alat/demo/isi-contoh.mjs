@@ -92,86 +92,21 @@ await panggil("POST", "/api/admin/surat/massal", { jenis_id: idJenis.SKD, tangga
 
 /* ---------- tes seleksi ---------- */
 
-const SOAL = [
-  {
-    "mata_pelajaran": "Matematika",
-    "pertanyaan": "Hasil dari 3/4 + 1/2 adalah ...",
-    "pilihan_a": "5/4",
-    "pilihan_b": "4/6",
-    "pilihan_c": "1",
-    "pilihan_d": "3/8",
-    "pilihan_e": "2/3",
-    "jawaban": "A",
-    "pembahasan": "3/4 + 2/4 = 5/4.",
-    "aktif": true
-  },
-  {
-    "mata_pelajaran": "Matematika",
-    "pertanyaan": "Jika 2x + 5 = 17, maka nilai x adalah ...",
-    "pilihan_a": "5",
-    "pilihan_b": "6",
-    "pilihan_c": "7",
-    "pilihan_d": "8",
-    "pilihan_e": "11",
-    "jawaban": "B",
-    "pembahasan": "2x = 12, jadi x = 6.",
-    "aktif": true
-  },
-  {
-    "mata_pelajaran": "Bahasa Indonesia",
-    "pertanyaan": "Kalimat yang menggunakan kata baku adalah ...",
-    "pilihan_a": "Ia sedang menganalisa data.",
-    "pilihan_b": "Kami mengunjungi apotik.",
-    "pilihan_c": "Rapat itu dihadiri banyak orang.",
-    "pilihan_d": "Dia tidak mengerti resiko itu.",
-    "pilihan_e": "Jadwalnya sudah di tetapkan.",
-    "jawaban": "C",
-    "pembahasan": "Analisis, apotek, dan risiko adalah bentuk baku; 'ditetapkan' ditulis serangkai.",
-    "aktif": true
-  },
-  {
-    "mata_pelajaran": "Bahasa Inggris",
-    "pertanyaan": "Choose the correct sentence.",
-    "pilihan_a": "She go to school every day.",
-    "pilihan_b": "She goes to school every day.",
-    "pilihan_c": "She going to school every day.",
-    "pilihan_d": "She gone to school every day.",
-    "pilihan_e": "She to go school every day.",
-    "jawaban": "B",
-    "pembahasan": "Subjek orang ketiga tunggal pada simple present memakai goes.",
-    "aktif": true
-  },
-  {
-    "mata_pelajaran": "IPA",
-    "pertanyaan": "Satuan SI untuk gaya adalah ...",
-    "pilihan_a": "Joule",
-    "pilihan_b": "Watt",
-    "pilihan_c": "Newton",
-    "pilihan_d": "Pascal",
-    "pilihan_e": "Coulomb",
-    "jawaban": "C",
-    "pembahasan": "Gaya diukur dalam newton (N).",
-    "aktif": true
-  },
-  {
-    "mata_pelajaran": "IPS",
-    "pertanyaan": "Kegiatan menyalurkan barang dari produsen ke konsumen disebut ...",
-    "pilihan_a": "Produksi",
-    "pilihan_b": "Konsumsi",
-    "pilihan_c": "Distribusi",
-    "pilihan_d": "Investasi",
-    "pilihan_e": "Promosi",
-    "jawaban": "C",
-    "pembahasan": "Distribusi adalah penyaluran barang dan jasa.",
-    "aktif": true
-  }
-];
+// Bank soal demo: 40 soal latihan yang sama dengan berkas unduhan di panel,
+// dimasukkan lewat jalur impor Excel supaya jalur itu ikut teruji.
+const { readFileSync } = await import("node:fs");
+const csv = readFileSync(process.env.SOAL_CSV ?? new URL("../../frontend/public/templat/latihan-soal-40.csv", import.meta.url), "utf8");
+console.log((await panggil("POST", "/api/admin/soal/impor", { csv, aktif: true }, T)).pesan);
 const kunci = {};
-for (const s of SOAL) kunci[(await panggil("POST", "/api/admin/soal", s, T)).id] = s.jawaban;
+for (const s of (await panggil("GET", "/api/admin/soal", undefined, T)).data) kunci[s.id] = s.jawaban;
 
 const tahun = (await panggil("GET", "/api/admin/dasbor", undefined, T)).tahun_ajaran;
 await panggil("POST", "/api/admin/paket-ujian", {
-  nama: `Tes Potensi Akademik PPDB ${tahun}`, tahun_ajaran: tahun, durasi_menit: 30, jumlah_soal: SOAL.length,
+  nama: `Tes Potensi Akademik PPDB ${tahun}`, tahun_ajaran: tahun, durasi_menit: 60, jumlah_soal: 40,
+  komposisi: [
+    { mata_pelajaran: "Matematika", jumlah: 12 }, { mata_pelajaran: "Bahasa Indonesia", jumlah: 8 },
+    { mata_pelajaran: "Bahasa Inggris", jumlah: 8 }, { mata_pelajaran: "IPA", jumlah: 8 }, { mata_pelajaran: "IPS", jumlah: 4 },
+  ],
   acak_soal: true, mulai: "2026-09-01T07:00:00+07:00", selesai: "2027-06-30T16:00:00+07:00", nilai_minimum: 60,
   keterangan: "Kerjakan dengan jujur. Jawaban tersimpan otomatis setiap kali memilih.", aktif: true,
 }, T);
@@ -184,12 +119,12 @@ await panggil("PUT", "/api/admin/pengaturan", { pengaturan: {
 // satu tidak, supaya halaman hasil tes menampilkan keduanya.
 const daftar = (await panggil("GET", "/api/admin/pendaftar?per_halaman=200", undefined, T)).data
   .filter((p) => p.status === "Diterima").sort((a, b) => a.id - b.id);
-for (const [p, salah] of [[daftar[1], 1], [daftar[2], 3]]) {
+for (const [p, salah] of [[daftar[1], 6], [daftar[2], 22]]) {
   if (!p) continue;
   const mulai = await panggil("POST", "/api/ppdb/ujian/mulai", { no_registrasi: p.no_registrasi, tanggal_lahir: p.tanggal_lahir.slice(0, 10) });
   const { soal } = await panggil("GET", "/api/ppdb/ujian/soal", undefined, mulai.token);
   for (const [i, s] of soal.entries()) {
-    await panggil("PATCH", "/api/ppdb/ujian/jawab", { soal_id: s.soal_id, jawaban: i < salah ? "E" : kunci[s.soal_id] }, mulai.token);
+    await panggil("PATCH", "/api/ppdb/ujian/jawab", { soal_id: s.soal_id, jawaban: i < salah ? (kunci[s.soal_id] === "A" ? "B" : "A") : kunci[s.soal_id] }, mulai.token);
   }
   await panggil("POST", "/api/ppdb/ujian/selesai", undefined, mulai.token);
 }

@@ -51,11 +51,16 @@ log "1. Salin basis data $DB_ASAL ke $DB_DEMO"
 createdb -O "$DB_USER" "$DB_DEMO"
 pg_dump -U "$DB_USER" --no-owner "$DB_ASAL" | psql -q -U "$DB_USER" -d "$DB_DEMO" >/dev/null
 # Sesi tes yang ada di data asli tidak dibawa; contohnya dibuat ulang di bawah.
-psql -q -U "$DB_USER" -d "$DB_DEMO" -c "DELETE FROM sesi_soal; DELETE FROM sesi_ujian;"
+# Begitu pula bank soal dan paket tes: isinya sisa uji coba, dan demo memakai
+# 40 soal latihan yang diimpor isi-contoh.mjs.
+psql -q -U "$DB_USER" -d "$DB_DEMO" -c "DELETE FROM sesi_soal; DELETE FROM sesi_ujian; DELETE FROM paket_ujian; DELETE FROM soal;"
 cp -R "$REPO/backend/data/unggahan" "$SEMENTARA/unggahan"
 
 log "2. Rakit dan jalankan backend demo"
 (cd "$REPO/backend" && go build -o "$SEMENTARA/server" .)
+# Backend mencari folder migrations relatif terhadap folder kerjanya. Tanpa
+# salinan ini migrasi yang belum berjalan di basis data asli dilewati diam-diam.
+cp -R "$REPO/backend/migrations" "$SEMENTARA/migrations"
 cat > "$SEMENTARA/.env" <<EOF
 DB_HOST=127.0.0.1
 DB_PORT=5432
@@ -73,7 +78,8 @@ grep '^DB_PASS=' "$REPO/backend/.env" >> "$SEMENTARA/.env" 2>/dev/null || true
 for _ in $(seq 30); do curl -sf "localhost:$P_API/api/sehat" >/dev/null && break; sleep 0.5; done
 
 log "3. Isi contoh data demo"
-API="http://localhost:$P_API" node "$REPO/alat/demo/isi-contoh.mjs"
+API="http://localhost:$P_API" SOAL_CSV="$REPO/frontend/public/templat/latihan-soal-40.csv" \
+  node "$REPO/alat/demo/isi-contoh.mjs"
 
 log "4. Rakit Astro dan Next dari salinan kode"
 mkdir -p "$SEMENTARA/kode"
@@ -92,7 +98,11 @@ done
   npx next build > "$SEMENTARA/next-build.log" 2>&1)
 API="http://localhost:$P_API" UNGGAHAN="$SEMENTARA/unggahan" WEB="$SEMENTARA/kode/web" \
   node "$REPO/alat/demo/ganti-gambar-rusak.mjs"
+# SITUS_LAMA: Astro mengalihkan halaman yang tidak dikenalnya (termasuk
+# tangkapan 404.html) ke sana. Bawaannya localhost:3000, sehingga perakitan
+# dulu diam-diam bergantung pada situs user yang sedang menyala.
 (cd "$SEMENTARA/kode/web" && PORT=$P_ASTRO HOST=127.0.0.1 NEXT_PUBLIC_API_URL="http://localhost:$P_API" \
+  SITUS_LAMA="http://127.0.0.1:$P_NEXT$DASAR" \
   ALAMAT_SITUS="https://ridhoo1616.github.io$DASAR" node dist/server/entry.mjs > "$SEMENTARA/astro.log" 2>&1 &)
 (cd "$SEMENTARA/kode/frontend" && DASAR_DEMO=$DASAR npx next start -p $P_NEXT -H 127.0.0.1 > "$SEMENTARA/next.log" 2>&1 &)
 for _ in $(seq 60); do

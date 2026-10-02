@@ -17,6 +17,9 @@ import {
 } from "@/komponen/Medan";
 import type { Soal } from "@/lib/tipe";
 
+// Awalan alamat demo GitHub Pages; kosong pada pemasangan sekolah.
+const DASAR = process.env.NEXT_PUBLIC_DASAR ?? "";
+
 const KOSONG = {
   mata_pelajaran: "",
   pertanyaan: "",
@@ -442,12 +445,12 @@ function JendelaImpor({
         <ol className="list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-samar">
           <li>
             Unduh{" "}
-            <a href="/templat/templat-soal.csv" download className="font-semibold text-biru underline">
+            <a href={`${DASAR}/templat/templat-soal.csv`} download className="font-semibold text-biru underline">
               templat soal
             </a>
             ,{" "}
             <a
-              href="/templat/contoh-soal-seleksi.csv"
+              href={`${DASAR}/templat/contoh-soal-seleksi.csv`}
               download
               className="font-semibold text-biru underline"
             >
@@ -455,7 +458,7 @@ function JendelaImpor({
             </a>
             , atau{" "}
             <a
-              href="/templat/latihan-soal-40.csv"
+              href={`${DASAR}/templat/latihan-soal-40.csv`}
               download
               className="font-semibold text-biru underline"
             >
