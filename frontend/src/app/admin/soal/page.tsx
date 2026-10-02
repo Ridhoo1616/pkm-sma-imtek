@@ -384,6 +384,37 @@ export default function HalamanSoal() {
   );
 }
 
+const KOLOM_TEMPLAT = [
+  "mata_pelajaran", "pertanyaan", "pilihan_a", "pilihan_b", "pilihan_c",
+  "pilihan_d", "pilihan_e", "jawaban", "pembahasan",
+];
+
+/**
+ * Pratinjau sebelum impor: jumlah soal per isi kolom pertama. Hanya
+ * perkiraan untuk panitia; pemeriksaan sebenarnya di server. Sel Excel yang
+ * memuat baris baru dikutip, jadi baris di dalam tanda kutip tidak dihitung
+ * sebagai soal baru.
+ */
+function ringkasTabel(teks: string): { jumlah: number; rincian: string } | null {
+  const bersih = teks.replace(/^\uFEFF/, "").replace(/"(?:[^"]|"")*"/g, "x").trim();
+  if (!bersih) return null;
+  const baris = bersih.split(/\r?\n/).filter((b) => b.trim());
+  const pertama = baris[0];
+  const hitung = (c: string) => pertama.split(c).length - 1;
+  const pemisah = [";", "\t", ","].reduce((a, c) => (hitung(c) > hitung(a) ? c : a), ",");
+  if (/^mata.pelajaran/i.test(pertama.trim())) baris.shift();
+  const per = new Map<string, number>();
+  for (const b of baris) {
+    const m = b.split(pemisah)[0].trim() || "(kosong)";
+    per.set(m, (per.get(m) ?? 0) + 1);
+  }
+  if (!baris.length) return null;
+  return {
+    jumlah: baris.length,
+    rincian: [...per].map(([m, n]) => `${m} ${n}`).join(", "),
+  };
+}
+
 /**
  * Impor banyak soal sekaligus. Berkas dari Excel dibaca di peramban lalu
  * dikirim sebagai teks; panitia juga boleh menempel langsung dari Excel.
@@ -402,6 +433,8 @@ function JendelaImpor({
   const [aktif, setAktif] = useState(true);
   const [mengirim, setMengirim] = useState(false);
   const [galat, setGalat] = useState<string[]>([]);
+  const [tersalin, setTersalin] = useState(false);
+  const [memuat, setMemuat] = useState<"latihan" | "contoh" | null>(null);
 
   async function bacaBerkas(e: React.ChangeEvent<HTMLInputElement>) {
     const berkas = e.target.files?.[0];
@@ -435,72 +468,119 @@ function JendelaImpor({
     }
   }
 
-  const jumlahBaris = csv.trim() ? csv.trim().split(/\r?\n/).length : 0;
+  const ringkas = ringkasTabel(csv);
+
+  // Judul kolom dipisah tab: begitu ditempel di Excel, tiap judul langsung
+  // menempati kolomnya sendiri.
+  async function salinTemplat() {
+    const teks = KOLOM_TEMPLAT.join("\t") + "\n";
+    try {
+      await navigator.clipboard.writeText(teks);
+    } catch {
+      // Peramban lama atau halaman tanpa HTTPS: cara lama lewat seleksi.
+      const t = document.createElement("textarea");
+      t.value = teks;
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand("copy");
+      t.remove();
+    }
+    setTersalin(true);
+    setTimeout(() => setTersalin(false), 2500);
+  }
+
+  async function isiDari(berkas: string, kunci: "latihan" | "contoh") {
+    setGalat([]);
+    setMemuat(kunci);
+    try {
+      const j = await fetch(`${DASAR}/templat/${berkas}`);
+      if (!j.ok) throw new Error();
+      setCsv((await j.text()).replace(/^\uFEFF/, ""));
+      setNamaBerkas("");
+    } catch {
+      setGalat(["Soal siap jadi gagal dimuat. Coba lagi, atau pakai berkas CSV."]);
+    } finally {
+      setMemuat(null);
+    }
+  }
 
   return (
     <Jendela terbuka tutup={tutup} judul="Impor Soal dari Excel" lebar="max-w-3xl">
       <form onSubmit={kirim} className="space-y-5">
         {galat.length > 0 && <RingkasanGalat daftar={galat} />}
 
-        <ol className="list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-samar">
-          <li>
-            Unduh{" "}
-            <a href={`${DASAR}/templat/templat-soal.csv`} download className="font-semibold text-biru underline">
-              templat soal
-            </a>
-            ,{" "}
-            <a
-              href={`${DASAR}/templat/contoh-soal-seleksi.csv`}
-              download
-              className="font-semibold text-biru underline"
-            >
-              60 contoh soal setara SMP
-            </a>
-            , atau{" "}
-            <a
-              href={`${DASAR}/templat/latihan-soal-40.csv`}
-              download
-              className="font-semibold text-biru underline"
-            >
+        <section className="rounded-xl border border-garis bg-slate-50 p-4">
+          <h3 className="text-sm font-semibold">Cara tercepat: salin dan tempel dari Excel</h3>
+          <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-samar">
+            <li>
+              <span className="mr-2">Salin judul kolom, lalu tempel di sel A1 lembar Excel yang kosong.</span>
+              <Tombol type="button" jenis="halus" onClick={salinTemplat}>
+                {tersalin ? "Tersalin ✓" : "Salin kolom templat"}
+              </Tombol>
+            </li>
+            <li>
+              Isi satu baris untuk satu soal. <em>mata_pelajaran</em>: {MAPEL_AWAL.join(", ")}.{" "}
+              <em>jawaban</em>: huruf A sampai E. Pilihan C sampai E boleh kosong.
+            </li>
+            <li>
+              Blok seluruh tabel termasuk judulnya, tekan <kbd className="rounded border border-garis bg-white px-1">Ctrl</kbd>+
+              <kbd className="rounded border border-garis bg-white px-1">C</kbd>, lalu tempel di kotak di bawah.
+            </li>
+          </ol>
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-garis pt-3 text-sm">
+            <span className="text-samar">Atau langsung pakai soal siap jadi:</span>
+            <Tombol type="button" jenis="kedua" sedangJalan={memuat === "latihan"} onClick={() => isiDari("latihan-soal-40.csv", "latihan")}>
               40 soal latihan tes
-            </a>
-            , lalu buka di Excel.
-          </li>
-          <li>
-            Satu baris satu soal. Kolom <em>mata_pelajaran</em> diisi salah satu
-            dari: {MAPEL_AWAL.join(", ")}. Kolom <em>jawaban</em> diisi huruf A
-            sampai E.
-          </li>
-          <li>
-            Simpan sebagai <strong>CSV UTF-8</strong>, lalu pilih berkasnya di
-            bawah. Bisa juga blok seluruh tabel di Excel, salin, lalu tempel.
-          </li>
-        </ol>
-
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold">Berkas CSV</span>
-          <input
-            type="file"
-            accept=".csv,.txt,text/csv"
-            onChange={bacaBerkas}
-            className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-biru-muda file:px-4 file:py-2 file:font-semibold file:text-biru"
-          />
-          {namaBerkas && (
-            <span className="mt-1 block text-xs text-samar">{namaBerkas} terbaca.</span>
-          )}
-        </label>
+            </Tombol>
+            <Tombol type="button" jenis="kedua" sedangJalan={memuat === "contoh"} onClick={() => isiDari("contoh-soal-seleksi.csv", "contoh")}>
+              60 contoh soal SMP
+            </Tombol>
+          </div>
+        </section>
 
         <AreaTeks
           nama="csv"
-          label="Atau tempel dari Excel"
+          label="Tempel tabel soal di sini"
           baris={8}
           nilai={csv}
           ubah={(v) => {
             setCsv(v);
             setNamaBerkas("");
           }}
-          bantuan={jumlahBaris ? `${jumlahBaris} baris, termasuk baris judul bila ada.` : undefined}
+          bantuan={
+            ringkas
+              ? `${ringkas.jumlah} soal terbaca: ${ringkas.rincian}. Periksa angkanya, lalu tekan Impor Soal.`
+              : "Kosong. Tempel dari Excel, atau pilih salah satu soal siap jadi di atas."
+          }
         />
+
+        <details className="text-sm">
+          <summary className="cursor-pointer font-semibold text-biru">Punya berkas CSV? Pilih berkasnya</summary>
+          <div className="mt-3 space-y-2">
+            <input
+              type="file"
+              accept=".csv,.txt,text/csv"
+              onChange={bacaBerkas}
+              className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-biru-muda file:px-4 file:py-2 file:font-semibold file:text-biru"
+            />
+            {namaBerkas && <span className="block text-xs text-samar">{namaBerkas} terbaca.</span>}
+            <p className="text-xs text-samar">
+              Unduh:{" "}
+              <a href={`${DASAR}/templat/templat-soal.csv`} download className="text-biru underline">
+                templat kosong
+              </a>
+              ,{" "}
+              <a href={`${DASAR}/templat/latihan-soal-40.csv`} download className="text-biru underline">
+                40 soal latihan
+              </a>
+              ,{" "}
+              <a href={`${DASAR}/templat/contoh-soal-seleksi.csv`} download className="text-biru underline">
+                60 contoh soal
+              </a>
+              . Dari Excel, simpan sebagai CSV UTF-8.
+            </p>
+          </div>
+        </details>
 
         <Centang nama="aktif_impor" nilai={aktif} ubah={setAktif}>
           Langsung aktifkan soal hasil impor
