@@ -1571,6 +1571,30 @@
     }
   }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["src"] });
 
+  // Gambar pengaturan (foto kepala sekolah, foto depan, logo, ...) di halaman
+  // publik demo adalah tangkapan yang menyebut berkas lama, misalnya
+  // /gambar/profil/<nama>-640.webp. Bila panel demo sudah menggantinya, gambar
+  // itu ditukar dengan unggahan baru, yang tersimpan di peramban.
+  async function tukarGambarPengaturan() {
+    await siap;
+    if (location.pathname.startsWith(DASAR + "/admin")) return;
+    const asli = Object.fromEntries(D.admin["/api/admin/pengaturan"].data.map((x) => [x.nama_setting, x.nilai]));
+    for (const x of S.pengaturan) {
+      const lama = asli[x.nama_setting];
+      if (!lama || lama === x.nilai || !/\.(png|jpe?g|webp|gif|svg)$/i.test(lama)) continue;
+      const baru = x.nilai ? gambarDemo[`profil/${x.nilai}`] || `${DASAR}/unggahan/profil/${encodeURIComponent(x.nilai)}` : "";
+      for (const img of document.querySelectorAll("img")) {
+        if (!`${img.getAttribute("src") || ""} ${img.getAttribute("srcset") || ""}`.includes(lama)) continue;
+        if (baru) {
+          img.removeAttribute("srcset");
+          img.setAttribute("src", baru);
+        } else img.style.visibility = "hidden"; // gambarnya dihapus di panel
+      }
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", tukarGambarPengaturan);
+  else tukarGambarPengaturan();
+
   /* ---------- tautan yang lupa awalan ---------- */
 
   // Tautan <a href="/..."> dari komponen yang tidak memakai next/link akan
