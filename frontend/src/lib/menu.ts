@@ -68,11 +68,6 @@ export const MENU: MenuUtama[] = [
     keterangan: "Kegiatan belajar: kurikulum, jadwal, dan layanan penunjang.",
     anak: [
       {
-        jalur: "/akademik/elearning",
-        label: "E-Learning / LMS",
-        keterangan: "Pintu masuk ke ruang belajar daring sekolah.",
-      },
-      {
         jalur: "/akademik/jadwal",
         label: "Jadwal Pelajaran",
         keterangan: "Jadwal yang berlaku pada semester ini.",

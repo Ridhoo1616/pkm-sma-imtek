@@ -88,9 +88,8 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
   {
     judul: "Akademik",
     keterangan:
-      "Mengisi halaman di menu Akademik. Alamat e-learning dan jadwal yang dibiarkan kosong membuat halamannya menjelaskan bahwa layanannya belum tersedia, bukan menampilkan tautan mati.",
+      "Mengisi halaman di menu Akademik. Alamat jadwal yang dibiarkan kosong membuat halamannya menjelaskan bahwa layanannya belum tersedia, bukan menampilkan tautan mati.",
     kunci: [
-      "tautan_elearning",
       "tautan_jadwal",
       "jadwal_keterangan",
       "perpustakaan_keterangan",
@@ -230,7 +229,6 @@ function labelDari(kunci: string): string {
     struktur_organisasi: "Bagan struktur organisasi",
     keunggulan: "Keunggulan sekolah (satu baris satu poin)",
     struktur_keterangan: "Keterangan struktur organisasi",
-    tautan_elearning: "Alamat e-learning / LMS",
     tautan_jadwal: "Alamat atau berkas jadwal pelajaran",
     jadwal_keterangan: "Keterangan jadwal pelajaran",
     perpustakaan_keterangan: "Keterangan perpustakaan",

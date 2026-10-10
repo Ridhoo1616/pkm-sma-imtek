@@ -154,7 +154,7 @@ memeriksa isinya kembali utuh.
 | Sarana dan Prasarana | `/fasilitas` | Sarana dan prasarana beserta gambarnya |
 | Struktur Organisasi | `/profil/struktur-organisasi` | Bagan struktur beserta unsur pimpinan |
 | Tenaga Pendidik | `/profil/tenaga-pendidik` | Guru dan tenaga kependidikan beserta angka ringkas, pencarian, dan penyaring kategori serta mata pelajaran |
-| Akademik | `/akademik` beserta turunannya | E-learning, jadwal pelajaran, kalender akademik, kurikulum, perpustakaan digital |
+| Akademik | `/akademik` beserta turunannya | Jadwal pelajaran, kalender akademik, kurikulum, perpustakaan digital |
 | Kesiswaan | `/kesiswaan` beserta turunannya | Ekstrakurikuler, OSIS, prestasi siswa, pendidikan karakter |
 | Halaman naskah | `/halaman/{slug}` | Halaman profil bernaskah panjang yang dapat ditambah sekolah sendiri |
 | Berita | `/berita`, `/berita/{slug}` | Berita dengan pencarian, penyaring kategori, halaman, pencacah baca, berita terkait |
@@ -379,7 +379,7 @@ satu topik satu halaman, dikelompokkan pada tiga menu bertingkat.
 | Menu | Halaman turunannya |
 |---|---|
 | Profil Sekolah | Sejarah Sekolah, Data Sekolah, Visi & Misi, Sarana dan Prasarana, Struktur Organisasi, Tenaga Pendidik dan Kependidikan |
-| Akademik | E-Learning/LMS, Jadwal Pelajaran, Kalender Akademik, Kurikulum, Perpustakaan Digital |
+| Akademik | Jadwal Pelajaran, Kalender Akademik, Kurikulum, Perpustakaan Digital |
 | Kesiswaan | Ekstrakurikuler, OSIS, Prestasi Siswa, Pendidikan Karakter |
 
 Empat butir di antaranya **tidak** memakai tempat penyimpanan baru, karena
@@ -758,11 +758,9 @@ menyembunyikan kelebihannya sejak lukisan pertama. Halaman berisi 16 orang
 turun dari 4.797 piksel menjadi 3.829 piksel, dan tidak ada gulir mendatar
 pada 390 maupun 1280 piksel.
 
-Dua butir sengaja berupa pintu masuk, bukan sistem yang dibangun sendiri.
-E-Learning menampilkan tautan ke layanan yang sudah dipakai sekolah, misalnya
-Google Classroom atau Moodle, dan Jadwal Pelajaran menunjuk berkas jadwalnya.
-Membangun ruang kelas daring kedua hanya akan menghasilkan kelas kosong yang
-harus dirawat, sedangkan satu tautan yang mudah ditemukan justru dipakai.
+Jadwal Pelajaran sengaja berupa pintu masuk, bukan sistem yang dibangun
+sendiri: ia menunjuk berkas jadwalnya. Halaman E-Learning/LMS dihapus pada
+10 Oktober 2026 (migrasi `029_hapus_elearning.sql`).
 
 **Menu bertingkatnya dapat dipakai tanpa tetikus.** Pembukanya berupa
 `<button aria-expanded>`, bukan tautan yang tidak pernah dituju, sehingga Tab

@@ -139,7 +139,7 @@ export function PetaAnak({ induk }: { induk: string }) {
   );
 }
 
-/** Kotak tautan keluar, dipakai E-Learning dan Jadwal Pelajaran. */
+/** Kotak tautan keluar, dipakai Jadwal Pelajaran. */
 export function TautanKeluar({
   tautan,
   label,

@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Akademik",
   description:
-    "Kurikulum, jadwal pelajaran, kalender akademik, e-learning, dan perpustakaan digital sekolah.",
+    "Kurikulum, jadwal pelajaran, kalender akademik, dan perpustakaan digital sekolah.",
 };
 
 export default function HalamanAkademik() {

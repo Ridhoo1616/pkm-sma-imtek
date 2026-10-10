@@ -456,10 +456,8 @@ muncul di laptop lain kecuali dump-nya dipindahkan lagi.
    NIK, dan pesannya menyebut bagian mana yang salah. Verifikasi sebenarnya
    tetap dilakukan panitia dengan membandingkan Kartu Keluarga dan rapor yang
    diunggah.
-9. **Isi `tautan_elearning` dan `tautan_jadwal`** pada menu *Pengaturan* bila
-   sekolah sudah memakai layanan belajar daring, misalnya Google Classroom
-   atau Moodle, dan sudah punya berkas jadwal pelajaran. Keduanya berupa
-   pintu masuk ke layanan yang sudah ada, bukan sistem yang dibangun di sini.
+9. **Isi `tautan_jadwal`** pada menu *Pengaturan* bila sekolah sudah punya
+   berkas jadwal pelajaran. Halamannya hanya pintu masuk ke berkas itu.
    Dibiarkan kosong, halamannya menjelaskan bahwa layanannya belum tersedia,
    bukan menampilkan tautan mati.
 
