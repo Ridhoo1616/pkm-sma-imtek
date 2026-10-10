@@ -28,7 +28,7 @@ const T = masuk.token;
 const publik = {};
 for (const j of [
   "/api/profil", "/api/jurusan", "/api/fasilitas", "/api/galeri", "/api/biaya", "/api/faq",
-  "/api/halaman", "/api/tenaga-pendidik", "/api/agenda", "/api/kegiatan-siswa", "/api/pustaka",
+  "/api/halaman", "/api/tenaga-pendidik", "/api/agenda", "/api/kegiatan-siswa",
   "/api/berita?per_halaman=50",
 ]) publik[j.replace(/\?.*/, "")] = await json(j);
 
@@ -39,7 +39,7 @@ for (const j of [
   "/api/admin/biaya", "/api/admin/faq",
   "/api/admin/tanya-buntu", "/api/admin/notifikasi?per_halaman=100",
   "/api/admin/sekolah?per_halaman=100", "/api/admin/pesan?per_halaman=100", "/api/admin/halaman",
-  "/api/admin/tenaga-pendidik", "/api/admin/agenda", "/api/admin/kegiatan-siswa", "/api/admin/pustaka",
+  "/api/admin/tenaga-pendidik", "/api/admin/agenda", "/api/admin/kegiatan-siswa",
   "/api/admin/pengaturan", "/api/admin/pengguna",
   "/api/admin/bkk/mitra", "/api/admin/bkk/lowongan", "/api/admin/bkk/lamaran",
 ]) admin[j.replace(/\?.*/, "")] = await json(j, T);

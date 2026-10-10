@@ -47,7 +47,6 @@
       "tenaga-pendidik": a["/api/admin/tenaga-pendidik"].data,
       agenda: a["/api/admin/agenda"].data,
       "kegiatan-siswa": a["/api/admin/kegiatan-siswa"].data,
-      pustaka: a["/api/admin/pustaka"].data,
       biaya: a["/api/admin/biaya"].data,
       faq: a["/api/admin/faq"].data,
       pengguna: a["/api/admin/pengguna"].data.map((u) => ({
@@ -444,14 +443,13 @@
     "tenaga-pendidik": { formulir: true, folder: "profil" },
     agenda: {},
     "kegiatan-siswa": { formulir: true, folder: "profil" },
-    pustaka: { formulir: true, folder: "profil" },
     biaya: { admin: true },
     faq: {},
     pengguna: { admin: true },
   };
   const PESAN_TAMBAH = {
     jurusan: "Peminatan", berita: "Berita", galeri: "Foto", fasilitas: "Fasilitas", halaman: "Halaman",
-    "tenaga-pendidik": "Data tenaga pendidik", agenda: "Agenda", "kegiatan-siswa": "Kegiatan", pustaka: "Koleksi pustaka",
+    "tenaga-pendidik": "Data tenaga pendidik", agenda: "Agenda", "kegiatan-siswa": "Kegiatan",
     biaya: "Rincian biaya", faq: "Pertanyaan", pengguna: "Pengguna",
   };
 
@@ -600,7 +598,7 @@
     for (const k of Object.keys(r.pengaturan)) r.pengaturan[k] = atur(k);
     return r;
   });
-  for (const n of ["jurusan", "fasilitas", "galeri", "biaya", "faq", "halaman", "tenaga-pendidik", "agenda", "kegiatan-siswa", "pustaka"]) {
+  for (const n of ["jurusan", "fasilitas", "galeri", "biaya", "faq", "halaman", "tenaga-pendidik", "agenda", "kegiatan-siswa"]) {
     di("GET", `/api/${n}`, ({ q }) => daftarUmum(n, q, true));
   }
   di("GET", "/api/berita", ({ q }) => daftarUmum("berita", q, true));

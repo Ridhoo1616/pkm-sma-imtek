@@ -396,19 +396,6 @@ export interface KegiatanSiswa {
   aktif: boolean;
 }
 
-export interface Pustaka {
-  id: number;
-  judul: string;
-  penulis: string;
-  kategori: string;
-  tahun: number | null;
-  keterangan: string;
-  tautan: string;
-  berkas: string;
-  urutan: number;
-  aktif: boolean;
-}
-
 /* ---------- Bursa Kerja Khusus ---------- */
 
 export interface MitraBkk {

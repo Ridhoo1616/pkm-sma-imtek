@@ -92,7 +92,6 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
     kunci: [
       "tautan_jadwal",
       "jadwal_keterangan",
-      "perpustakaan_keterangan",
     ],
   },
   {
@@ -191,7 +190,6 @@ const AREA_TEKS = [
   "peta_embed",
   "struktur_keterangan",
   "jadwal_keterangan",
-  "perpustakaan_keterangan",
   "bkk_keterangan",
 ];
 
@@ -231,7 +229,6 @@ function labelDari(kunci: string): string {
     struktur_keterangan: "Keterangan struktur organisasi",
     tautan_jadwal: "Alamat atau berkas jadwal pelajaran",
     jadwal_keterangan: "Keterangan jadwal pelajaran",
-    perpustakaan_keterangan: "Keterangan perpustakaan",
   };
   if (khusus[kunci]) return khusus[kunci];
   return kunci

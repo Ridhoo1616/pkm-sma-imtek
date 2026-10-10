@@ -352,11 +352,6 @@ export const api = {
       "/api/kegiatan-siswa",
       { segarkanSetiap: CACHE_PUBLIK },
     ),
-  pustaka: () =>
-    permintaan<{ data: import("./tipe").Pustaka[]; kategori: string[] }>(
-      "/api/pustaka",
-      { segarkanSetiap: CACHE_PUBLIK },
-    ),
 
   /* ---------- Bursa Kerja Khusus (publik) ---------- */
   lowonganBkk: () =>
@@ -693,29 +688,6 @@ export const api = {
     }),
   hapusKegiatan: (id: number) =>
     permintaan<{ pesan: string }>(`/api/admin/kegiatan-siswa/${id}`, {
-      metode: "DELETE",
-      token: true,
-    }),
-
-  pustakaAdmin: () =>
-    permintaan<{ data: import("./tipe").Pustaka[]; kategori: string[] }>(
-      "/api/admin/pustaka",
-      { token: true },
-    ),
-  simpanPustaka: (formulir: FormData) =>
-    permintaan<{ pesan: string }>("/api/admin/pustaka", {
-      metode: "POST",
-      formulir,
-      token: true,
-    }),
-  ubahPustaka: (id: number, formulir: FormData) =>
-    permintaan<{ pesan: string }>(`/api/admin/pustaka/${id}`, {
-      metode: "PUT",
-      formulir,
-      token: true,
-    }),
-  hapusPustaka: (id: number) =>
-    permintaan<{ pesan: string }>(`/api/admin/pustaka/${id}`, {
       metode: "DELETE",
       token: true,
     }),

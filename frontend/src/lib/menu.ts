@@ -82,11 +82,6 @@ export const MENU: MenuUtama[] = [
         label: "Kurikulum",
         keterangan: "Kurikulum yang dipakai dan struktur mata pelajarannya.",
       },
-      {
-        jalur: "/akademik/perpustakaan",
-        label: "Perpustakaan Digital",
-        keterangan: "Katalog koleksi digital yang dapat dibaca siswa.",
-      },
     ],
   },
   {

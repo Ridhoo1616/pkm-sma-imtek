@@ -154,7 +154,7 @@ memeriksa isinya kembali utuh.
 | Sarana dan Prasarana | `/fasilitas` | Sarana dan prasarana beserta gambarnya |
 | Struktur Organisasi | `/profil/struktur-organisasi` | Bagan struktur beserta unsur pimpinan |
 | Tenaga Pendidik | `/profil/tenaga-pendidik` | Guru dan tenaga kependidikan beserta angka ringkas, pencarian, dan penyaring kategori serta mata pelajaran |
-| Akademik | `/akademik` beserta turunannya | Jadwal pelajaran, kalender akademik, kurikulum, perpustakaan digital |
+| Akademik | `/akademik` beserta turunannya | Jadwal pelajaran, kalender akademik, kurikulum |
 | Kesiswaan | `/kesiswaan` beserta turunannya | Ekstrakurikuler, OSIS, prestasi siswa, pendidikan karakter |
 | Halaman naskah | `/halaman/{slug}` | Halaman profil bernaskah panjang yang dapat ditambah sekolah sendiri |
 | Berita | `/berita`, `/berita/{slug}` | Berita dengan pencarian, penyaring kategori, halaman, pencacah baca, berita terkait |
@@ -224,7 +224,6 @@ Tanya Jawab | `/admin/faq` | Kelola pertanyaan, kategori, urutan, dan penanda so
 | Tenaga Pendidik | `/admin/tenaga` | Guru dan tenaga kependidikan beserta foto, jabatan, mata pelajaran, dan kelas yang diampunya sebagai wali kelas |
 | Kalender Akademik | `/admin/kalender` | Tanggal kegiatan, ujian, hari libur, dan jadwal PPDB; inilah satu-satunya sumber isi halaman publiknya |
 | Kegiatan Siswa | `/admin/kegiatan` | Ekstrakurikuler, OSIS, dan pembinaan beserta pembina dan jadwalnya |
-| Perpustakaan | `/admin/pustaka` | Katalog koleksi digital: berkas unggahan atau tautan ke layanan lain |
 | Pengguna | `/admin/pengguna` | Kelola akun petugas dan perannya |
 
 Seluruh isi situs publik berasal dari menu **Pengaturan**, sehingga sekolah
@@ -379,7 +378,7 @@ satu topik satu halaman, dikelompokkan pada tiga menu bertingkat.
 | Menu | Halaman turunannya |
 |---|---|
 | Profil Sekolah | Sejarah Sekolah, Data Sekolah, Visi & Misi, Sarana dan Prasarana, Struktur Organisasi, Tenaga Pendidik dan Kependidikan |
-| Akademik | Jadwal Pelajaran, Kalender Akademik, Kurikulum, Perpustakaan Digital |
+| Akademik | Jadwal Pelajaran, Kalender Akademik, Kurikulum |
 | Kesiswaan | Ekstrakurikuler, OSIS, Prestasi Siswa, Pendidikan Karakter |
 
 Empat butir di antaranya **tidak** memakai tempat penyimpanan baru, karena
@@ -760,7 +759,8 @@ pada 390 maupun 1280 piksel.
 
 Jadwal Pelajaran sengaja berupa pintu masuk, bukan sistem yang dibangun
 sendiri: ia menunjuk berkas jadwalnya. Halaman E-Learning/LMS dihapus pada
-10 Oktober 2026 (migrasi `029_hapus_elearning.sql`).
+10 Oktober 2026 (migrasi `029_hapus_elearning.sql`). Perpustakaan Digital menyusul pada hari yang sama
+(migrasi `030_hapus_perpustakaan.sql`).
 
 **Menu bertingkatnya dapat dipakai tanpa tetikus.** Pembukanya berupa
 `<button aria-expanded>`, bukan tautan yang tidak pernah dituju, sehingga Tab
@@ -2739,7 +2739,6 @@ terpasang beserta petaknya, diperiksa lewat tangkapan layar.
 | `tenaga_pendidik` | Guru dan tenaga kependidikan beserta jabatannya |
 | `agenda` | Kalender akademik; satu baris boleh satu hari atau satu rentang |
 | `kegiatan_siswa` | Ekstrakurikuler, kegiatan OSIS, dan pembinaan |
-| `pustaka` | Katalog perpustakaan digital, berupa berkas atau tautan luar |
 
 Isinya dapat ditengok dengan **DBeaver**: buat sambungan PostgreSQL baru
 memakai host, porta, nama basis data, pengguna, dan sandi yang sama dengan

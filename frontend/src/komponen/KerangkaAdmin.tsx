@@ -19,7 +19,7 @@ import {
   LayoutDashboard, Users, TrendingUp, Bell,
   Receipt, LibraryBig, School, 
   MonitorSmartphone, Briefcase, Building, 
-  Calendar, Activity, Book, Newspaper, 
+  Calendar, Activity, Newspaper, 
   Image as ImageIcon, MessageCircleQuestion, Mail, 
   Settings, UserCog, GraduationCap, Handshake, ClipboardList,
   type LucideIcon 
@@ -57,7 +57,6 @@ const KELOMPOK: {
     butir: [
       { jalur: "/admin/kalender", label: "Kalender Akademik", khususAdmin: false, ikon: Calendar },
       { jalur: "/admin/kegiatan", label: "Kegiatan Siswa", khususAdmin: false, ikon: Activity },
-      { jalur: "/admin/pustaka", label: "Perpustakaan", khususAdmin: false, ikon: Book },
     ],
   },
   {

@@ -127,7 +127,6 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/tenaga-pendidik", a.tanganiTenagaPublik)
 	m.HandleFunc("GET /api/agenda", a.tanganiAgendaPublik)
 	m.HandleFunc("GET /api/kegiatan-siswa", a.tanganiKegiatanPublik)
-	m.HandleFunc("GET /api/pustaka", a.tanganiPustakaPublik)
 
 	/* ---- Bursa Kerja Khusus ----
 	   Lamaran membawa CV dan data diri, jadi dibatasi seketat formulir
@@ -259,11 +258,6 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("POST /api/admin/kegiatan-siswa", a.wajibMasuk(a.tanganiSimpanKegiatan))
 	m.HandleFunc("PUT /api/admin/kegiatan-siswa/{id}", a.wajibMasuk(a.tanganiUbahKegiatan))
 	m.HandleFunc("DELETE /api/admin/kegiatan-siswa/{id}", a.wajibMasuk(a.tanganiHapusKegiatan))
-
-	m.HandleFunc("GET /api/admin/pustaka", a.wajibMasuk(a.tanganiPustakaAdmin))
-	m.HandleFunc("POST /api/admin/pustaka", a.wajibMasuk(a.tanganiSimpanPustaka))
-	m.HandleFunc("PUT /api/admin/pustaka/{id}", a.wajibMasuk(a.tanganiUbahPustaka))
-	m.HandleFunc("DELETE /api/admin/pustaka/{id}", a.wajibMasuk(a.tanganiHapusPustaka))
 
 	m.HandleFunc("GET /api/admin/bkk/mitra", a.wajibMasuk(a.tanganiMitraBkkAdmin))
 	m.HandleFunc("POST /api/admin/bkk/mitra", a.wajibMasuk(a.tanganiSimpanMitraBkk))

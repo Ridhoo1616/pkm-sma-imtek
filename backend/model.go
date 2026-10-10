@@ -253,19 +253,6 @@ type KegiatanSiswa struct {
 	Aktif     bool   `json:"aktif"`
 }
 
-type Pustaka struct {
-	ID         int    `json:"id"`
-	Judul      string `json:"judul"`
-	Penulis    string `json:"penulis"`
-	Kategori   string `json:"kategori"`
-	Tahun      *int   `json:"tahun"`
-	Keterangan string `json:"keterangan"`
-	Tautan     string `json:"tautan"`
-	Berkas     string `json:"berkas"`
-	Urutan     int    `json:"urutan"`
-	Aktif      bool   `json:"aktif"`
-}
-
 // Pilihan yang dipakai formulir panel admin sekaligus menjadi acuan CHECK
 // pada migrasi 004. Keduanya harus tetap sama.
 var (

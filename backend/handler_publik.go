@@ -22,7 +22,6 @@ var pengaturanPublik = []string{
 	"foto_depan_2", "foto_depan_3", "foto_depan_4",
 	"foto_kepsek", "struktur_organisasi", "struktur_keterangan",
 	"tautan_jadwal", "jadwal_keterangan",
-	"perpustakaan_keterangan",
 	// Bursa Kerja Khusus. Lihat migrasi 025.
 	"bkk_keterangan", "bkk_kontak",
 	// Angka sekolah pada kartu sorotan beranda. Lihat migrasi 019.

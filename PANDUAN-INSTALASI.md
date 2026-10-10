@@ -438,7 +438,6 @@ muncul di laptop lain kecuali dump-nya dipindahkan lagi.
    | *Tenaga Pendidik* | Halaman Tenaga Pendidik; yang berkategori Pimpinan juga tampil pada halaman Struktur Organisasi |
    | *Kalender Akademik* | Halaman Kalender Akademik |
    | *Kegiatan Siswa* | Halaman Ekstrakurikuler; yang berjenis Ekstrakurikuler juga dihitung sebagai angka *Ekskul* pada sorotan beranda |
-   | *Perpustakaan* | Halaman Perpustakaan Digital |
 
    Prestasi Siswa tidak punya menu sendiri: tulis capaiannya lewat menu
    *Berita* dengan kategori **Prestasi**, dan halaman Prestasi Siswa

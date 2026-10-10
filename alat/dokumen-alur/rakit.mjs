@@ -636,7 +636,7 @@ ${gambar(notifikasi, "Flowchart notifikasi WhatsApp")}
 
 <section>
 <h2>14. Alur Pengelolaan Konten</h2>
-<p>Seluruh isi situs publik diubah dari panel admin tanpa menyentuh kode: Berita, Galeri, Sarana dan Prasarana, Halaman Profil, Tenaga Pendidik, Kalender, Kegiatan Siswa, Perpustakaan, Peminatan, Rincian Biaya, dan Pengaturan Sekolah.</p>
+<p>Seluruh isi situs publik diubah dari panel admin tanpa menyentuh kode: Berita, Galeri, Sarana dan Prasarana, Halaman Profil, Tenaga Pendidik, Kalender, Kegiatan Siswa, Peminatan, Rincian Biaya, dan Pengaturan Sekolah.</p>
 ${gambar(konten, "Flowchart pengelolaan konten situs")}
 </section>
 

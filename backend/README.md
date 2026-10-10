@@ -29,7 +29,7 @@ Migrasi yang sudah ada empat berkas: `001_skema.sql` untuk sembilan tabel
 awal, `002_ujian_biaya_notifikasi.sql` untuk rincian biaya dan catatan notifikasi
 (bagian tes seleksinya dibuang oleh `026_hapus_ujian.sql`), `003_faq.sql` untuk tanya jawab, serta
 `004_profil_akademik_kesiswaan.sql` untuk halaman profil, tenaga pendidik,
-kalender akademik, kegiatan siswa, dan katalog perpustakaan. Basis data
+kalender akademik, dan kegiatan siswa. Basis data
 warisan versi PHP melewati migrasi **pertama** saja, lalu menerima migrasi
 berikutnya seperti biasa.
 
@@ -77,7 +77,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | `handler_konten.go` | jurusan, berita, galeri, fasilitas |
 | `handler_pengaturan.go` | pesan masuk, pengaturan sekolah, pengguna |
 | `handler_faq.go` | tanya jawab |
-| `handler_profil.go` | halaman profil, tenaga pendidik, agenda, kegiatan siswa, pustaka |
+| `handler_profil.go` | halaman profil, tenaga pendidik, agenda, kegiatan siswa |
 | `validasi_identitas.go` | pemeriksaan struktur NISN dan NIK beserta pencocokan silangnya |
 
 ## Daftar alamat API
@@ -104,7 +104,6 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | GET | `/api/tenaga-pendidik` | guru dan tenaga kependidikan yang aktif |
 | GET | `/api/agenda` | kalender akademik; `?tahun=` menyaring tahunnya |
 | GET | `/api/kegiatan-siswa` | ekstrakurikuler, OSIS, dan pembinaan yang aktif |
-| GET | `/api/pustaka` | katalog perpustakaan digital beserta kategorinya |
 | POST | `/api/masuk` | masuk sebagai petugas |
 
 ### Perlu token (petugas)
@@ -131,7 +130,6 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | GET/POST/PUT/DELETE | `/api/admin/tenaga-pendidik` | kelola guru dan tenaga kependidikan |
 | GET/POST/PUT/DELETE | `/api/admin/agenda` | kelola kalender akademik |
 | GET/POST/PUT/DELETE | `/api/admin/kegiatan-siswa` | kelola ekstrakurikuler dan kegiatan OSIS |
-| GET/POST/PUT/DELETE | `/api/admin/pustaka` | kelola katalog perpustakaan digital |
 
 ### Khusus peran `admin`
 
@@ -148,8 +146,8 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 ### Berkas unggahan
 
 `GET /unggahan/{folder}/{berkas}` melayani gambar berita, galeri, fasilitas,
-profil (logo, foto kepala sekolah, bagan struktur, foto guru), kegiatan siswa,
-dan koleksi pustaka secara terbuka. Folder `pendaftar` berisi dokumen pribadi
+profil (logo, foto kepala sekolah, bagan struktur, foto guru), dan kegiatan
+siswa secara terbuka. Folder `pendaftar` berisi dokumen pribadi
 (Kartu Keluarga, akta kelahiran, ijazah), sehingga wajib membawa token
 petugas dan tidak disimpan di cache bersama.
 
