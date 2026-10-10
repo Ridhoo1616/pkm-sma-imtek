@@ -4,6 +4,7 @@ import { useState } from "react";
 import { api, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { belumTerisi } from "@/lib/format";
+import { templatUntuk } from "@/lib/templatHalaman";
 import { useKabar } from "@/komponen/Kabar";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Lencana } from "@/komponen/Bagian";
@@ -285,8 +286,27 @@ export default function HalamanProfilAdmin() {
             nilai={isi.isi}
             ubah={(v) => setIsi((s) => ({ ...s, isi: v }))}
             galat={galatKolom.isi}
-            bantuan="Satu baris kosong memisahkan paragraf. Baris yang diawali ## menjadi judul bagian, dan tiap judul bagian otomatis menjadi satu kartu penunjuk di atas naskah. Naskahnya hanya boleh berasal dari sekolah."
+            bantuan="Satu baris kosong memisahkan paragraf. Baris yang diawali ## menjadi judul bagian dan otomatis masuk daftar isi di samping naskah. Paragraf yang diapit [kurung siku] adalah petunjuk dan tidak tampil di situs. Naskahnya hanya boleh berasal dari sekolah."
           />
+          <div className="-mt-3 flex flex-wrap items-center gap-3">
+            <Tombol
+              type="button"
+              jenis="kedua"
+              onClick={() => {
+                const t = templatUntuk(isi.slug);
+                setIsi((s) => ({
+                  ...s,
+                  isi: s.isi.trim() === "" ? t.isi : `${s.isi.trimEnd()}\n\n${t.isi}`,
+                  ringkasan: s.ringkasan.trim() === "" ? t.ringkasan : s.ringkasan,
+                }));
+              }}
+            >
+              Pakai template
+            </Tombol>
+            <span className="text-xs text-samar">
+              Menyisipkan kerangka bagian beserta petunjuk pengisian. Yang sudah Anda tulis tidak dihapus.
+            </span>
+          </div>
 
           {/* Visi dan misi MILIK HALAMAN INI, bukan milik sekolah. Dipakai
               halaman seperti OSIS yang punya rumusannya sendiri. Dikosongkan

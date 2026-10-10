@@ -149,6 +149,9 @@ export function bagianNaskah(isi: string): {
   const bagian: BagianNaskah[] = [];
 
   for (const p of keParagraf(isi)) {
+    // Paragraf yang seluruhnya diapit kurung siku adalah petunjuk pengisian
+    // dari template, bukan naskah, jadi tidak pernah ikut tampil.
+    if (belumTerisi(p) && p.trim() !== "") continue;
     const judul = p.startsWith("## ") ? p.slice(3).trim() : "";
     if (judul) {
       bagian.push({ judul, id: keIdJudul(judul, bagian.length), paragraf: [] });
@@ -158,7 +161,7 @@ export function bagianNaskah(isi: string): {
     else bagian[bagian.length - 1].paragraf.push(p);
   }
 
-  return { pembuka, bagian };
+  return { pembuka, bagian: bagian.filter((b) => b.paragraf.length > 0) };
 }
 
 function keIdJudul(judul: string, urutan: number): string {

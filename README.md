@@ -500,6 +500,17 @@ naskah OSIS-nya sendiri belum dikirim sekolah. Dengan penanda `## `, panitia
 yang menentukan bagiannya, lewat satu kotak teks yang sudah ada di panel
 admin.
 
+**Template naskah dan tampilan polos (10 Oktober 2026).** Halaman bernaskah
+tidak lagi berupa tumpukan kartu: daftar isi di kolom kiri, bagian-bagian
+berjudul di kanan, dipisah garis tipis. Tombol **Pakai template** di Halaman
+Profil (panel admin) menyisipkan kerangka bagian per halaman, yaitu
+Kurikulum, OSIS, Pendidikan Karakter, atau kerangka umum
+(`frontend/src/lib/templatHalaman.ts`). Petunjuk pengisian ditulis di dalam
+`[kurung siku]`; paragraf yang seluruhnya berkurung siku dan bagian yang
+isinya hanya petunjuk tidak pernah tampil di situs publik, sehingga template
+yang belum selesai diisi tidak bocor ke pengunjung. Ilustrasi pembuka halaman
+OSIS dan Pendidikan Karakter tidak dipakai lagi.
+
 **Penanda kartunya nomor urut, bukan ikon per bagian.** Judul bagiannya
 ditulis sekolah dan bisa apa saja, jadi ikon yang dipilih di sini pasti
 sekadar tempelan pada sebagian judul. Nomor selalu benar, dan sekaligus

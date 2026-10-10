@@ -85,4 +85,28 @@ await panggil("PUT", "/api/admin/pengaturan", { pengaturan: {
   daftar_ulang_syarat: "Bawa ijazah atau SKL asli beserta fotokopinya\nBawa Kartu Keluarga dan akta kelahiran\nBawa pas foto 3x4 sebanyak dua lembar",
 } }, T);
 
+// Naskah contoh untuk halaman Kurikulum, memperlihatkan hasil template
+// "Pakai template" yang sudah diisi. Hanya di demo; setiap paragraf diawali
+// "Contoh" supaya tidak terbaca sebagai keterangan resmi sekolah.
+const halamanAdmin = (await panggil("GET", "/api/admin/halaman", undefined, T)).data;
+const kur = halamanAdmin.find((h) => h.slug === "kurikulum");
+if (kur) {
+  const fd = new FormData();
+  for (const k of ["slug", "judul", "ringkasan", "visi", "misi", "galeri_kategori", "kelompok", "urutan"]) fd.append(k, String(kur[k] ?? ""));
+  fd.append("aktif", kur.aktif ? "1" : "0");
+  fd.append("isi", [
+    "Contoh naskah: halaman ini diisi dari kotak Naskah di panel admin. Paragraf pembuka seperti ini tampil lebih besar di atas bagian-bagiannya.",
+    "## Kurikulum yang dipakai",
+    "Contoh: sekolah menyebut nama kurikulum dan tahun penerapannya di sini.",
+    "## Struktur mata pelajaran",
+    "Contoh: mata pelajaran kelompok umum untuk kelas X, XI, dan XII dituliskan di bagian ini.\n\nContoh paragraf kedua, untuk catatan tambahan.",
+    "## Peminatan",
+    "Contoh: peminatan yang dibuka dan mata pelajaran pilihannya.",
+    "## Penilaian dan rapor",
+    "Contoh: bentuk penilaian, jadwal pembagian rapor, dan kriteria kenaikan kelas.",
+  ].join("\n\n"));
+  const j = await fetch(`${API}/api/admin/halaman/${kur.id}`, { method: "PUT", headers: { Authorization: `Bearer ${T}` }, body: fd });
+  if (!j.ok) throw new Error(`PUT halaman kurikulum: ${j.status} ${await j.text()}`);
+}
+
 console.log("contoh data demo terisi");
