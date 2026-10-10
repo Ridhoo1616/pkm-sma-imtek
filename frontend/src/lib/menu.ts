@@ -139,7 +139,7 @@ export const MENU: MenuUtama[] = [
       {
         jalur: "/ppdb/cek",
         label: "Cek Status & Hasil",
-        keterangan: "Memantau verifikasi berkas dan melihat hasil seleksi.",
+        keterangan: "Memantau verifikasi berkas dan melihat pengumuman hasil.",
       },
       {
         jalur: "/faq",

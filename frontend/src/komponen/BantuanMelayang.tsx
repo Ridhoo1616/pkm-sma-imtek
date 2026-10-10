@@ -61,7 +61,7 @@ const ALUR: Langkah[] = [
   },
   {
     kunci: "hasil",
-    label: "Lihat hasil seleksi",
+    label: "Lihat pengumuman",
     jalur: "/ppdb/cek",
     keterangan: "Hasilnya muncul di halaman Cek Status begitu panitia menetapkannya.",
   },

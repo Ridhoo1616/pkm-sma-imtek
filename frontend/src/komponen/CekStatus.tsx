@@ -155,7 +155,7 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
         return (
           <MunculLangsung className="border-t border-garis pt-10">
             <p className={"text-xs font-semibold tracking-[0.14em] uppercase " + (diterima ? "text-green-700" : "text-samar")}>
-              Hasil seleksi · PPDB {hasil.tahun_ajaran}
+              Pengumuman · PPDB {hasil.tahun_ajaran}
             </p>
             <h2 className="mt-4 max-w-[18ch] text-4xl leading-[1.05] font-bold tracking-tight text-biru-tua md:text-5xl">
               {isi.judul}

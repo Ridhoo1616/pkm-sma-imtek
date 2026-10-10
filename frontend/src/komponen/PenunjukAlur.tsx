@@ -36,7 +36,7 @@ const TAHAP: Tahap[] = [
   { kunci: "ketentuan", label: "Baca ketentuan", jalur: "/ppdb" },
   { kunci: "daftar", label: "Isi formulir", jalur: "/ppdb/daftar" },
   { kunci: "pantau", label: "Verifikasi berkas", jalur: "/ppdb/cek" },
-  { kunci: "hasil", label: "Hasil seleksi", jalur: "/ppdb/cek" },
+  { kunci: "hasil", label: "Pengumuman", jalur: "/ppdb/cek" },
 ];
 
 export function PenunjukAlur({
