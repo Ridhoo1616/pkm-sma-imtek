@@ -5,7 +5,6 @@ import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import { data } from "../../lib/tembolok";
 import { bagianNaskah, belumTerisi, kePoinTerisi } from "@/lib/format";
 import PetakGaleri from "@/komponen/Galeri";
-import { IkonPanahKanan } from "@/komponen/Ikon";
 import { tombolGelap } from "../../lib/gaya";
 import type { Galeri, Halaman } from "@/lib/tipe";
 
@@ -110,9 +109,8 @@ const induk = h ? INDUK[h.kelompok] : undefined;
                 <div>
                   <h2 class="judul-bagian">Belum diterbitkan</h2>
                   <p class="max-w-xl text-[17px] leading-relaxed text-samar">
-                    Sekolah belum mengirim naskah untuk halaman ini. Bila Anda memerlukan informasinya sekarang, tanyakan langsung ke sekolah.
+                    Sekolah belum mengirim naskah untuk halaman ini.
                   </p>
-                  <a href="/kontak" class={"mt-6 " + tombolGelap}>Tanyakan ke sekolah <IkonPanahKanan ukuran={15} /></a>
                 </div>
               </section>
             )

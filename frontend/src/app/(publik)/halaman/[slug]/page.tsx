@@ -371,13 +371,6 @@ export default async function HalamanNaskah(
                     polos
                   />
                 </div>
-                <Link
-                  href="/kontak"
-                  className="mt-6 inline-flex items-center gap-2 rounded-lg bg-biru px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-biru-tua"
-                >
-                  Tanyakan ke sekolah
-                  <IkonPanahKanan ukuran={16} />
-                </Link>
               </div>
             )}
           </article>
