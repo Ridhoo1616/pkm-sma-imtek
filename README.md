@@ -168,7 +168,7 @@ memeriksa isinya kembali utuh.
 |---|---|---|
 | Informasi PPDB | `/ppdb` | Jadwal, empat jalur, alur, dokumen yang diminta, kuota per peminatan, rincian biaya |
 | Formulir Pendaftaran | `/ppdb/daftar` | Lima langkah pengisian + unggah enam dokumen + pernyataan kebenaran data |
-| Cek Status | `/ppdb/cek` | Pantau hasil verifikasi, unduh bukti pendaftaran dan surat |
+| Cek Status | `/ppdb/cek` | Pantau hasil verifikasi, unduh bukti pendaftaran, dan lihat ucapan selamat beserta peminatan bila diterima |
 
 Formulirnya dibagi lima langkah dan dapat dilompati bebas. Bila server menolak
 isian, halaman otomatis kembali ke langkah yang memuat kesalahan pertama, dan
@@ -237,6 +237,11 @@ halaman publik disegarkan seketika.
 > 10 Oktober 2026 (migrasi `026_hapus_ujian.sql`): PPDB berhenti pada
 > pendaftaran dan keputusan Diterima, Cadangan, atau Ditolak. Catatan
 > pengujian di bawah yang menyebut tes seleksi bersifat historis.
+>
+> Modul Surat (jenis surat, penomoran, penerbitan massal, PDF berkop, dan
+> bagian "Surat untuk Anda" di Cek Status) dihapus pada 10 Oktober 2026
+> (migrasi `027_hapus_surat.sql`). Pendaftar yang diterima kini melihat ucapan
+> selamat, peminatan, dan langkah daftar ulang langsung di halaman Cek Status.
 
 **Notifikasi WhatsApp.** Pesan disusun sistem saat status pendaftar diubah,
 lalu **menunggu ditinjau** panitia, bukan langsung terkirim; pesan yang salah

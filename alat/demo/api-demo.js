@@ -16,8 +16,8 @@
 (() => {
   "use strict";
   const DASAR = globalThis.__DASAR_DEMO || "";
-  const KUNCI = "demo_pkm_v8";
-  const KUNCI_GAMBAR = "demo_pkm_v8_gambar";
+  const KUNCI = "demo_pkm_v9";
+  const KUNCI_GAMBAR = "demo_pkm_v9_gambar";
 
   // GitHub Pages menyajikan /admin/masuk sebagai /admin/masuk/ (folder berisi
   // index.html). Aplikasinya dirender untuk jalur tanpa garis miring akhir,
@@ -54,8 +54,6 @@
         ...u,
         sandi: u.username === "admin" ? "admin123" : u.username === "panitia" ? "panitia123" : "",
       })),
-      "jenis-surat": a["/api/admin/jenis-surat"].data,
-      surat: a["/api/admin/surat"].data,
       pesan: a["/api/admin/pesan"].data,
       notifikasi: a["/api/admin/notifikasi"].data,
       "tanya-buntu": a["/api/admin/tanya-buntu"].data,
@@ -320,27 +318,7 @@
     ]);
   }
 
-  function pdfSurat(s) {
-    const j = kol("jenis-surat").find((x) => x.id === s.jenis_id) || {};
-    return buatPdf([
-      ...kop(),
-      [`Nomor    : ${s.nomor_surat}`],
-      [`Lampiran : ${s.lampiran || "-"}`],
-      [`Perihal  : ${s.perihal}`, { jarak: 10 }],
-      ...(s.tujuan ? [["Kepada Yth."], [s.tujuan, { jarak: 10 }]] : []),
-      [s.isi, { jarak: 20 }],
-      [`${atur("kota") || ""}, ${tanggalPanjang(s.tanggal_surat)}`],
-      [j.penanda_tangan_jabatan || "Kepala Sekolah", { jarak: 40 }],
-      [j.penanda_tangan_nama || "", { tebal: true }],
-      ...(j.penanda_tangan_nip ? [[`NIP. ${j.penanda_tangan_nip}`]] : []),
-      ["", { jarak: 20 }],
-      ...(s.dibatalkan ? [["SURAT INI DIBATALKAN: " + s.alasan_batal, { tebal: true }]] : []),
-      catatanDemo,
-    ]);
-  }
-
   const BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-  const ROMAWI = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
   function tanggalPanjang(iso) {
     const [t, b, h] = String(iso).slice(0, 10).split("-").map(Number);
     return `${h} ${BULAN[b - 1]} ${t}`;
@@ -374,13 +352,6 @@
     );
     if (!p) galat(404, "Data pendaftaran tidak ditemukan. Periksa kembali nomor registrasi dan tanggal lahir Anda.");
     return p;
-  }
-
-  function suratUntuk(p) {
-    return kol("surat")
-      .filter((s) => s.pendaftar_id === p.id && !s.dibatalkan)
-      .filter((s) => (kol("jenis-surat").find((j) => j.id === s.jenis_id) || {}).tampil_di_cek_status)
-      .map((s) => ({ id: s.id, jenis: s.nama_jenis, nomor_surat: s.nomor_surat, perihal: s.perihal, tanggal_surat: s.tanggal_surat }));
   }
 
   function jurusanDari(id) {
@@ -459,66 +430,6 @@
     return hasil;
   }
 
-  /* ---------- surat ---------- */
-
-  function periodeSurat(atur_ulang, tgl) {
-    if (atur_ulang === "bulanan") return tgl.slice(0, 7);
-    if (atur_ulang === "tahunan") return tgl.slice(0, 4);
-    return "-";
-  }
-
-  function susunNomor(format, urut, kode, tgl, tahunAjaran) {
-    const [t, b] = tgl.split("-");
-    return format.replace(/\{([a-z_]+)(?::(\d))?\}/g, (m, nama, lebar) => {
-      switch (nama) {
-        case "urut": return String(urut).padStart(Number(lebar) || 0, "0");
-        case "kode": return kode;
-        case "tahun": return t;
-        case "bulan": return b;
-        case "bulan_romawi": return ROMAWI[Number(b) - 1];
-        case "tahun_ajaran": return tahunAjaran;
-        default: return m;
-      }
-    });
-  }
-
-  function nomorBerikut(jenis, tgl) {
-    const periode = periodeSurat(jenis.atur_ulang, tgl);
-    const urut = Math.max(0, ...kol("surat").filter((s) => s.jenis_id === jenis.id && s.periode === periode).map((s) => s.nomor_urut)) + 1;
-    return { periode, nomor_urut: urut, nomor_surat: susunNomor(jenis.format_nomor, urut, jenis.kode, tgl, atur("ppdb_tahun")) };
-  }
-
-  function isiNaskah(teks, nilai) {
-    return String(teks || "").replace(/\{([a-z_]+)\}/g, (m, k) => (k in nilai ? nilai[k] : m));
-  }
-
-  function nilaiNaskah(nomor, tgl, p) {
-    const n = {
-      nomor_surat: nomor, tanggal_surat: tanggalPanjang(tgl), nama_sekolah: atur("nama_sekolah"), tahun_ajaran: atur("ppdb_tahun"),
-    };
-    if (p) Object.assign(n, {
-      nama_lengkap: p.nama_lengkap, no_registrasi: p.no_registrasi, nisn: p.nisn, jalur: p.jalur,
-      peminatan: p.nama_jurusan, sekolah_asal: p.asal_sekolah, status: p.status,
-    });
-    return n;
-  }
-
-  function terbitkanSurat(jenis, isi, u, p) {
-    const tgl = String(isi.tanggal_surat || "").slice(0, 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(tgl)) galat(400, "Data yang dikirim belum benar.", { tanggal_surat: "Tanggal surat wajib diisi." });
-    const n = nomorBerikut(jenis, tgl);
-    const nilai = nilaiNaskah(n.nomor_surat, tgl, p);
-    const s = {
-      id: idBaru(kol("surat")), jenis_id: jenis.id, nama_jenis: jenis.nama, ...n, tanggal_surat: tgl,
-      perihal: isiNaskah(isi.perihal ?? jenis.perihal_bawaan, nilai), tujuan: isiNaskah(isi.tujuan ?? jenis.tujuan_bawaan, nilai),
-      lampiran: isi.lampiran || "", isi: isiNaskah(isi.isi ?? jenis.isi_bawaan, nilai),
-      pendaftar_id: p ? p.id : null, nama_pendaftar: p ? p.nama_lengkap : "", no_registrasi: p ? p.no_registrasi : "",
-      dibatalkan: false, alasan_batal: "", dibuat_oleh: u.nama, dibuat: sekarang(), baru: true,
-    };
-    kol("surat").push(s);
-    return s;
-  }
-
   /* ---------- koleksi umum ---------- */
 
   // Koleksi dengan tambah/ubah/hapus yang seragam. `formulir`: dikirim sebagai
@@ -537,12 +448,11 @@
     biaya: { admin: true },
     faq: {},
     pengguna: { admin: true },
-    "jenis-surat": { admin: true },
   };
   const PESAN_TAMBAH = {
     jurusan: "Peminatan", berita: "Berita", galeri: "Foto", fasilitas: "Fasilitas", halaman: "Halaman",
     "tenaga-pendidik": "Data tenaga pendidik", agenda: "Agenda", "kegiatan-siswa": "Kegiatan", pustaka: "Koleksi pustaka",
-    biaya: "Rincian biaya", faq: "Pertanyaan", pengguna: "Pengguna", "jenis-surat": "Jenis surat",
+    biaya: "Rincian biaya", faq: "Pertanyaan", pengguna: "Pengguna",
   };
 
   async function isiDariBadan(badan, daftar, cfg, lama) {
@@ -575,7 +485,6 @@
     const butir = { id: idBaru(daftar), ...isi, dibuat: sekarang(), diubah: sekarang() };
     if (nama === "berita") Object.assign(butir, { slug: isi.slug || slugDari(isi.judul), dibaca: 0, penulis: isi.penulis || u.nama });
     if (nama === "halaman" && !isi.slug) butir.slug = slugDari(isi.judul);
-    if (nama === "jenis-surat") butir.jumlah_surat = 0;
     if (nama === "pengguna") butir.masuk_akhir = null;
     daftar.push(butir);
     return { pesan: `${PESAN_TAMBAH[nama]} berhasil ditambahkan.`, id: butir.id, slug: butir.slug };
@@ -588,7 +497,6 @@
     const isi = await isiDariBadan(badan, daftar, cfg, butir);
     if (nama === "pengguna" && !isi.sandi) delete isi.sandi;
     Object.assign(butir, isi, { diubah: sekarang() });
-    if (nama === "jenis-surat") for (const s of kol("surat")) if (s.jenis_id === id) s.nama_jenis = butir.nama;
     return { pesan: `${PESAN_TAMBAH[nama]} berhasil diperbarui.` };
   }
 
@@ -597,9 +505,6 @@
     const i = daftar.findIndex((x) => x.id === id);
     if (i < 0) tidakAda(PESAN_TAMBAH[nama]);
     if (nama === "pengguna" && id === u.id) galat(400, "Anda tidak dapat menghapus akun yang sedang dipakai.");
-    if (nama === "jenis-surat" && kol("surat").some((s) => s.jenis_id === id)) {
-      galat(409, "Jenis surat ini sudah dipakai surat yang terbit, jadi tidak dapat dihapus. Nonaktifkan saja.");
-    }
     if (nama === "jurusan" && semuaPendaftar().some((p) => p.jurusan_id === id)) {
       galat(409, "Peminatan ini sudah dipilih pendaftar, jadi tidak dapat dihapus. Nonaktifkan saja.");
     }
@@ -647,11 +552,6 @@
       }
       case "pengguna":
         return { ...tambahan("/api/admin/pengguna"), data: daftar.map(tanpaSandi) };
-      case "jenis-surat":
-        return {
-          ...tambahan("/api/admin/jenis-surat"),
-          data: urutkan(daftar).map((j) => ({ ...j, jumlah_surat: kol("surat").filter((s) => s.jenis_id === j.id).length })),
-        };
       case "biaya": {
         const r = { ...tambahan(publik ? "/api/biaya" : "/api/admin/biaya"), data: urutkan(daftar) };
         if (publik) {
@@ -766,22 +666,15 @@
       no_registrasi: p.no_registrasi, nama_lengkap: p.nama_lengkap, jalur: p.jalur, nama_jurusan: p.nama_jurusan,
       status: p.status, tahun_ajaran: p.tahun_ajaran, catatan_admin: p.catatan_admin || "",
       dibuat: waktuSetempat(p.dibuat), pengumuman: atur("ppdb_pengumuman"),
-      surat: suratUntuk(p),
+      ...(p.status === "Diterima" && {
+        daftar_ulang: { jadwal: atur("daftar_ulang_jadwal"), tempat: atur("daftar_ulang_tempat"), syarat: atur("daftar_ulang_syarat") },
+      }),
     };
   });
   di("POST", "/api/ppdb/bukti", async ({ badan }) => {
     const p = cariPendaftar(badan.no_registrasi, badan.tanggal_lahir);
     return (!S.diubah[p.id] && (await pdfRekaman(`bukti-${p.id}.pdf`))) || pdfPendaftar(p);
   });
-  di("POST", "/api/ppdb/surat", async ({ badan }) => {
-    const p = cariPendaftar(badan.no_registrasi, badan.tanggal_lahir);
-    const s = suratUntuk(p).find((x) => x.id === Number(badan.id)) || tidakAda("Surat");
-    return pdfUntukSurat(kol("surat").find((x) => x.id === s.id));
-  });
-  async function pdfUntukSurat(s) {
-    return (!s.baru && !s.disunting && !s.dibatalkan && (await pdfRekaman(`surat-${s.id}.pdf`))) || pdfSurat(s);
-  }
-
   // --- dasbor & laporan ---
   di("GET", "/api/admin/dasbor", ({ kepala }) => {
     pengguna(kepala);
@@ -881,77 +774,6 @@
     const x = ambilPendaftar(p.id);
     return (!S.diubah[x.id] && (await pdfRekaman(`bukti-${x.id}.pdf`))) || pdfPendaftar(x);
   });
-
-  // --- surat ---
-  di("GET", "/api/admin/surat", ({ kepala, q }) => {
-    pengguna(kepala);
-    let d = [...kol("surat")].sort((a, b) => String(b.tanggal_surat).localeCompare(String(a.tanggal_surat)) || b.id - a.id);
-    const jenis = q.get("jenis_id");
-    if (jenis) d = d.filter((s) => String(s.jenis_id) === jenis);
-    const pd = q.get("pendaftar_id");
-    if (pd) d = d.filter((s) => String(s.pendaftar_id) === pd);
-    const th = q.get("tahun");
-    if (th) d = d.filter((s) => s.tanggal_surat.startsWith(th));
-    d = d.filter((s) => cocokCari(s, q.get("cari"), ["nomor_surat", "perihal", "tujuan", "nama_pendaftar", "no_registrasi"]));
-    return halamanan(d, q, 25);
-  });
-  const ambilJenis = (id) => kol("jenis-surat").find((j) => j.id === Number(id)) || galat(400, "Data yang dikirim belum benar.", { jenis_id: "Jenis surat wajib dipilih." });
-  di("GET", "/api/admin/surat/pratinjau-nomor", ({ kepala, q }) => {
-    pengguna(kepala);
-    const j = ambilJenis(q.get("jenis_id"));
-    return nomorBerikut(j, String(q.get("tanggal") || hariIni()).slice(0, 10));
-  });
-  di("POST", "/api/admin/surat", ({ kepala, badan }) => {
-    const u = pengguna(kepala);
-    const j = ambilJenis(badan.jenis_id);
-    const p = badan.pendaftar_id ? ambilPendaftar(badan.pendaftar_id) : null;
-    if (j.untuk_pendaftar && !p) galat(400, "Data yang dikirim belum benar.", { pendaftar_id: "Jenis surat ini untuk pendaftar; pilih pendaftarnya." });
-    const s = terbitkanSurat(j, badan, u, p);
-    return [201, { pesan: `Surat ${s.nomor_surat} berhasil diterbitkan.`, id: s.id, nomor_surat: s.nomor_surat }];
-  });
-  di("POST", "/api/admin/surat/massal", ({ kepala, badan }) => {
-    const u = pengguna(kepala);
-    const j = ambilJenis(badan.jenis_id);
-    const tahun = badan.tahun_ajaran || atur("ppdb_tahun");
-    let d = semuaPendaftar().filter((p) => p.tahun_ajaran === tahun);
-    if (badan.pendaftar_ids && badan.pendaftar_ids.length) d = d.filter((p) => badan.pendaftar_ids.includes(p.id));
-    else d = d.filter((p) => p.status === badan.status);
-    if (badan.lewati_yang_sudah) d = d.filter((p) => !kol("surat").some((s) => s.jenis_id === j.id && s.pendaftar_id === p.id && !s.dibatalkan));
-    d.sort((a, b) => a.no_registrasi.localeCompare(b.no_registrasi));
-    if (badan.hanya_hitung) return { jumlah: d.length };
-    if (!d.length) galat(400, "Tidak ada pendaftar yang cocok dengan pilihan ini.");
-    const terbit = d.map((p) => terbitkanSurat(j, { tanggal_surat: badan.tanggal_surat }, u, p));
-    return [201, { jumlah: terbit.length, pesan: `${terbit.length} surat berhasil diterbitkan, nomor ${terbit[0].nomor_surat} sampai ${terbit[terbit.length - 1].nomor_surat}.` }];
-  });
-  const ambilSurat = (id) => kol("surat").find((s) => s.id === Number(id)) || tidakAda("Surat");
-  di("PUT", "/api/admin/surat/{id}", ({ kepala, p, badan }) => {
-    pengguna(kepala);
-    const s = ambilSurat(p.id);
-    if (s.dibatalkan) galat(409, "Surat yang dibatalkan tidak dapat disunting.");
-    const tgl = String(badan.tanggal_surat || s.tanggal_surat).slice(0, 10);
-    const j = kol("jenis-surat").find((x) => x.id === s.jenis_id);
-    if (periodeSurat(j.atur_ulang, tgl) !== s.periode) {
-      galat(400, "Data yang dikirim belum benar.", { tanggal_surat: "Tanggal baru berada di periode penomoran lain. Batalkan surat ini lalu terbitkan yang baru." });
-    }
-    Object.assign(s, { tanggal_surat: tgl, perihal: badan.perihal ?? s.perihal, tujuan: badan.tujuan ?? s.tujuan, lampiran: badan.lampiran ?? s.lampiran, isi: badan.isi ?? s.isi, disunting: true });
-    return { pesan: "Surat berhasil diperbarui." };
-  });
-  di("PATCH", "/api/admin/surat/{id}/batal", ({ kepala, p, badan }) => {
-    pengguna(kepala);
-    const s = ambilSurat(p.id);
-    if (badan.batal && !String(badan.alasan || "").trim()) galat(400, "Data yang dikirim belum benar.", { alasan: "Tuliskan alasan pembatalan." });
-    Object.assign(s, { dibatalkan: !!badan.batal, alasan_batal: badan.batal ? badan.alasan : "" });
-    return { pesan: badan.batal ? `Surat ${s.nomor_surat} dibatalkan. Nomornya tetap tercatat.` : `Pembatalan surat ${s.nomor_surat} dicabut.` };
-  });
-  di("DELETE", "/api/admin/surat/{id}", ({ kepala, p }) => {
-    pengguna(kepala, true);
-    const s = ambilSurat(p.id);
-    const terakhir = Math.max(...kol("surat").filter((x) => x.jenis_id === s.jenis_id && x.periode === s.periode).map((x) => x.nomor_urut));
-    if (s.nomor_urut !== terakhir) galat(409, "Hanya surat bernomor terakhir yang dapat dihapus, supaya nomor surat tidak berlubang. Batalkan saja surat ini.");
-    kol("surat").splice(kol("surat").indexOf(s), 1);
-    return { pesan: `Surat ${s.nomor_surat} dihapus.` };
-  });
-  di("GET", "/api/admin/surat/{id}/pdf", async ({ kepala, p }) => (pengguna(kepala), pdfUntukSurat(ambilSurat(p.id))));
 
   // --- pesan masuk ---
   di("GET", "/api/admin/pesan", ({ kepala, q }) => {

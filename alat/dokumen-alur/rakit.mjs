@@ -123,8 +123,8 @@ const sistemPublik = flowchart(
     G("qc", "B", 2, "d", ["Cek status", "pendaftaran?"]),
     G("isi", "B", 3, "p", ["Mengisi nomor reg.", "dan tanggal lahir"]),
     G("qk", "B", 4, "d", ["Data cocok?"]),
-    G("lihat", "B", 5, "p", ["Melihat status,", "catatan, pengumuman"]),
-    G("unduh", "B", 6, "p", ["Mengunduh bukti", "dan surat"]),
+    G("lihat", "B", 5, "p", ["Melihat status, catatan,", "dan ucapan selamat"]),
+    G("unduh", "B", 6, "p", ["Mengunduh bukti", "pendaftaran"]),
     G("x2", "B", 7, "t", "Selesai"),
     G("qq", "C", 2, "d", ["Ada", "pertanyaan?"]),
     G("tanya", "C", 3, "p", ["Bertanya lewat", "\"Butuh bantuan?\""]),
@@ -169,13 +169,6 @@ const sistemAdmin = flowchart(
     G("kirim", "A", 12, "p", ["Meninjau dan", "mengirim WhatsApp"]),
     G("xa", "A", 13, "t", "Selesai"),
     G("tolak", "B", 3, "p", ["Ditolak sementara,", "coba 10 menit lagi"]),
-    G("qsr", "B", 6, "d", ["Menerbitkan", "surat?"]),
-    G("jenis", "B", 7, "p", ["Memilih jenis", "surat dan tanggal"]),
-    G("qm", "B", 8, "d", ["Banyak", "pendaftar?"]),
-    G("naskah", "B", 9, "p", ["Menulis perihal,", "tujuan, dan isi"]),
-    G("nomor", "B", 10, "p", ["Sistem memberi", "nomor urut"]),
-    G("pdf", "B", 11, "doc", ["Surat PDF", "berkop sekolah"]),
-    G("xb", "B", 12, "t", "Selesai"),
     G("x0", "C", 3, "t", "Selesai"),
     G("qk", "C", 6, "d", ["Mengelola", "konten?"]),
     G("ubah", "C", 7, "p", ["Mengubah berita,", "galeri, halaman"]),
@@ -193,15 +186,12 @@ const sistemAdmin = flowchart(
     E("q5", "tolak", ["r", "l"], "Ya"), E("tolak", "x0", ["r", "l"]), E("q5", "qs", ["b", "t"], "Tidak"),
     E("qs", "isi", ["l", "l"], "Tidak", { saluran: SAL.kiri }), E("qs", "dasbor", ["b", "t"], "Ya"),
     E("dasbor", "qv"),
-    E("qv", "qsr", ["r", "l"], "Tidak"), E("qv", "rinci", ["b", "t"], "Ya"),
-    E("qsr", "qk", ["r", "l"], "Tidak"), E("qsr", "jenis", ["b", "t"], "Ya"),
+    E("qv", "qk", ["r", "l"], "Tidak"), E("qv", "rinci", ["b", "t"], "Ya"),
     E("qk", "qa", ["r", "l"], "Tidak"), E("qk", "ubah", ["b", "t"], "Ya"),
     E("qa", "atur", ["t", "b"], "Ya"), E("qa", "keluar", ["b", "t"], "Tidak"), E("keluar", "xd"),
     E("atur", "dasbor", ["l", "r"]),
     E("rinci", "qbk"), E("qbk", "status", ["l", "l"], "Tidak", { saluran: SAL.kiri }), E("qbk", "verif", ["b", "t"], "Ya"),
     E("verif", "status"), E("status", "notif"), E("notif", "kirim"), E("kirim", "xa"),
-    E("jenis", "qm"), E("qm", "nomor", ["r", "r"], "Ya", { saluran: SAL.BC }), E("qm", "naskah", ["b", "t"], "Tidak"),
-    E("naskah", "nomor"), E("nomor", "pdf"), E("pdf", "xb"),
     E("ubah", "qvl"), E("qvl", "ubah", ["r", "r"], "Tidak", { saluran: SAL.CD }), E("qvl", "db", ["b", "t"], "Ya"),
     E("db", "tampil"), E("tampil", "xc"),
   ],
@@ -220,7 +210,7 @@ const umum = flowchart(
     D("u5", 5, ["Lolos", "verifikasi?"]),
     P("u5t", 5, ["Status Ditolak"], "c"),
     P("u7", 6, ["Panitia menetapkan hasil:", "Diterima, Cadangan, Ditolak"]),
-    P("u8", 7, ["Surat dan notifikasi dikirim", "(Bagian 11 dan 12)"]),
+    P("u8", 7, ["Notifikasi dikirim ke pendaftar", "(Bagian 11)"]),
     P("u9", 8, ["Pendaftar melihat hasil di", "Cek Status (Bagian 8)"]),
     T("u10", 9, "Selesai"),
   ],
@@ -332,8 +322,8 @@ const cek = flowchart(
     P("k3t", 3, ["Sistem menampilkan", "data tidak ditemukan"], "c"),
     P("k4", 4, ["Sistem menampilkan status, catatan", "panitia, dan pengumuman"]),
     DOC("k5", 5, ["Bukti pendaftaran (PDF)"]),
-    D("k7", 6, ["Ada surat untuk", "pendaftar?"]),
-    DOC("k7y", 6, ["Surat dari sekolah (PDF)"], "c"),
+    D("k7", 6, ["Status", "Diterima?"]),
+    P("k7y", 6, ["Sistem menampilkan ucapan", "selamat, peminatan, dan", "langkah daftar ulang"], "c"),
     T("k8", 7.2, "Selesai"),
   ],
   [
@@ -379,17 +369,16 @@ const verifikasi = flowchart(
     D("b7", 4, ["Kuota peminatan", "masih tersedia?"]),
     P("b7t", 4, ["Status Cadangan"], "c"),
     P("b8", 5, ["Status Diterima"]),
-    P("b9", 6, ["Panitia menerbitkan surat", "keterangan diterima"]),
-    P("b10", 7, ["Sistem menyusun notifikasi", "untuk ditinjau panitia"]),
-    P("b11", 8, ["Pendaftar melihat hasil", "di Cek Status"]),
-    T("b12", 9, "Selesai"),
+    P("b10", 6, ["Sistem menyusun notifikasi", "untuk ditinjau panitia"]),
+    P("b11", 7, ["Pendaftar melihat ucapan selamat", "di Cek Status"]),
+    T("b12", 8, "Selesai"),
   ],
   [
     E("b0", "b1"), E("b1", "b3"),
     E("b3", "b3t", ["r", "l"], "Tidak"), E("b3", "b4", ["b", "t"], "Ya"),
     E("b4", "b7"),
     E("b7", "b7t", ["r", "l"], "Tidak"), E("b7", "b8", ["b", "t"], "Ya"),
-    E("b8", "b9"), E("b9", "b10"), E("b10", "b11"), E("b11", "b12"),
+    E("b8", "b10"), E("b10", "b11"), E("b11", "b12"),
     E("b3t", "b10", ["r", "r"], null, { saluran: 600 }),
     E("b7t", "b10", ["r", "r"], null, { saluran: 600 }),
   ],
@@ -420,38 +409,6 @@ const notifikasi = flowchart(
     E("n5", "n6", ["b", "t"], "Tidak"),
     E("n6", "n6t", ["r", "l"], "Tidak"), E("n6", "n7", ["b", "t"], "Ya"),
     E("n7", "n8"), E("n6t", "n8", ["b", "r"]), E("n8", "n9"),
-  ],
-);
-
-const surat = flowchart(
-  [
-    T("d0", 0),
-    D("d1", 1, ["Jenis surat", "sudah ada?"]),
-    P("d1t", 1, ["Admin membuat jenis surat", "dan format nomornya"], "c"),
-    D("d2", 2, ["Untuk satu surat atau", "banyak pendaftar?"]),
-    P("d3", 3, ["Panitia mengisi tanggal,", "perihal, tujuan, dan isi"]),
-    P("d3b", 3, ["Panitia memilih status", "pendaftar penerima"], "c"),
-    P("d4", 4, ["Sistem menampilkan", "pratinjau nomor"]),
-    P("d4b", 4, ["Sistem menghitung jumlah", "surat yang akan terbit"], "c"),
-    P("d5", 5, ["Panitia menyimpan surat"]),
-    P("d5b", 5, ["Panitia mengonfirmasi"], "c"),
-    P("d6", 6, ["Sistem mengunci penomoran dan", "memberi nomor urut berikutnya"]),
-    DOC("d7", 7, ["Surat PDF berkop sekolah"]),
-    D("d8", 8, ["Ditampilkan di", "Cek Status?"]),
-    P("d8t", 8, ["Surat tersimpan di", "Buku Agenda Surat"], "c"),
-    P("d9", 9, ["Pendaftar mengunduh surat", "dari halaman Cek Status"]),
-    T("d10", 10, "Selesai"),
-  ],
-  [
-    E("d0", "d1"),
-    E("d1", "d1t", ["r", "l"], "Tidak"), E("d1t", "d2", ["b", "t"]),
-    E("d1", "d2", ["b", "t"], "Ya", { kiri: true }),
-    E("d2", "d3", ["b", "t"], "Satu"), E("d2", "d3b", ["r", "t"], "Banyak"),
-    E("d3", "d4"), E("d4", "d5"), E("d3b", "d4b"), E("d4b", "d5b"),
-    E("d5", "d6"), E("d5b", "d6", ["b", "r"]),
-    E("d6", "d7"), E("d7", "d8"),
-    E("d8", "d8t", ["r", "l"], "Tidak"), E("d8", "d9", ["b", "t"], "Ya"),
-    E("d9", "d10"), E("d8t", "d10", ["b", "r"]),
   ],
 );
 
@@ -543,11 +500,11 @@ function arsitektur() {
     kotak(40, 12, 260, 52, "Pengunjung dan pendaftar", ["peramban komputer atau ponsel"]) +
     kotak(360, 12, 260, 52, "Panitia dan admin", ["peramban, masuk dengan akun panel"]) +
     kotak(40, 118, 260, 68, "Situs publik (Astro)", ["porta 3000", "profil, berita, PPDB, Cek Status"]) +
-    kotak(360, 118, 260, 68, "Panel admin (Next.js)", ["porta 3001", "verifikasi, surat, konten, pengaturan"]) +
-    kotak(230, 244, 200, 70, "Backend (Go)", ["porta 8090", "API, aturan PPDB, nomor surat, PDF"], true) +
+    kotak(360, 118, 260, 68, "Panel admin (Next.js)", ["porta 3001", "verifikasi, konten, pengaturan"]) +
+    kotak(230, 244, 200, 70, "Backend (Go)", ["porta 8090", "API, aturan PPDB, PDF"], true) +
     tabung(40, 382, 180, 70, "PostgreSQL", "seluruh data sekolah") +
     kotak(240, 382, 180, 70, "Folder unggahan", ["foto dan berkas", "pendaftar"]) +
-    kotak(440, 382, 180, 70, "Pembuat PDF", ["bukti pendaftaran,", "surat berkop"]) +
+    kotak(440, 382, 180, 70, "Pembuat PDF", ["bukti pendaftaran"]) +
     `</svg>`;
 }
 
@@ -603,7 +560,7 @@ li { margin: 0 0 2pt; }
 </table>
 
 <h2>1. Gambaran Sistem</h2>
-<p>Sistem terdiri atas situs publik dan panel admin yang memakai satu backend dan satu basis data. Aturan penting seperti kuota, penomoran surat, dan hak akses dijaga di backend, sehingga tidak dapat dilewati dari tampilan.</p>
+<p>Sistem terdiri atas situs publik dan panel admin yang memakai satu backend dan satu basis data. Aturan penting seperti kuota dan hak akses dijaga di backend, sehingga tidak dapat dilewati dari tampilan.</p>
 ${gambar(arsitektur(), "Arsitektur sistem")}
 <p style="margin-top:10pt">Pengunjung dan petugas sama-sama membuka alamat <code>localhost:3000</code>. Situs publik meneruskan alamat <code>/admin</code> ke panel admin, dan hanya backend yang menulis ke basis data.</p>
 
@@ -612,8 +569,8 @@ ${gambar(arsitektur(), "Arsitektur sistem")}
 <table class="data">
 <tr><th style="width:18%">Peran</th><th style="width:40%">Dapat melakukan</th><th>Tidak dapat</th></tr>
 <tr><td>Pengunjung</td><td>Membaca profil, berita, galeri, fasilitas, dan tanya jawab; mengirim pesan</td><td>Melihat data pendaftar</td></tr>
-<tr><td>Pendaftar</td><td>Mendaftar, Cek Status, mengunduh bukti pendaftaran dan surat</td><td>Melihat data pendaftar lain</td></tr>
-<tr><td>Panitia</td><td>Verifikasi, mengubah status, menerbitkan surat, mengelola konten dan pesan</td><td>Pengaturan, akun, peminatan, biaya, jenis surat, menghapus data</td></tr>
+<tr><td>Pendaftar</td><td>Mendaftar, Cek Status, mengunduh bukti pendaftaran, dan melihat ucapan selamat bila diterima</td><td>Melihat data pendaftar lain</td></tr>
+<tr><td>Panitia</td><td>Verifikasi, mengubah status, mengelola konten dan pesan</td><td>Pengaturan, akun, peminatan, biaya, menghapus data</td></tr>
 <tr><td>Admin</td><td>Semua tugas panitia ditambah seluruh isi kolom di sebelah kanan</td><td>-</td></tr>
 </table>
 <p style="margin-top:12pt"><b>Simbol flowchart</b> yang dipakai pada dokumen ini:</p>
@@ -655,7 +612,7 @@ ${gambar(pendaftaran, "Flowchart pendaftaran PPDB")}
 
 <section>
 <h2>7. Alur Cek Status dan Unduh Dokumen</h2>
-<p>Pendaftar memakai nomor registrasi dan tanggal lahir. Pendaftar dapat mengunduh bukti pendaftaran, dan surat bila sekolah sudah menerbitkannya.</p>
+<p>Pendaftar memakai nomor registrasi dan tanggal lahir. Pendaftar dapat mengunduh bukti pendaftaran. Bila diterima, halaman menampilkan ucapan selamat beserta peminatan dan langkah daftar ulang.</p>
 ${gambar(cek, "Flowchart cek status dan unduh dokumen")}
 </section>
 
@@ -675,12 +632,6 @@ ${gambar(verifikasi, "Flowchart verifikasi dan penetapan hasil")}
 <h2>10. Alur Notifikasi WhatsApp</h2>
 <p>Pesan tidak langsung terkirim. Panitia meninjaunya lebih dulu, karena pesan WhatsApp yang salah tidak dapat ditarik kembali.</p>
 ${gambar(notifikasi, "Flowchart notifikasi WhatsApp")}
-</section>
-
-<section>
-<h2>13. Alur Surat Keluar</h2>
-<p>Sekolah menentukan format nomor, misalnya <code>{urut:3}/{kode}/SMA-IMTEK/{bulan_romawi}/{tahun}</code>, dan sistem membagikan nomor urutnya. Surat yang dibatalkan tetap tercatat supaya nomor tidak berlubang.</p>
-${gambar(surat, "Flowchart penerbitan surat keluar")}
 </section>
 
 <section>

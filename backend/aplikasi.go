@@ -83,8 +83,8 @@ func (a *Aplikasi) atur(kunci string, bawaan ...string) string {
 	return nilai
 }
 
-// namaLengkapSekolah dipakai pada dokumen resmi: kop surat, bukti
-// pendaftaran, dan kartu peserta. Nama ringkas (`nama_sekolah`, misalnya
+// namaLengkapSekolah dipakai pada dokumen resmi seperti bukti
+// pendaftaran. Nama ringkas (`nama_sekolah`, misalnya
 // "SMAS IMTEK") tetap dipakai di tempat sempit seperti bilah menu.
 func (a *Aplikasi) namaLengkapSekolah() string {
 	if v := a.atur("nama_lengkap_sekolah"); v != "" && !dalamKurungSiku(v) {

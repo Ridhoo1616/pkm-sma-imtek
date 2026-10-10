@@ -104,8 +104,8 @@ const gambar =
     <div class="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {
         PELAKU.map((pel, i) => (
-          <div data-miring data-muncul={String(i * 0.07)} class="kaca kartu-sorot relative flex h-full gap-4 p-5">
-            <span aria-hidden="true" class="ikon-kartu grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru">
+          <div data-muncul={String(i * 0.07)} class="flex h-full gap-4 border-t border-garis pt-5">
+            <span aria-hidden="true" class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru">
               <pel.Ikon ukuran={26} />
             </span>
             <div class="min-w-0">

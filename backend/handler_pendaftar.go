@@ -263,8 +263,15 @@ func (a *Aplikasi) tanganiCekStatus(w http.ResponseWriter, r *http.Request) {
 		"pengumuman":    a.atur("ppdb_pengumuman"),
 	}
 
-	// Surat yang diterbitkan untuk pendaftar ini dan boleh diunduhnya sendiri.
-	jawab["surat"] = a.suratPendaftar(noReg)
+	// Langkah daftar ulang hanya dikirim kepada yang diterima. Nilainya apa
+	// adanya dari pengaturan; halaman yang menandai naskah yang belum diisi.
+	if status == "Diterima" {
+		jawab["daftar_ulang"] = map[string]string{
+			"jadwal": a.atur("daftar_ulang_jadwal"),
+			"tempat": a.atur("daftar_ulang_tempat"),
+			"syarat": a.atur("daftar_ulang_syarat"),
+		}
+	}
 
 	kirimJSON(w, http.StatusOK, jawab)
 }

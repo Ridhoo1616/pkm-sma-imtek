@@ -1,28 +1,58 @@
 "use client";
 
 import { useState } from "react";
-import { api, unduhBukti, unduhSuratPendaftar, GalatApi } from "@/lib/api";
+import { api, unduhBukti, GalatApi } from "@/lib/api";
 import { bukaBlob } from "@/lib/berkas";
 import { Teks, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import { PesanGalat } from "@/komponen/Memuat";
-import { Lencana } from "@/komponen/Bagian";
-import { tanggalJam, tanggalPanjang, warnaStatus } from "@/lib/format";
+import { belumTerisi, kePoinTerisi, tanggalJam, tanggalPanjang } from "@/lib/format";
 import type { StatusPendaftaran } from "@/lib/tipe";
 import { MunculLangsung } from "@/komponen/Gerak";
 
-/** Keterangan tiap status, supaya pendaftar paham artinya tanpa bertanya. */
-const ARTI_STATUS: Record<string, string> = {
-  "Menunggu Verifikasi":
-    "Berkas Anda sudah kami terima dan sedang menunggu pemeriksaan panitia. Belum ada tindakan yang perlu Anda lakukan.",
-  Terverifikasi:
-    "Berkas Anda sudah diperiksa dan dinyatakan lengkap. Menunggu penetapan hasil seleksi.",
-  Diterima:
-    "Selamat, Anda dinyatakan diterima. Lanjutkan dengan daftar ulang sesuai ketentuan sekolah.",
-  Cadangan:
-    "Anda masuk daftar cadangan. Bila ada peserta diterima yang tidak melakukan daftar ulang, panitia akan menghubungi Anda.",
-  Ditolak:
-    "Pendaftaran Anda belum dapat diterima. Keterangan dari panitia dapat dibaca di bawah, bila ada.",
-};
+/** Nama peminatan di basis data sering sudah berawalan "Peminatan". */
+const ringkasPeminatan = (nama: string) => nama.replace(/^Peminatan\s+/i, "");
+
+/**
+ * Judul dan kalimat pengantar tiap status. Yang diterima disapa langsung dan
+ * disebut peminatannya; yang lain cukup jelas dan tenang, tanpa hiasan.
+ */
+function isiHasil(h: StatusPendaftaran, pengumuman: string) {
+  const nama = h.nama_lengkap.split(" ")[0];
+  const peminatan = ringkasPeminatan(h.nama_jurusan);
+  switch (h.status) {
+    case "Diterima":
+      return {
+        judul: "Selamat, kamu diterima di SMAS IMTEK.",
+        pengantar: peminatan
+          ? `${nama}, kamu dinyatakan lulus seleksi dan diterima di Peminatan ${peminatan}. Kami menunggu kamu bergabung.`
+          : `${nama}, kamu dinyatakan lulus seleksi dan diterima. Kami menunggu kamu bergabung.`,
+      };
+    case "Cadangan":
+      return {
+        judul: "Kamu masuk daftar cadangan.",
+        pengantar: `Terima kasih sudah mendaftar, ${nama}. Bila ada peserta diterima yang tidak daftar ulang, panitia akan menghubungi kamu.`,
+      };
+    case "Ditolak":
+      return {
+        judul: "Pendaftaranmu belum dapat kami terima.",
+        pengantar: `Terima kasih sudah mendaftar di SMAS IMTEK, ${nama}. Catatan dari panitia, bila ada, dapat dibaca di bawah.`,
+      };
+    case "Terverifikasi":
+      return {
+        judul: "Berkasmu sudah lengkap.",
+        pengantar: pengumuman
+          ? `Hasil seleksi diumumkan pada ${tanggalPanjang(pengumuman)}. Belum ada yang perlu kamu lakukan.`
+          : "Kami sedang menetapkan hasil seleksi. Belum ada yang perlu kamu lakukan.",
+      };
+    default:
+      return {
+        judul: "Berkasmu sedang diperiksa.",
+        pengantar: pengumuman
+          ? `Panitia memeriksa kelengkapan berkas. Hasil seleksi diumumkan pada ${tanggalPanjang(pengumuman)}. Belum ada yang perlu kamu lakukan.`
+          : "Panitia memeriksa kelengkapan berkas. Belum ada yang perlu kamu lakukan.",
+      };
+  }
+}
 
 export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
   const [no, setNo] = useState(nomorAwal);
@@ -33,7 +63,6 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
   const [hasil, setHasil] = useState<StatusPendaftaran | null>(null);
   const [mengunduh, setMengunduh] = useState(false);
   const [galatBukti, setGalatBukti] = useState("");
-  const [mengunduhSurat, setMengunduhSurat] = useState<number | null>(null);
 
   async function cari(e: React.FormEvent) {
     e.preventDefault();
@@ -76,25 +105,6 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
     }
   }
 
-  async function ambilSurat(id: number, nomor: string) {
-    if (!hasil) return;
-    setGalatBukti("");
-    setMengunduhSurat(id);
-    try {
-      const { nama, blob } = await unduhSuratPendaftar({
-        no_registrasi: hasil.no_registrasi,
-        tanggal_lahir: tgl,
-        id,
-        nomor,
-      });
-      bukaBlob(nama, blob);
-    } catch (e) {
-      setGalatBukti(e instanceof GalatApi ? e.message : "Surat gagal diunduh.");
-    } finally {
-      setMengunduhSurat(null);
-    }
-  }
-
   return (
     <div className="space-y-8">
       <form onSubmit={cari} className="kartu p-6 md:p-7" noValidate>
@@ -130,98 +140,80 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
         </div>
       </form>
 
-      {hasil && (
-        <MunculLangsung className="kartu overflow-hidden">
-          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-garis bg-biru-muda px-6 py-5">
-            <div>
-              <p className="text-xs font-semibold tracking-wide text-samar uppercase">
-                Nomor registrasi
-              </p>
-              <p className="mt-0.5 text-2xl font-bold text-biru-tua">
-                {hasil.no_registrasi}
-              </p>
-            </div>
-            <Lencana jenis={warnaStatus(hasil.status)}>{hasil.status}</Lencana>
-          </div>
+      {hasil && (() => {
+        const isi = isiHasil(hasil, hasil.pengumuman);
+        const diterima = hasil.status === "Diterima";
+        const du = hasil.daftar_ulang;
+        const langkah: { t: string; k: string }[] = du
+          ? [
+              ...(belumTerisi(du.jadwal)
+                ? []
+                : [{ t: `Daftar ulang pada ${du.jadwal}`, k: belumTerisi(du.tempat) ? "" : `Di ${du.tempat}` }]),
+              ...kePoinTerisi(du.syarat).map((t) => ({ t, k: "" })),
+            ]
+          : [];
+        return (
+          <MunculLangsung className="border-t border-garis pt-10">
+            <p className={"text-xs font-semibold tracking-[0.14em] uppercase " + (diterima ? "text-green-700" : "text-samar")}>
+              Hasil seleksi · PPDB {hasil.tahun_ajaran}
+            </p>
+            <h2 className="mt-4 max-w-[18ch] text-4xl leading-[1.05] font-bold tracking-tight text-biru-tua md:text-5xl">
+              {isi.judul}
+            </h2>
+            <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-teks">{isi.pengantar}</p>
 
-          <dl className="divide-y divide-garis text-sm">
-            {[
-              { k: "Nama lengkap", v: hasil.nama_lengkap },
-              { k: "Tahun ajaran", v: hasil.tahun_ajaran },
-              { k: "Jalur pendaftaran", v: hasil.jalur },
-              { k: "Peminatan", v: hasil.nama_jurusan },
-              { k: "Waktu mendaftar", v: tanggalJam(hasil.dibuat) },
-            ].map(
-              (b) =>
-                b.v && (
-                  <div
-                    key={b.k}
-                    className="flex flex-col gap-0.5 px-6 py-3.5 sm:flex-row sm:justify-between sm:gap-4"
-                  >
-                    <dt className="text-samar">{b.k}</dt>
-                    <dd className="font-semibold text-teks sm:text-right">{b.v}</dd>
+            <dl className="mt-8 grid border-y border-garis sm:grid-cols-3">
+              {[
+                { k: "Nomor registrasi", v: hasil.no_registrasi },
+                { k: "Peminatan", v: ringkasPeminatan(hasil.nama_jurusan) },
+                { k: "Jalur", v: hasil.jalur },
+              ]
+                .filter((b) => b.v)
+                .map((b, i) => (
+                  <div key={b.k} className={"py-4 " + (i > 0 ? "border-t border-garis sm:border-t-0 sm:border-l sm:pl-6" : "")}>
+                    <dt className="text-sm text-samar">{b.k}</dt>
+                    <dd className="mt-0.5 text-xl font-semibold text-biru-tua">{b.v}</dd>
                   </div>
-                ),
-            )}
-          </dl>
-
-          <div className="space-y-4 border-t border-garis px-6 py-5">
-            <p className="text-sm leading-relaxed text-teks">
-              {ARTI_STATUS[hasil.status] ?? ""}
+                ))}
+            </dl>
+            <p className="mt-3 text-sm text-samar">
+              {hasil.nama_lengkap} · mendaftar {tanggalJam(hasil.dibuat)} · status {hasil.status}
             </p>
 
             {hasil.catatan_admin && (
-              <div className="rounded-lg border border-biru/20 bg-biru-muda px-5 py-4">
-                <p className="text-xs font-semibold tracking-wide text-biru uppercase">
-                  Catatan panitia
-                </p>
-                <p className="mt-1 text-sm leading-relaxed whitespace-pre-line text-teks">
-                  {hasil.catatan_admin}
+              <div className="mt-8 max-w-2xl">
+                <p className="text-xs font-semibold tracking-[0.14em] text-samar uppercase">Catatan panitia</p>
+                <p className="mt-1.5 leading-relaxed whitespace-pre-line text-teks">{hasil.catatan_admin}</p>
+              </div>
+            )}
+
+            {diterima && du && (
+              <div className="mt-10">
+                <h3 className="text-xl font-bold text-biru-tua">Yang perlu kamu lakukan</h3>
+                {langkah.length > 0 ? (
+                  <ol className="mt-3">
+                    {langkah.map((b, i) => (
+                      <li key={i} className="grid grid-cols-[2.25rem_1fr] border-t border-garis py-3.5 last:border-b">
+                        <span className="text-xl leading-snug font-bold text-emas tabular-nums">{i + 1}</span>
+                        <span>
+                          {b.t}
+                          {b.k && <small className="block text-sm text-samar">{b.k}</small>}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="mt-2 max-w-[56ch] text-teks">
+                    Panitia akan menghubungi kamu lewat WhatsApp untuk jadwal dan berkas daftar ulang.
+                  </p>
+                )}
+                <p className="mt-4 max-w-[56ch] text-sm text-samar">
+                  Bila tidak daftar ulang sampai batas waktunya, tempatmu dapat diberikan kepada pendaftar cadangan.
                 </p>
               </div>
             )}
 
-            {hasil.pengumuman && (
-              <p className="text-sm text-samar">
-                Pengumuman hasil seleksi dijadwalkan pada{" "}
-                <strong className="text-biru-tua">
-                  {tanggalPanjang(hasil.pengumuman)}
-                </strong>
-                .
-              </p>
-            )}
-
-            {/* Surat yang diterbitkan panitia untuk pendaftar ini, misalnya
-                surat keterangan diterima. Hanya jenis surat yang diizinkan
-                tampil di sini, dan surat yang dibatalkan tidak ikut. */}
-            {hasil.surat && hasil.surat.length > 0 && (
-              <div className="tanpa-cetak space-y-3 border-t border-garis pt-4">
-                <p className="text-xs font-semibold tracking-wide text-samar uppercase">
-                  Surat untuk Anda
-                </p>
-                <ul className="divide-y divide-garis rounded-lg border border-garis">
-                  {hasil.surat.map((s) => (
-                    <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-teks">{s.perihal || s.jenis}</p>
-                        <p className="text-xs text-samar">
-                          Nomor {s.nomor_surat} · {tanggalPanjang(s.tanggal_surat)}
-                        </p>
-                      </div>
-                      <Tombol
-                        jenis="kedua"
-                        onClick={() => ambilSurat(s.id, s.nomor_surat)}
-                        sedangJalan={mengunduhSurat === s.id}
-                      >
-                        {mengunduhSurat === s.id ? "Menyiapkan..." : "Unduh Surat (PDF)"}
-                      </Tombol>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="tanpa-cetak space-y-3 border-t border-garis pt-4">
+            <div className="tanpa-cetak mt-8 space-y-3">
               {galatBukti && <PesanGalat pesan={galatBukti} />}
               <div className="flex flex-wrap gap-2">
                 <Tombol onClick={ambilBukti} sedangJalan={mengunduh}>
@@ -232,13 +224,12 @@ export default function CekStatus({ nomorAwal = "" }: { nomorAwal?: string }) {
                 </Tombol>
               </div>
               <p className="text-xs leading-relaxed text-samar">
-                Bukti pendaftaran dirakit di server, jadi bentuknya sama di semua
-                peramban. Berkasnya memuat data pribadi, simpan di tempat yang aman.
+                Berkas bukti memuat data pribadi, simpan di tempat yang aman.
               </p>
             </div>
-          </div>
-        </MunculLangsung>
-      )}
+          </MunculLangsung>
+        );
+      })()}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { anakMenu } from "@/lib/menu";
 import { IkonPanahKanan } from "@/komponen/Ikon";
 
 /**
- * Kartu penunjuk ke halaman-halaman turunan sebuah kelompok menu. Dibaca
+ * Daftar penunjuk ke halaman-halaman turunan sebuah kelompok menu. Dibaca
  * dari susunan menu yang sama dengan navigasi atas, jadi tidak pernah
  * menyebut halaman yang tidak ada di menu.
  */
@@ -15,25 +15,21 @@ const anak = anakMenu(Astro.props.induk);
 
 {
   anak.length > 0 && (
-    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <ol class="divide-y divide-garis border-y border-garis">
       {anak.map((a, i) => (
-        <a
-          href={a.jalur}
-          data-miring
-          data-muncul={String((i % 3) * 0.07)}
-          class="kaca kartu-sorot group relative flex flex-col p-6"
-        >
-          <span class="ikon-kartu grid h-11 w-11 place-items-center rounded-xl bg-biru-muda text-base font-extrabold text-biru tabular-nums" aria-hidden="true">
-            {String(i + 1).padStart(2, "0")}
-          </span>
-          <h3 class="mt-4 text-lg leading-snug">{a.label}</h3>
-          {a.keterangan && <p class="mt-2 flex-1 text-sm leading-relaxed text-samar">{a.keterangan}</p>}
-          <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-emas">
-            Buka halaman
-            <span class="transition group-hover:translate-x-1"><IkonPanahKanan ukuran={14} /></span>
-          </span>
-        </a>
+        <li data-muncul={String((i % 4) * 0.05)}>
+          <a href={a.jalur} class="group flex items-center gap-5 py-5 transition hover:bg-white/60 sm:gap-8 sm:px-2">
+            <span class="w-8 shrink-0 text-lg font-extrabold text-emas tabular-nums" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-lg leading-snug font-bold text-biru-tua">{a.label}</span>
+              {a.keterangan && <span class="mt-1 block text-sm leading-relaxed text-samar">{a.keterangan}</span>}
+            </span>
+            <span class="shrink-0 text-biru transition group-hover:translate-x-1"><IkonPanahKanan ukuran={18} /></span>
+          </a>
+        </li>
       ))}
-    </div>
+    </ol>
   )
 }

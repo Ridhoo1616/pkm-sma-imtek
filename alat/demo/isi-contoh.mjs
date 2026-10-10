@@ -1,5 +1,5 @@
 // Mengisi contoh data yang belum ada di basis data asli, lewat API backend
-// demo, supaya setiap fitur di demo punya isi: jenis surat dan suratnya.
+// demo, supaya setiap fitur di demo punya isi: pengguna panitia dan Bursa Kerja Khusus.
 // Hanya untuk basis data sekali pakai yang dibuat alat/demo/rakit.sh.
 const API = process.env.API ?? "http://localhost:8190";
 
@@ -22,72 +22,6 @@ const panitia = pengguna.data.find((u) => u.username === "panitia");
 if (panitia) {
   await panggil("PUT", `/api/admin/pengguna/${panitia.id}`, { nama: panitia.nama, username: panitia.username, role: panitia.role, sandi: "panitia123" }, T);
 }
-
-/* ---------- surat ---------- */
-
-const JENIS = [
-  {
-    "nama": "Surat Undangan",
-    "kode": "UND",
-    "format_nomor": "{urut:3}/{kode}/SMAS-IMTEK/{bulan_romawi}/{tahun}",
-    "atur_ulang": "tahunan",
-    "untuk_pendaftar": false,
-    "tampil_di_cek_status": false,
-    "perihal_bawaan": "Undangan Rapat Orang Tua Siswa",
-    "tujuan_bawaan": "Bapak/Ibu Orang Tua/Wali Siswa",
-    "isi_bawaan": "Dengan hormat,\n\nSehubungan dengan dimulainya tahun ajaran {tahun_ajaran}, kami mengundang Bapak/Ibu untuk hadir pada rapat orang tua siswa di aula {nama_sekolah}.\n\nAtas perhatian dan kehadirannya kami ucapkan terima kasih.",
-    "penanda_tangan_nama": "Nama Kepala Sekolah, S.Pd., M.Pd.",
-    "penanda_tangan_jabatan": "Kepala Sekolah",
-    "penanda_tangan_nip": "",
-    "aktif": true,
-    "urutan": 1
-  },
-  {
-    "nama": "Surat Keterangan Diterima",
-    "kode": "SKD",
-    "format_nomor": "{urut:3}/SKD/PPDB/{tahun}",
-    "atur_ulang": "tahunan",
-    "untuk_pendaftar": true,
-    "tampil_di_cek_status": true,
-    "perihal_bawaan": "Keterangan Diterima sebagai Peserta Didik Baru",
-    "tujuan_bawaan": "{nama_lengkap}",
-    "isi_bawaan": "Dengan hormat,\n\nBerdasarkan hasil seleksi Penerimaan Peserta Didik Baru tahun ajaran {tahun_ajaran}, dengan ini kami menerangkan bahwa:\n\nNama: {nama_lengkap}\nNomor Registrasi: {no_registrasi}\nNISN: {nisn}\nPeminatan: {peminatan}\n\ndinyatakan DITERIMA sebagai peserta didik baru {nama_sekolah}.\n\nDemikian surat keterangan ini dibuat untuk dipergunakan sebagaimana mestinya.",
-    "penanda_tangan_nama": "Nama Kepala Sekolah, S.Pd., M.Pd.",
-    "penanda_tangan_jabatan": "Kepala Sekolah",
-    "penanda_tangan_nip": "",
-    "aktif": true,
-    "urutan": 2
-  },
-  {
-    "nama": "Surat Tugas",
-    "kode": "ST",
-    "format_nomor": "{urut:3}/ST/{bulan_romawi}/{tahun}",
-    "atur_ulang": "bulanan",
-    "untuk_pendaftar": false,
-    "tampil_di_cek_status": false,
-    "perihal_bawaan": "Surat Tugas",
-    "tujuan_bawaan": "",
-    "isi_bawaan": "Yang bertanda tangan di bawah ini menugaskan nama yang tercantum untuk ...",
-    "penanda_tangan_nama": "Nama Kepala Sekolah, S.Pd., M.Pd.",
-    "penanda_tangan_jabatan": "Kepala Sekolah",
-    "penanda_tangan_nip": "",
-    "aktif": true,
-    "urutan": 3
-  }
-];
-const idJenis = {};
-for (const j of JENIS) idJenis[j.kode] = (await panggil("POST", "/api/admin/jenis-surat", j, T)).id;
-
-const SURAT = [
-  { jenis_id: idJenis.UND, tanggal_surat: "2026-09-15", perihal: "Undangan Rapat Orang Tua Siswa", tujuan: "Bapak/Ibu Orang Tua/Wali Siswa Kelas X", lampiran: "-",
-    isi: "Dengan hormat,\n\nKami mengundang Bapak/Ibu untuk hadir pada rapat orang tua siswa kelas X yang akan dilaksanakan pada hari Sabtu, 3 Oktober 2026, pukul 08.00 WIB di aula sekolah.\n\nAtas perhatian dan kehadirannya kami ucapkan terima kasih." },
-  { jenis_id: idJenis.UND, tanggal_surat: "2026-09-22", perihal: "Undangan Pentas Seni", tujuan: "Komite Sekolah", lampiran: "-",
-    isi: "Dengan hormat,\n\nKami mengundang Komite Sekolah untuk menghadiri pentas seni siswa pada hari Jumat, 16 Oktober 2026 di lapangan sekolah.\n\nTerima kasih." },
-  { jenis_id: idJenis.ST, tanggal_surat: "2026-09-28", perihal: "Surat Tugas Pendamping Lomba", tujuan: "", lampiran: "-",
-    isi: "Yang bertanda tangan di bawah ini menugaskan guru pembina ekstrakurikuler untuk mendampingi siswa pada lomba cerdas cermat tingkat kabupaten." },
-];
-for (const s of SURAT) await panggil("POST", "/api/admin/surat", s, T);
-await panggil("POST", "/api/admin/surat/massal", { jenis_id: idJenis.SKD, tanggal_surat: "2026-09-25", status: "Diterima" }, T);
 
 /* ---------- Bursa Kerja Khusus ----------
    Nama perusahaannya sengaja berawalan "Contoh" supaya tidak terbaca
@@ -142,6 +76,13 @@ for (const [nisn, status, catatan] of [
 }
 await panggil("PUT", "/api/admin/pengaturan", { pengaturan: {
   bkk_keterangan: "Bursa Kerja Khusus (BKK) adalah layanan sekolah yang membantu lulusan mendapatkan pekerjaan: mengumumkan lowongan dari perusahaan mitra, menerima lamaran, meneruskannya ke perusahaan, dan mencatat lulusan yang tersalurkan.",
+} }, T);
+
+// Langkah daftar ulang yang tampil pada hasil "Diterima" di Cek Status.
+await panggil("PUT", "/api/admin/pengaturan", { pengaturan: {
+  daftar_ulang_jadwal: "1-10 Juli 2027, pukul 08.00-14.00",
+  daftar_ulang_tempat: "Ruang Tata Usaha SMAS IMTEK",
+  daftar_ulang_syarat: "Bawa ijazah atau SKL asli beserta fotokopinya\nBawa Kartu Keluarga dan akta kelahiran\nBawa pas foto 3x4 sebanyak dua lembar",
 } }, T);
 
 console.log("contoh data demo terisi");

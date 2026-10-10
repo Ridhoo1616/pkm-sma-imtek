@@ -36,7 +36,7 @@ const admin = {};
 for (const j of [
   "/api/admin/dasbor", "/api/admin/kunjungan", "/api/admin/laporan",
   "/api/admin/pendaftar?per_halaman=200", "/api/admin/jurusan", "/api/admin/berita?per_halaman=100",
-  "/api/admin/jenis-surat", "/api/admin/surat?per_halaman=100", "/api/admin/biaya", "/api/admin/faq",
+  "/api/admin/biaya", "/api/admin/faq",
   "/api/admin/tanya-buntu", "/api/admin/notifikasi?per_halaman=100",
   "/api/admin/sekolah?per_halaman=100", "/api/admin/pesan?per_halaman=100", "/api/admin/halaman",
   "/api/admin/tenaga-pendidik", "/api/admin/agenda", "/api/admin/kegiatan-siswa", "/api/admin/pustaka",
@@ -48,7 +48,7 @@ for (const j of [
 const detail = { pendaftar: {}, cek: {}, berita: {}, halaman: {} };
 for (const p of admin["/api/admin/pendaftar"].data) {
   detail.pendaftar[p.id] = await json(`/api/admin/pendaftar/${p.id}`, T);
-  // Jawaban Cek Status apa adanya, termasuk daftar suratnya.
+  // Jawaban Cek Status apa adanya.
   const cek = await fetch(API + "/api/ppdb/cek", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -68,10 +68,6 @@ for (const h of publik["/api/halaman"].data) {
 await mkdir(`${KELUAR}/pdf`, { recursive: true });
 for (const p of admin["/api/admin/pendaftar"].data) {
   await berkas(`/api/admin/pendaftar/${p.id}/bukti`, T, `${KELUAR}/pdf/bukti-${p.id}.pdf`);
-  await berkas(`/api/admin/pendaftar/${p.id}/kartu`, T, `${KELUAR}/pdf/kartu-${p.id}.pdf`).catch(() => {});
-}
-for (const s of admin["/api/admin/surat"].data) {
-  await berkas(`/api/admin/surat/${s.id}/pdf`, T, `${KELUAR}/pdf/surat-${s.id}.pdf`);
 }
 
 await mkdir(KELUAR, { recursive: true });

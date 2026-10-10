@@ -509,3 +509,43 @@
     display: none !important;
   }
 }
+
+/* Bagian polos: label kecil di kiri, isi di kanan, dipisah garis tipis.
+   Pengganti deretan kartu pada halaman yang isinya berupa daftar. Ada di
+   @layer components supaya utilitas Tailwind pada elemen yang sama tetap
+   menang. */
+@layer components {
+  .bagian-polos {
+    display: grid;
+    gap: 0.75rem 2rem;
+    padding: 3.5rem 0;
+    border-bottom: 1px solid var(--color-garis);
+  }
+  @media (min-width: 1024px) {
+    .bagian-polos {
+      grid-template-columns: 13rem minmax(0, 1fr);
+      padding: 5rem 0;
+    }
+    .bagian-polos > .label-bagian {
+      position: sticky;
+      top: 7rem;
+      align-self: start;
+    }
+  }
+  .label-bagian {
+    padding-top: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-samar);
+  }
+  .judul-bagian {
+    margin-bottom: 1.75rem;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-biru-tua);
+  }
+}

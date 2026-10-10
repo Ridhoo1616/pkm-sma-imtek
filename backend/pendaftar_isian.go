@@ -128,7 +128,7 @@ func (a *Aplikasi) periksaIsianPendaftar(
 
 	   Tanpa NISN dan NIK, tidak ada yang bisa dicocokkan ke data Dapodik
 	   maupun dokumen kependudukan; tanpa kelurahan sampai kode pos, jalur
-	   zonasi tidak dapat dinilai dan surat panggilan tidak dapat dikirim. */
+	   zonasi tidak dapat dinilai dan panggilan tidak dapat dikirim. */
 	d.NISN = isi("nisn")
 	d.NIK = v.wajib("nik", "NIK", isi("nik"))
 	d.Kelurahan = v.wajib("kelurahan", "Kelurahan/Desa", isi("kelurahan"))

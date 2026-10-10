@@ -119,7 +119,8 @@ export default function DaftarTenaga({ daftar }: { daftar: Tenaga[] }) {
           karena empat warna berbeda membuat deretan ini terbaca sebagai empat
           hal yang tidak berhubungan, padahal keempatnya satu tabel yang sama.
           Angkanya tebal dan besar supaya terbaca sekali lihat. */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="kartu overflow-hidden">
+      <div className="grid grid-cols-2 divide-x divide-garis/70 lg:grid-cols-4 [&>*:nth-child(n+3)]:border-t [&>*:nth-child(n+3)]:border-garis/70 lg:[&>*:nth-child(n+3)]:border-t-0">
         <Angka ikon={IkonGuru} nilai={angka.pendidik} judul="Tenaga Pendidik"
           keterangan="Pimpinan dan guru" />
         <Angka ikon={IkonSiswa} nilai={angka.wali} judul="Wali Kelas"
@@ -133,7 +134,7 @@ export default function DaftarTenaga({ daftar }: { daftar: Tenaga[] }) {
       {/* Pencarian dan penyaring. Ada supaya pengunjung yang mencari satu
           nama tidak perlu menggulir seluruh daftarnya — inilah yang menahan
           panjang halaman ini di layar ponsel. */}
-      <div className="kartu space-y-4 p-4 sm:p-5">
+      <div className="space-y-4 border-t border-garis/70 p-4 sm:p-5">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
           <div>
             <label htmlFor="cari-tenaga" className="sr-only">
@@ -208,6 +209,7 @@ export default function DaftarTenaga({ daftar }: { daftar: Tenaga[] }) {
             </div>
           </div>
         )}
+      </div>
       </div>
 
       {tersaring.length === 0 ? (
@@ -285,7 +287,7 @@ function Angka({
   keterangan: string;
 }) {
   return (
-    <div className="kartu flex items-center gap-3 p-4 sm:gap-4 sm:p-5">
+    <div className="flex items-center gap-3 p-4 sm:gap-4 sm:p-5">
       <span
         aria-hidden
         className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru sm:h-12 sm:w-12"
