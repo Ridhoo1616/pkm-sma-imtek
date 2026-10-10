@@ -8,7 +8,6 @@ import {
   urlUnggahan,
   ambilToken,
   unduhBuktiAdmin,
-  unduhKartuAdmin,
   GalatApi,
 } from "@/lib/api";
 import { bukaBlob } from "@/lib/berkas";
@@ -24,7 +23,7 @@ import { useSesi } from "@/komponen/Sesi";
 import { KepalaPanel, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, PesanBerhasil } from "@/komponen/Memuat";
 import { Lencana } from "@/komponen/Bagian";
-import { Pilihan, AreaTeks, Teks, Tombol } from "@/komponen/Medan";
+import { Pilihan, AreaTeks, Tombol } from "@/komponen/Medan";
 import type { Pendaftar } from "@/lib/tipe";
 
 /** Kelompok isian yang ditampilkan sebagai daftar istilah. */
@@ -156,14 +155,6 @@ export default function HalamanDetailPendaftar() {
   const [galatSimpan, setGalatSimpan] = useState("");
   const [konfirmasiHapus, setKonfirmasiHapus] = useState(false);
   const [menghapus, setMenghapus] = useState(false);
-  // Ruang dan kursi disunting terpisah dari verifikasi, karena keduanya
-  // sering diisi belakangan oleh orang yang berbeda.
-  const [suntinganRuang, setSuntinganRuang] = useState<{
-    kunci: string;
-    ruang: string;
-    kursi: string;
-  } | null>(null);
-  const [menyimpanRuang, setMenyimpanRuang] = useState(false);
 
   if (memuat) return <Memuat />;
   if (galat) return <PesanGalat pesan={galat} ulangi={muatUlang} />;
@@ -180,32 +171,6 @@ export default function HalamanDetailPendaftar() {
     setSuntingan({ kunci, status: v, catatan });
   const setCatatan = (v: string) =>
     setSuntingan({ kunci, status, catatan: v });
-
-  const selarasRuang = suntinganRuang?.kunci === kunci;
-  const ruang = selarasRuang ? suntinganRuang.ruang : (p.ruang_ujian ?? "");
-  const kursi = selarasRuang ? suntinganRuang.kursi : (p.kursi_ujian ?? "");
-  const setRuang = (v: string) => setSuntinganRuang({ kunci, ruang: v, kursi });
-  const setKursi = (v: string) => setSuntinganRuang({ kunci, ruang, kursi: v });
-
-  async function simpanRuang() {
-    setPesanSimpan("");
-    setGalatSimpan("");
-    setMenyimpanRuang(true);
-    try {
-      const hasil = await api.ubahRuangUjian(id, {
-        ruang_ujian: ruang,
-        kursi_ujian: kursi,
-      });
-      setPesanSimpan(hasil.pesan);
-      muatUlang();
-    } catch (e) {
-      setGalatSimpan(
-        e instanceof GalatApi ? e.message : "Ruang ujian gagal disimpan.",
-      );
-    } finally {
-      setMenyimpanRuang(false);
-    }
-  }
 
   async function simpan() {
     setPesanSimpan("");
@@ -260,19 +225,6 @@ export default function HalamanDetailPendaftar() {
               }}
             >
               Bukti Pendaftaran (PDF)
-            </Tombol>
-            <Tombol
-              jenis="kedua"
-              onClick={async () => {
-                try {
-                  const { nama, blob } = await unduhKartuAdmin(id, p.no_registrasi);
-                  bukaBlob(nama, blob);
-                } catch {
-                  setGalatSimpan("Kartu peserta gagal dibuat.");
-                }
-              }}
-            >
-              Kartu Peserta (PDF)
             </Tombol>
             <Link
               href="/admin/pendaftar"
@@ -419,46 +371,6 @@ export default function HalamanDetailPendaftar() {
                   <strong className="text-biru-tua">{p.nama_verifikator}</strong>.
                 </p>
               )}
-            </div>
-          </section>
-
-          {/* Ruang ujian, dicetak pada kartu peserta */}
-          <section className="kartu overflow-hidden">
-            <h2 className="border-b border-garis bg-slate-50 px-6 py-3.5 text-base">
-              Ruang Tes Seleksi
-            </h2>
-            <div className="space-y-5 px-6 py-5">
-              <p className="text-xs leading-relaxed text-samar">
-                Keduanya dicetak pada kartu peserta. Boleh dikosongkan bila
-                peserta tidak dibagi per ruang; kartunya akan menuliskan
-                &ldquo;belum ditentukan&rdquo;.
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Teks
-                  nama="ruang_ujian"
-                  label="Ruang ujian"
-                  maks={40}
-                  nilai={ruang}
-                  ubah={setRuang}
-                  contoh="Ruang 1"
-                />
-                <Teks
-                  nama="kursi_ujian"
-                  label="Nomor kursi"
-                  maks={20}
-                  nilai={kursi}
-                  ubah={setKursi}
-                  contoh="A-12"
-                />
-              </div>
-              <Tombol
-                jenis="kedua"
-                onClick={simpanRuang}
-                sedangJalan={menyimpanRuang}
-                penuh
-              >
-                {menyimpanRuang ? "Menyimpan..." : "Simpan Ruang & Kursi"}
-              </Tombol>
             </div>
           </section>
 

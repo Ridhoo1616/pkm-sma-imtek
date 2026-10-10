@@ -60,12 +60,6 @@ const ALUR: Langkah[] = [
     keterangan: "Masukkan nomor registrasi dan tanggal lahir untuk melihat statusnya.",
   },
   {
-    kunci: "tes",
-    label: "Kerjakan tes seleksi",
-    jalur: "/ppdb/ujian",
-    keterangan: "Dibuka setelah berkas Anda diverifikasi panitia.",
-  },
-  {
     kunci: "hasil",
     label: "Lihat hasil seleksi",
     jalur: "/ppdb/cek",
@@ -76,7 +70,6 @@ const ALUR: Langkah[] = [
 /** Mencocokkan halaman yang sedang dibuka dengan langkah pada alur. */
 function langkahDari(jalur: string): number {
   if (jalur.startsWith("/ppdb/daftar")) return 2;
-  if (jalur.startsWith("/ppdb/ujian")) return 4;
   if (jalur.startsWith("/ppdb/cek")) return 3;
   if (jalur.startsWith("/ppdb")) return 1;
   if (jalur === "/profil" || jalur.startsWith("/fasilitas")) return 0;

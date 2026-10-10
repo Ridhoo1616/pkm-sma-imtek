@@ -47,6 +47,5 @@ export const data = {
   mitraBkk: () => sekali("mitraBkk", () => api.mitraBkk()),
   galeri: () => sekali("galeri", () => api.galeri()),
   biaya: () => sekali("biaya", () => api.biaya()),
-  infoUjian: () => sekali("infoUjian", () => api.infoUjian()),
   halamanDetail: (slug: string) => sekali(`halaman:${slug}`, () => api.halamanDetail(slug)),
 };

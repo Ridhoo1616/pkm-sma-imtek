@@ -3,7 +3,7 @@ import { IkonCentang } from "@/komponen/Ikon";
 import type { TahapAlur } from "../lib/alur";
 
 /**
- * Penunjuk alur PPDB lima langkah, pengganti bilah sub menu pada halaman
+ * Penunjuk alur PPDB empat langkah, pengganti bilah sub menu pada halaman
  * PPDB. Susunan dan aturannya sama dengan PenunjukAlur.tsx di frontend Next:
  * langkah yang sedang dibuka ditandai dan bukan tautan; "Isi formulir"
  * redup dan tidak dapat diklik selama pendaftaran ditutup.
@@ -21,7 +21,6 @@ const TAHAP: { kunci: TahapAlur; label: string; jalur: string }[] = [
   { kunci: "ketentuan", label: "Baca ketentuan", jalur: "/ppdb" },
   { kunci: "daftar", label: "Isi formulir", jalur: "/ppdb/daftar" },
   { kunci: "pantau", label: "Verifikasi berkas", jalur: "/ppdb/cek" },
-  { kunci: "tes", label: "Tes seleksi", jalur: "/ppdb/ujian" },
   { kunci: "hasil", label: "Hasil seleksi", jalur: "/ppdb/cek" },
 ];
 

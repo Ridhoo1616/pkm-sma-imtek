@@ -7,7 +7,7 @@
 # YANG DICADANGKAN, dan mengapa jadwalnya berbeda:
 #
 #   - Basis data SETIAP HARI, disimpan 14 hari. Isinya tidak dapat disusun
-#     ulang dari mana pun: pendaftaran, status verifikasi, nilai ujian, dan
+#     ulang dari mana pun: pendaftaran, status verifikasi, dan
 #     catatan panitia hanya ada di situ.
 #   - Dokumen pendaftar SETIAP MINGGU, disimpan 4 pekan. Ukurannya ratusan
 #     megabita, dan mencadangkannya tiap hari akan menghabiskan cakram 40 GB

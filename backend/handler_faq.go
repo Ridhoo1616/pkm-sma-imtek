@@ -32,7 +32,7 @@ type Faq struct {
 // KategoriFaq adalah urutan tampil kategori, bukan urutan abjad, karena
 // pembacanya mengikuti runtutan proses pendaftaran.
 var KategoriFaq = []string{
-	"Umum", "Pendaftaran", "Berkas", "Biaya", "Tes Seleksi", "Pengumuman",
+	"Umum", "Pendaftaran", "Berkas", "Biaya", "Pengumuman",
 }
 
 func kategoriFaqSah(k string) bool {

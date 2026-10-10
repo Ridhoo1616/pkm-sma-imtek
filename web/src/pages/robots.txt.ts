@@ -10,7 +10,6 @@ export const GET: APIRoute = ({ url }) =>
       "Disallow: /admin",
       "Disallow: /api/",
       "Disallow: /unggahan/",
-      "Disallow: /ppdb/ujian",
       "",
       `Sitemap: ${asalSitus(url)}/sitemap.xml`,
       "",

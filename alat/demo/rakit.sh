@@ -6,8 +6,8 @@
 # Langkahnya:
 #   1. Menyalin basis data sma_imtek ke basis data sekali pakai
 #      (sma_imtek_demo). Basis data aslinya hanya dibaca oleh pg_dump.
-#   2. Mengisi contoh yang belum ada di sana: jenis surat dan suratnya, bank
-#      soal dan paket tes, sesi tes contoh, serta sandi akun demo
+#   2. Mengisi contoh yang belum ada di sana: jenis surat dan suratnya, 
+#      serta sandi akun demo
 #      (admin/admin123, panitia/panitia123). Foto contoh yang rusak diganti
 #      gambar pengganti pada salinan folder unggahan.
 #   3. Menjalankan salinan backend, Astro, dan Next di porta lain (8190, 3100,
@@ -50,10 +50,6 @@ done
 log "1. Salin basis data $DB_ASAL ke $DB_DEMO"
 createdb -O "$DB_USER" "$DB_DEMO"
 pg_dump -U "$DB_USER" --no-owner "$DB_ASAL" | psql -q -U "$DB_USER" -d "$DB_DEMO" >/dev/null
-# Sesi tes yang ada di data asli tidak dibawa; contohnya dibuat ulang di bawah.
-# Begitu pula bank soal dan paket tes: isinya sisa uji coba, dan demo memakai
-# 40 soal latihan yang diimpor isi-contoh.mjs.
-psql -q -U "$DB_USER" -d "$DB_DEMO" -c "DELETE FROM sesi_soal; DELETE FROM sesi_ujian; DELETE FROM paket_ujian; DELETE FROM soal;"
 cp -R "$REPO/backend/data/unggahan" "$SEMENTARA/unggahan"
 
 log "2. Rakit dan jalankan backend demo"
@@ -78,7 +74,7 @@ grep '^DB_PASS=' "$REPO/backend/.env" >> "$SEMENTARA/.env" 2>/dev/null || true
 for _ in $(seq 30); do curl -sf "localhost:$P_API/api/sehat" >/dev/null && break; sleep 0.5; done
 
 log "3. Isi contoh data demo"
-API="http://localhost:$P_API" SOAL_CSV="$REPO/frontend/public/templat/latihan-soal-40.csv" \
+API="http://localhost:$P_API" \
   node "$REPO/alat/demo/isi-contoh.mjs"
 
 log "4. Rakit Astro dan Next dari salinan kode"

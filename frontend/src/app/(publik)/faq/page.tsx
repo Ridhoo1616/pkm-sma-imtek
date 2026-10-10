@@ -10,7 +10,7 @@ import type { Faq } from "@/lib/tipe";
 export const metadata: Metadata = {
   title: "Tanya Jawab PPDB",
   description:
-    "Pertanyaan yang sering diajukan orang tua dan calon peserta didik tentang pendaftaran, berkas, biaya, tes seleksi, dan pengumuman.",
+    "Pertanyaan yang sering diajukan orang tua dan calon peserta didik tentang pendaftaran, berkas, biaya, dan pengumuman.",
 };
 
 export default async function HalamanFaq() {

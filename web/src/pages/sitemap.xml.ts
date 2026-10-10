@@ -9,7 +9,6 @@ import type { Berita, Halaman, LowonganBkk } from "@/lib/tipe";
  * Peta situs untuk mesin pencari: seluruh halaman menu, halaman naskah, dan
  * berita yang sudah terbit. Disusun dari MENU yang sama dengan navigasi,
  * jadi halaman yang ditambah ke menu ikut masuk tanpa disentuh di sini.
- * Tes seleksi tidak ikut: halaman itu memang tidak untuk diindeks.
  */
 const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -20,7 +19,6 @@ export const GET: APIRoute = async ({ url }) => {
     jalur.add(m.jalur);
     for (const a of m.anak ?? []) jalur.add(a.jalur);
   }
-  jalur.delete("/ppdb/ujian");
 
   const [berita, halaman, lowongan] = await Promise.all([
     data.berita("?per_halaman=100").then((h) => h.data).catch((): Berita[] => []),

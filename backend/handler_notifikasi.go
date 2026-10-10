@@ -272,12 +272,11 @@ func (a *Aplikasi) tanganiBatalkanNotifikasi(w http.ResponseWriter, r *http.Requ
 type permintaanNotifikasiBaru struct {
 	PendaftarID int    `json:"pendaftar_id"`
 	Jenis       string `json:"jenis"`
-	Jadwal      string `json:"jadwal_ujian"`
 	Catatan     string `json:"catatan"`
 }
 
 // tanganiBuatNotifikasi dipakai panitia untuk menyusun pesan di luar
-// perubahan status, misalnya mengabarkan jadwal tes seleksi.
+// perubahan status.
 func (a *Aplikasi) tanganiBuatNotifikasi(w http.ResponseWriter, r *http.Request) {
 	var p permintaanNotifikasiBaru
 	if !bacaJSON(w, r, &p) {
@@ -300,8 +299,7 @@ func (a *Aplikasi) tanganiBuatNotifikasi(w http.ResponseWriter, r *http.Request)
 	}
 
 	tambahan := map[string]string{
-		"jadwal_ujian": strings.TrimSpace(p.Jadwal),
-		"catatan":      strings.TrimSpace(p.Catatan),
+		"catatan": strings.TrimSpace(p.Catatan),
 	}
 	if err := a.buatNotifikasi(p.PendaftarID, p.Jenis, tambahan); err != nil {
 		a.galatServer(w, "menyusun notifikasi", err)

@@ -160,19 +160,6 @@ func (a *Aplikasi) rute() http.Handler {
 		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiBuktiPendaftar))
 	m.HandleFunc("POST /api/ppdb/surat", a.batasiIP(a.batas.identitasIP,
 		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiPdfSuratPendaftar))
-	m.HandleFunc("POST /api/ppdb/kartu", a.batasiIP(a.batas.identitasIP,
-		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiKartuPendaftar))
-
-	/* ---- tes seleksi online ----
-	   Peserta tidak punya akun. Jalur /mulai memakai nomor registrasi beserta
-	   tanggal lahir, lalu menerbitkan token berperan "peserta" yang hanya
-	   berlaku untuk tiga jalur di bawahnya. */
-	m.HandleFunc("GET /api/ppdb/ujian", a.tanganiInfoUjian)
-	m.HandleFunc("POST /api/ppdb/ujian/mulai", a.batasiIP(a.batas.identitasIP,
-		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiMulaiUjian))
-	m.HandleFunc("GET /api/ppdb/ujian/soal", a.wajibPeserta(a.tanganiSoalUjian))
-	m.HandleFunc("PATCH /api/ppdb/ujian/jawab", a.wajibPeserta(a.tanganiJawabUjian))
-	m.HandleFunc("POST /api/ppdb/ujian/selesai", a.wajibPeserta(a.tanganiSelesaikanUjian))
 
 	/* ---- autentikasi ---- */
 	m.HandleFunc("POST /api/masuk", a.tanganiMasuk)
@@ -190,8 +177,6 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/admin/pendaftar/{id}", a.wajibMasuk(a.tanganiDetailPendaftar))
 	m.HandleFunc("PATCH /api/admin/pendaftar/{id}/status", a.wajibMasuk(a.tanganiUbahStatus))
 	m.HandleFunc("GET /api/admin/pendaftar/{id}/bukti", a.wajibMasuk(a.tanganiBuktiAdmin))
-	m.HandleFunc("GET /api/admin/pendaftar/{id}/kartu", a.wajibMasuk(a.tanganiKartuAdmin))
-	m.HandleFunc("PATCH /api/admin/pendaftar/{id}/ruang", a.wajibMasuk(a.tanganiUbahRuangUjian))
 	// Menghapus data pendaftar berarti menghapus dokumen pribadinya juga,
 	// jadi hanya admin penuh yang boleh.
 	m.HandleFunc("DELETE /api/admin/pendaftar/{id}", a.wajibAdmin(a.tanganiHapusPendaftar))
@@ -253,21 +238,6 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/admin/tanya-buntu", a.wajibMasuk(a.tanganiDaftarTanyaBuntu))
 	m.HandleFunc("PATCH /api/admin/tanya-buntu/{id}", a.wajibMasuk(a.tanganiTandaiTanyaBuntu))
 	m.HandleFunc("DELETE /api/admin/tanya-buntu/{id}", a.wajibMasuk(a.tanganiHapusTanyaBuntu))
-
-	/* ---- bank soal dan paket ujian ---- */
-	m.HandleFunc("GET /api/admin/soal", a.wajibMasuk(a.tanganiDaftarSoal))
-	m.HandleFunc("POST /api/admin/soal", a.wajibMasuk(a.tanganiSimpanSoal))
-	m.HandleFunc("POST /api/admin/soal/impor", a.wajibMasuk(a.tanganiImporSoal))
-	m.HandleFunc("PUT /api/admin/soal/{id}", a.wajibMasuk(a.tanganiUbahSoal))
-	m.HandleFunc("DELETE /api/admin/soal/{id}", a.wajibMasuk(a.tanganiHapusSoal))
-
-	m.HandleFunc("GET /api/admin/paket-ujian", a.wajibMasuk(a.tanganiDaftarPaket))
-	m.HandleFunc("GET /api/admin/paket-ujian/{id}/hasil", a.wajibMasuk(a.tanganiHasilUjian))
-	// Membuka dan menutup jadwal tes menentukan siapa yang dapat mengerjakan,
-	// jadi dibatasi admin penuh.
-	m.HandleFunc("POST /api/admin/paket-ujian", a.wajibAdmin(a.tanganiSimpanPaket))
-	m.HandleFunc("PUT /api/admin/paket-ujian/{id}", a.wajibAdmin(a.tanganiUbahPaket))
-	m.HandleFunc("DELETE /api/admin/paket-ujian/{id}", a.wajibAdmin(a.tanganiHapusPaket))
 
 	/* ---- notifikasi ---- */
 	m.HandleFunc("GET /api/admin/notifikasi", a.wajibMasuk(a.tanganiDaftarNotifikasi))

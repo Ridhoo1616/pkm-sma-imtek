@@ -16,8 +16,8 @@
 (() => {
   "use strict";
   const DASAR = globalThis.__DASAR_DEMO || "";
-  const KUNCI = "demo_pkm_v7";
-  const KUNCI_GAMBAR = "demo_pkm_v7_gambar";
+  const KUNCI = "demo_pkm_v8";
+  const KUNCI_GAMBAR = "demo_pkm_v8_gambar";
 
   // GitHub Pages menyajikan /admin/masuk sebagai /admin/masuk/ (folder berisi
   // index.html). Aplikasinya dirender untuk jalur tanpa garis miring akhir,
@@ -50,8 +50,6 @@
       pustaka: a["/api/admin/pustaka"].data,
       biaya: a["/api/admin/biaya"].data,
       faq: a["/api/admin/faq"].data,
-      soal: a["/api/admin/soal"].data,
-      "paket-ujian": a["/api/admin/paket-ujian"].data,
       pengguna: a["/api/admin/pengguna"].data.map((u) => ({
         ...u,
         sandi: u.username === "admin" ? "admin123" : u.username === "panitia" ? "panitia123" : "",
@@ -68,23 +66,10 @@
     };
     const pendaftar = {};
     for (const [id, r] of Object.entries(D.detail.pendaftar)) pendaftar[id] = r.data;
-    // Sesi tes yang sudah ada di rekaman: hasilnya saja yang diperlukan.
-    const sesi = [];
-    for (const [paketId, h] of Object.entries(D.detail.hasil)) {
-      for (const r of h.data) {
-        sesi.push({
-          id: r.sesi_id, pendaftar_id: r.pendaftar_id, paket_id: Number(paketId),
-          soal: [], jawaban: {}, mulai_pada: r.mulai_pada, batas_pada: r.selesai_pada,
-          selesai_pada: r.selesai_pada, status: r.status, jumlah_benar: r.jumlah_benar,
-          jumlah_soal: r.jumlah_soal, skor: r.skor, per_mapel: r.per_mapel || null,
-        });
-      }
-    }
     return {
       koleksi: salin(koleksi),
       pendaftar: salin(pendaftar),
       pengaturan: salin(a["/api/admin/pengaturan"].data),
-      sesi,
       diubah: {}, // id pendaftar yang berkas PDF rekamannya tidak lagi sesuai
     };
   }
@@ -173,11 +158,11 @@
   // Nilai dari formulir berupa teks; tipe aslinya diambil dari butir lain di
   // koleksi yang sama, atau ditebak dari namanya bila koleksinya kosong.
   function ubahTipe(nilai, contoh, nama) {
-    if (typeof contoh === "number" || /^(id|urutan|kuota|jumlah|durasi_menit|jumlah_soal|nilai_minimum|jurusan_id|tahun)$/.test(nama)) {
+    if (typeof contoh === "number" || /^(id|urutan|kuota|jumlah|jurusan_id|tahun)$/.test(nama)) {
       const n = Number(nilai);
       return nilai === "" || Number.isNaN(n) ? nilai : n;
     }
-    if (typeof contoh === "boolean" || /^(aktif|publish|sorot|wajib|acak_soal|dibaca)$/.test(nama)) {
+    if (typeof contoh === "boolean" || /^(aktif|publish|sorot|wajib|dibaca)$/.test(nama)) {
       return nilai === true || nilai === "true" || nilai === "1" || nilai === "on";
     }
     return nilai;
@@ -316,8 +301,8 @@
     { ukuran: 8, jarak: 0 },
   ];
 
-  function pdfPendaftar(p, jenis) {
-    const judul = jenis === "kartu" ? "KARTU PESERTA TES SELEKSI" : "BUKTI PENDAFTARAN PESERTA DIDIK BARU";
+  function pdfPendaftar(p) {
+    const judul = "BUKTI PENDAFTARAN PESERTA DIDIK BARU";
     return buatPdf([
       ...kop(),
       [judul, { ukuran: 13, tebal: true, tengah: true }],
@@ -329,9 +314,7 @@
       [`Jalur            : ${p.jalur}`],
       [`Peminatan        : ${p.nama_jurusan}`],
       [`Asal Sekolah     : ${p.asal_sekolah}`],
-      ...(jenis === "kartu"
-        ? [[`Ruang / Kursi    : ${p.ruang_ujian || "-"} / ${p.kursi_ujian || "-"}`]]
-        : [[`Status           : ${p.status}`]]),
+      [`Status           : ${p.status}`],
       ["", { jarak: 20 }],
       catatanDemo,
     ]);
@@ -391,128 +374,6 @@
     );
     if (!p) galat(404, "Data pendaftaran tidak ditemukan. Periksa kembali nomor registrasi dan tanggal lahir Anda.");
     return p;
-  }
-
-  /* ---------- mata pelajaran baku, sama dengan backend/mapel.go ---------- */
-
-  const DAFTAR_MAPEL = ["Matematika", "Bahasa Indonesia", "Bahasa Inggris", "IPA", "IPS", "Pendidikan Agama", "Pengetahuan Umum", "Tes Potensi Akademik"];
-  const SEBUTAN_MAPEL = {
-    mtk: "Matematika", mat: "Matematika", math: "Matematika",
-    "b indonesia": "Bahasa Indonesia", bindo: "Bahasa Indonesia", "b indo": "Bahasa Indonesia", "bhs indonesia": "Bahasa Indonesia",
-    "b inggris": "Bahasa Inggris", bing: "Bahasa Inggris", "bhs inggris": "Bahasa Inggris", english: "Bahasa Inggris",
-    "ilmu pengetahuan alam": "IPA", sains: "IPA", "ilmu pengetahuan sosial": "IPS",
-    agama: "Pendidikan Agama", pai: "Pendidikan Agama", umum: "Pengetahuan Umum", tpa: "Tes Potensi Akademik",
-  };
-  const kunciMapel = (s) => String(s ?? "").replace(/\./g, " ").toLowerCase().split(/\s+/).filter(Boolean).join(" ");
-  function mapelBaku(s) {
-    const k = kunciMapel(s);
-    if (!k) return "";
-    return DAFTAR_MAPEL.find((m) => kunciMapel(m) === k) || SEBUTAN_MAPEL[k] || "";
-  }
-  const urutanMapel = (m) => (DAFTAR_MAPEL.indexOf(m) < 0 ? DAFTAR_MAPEL.length : DAFTAR_MAPEL.indexOf(m));
-
-  function stokMapel() {
-    const stok = {};
-    for (const s of kol("soal")) if (s.aktif) stok[s.mata_pelajaran] = (stok[s.mata_pelajaran] || 0) + 1;
-    return stok;
-  }
-
-  // Mengembalikan galat per kolom; isi soal dibakukan di tempat.
-  function periksaSoal(s) {
-    const kolom = {};
-    for (const k of ["mata_pelajaran", "pertanyaan", "pilihan_a", "pilihan_b", "pilihan_c", "pilihan_d", "pilihan_e", "jawaban", "pembahasan"]) {
-      s[k] = String(s[k] ?? "").trim();
-    }
-    s.jawaban = s.jawaban.toUpperCase();
-    if (!s.mata_pelajaran) kolom.mata_pelajaran = "Mata pelajaran wajib diisi.";
-    else if (mapelBaku(s.mata_pelajaran)) s.mata_pelajaran = mapelBaku(s.mata_pelajaran);
-    else kolom.mata_pelajaran = `Mata pelajaran "${s.mata_pelajaran.slice(0, 40)}" tidak dikenal. Pilih salah satu: ${DAFTAR_MAPEL.join(", ")}.`;
-    if (!s.pertanyaan) kolom.pertanyaan = "Pertanyaan wajib diisi.";
-    if (!s.pilihan_a) kolom.pilihan_a = "Pilihan A wajib diisi.";
-    if (!s.pilihan_b) kolom.pilihan_b = "Pilihan B wajib diisi.";
-    if (!/^[A-E]$/.test(s.jawaban)) kolom.jawaban = "Kunci jawaban harus salah satu dari A sampai E.";
-    else if (!s[`pilihan_${s.jawaban.toLowerCase()}`]) kolom.jawaban = `Kunci jawaban ${s.jawaban} menunjuk pilihan yang masih kosong.`;
-    return kolom;
-  }
-
-  // Membakukan komposisi kiriman formulir; baris berjumlah nol dibuang.
-  function periksaKomposisi(daftar, kolom) {
-    const bersih = [];
-    for (const k of Array.isArray(daftar) ? daftar : []) {
-      const n = Number(k.jumlah) || 0;
-      if (n === 0) continue;
-      const m = mapelBaku(k.mata_pelajaran);
-      if (!m) kolom.komposisi = `Mata pelajaran "${k.mata_pelajaran}" tidak dikenal.`;
-      else if (bersih.some((x) => x.mata_pelajaran === m)) kolom.komposisi = `${m} tercantum dua kali.`;
-      else if (n < 0 || n > 200) kolom.komposisi = `Jumlah soal ${m} harus antara 1 dan 200.`;
-      else bersih.push({ mata_pelajaran: m, jumlah: n });
-    }
-    return bersih.sort((a, b) => urutanMapel(a.mata_pelajaran) - urutanMapel(b.mata_pelajaran));
-  }
-  const kekuranganStok = (komposisi, stok) =>
-    komposisi.filter((k) => (stok[k.mata_pelajaran] || 0) < k.jumlah)
-      .map((k) => `${k.mata_pelajaran} baru ${stok[k.mata_pelajaran] || 0} soal aktif, diminta ${k.jumlah}`);
-
-  // Pembaca CSV kecil: tanda kutip ganda, pemisah ; tab atau koma (ditebak
-  // dari baris pertama, seperti pemisahCsv di backend).
-  function bacaCsv(teks) {
-    const pertama = teks.split(/\r?\n/, 1)[0];
-    const hitung = (c) => pertama.split(c).length - 1;
-    const pemisah = [";", "\t", ","].reduce((a, c) => (hitung(c) > hitung(a) ? c : a), ",");
-    const baris = [];
-    let sel = "", rek = [], kutip = false;
-    for (let i = 0; i < teks.length; i++) {
-      const c = teks[i];
-      if (kutip) {
-        if (c === '"' && teks[i + 1] === '"') { sel += '"'; i++; }
-        else if (c === '"') kutip = false;
-        else sel += c;
-      } else if (c === '"' && sel.trim() === "") { kutip = true; sel = ""; }
-      else if (c === pemisah) { rek.push(sel); sel = ""; }
-      else if (c === "\n" || c === "\r") {
-        if (c === "\r" && teks[i + 1] === "\n") i++;
-        rek.push(sel); baris.push(rek); rek = []; sel = "";
-      } else sel += c;
-    }
-    if (sel !== "" || rek.length) { rek.push(sel); baris.push(rek); }
-    return baris;
-  }
-
-  function paketBerlaku() {
-    const t = Date.now();
-    return kol("paket-ujian").find(
-      (p) => p.aktif && (!p.mulai || Date.parse(p.mulai) <= t) && (!p.selesai || Date.parse(p.selesai) >= t),
-    );
-  }
-
-  function ringkasSesi(s, paket) {
-    return {
-      jumlah_benar: s.jumlah_benar, jumlah_soal: s.jumlah_soal, lulus: s.skor >= paket.nilai_minimum,
-      nama_paket: paket.nama, nilai_minimum: paket.nilai_minimum, skor: s.skor, status: s.status,
-    };
-  }
-
-  function keadaanUjian(p) {
-    const k = {
-      dibuka: false, boleh_ikut: false, sudah_ikut: false,
-      kartu_siap: p.status !== "Menunggu Verifikasi" && p.status !== "Ditolak", hasil: null, alasan: "",
-    };
-    const paket = paketBerlaku();
-    const dibuka = atur("ujian_aktif") === "1" && !!paket;
-    k.dibuka = dibuka;
-    if (dibuka) Object.assign(k, { nama_paket: paket.nama, durasi_menit: paket.durasi_menit, jumlah_soal: paket.jumlah_soal });
-    if (p.status === "Menunggu Verifikasi") k.alasan = "Berkas Anda masih menunggu verifikasi panitia.";
-    else if (p.status === "Ditolak") k.alasan = "Pendaftaran Anda tidak dilanjutkan ke tahap tes seleksi.";
-    else k.boleh_ikut = dibuka;
-    if (!paket) return k;
-    const s = S.sesi.find((x) => x.pendaftar_id === p.id && x.paket_id === paket.id);
-    if (!s) return k;
-    k.sudah_ikut = true;
-    if (s.status !== "Berjalan") {
-      k.hasil = ringkasSesi(s, paket);
-      k.boleh_ikut = false;
-    }
-    return k;
   }
 
   function suratUntuk(p) {
@@ -675,15 +536,13 @@
     pustaka: { formulir: true, folder: "profil" },
     biaya: { admin: true },
     faq: {},
-    soal: {},
-    "paket-ujian": { admin: true },
     pengguna: { admin: true },
     "jenis-surat": { admin: true },
   };
   const PESAN_TAMBAH = {
     jurusan: "Peminatan", berita: "Berita", galeri: "Foto", fasilitas: "Fasilitas", halaman: "Halaman",
     "tenaga-pendidik": "Data tenaga pendidik", agenda: "Agenda", "kegiatan-siswa": "Kegiatan", pustaka: "Koleksi pustaka",
-    biaya: "Rincian biaya", faq: "Pertanyaan", soal: "Soal", "paket-ujian": "Paket ujian", pengguna: "Pengguna", "jenis-surat": "Jenis surat",
+    biaya: "Rincian biaya", faq: "Pertanyaan", pengguna: "Pengguna", "jenis-surat": "Jenis surat",
   };
 
   async function isiDariBadan(badan, daftar, cfg, lama) {
@@ -703,47 +562,20 @@
     return isi;
   }
 
-  // Soal dan paket ujian diperiksa dengan aturan yang sama dengan backend.
-  function periksaKhusus(nama, isi) {
-    if (nama === "soal") {
-      const kolom = periksaSoal(isi);
-      if (Object.keys(kolom).length) galat(422, "Data yang dikirim belum benar.", kolom);
-    }
-    if (nama === "paket-ujian") {
-      const kolom = {};
-      isi.komposisi = periksaKomposisi(isi.komposisi, kolom);
-      if (isi.komposisi.length) isi.jumlah_soal = isi.komposisi.reduce((n, k) => n + k.jumlah, 0);
-      if (isi.aktif && !kolom.komposisi) {
-        if (isi.komposisi.length) {
-          const kurang = kekuranganStok(isi.komposisi, stokMapel());
-          if (kurang.length) kolom.komposisi = `Bank soal belum cukup: ${kurang.join("; ")}. Tambah soal dulu, atau kurangi jumlahnya.`;
-        } else {
-          const tersedia = kol("soal").filter((x) => x.aktif).length;
-          if (tersedia < isi.jumlah_soal) {
-            kolom.jumlah_soal = `Bank soal aktif baru berisi ${tersedia} soal, sedangkan paket ini meminta ${isi.jumlah_soal}. Tambah soal atau kurangi jumlahnya.`;
-          }
-        }
-      }
-      if (Object.keys(kolom).length) galat(422, "Data yang dikirim belum benar.", kolom);
-    }
-  }
-
   async function tambahUmum(nama, badan, u) {
     const cfg = UMUM[nama];
     const daftar = kol(nama);
     const isi = await isiDariBadan(badan, daftar, cfg);
-    periksaKhusus(nama, isi);
     if (nama === "pengguna") {
       if (daftar.some((x) => x.username === isi.username)) galat(409, "Nama pengguna sudah dipakai.");
       if (!isi.sandi || String(isi.sandi).length < 8) galat(400, "Data yang dikirim belum benar.", { sandi: "Kata sandi minimal 8 karakter." });
     }
     const judul = isi.judul || isi.nama || isi.pertanyaan;
-    if (!judul && nama !== "soal") galat(400, "Data yang dikirim belum benar.", { [isi.judul !== undefined ? "judul" : "nama"]: "Wajib diisi." });
+    if (!judul) galat(400, "Data yang dikirim belum benar.", { [isi.judul !== undefined ? "judul" : "nama"]: "Wajib diisi." });
     const butir = { id: idBaru(daftar), ...isi, dibuat: sekarang(), diubah: sekarang() };
     if (nama === "berita") Object.assign(butir, { slug: isi.slug || slugDari(isi.judul), dibaca: 0, penulis: isi.penulis || u.nama });
     if (nama === "halaman" && !isi.slug) butir.slug = slugDari(isi.judul);
     if (nama === "jenis-surat") butir.jumlah_surat = 0;
-    if (nama === "paket-ujian") Object.assign(butir, { jumlah_peserta: 0, jumlah_selesai: 0 });
     if (nama === "pengguna") butir.masuk_akhir = null;
     daftar.push(butir);
     return { pesan: `${PESAN_TAMBAH[nama]} berhasil ditambahkan.`, id: butir.id, slug: butir.slug };
@@ -754,13 +586,6 @@
     const daftar = kol(nama);
     const butir = daftar.find((x) => x.id === id) || tidakAda(PESAN_TAMBAH[nama]);
     const isi = await isiDariBadan(badan, daftar, cfg, butir);
-    if (nama === "soal" || nama === "paket-ujian") {
-      // Diperiksa dalam keadaan gabungan, lalu nilai yang dibakukan (nama
-      // mapel, komposisi, jumlah soal) disalin balik.
-      const gabung = { ...butir, ...isi };
-      periksaKhusus(nama, gabung);
-      Object.assign(isi, gabung);
-    }
     if (nama === "pengguna" && !isi.sandi) delete isi.sandi;
     Object.assign(butir, isi, { diubah: sekarang() });
     if (nama === "jenis-surat") for (const s of kol("surat")) if (s.jenis_id === id) s.nama_jenis = butir.nama;
@@ -820,24 +645,6 @@
         const th = q.get("tahun");
         return { ...tambahan("/api/admin/agenda"), data: [...daftar].sort((a, b) => String(a.mulai).localeCompare(String(b.mulai))).filter((x) => !th || String(x.mulai).startsWith(th)) };
       }
-      case "soal": {
-        const mp = q.get("mata_pelajaran");
-        const d = daftar.filter((s) => (!mp || s.mata_pelajaran === mp) && cocokCari(s, q.get("cari"), ["pertanyaan"]));
-        const mapel = [...new Set(kol("soal").map((s) => s.mata_pelajaran))].sort();
-        return { data: d, mata_pelajaran: mapel.length ? mapel : null, mapel_baku: DAFTAR_MAPEL, stok: stokMapel(), jumlah_aktif: kol("soal").filter((s) => s.aktif).length };
-      }
-      case "paket-ujian":
-        return {
-          data: daftar.map((p) => ({
-            ...p,
-            komposisi: p.komposisi || [],
-            jumlah_peserta: S.sesi.filter((s) => s.paket_id === p.id).length,
-            jumlah_selesai: S.sesi.filter((s) => s.paket_id === p.id && s.status !== "Berjalan").length,
-          })),
-          jumlah_aktif: kol("soal").filter((s) => s.aktif).length,
-          mapel_baku: DAFTAR_MAPEL,
-          stok: stokMapel(),
-        };
       case "pengguna":
         return { ...tambahan("/api/admin/pengguna"), data: daftar.map(tanpaSandi) };
       case "jenis-surat":
@@ -959,16 +766,13 @@
       no_registrasi: p.no_registrasi, nama_lengkap: p.nama_lengkap, jalur: p.jalur, nama_jurusan: p.nama_jurusan,
       status: p.status, tahun_ajaran: p.tahun_ajaran, catatan_admin: p.catatan_admin || "",
       dibuat: waktuSetempat(p.dibuat), pengumuman: atur("ppdb_pengumuman"),
-      ujian: keadaanUjian(p), surat: suratUntuk(p),
+      surat: suratUntuk(p),
     };
   });
-  const pdfPendaftarPublik = (jenis) => async ({ badan }) => {
+  di("POST", "/api/ppdb/bukti", async ({ badan }) => {
     const p = cariPendaftar(badan.no_registrasi, badan.tanggal_lahir);
-    if (jenis === "kartu" && !keadaanUjian(p).kartu_siap) galat(409, "Kartu peserta tersedia setelah berkas Anda diverifikasi panitia.");
-    return (!S.diubah[p.id] && (await pdfRekaman(`${jenis}-${p.id}.pdf`))) || pdfPendaftar(p, jenis);
-  };
-  di("POST", "/api/ppdb/bukti", pdfPendaftarPublik("bukti"));
-  di("POST", "/api/ppdb/kartu", pdfPendaftarPublik("kartu"));
+    return (!S.diubah[p.id] && (await pdfRekaman(`bukti-${p.id}.pdf`))) || pdfPendaftar(p);
+  });
   di("POST", "/api/ppdb/surat", async ({ badan }) => {
     const p = cariPendaftar(badan.no_registrasi, badan.tanggal_lahir);
     const s = suratUntuk(p).find((x) => x.id === Number(badan.id)) || tidakAda("Surat");
@@ -977,90 +781,6 @@
   async function pdfUntukSurat(s) {
     return (!s.baru && !s.disunting && !s.dibatalkan && (await pdfRekaman(`surat-${s.id}.pdf`))) || pdfSurat(s);
   }
-
-  // --- tes seleksi ---
-  di("GET", "/api/ppdb/ujian", () => {
-    const paket = paketBerlaku();
-    const dibuka = atur("ujian_aktif") === "1" && !!paket;
-    return {
-      dibuka, info: atur("ujian_info"),
-      paket: dibuka ? { nama: paket.nama, durasi_menit: paket.durasi_menit, jumlah_soal: paket.jumlah_soal, mulai: paket.mulai, selesai: paket.selesai, keterangan: paket.keterangan, nilai_minimum: paket.nilai_minimum } : null,
-    };
-  });
-  function sesiDariToken(kepala) {
-    const m = /^sesi\.(\d+)$/.exec((kepala.get("authorization") || "").replace(/^Bearer\s+/i, ""));
-    const s = m && S.sesi.find((x) => x.id === Number(m[1]));
-    if (!s) galat(401, "Sesi tes tidak ditemukan. Masuk kembali dari halaman Tes Seleksi.");
-    const paket = kol("paket-ujian").find((p) => p.id === s.paket_id);
-    if (s.status === "Berjalan" && Date.parse(s.batas_pada) <= Date.now()) nilaiSesi(s, paket, "Waktu Habis");
-    return { s, paket };
-  }
-  function nilaiSesi(s, paket, status = "Selesai") {
-    const benar = s.soal.filter((id) => (kol("soal").find((x) => x.id === id) || {}).jawaban === s.jawaban[id]).length;
-    Object.assign(s, { status, selesai_pada: sekarang(), jumlah_benar: benar, skor: Math.round((benar / Math.max(1, s.jumlah_soal)) * 10000) / 100 });
-  }
-  const sisaDetik = (s) => Math.max(0, Math.round((Date.parse(s.batas_pada) - Date.now()) / 1000));
-  di("POST", "/api/ppdb/ujian/mulai", ({ badan }) => {
-    const p = cariPendaftar(badan.no_registrasi, badan.tanggal_lahir);
-    const k = keadaanUjian(p);
-    const paket = paketBerlaku();
-    if (!k.dibuka) galat(409, "Tes seleksi sedang tidak dibuka.");
-    let s = S.sesi.find((x) => x.pendaftar_id === p.id && x.paket_id === paket.id);
-    if (s && s.status !== "Berjalan") return { sudah_selesai: true, hasil: ringkasSesi(s, paket) };
-    if (!s) {
-      if (!k.boleh_ikut) galat(403, k.alasan || "Anda belum dapat mengikuti tes seleksi.");
-      const acak = (d) => (paket.acak_soal ? d.map((v) => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map((x) => x[1]) : d);
-      const aktif = kol("soal").filter((x) => x.aktif);
-      const komposisi = paket.komposisi || [];
-      let soal;
-      if (komposisi.length) {
-        // Dikelompokkan per mapel sesuai urutan DaftarMapel, diacak di dalam
-        // kelompoknya, seperti mulaiAtauLanjutkanSesi di backend.
-        if (kekuranganStok(komposisi, stokMapel()).length) galat(409, "Bank soal belum mencukupi untuk paket ini. Silakan hubungi panitia.");
-        soal = komposisi.flatMap((k) => acak(aktif.filter((x) => x.mata_pelajaran === k.mata_pelajaran).map((x) => x.id)).slice(0, k.jumlah));
-      } else {
-        if (aktif.length < paket.jumlah_soal) galat(409, "Bank soal belum mencukupi untuk paket ini. Silakan hubungi panitia.");
-        soal = acak(aktif.map((x) => x.id)).slice(0, paket.jumlah_soal);
-      }
-      s = {
-        id: Math.max(0, ...S.sesi.map((x) => x.id)) + 1, pendaftar_id: p.id, paket_id: paket.id, soal, jawaban: {},
-        mulai_pada: sekarang(), batas_pada: new Date(Date.now() + paket.durasi_menit * 60000).toISOString(),
-        selesai_pada: null, status: "Berjalan", jumlah_benar: 0, jumlah_soal: soal.length, skor: 0,
-      };
-      S.sesi.push(s);
-    }
-    return {
-      sudah_selesai: false, token: `sesi.${s.id}`,
-      sesi: { id: s.id, batas_pada: s.batas_pada, sisa_detik: sisaDetik(s), jumlah_soal: s.jumlah_soal, nama_paket: paket.nama, nama_peserta: p.nama_lengkap, no_registrasi: p.no_registrasi },
-    };
-  });
-  di("GET", "/api/ppdb/ujian/soal", ({ kepala }) => {
-    const { s, paket } = sesiDariToken(kepala);
-    if (s.status !== "Berjalan") return { selesai: true, hasil: ringkasSesi(s, paket) };
-    return {
-      selesai: false, batas_pada: s.batas_pada, sisa_detik: sisaDetik(s), jumlah_soal: s.jumlah_soal, nama_paket: paket.nama,
-      terjawab: Object.keys(s.jawaban).length,
-      soal: s.soal.map((id, i) => {
-        const x = kol("soal").find((y) => y.id === id) || {};
-        return {
-          soal_id: id, urutan: i + 1, mata_pelajaran: x.mata_pelajaran, pertanyaan: x.pertanyaan, jawaban: s.jawaban[id] || "",
-          pilihan: ["a", "b", "c", "d", "e"].filter((h) => x[`pilihan_${h}`]).map((h) => ({ huruf: h.toUpperCase(), teks: x[`pilihan_${h}`] })),
-        };
-      }),
-    };
-  });
-  di("PATCH", "/api/ppdb/ujian/jawab", ({ kepala, badan }) => {
-    const { s } = sesiDariToken(kepala);
-    if (s.status !== "Berjalan") galat(409, "Waktu tes sudah habis. Jawaban tidak dapat diubah lagi.");
-    if (!s.soal.includes(Number(badan.soal_id))) galat(400, "Soal ini bukan bagian dari tes Anda.");
-    s.jawaban[Number(badan.soal_id)] = badan.jawaban;
-    return { pesan: "Jawaban tersimpan.", terjawab: Object.keys(s.jawaban).length, sisa_detik: sisaDetik(s) };
-  });
-  di("POST", "/api/ppdb/ujian/selesai", ({ kepala }) => {
-    const { s, paket } = sesiDariToken(kepala);
-    if (s.status === "Berjalan") nilaiSesi(s, paket);
-    return { pesan: "Ujian selesai. Hasilnya dapat dilihat di halaman Cek Status.", hasil: ringkasSesi(s, paket) };
-  });
 
   // --- dasbor & laporan ---
   di("GET", "/api/admin/dasbor", ({ kepala }) => {
@@ -1150,26 +870,17 @@
     S.diubah[x.id] = true;
     return { pesan: `Status ${x.nama_lengkap} diubah menjadi ${badan.status}.` };
   });
-  di("PATCH", "/api/admin/pendaftar/{id}/ruang", ({ kepala, p, badan }) => {
-    pengguna(kepala);
-    const x = ambilPendaftar(p.id);
-    Object.assign(x, { ruang_ujian: badan.ruang_ujian || "", kursi_ujian: badan.kursi_ujian || "" });
-    S.diubah[x.id] = true;
-    return { pesan: "Ruang dan nomor kursi tersimpan." };
-  });
   di("DELETE", "/api/admin/pendaftar/{id}", ({ kepala, p }) => {
     pengguna(kepala, true);
     ambilPendaftar(p.id);
     delete S.pendaftar[p.id];
     return { pesan: "Data pendaftar berhasil dihapus." };
   });
-  for (const jenis of ["bukti", "kartu"]) {
-    di("GET", `/api/admin/pendaftar/{id}/${jenis}`, async ({ kepala, p }) => {
-      pengguna(kepala);
-      const x = ambilPendaftar(p.id);
-      return (!S.diubah[x.id] && (await pdfRekaman(`${jenis}-${x.id}.pdf`))) || pdfPendaftar(x, jenis);
-    });
-  }
+  di("GET", "/api/admin/pendaftar/{id}/bukti", async ({ kepala, p }) => {
+    pengguna(kepala);
+    const x = ambilPendaftar(p.id);
+    return (!S.diubah[x.id] && (await pdfRekaman(`bukti-${x.id}.pdf`))) || pdfPendaftar(x);
+  });
 
   // --- surat ---
   di("GET", "/api/admin/surat", ({ kepala, q }) => {
@@ -1241,70 +952,6 @@
     return { pesan: `Surat ${s.nomor_surat} dihapus.` };
   });
   di("GET", "/api/admin/surat/{id}/pdf", async ({ kepala, p }) => (pengguna(kepala), pdfUntukSurat(ambilSurat(p.id))));
-
-  // --- impor bank soal dari Excel (backend/mapel.go tanganiImporSoal) ---
-  di("POST", "/api/admin/soal/impor", ({ kepala, badan }) => {
-    pengguna(kepala);
-    const isi = String(badan?.csv ?? "").replace(/^﻿/, "").trim();
-    if (!isi) galat(422, "Tempelkan atau pilih dulu berkas soalnya.");
-    if (isi.length > 4 << 20) galat(422, "Berkas soal terlalu besar. Bagi menjadi beberapa kali impor.");
-    const sah = [];
-    const masalah = [];
-    bacaCsv(isi).forEach((rek, i) => {
-      if (!rek.join("").trim()) return;
-      if (i === 0 && kunciMapel(rek[0]).replace(/_/g, " ").startsWith("mata pelajaran")) return;
-      const medan = ["mata_pelajaran", "pertanyaan", "pilihan_a", "pilihan_b", "pilihan_c", "pilihan_d", "pilihan_e", "jawaban", "pembahasan"];
-      const s = Object.fromEntries(medan.map((m, k) => [m, rek[k] ?? ""]));
-      const kolom = periksaSoal(s);
-      if (Object.keys(kolom).length) masalah.push(`Baris ${i + 1}: ${Object.values(kolom).join(" ")}`);
-      else sah.push({ ...s, aktif: !!badan.aktif });
-    });
-    if (masalah.length) {
-      const daftar = masalah.length > 15 ? [...masalah.slice(0, 15), `... dan ${masalah.length - 15} baris lain.`] : masalah;
-      throw new Galat(422, { pesan: "Belum ada soal yang dimasukkan. Betulkan baris berikut, lalu impor ulang seluruhnya.", daftar });
-    }
-    if (!sah.length) galat(422, "Tidak ada satu baris soal pun di dalam berkas.");
-    const daftarSoal = kol("soal");
-    const perMapel = {};
-    for (const s of sah) {
-      daftarSoal.push({ id: idBaru(daftarSoal), ...s, dibuat: sekarang(), diubah: sekarang() });
-      perMapel[s.mata_pelajaran] = (perMapel[s.mata_pelajaran] || 0) + 1;
-    }
-    const rincian = DAFTAR_MAPEL.filter((m) => perMapel[m]).map((m) => `${m} ${perMapel[m]}`).join(", ");
-    return { pesan: `${sah.length} soal berhasil diimpor (${rincian}).`, masuk: sah.length };
-  });
-
-  // Perolehan satu sesi per mata pelajaran, dibaca dari soalnya.
-  function nilaiPerMapel(s) {
-    if (!(s.soal || []).length) return s.per_mapel || null; // sesi dari rekaman
-    const per = {};
-    for (const id of s.soal || []) {
-      const x = kol("soal").find((y) => y.id === id);
-      if (!x) continue;
-      const n = (per[x.mata_pelajaran] ||= { mata_pelajaran: x.mata_pelajaran, benar: 0, soal: 0, skor: 0 });
-      n.soal++;
-      if ((s.jawaban || {})[id] === x.jawaban) n.benar++;
-    }
-    const hasil = Object.values(per).map((n) => ({ ...n, skor: (n.benar / n.soal) * 100 }));
-    return hasil.length ? hasil.sort((a, b) => urutanMapel(a.mata_pelajaran) - urutanMapel(b.mata_pelajaran)) : null;
-  }
-
-  // --- hasil tes ---
-  di("GET", "/api/admin/paket-ujian/{id}/hasil", ({ kepala, p }) => {
-    pengguna(kepala);
-    const paket = kol("paket-ujian").find((x) => x.id === Number(p.id)) || tidakAda("Paket ujian");
-    const data = S.sesi.filter((s) => s.paket_id === paket.id && S.pendaftar[s.pendaftar_id]).map((s) => {
-      const x = S.pendaftar[s.pendaftar_id];
-      return {
-        sesi_id: s.id, pendaftar_id: x.id, no_registrasi: x.no_registrasi, nama_lengkap: x.nama_lengkap, nama_jurusan: x.nama_jurusan,
-        status: s.status, jumlah_benar: s.jumlah_benar, jumlah_soal: s.jumlah_soal, skor: s.skor, lulus: s.skor >= paket.nilai_minimum,
-        mulai_pada: s.mulai_pada, selesai_pada: s.selesai_pada, per_mapel: nilaiPerMapel(s),
-      };
-    });
-    const mapel = [...new Set(data.flatMap((x) => (x.per_mapel || []).map((n) => n.mata_pelajaran)))]
-      .sort((a, b) => urutanMapel(a) - urutanMapel(b) || a.localeCompare(b));
-    return { data, nilai_minimum: paket.nilai_minimum, jumlah_lulus: data.filter((x) => x.lulus && x.status !== "Berjalan").length, mapel };
-  });
 
   // --- pesan masuk ---
   di("GET", "/api/admin/pesan", ({ kepala, q }) => {

@@ -1,7 +1,6 @@
 // Mengisi contoh data yang belum ada di basis data asli, lewat API backend
-// demo, supaya setiap fitur di demo punya isi: jenis surat dan suratnya,
-// bank soal, paket tes, dan dua sesi tes yang sudah dinilai. Hanya untuk
-// basis data sekali pakai yang dibuat alat/demo/rakit.sh.
+// demo, supaya setiap fitur di demo punya isi: jenis surat dan suratnya.
+// Hanya untuk basis data sekali pakai yang dibuat alat/demo/rakit.sh.
 const API = process.env.API ?? "http://localhost:8190";
 
 async function panggil(metode, jalur, isi, token) {
@@ -90,44 +89,6 @@ const SURAT = [
 for (const s of SURAT) await panggil("POST", "/api/admin/surat", s, T);
 await panggil("POST", "/api/admin/surat/massal", { jenis_id: idJenis.SKD, tanggal_surat: "2026-09-25", status: "Diterima" }, T);
 
-/* ---------- tes seleksi ---------- */
-
-// Bank soal demo: 40 soal latihan yang sama dengan berkas unduhan di panel,
-// dimasukkan lewat jalur impor Excel supaya jalur itu ikut teruji.
-const { readFileSync } = await import("node:fs");
-const csv = readFileSync(process.env.SOAL_CSV ?? new URL("../../frontend/public/templat/latihan-soal-40.csv", import.meta.url), "utf8");
-console.log((await panggil("POST", "/api/admin/soal/impor", { csv, aktif: true }, T)).pesan);
-const kunci = {};
-for (const s of (await panggil("GET", "/api/admin/soal", undefined, T)).data) kunci[s.id] = s.jawaban;
-
-const tahun = (await panggil("GET", "/api/admin/dasbor", undefined, T)).tahun_ajaran;
-await panggil("POST", "/api/admin/paket-ujian", {
-  nama: `Tes Potensi Akademik PPDB ${tahun}`, tahun_ajaran: tahun, durasi_menit: 60, jumlah_soal: 40,
-  komposisi: [
-    { mata_pelajaran: "Matematika", jumlah: 12 }, { mata_pelajaran: "Bahasa Indonesia", jumlah: 8 },
-    { mata_pelajaran: "Bahasa Inggris", jumlah: 8 }, { mata_pelajaran: "IPA", jumlah: 8 }, { mata_pelajaran: "IPS", jumlah: 4 },
-  ],
-  acak_soal: true, mulai: "2026-09-01T07:00:00+07:00", selesai: "2027-06-30T16:00:00+07:00", nilai_minimum: 60,
-  keterangan: "Kerjakan dengan jujur. Jawaban tersimpan otomatis setiap kali memilih.", aktif: true,
-}, T);
-await panggil("PUT", "/api/admin/pengaturan", { pengaturan: {
-  ujian_aktif: "1",
-  ujian_info: "Tes dikerjakan dari ponsel atau komputer masing-masing. Siapkan nomor registrasi dan tanggal lahir. Selama tes, jangan menutup halaman ini.",
-} }, T);
-
-// Dua pendaftar yang sudah lolos verifikasi mengerjakan tes: satu lulus,
-// satu tidak, supaya halaman hasil tes menampilkan keduanya.
-const daftar = (await panggil("GET", "/api/admin/pendaftar?per_halaman=200", undefined, T)).data
-  .filter((p) => p.status === "Diterima").sort((a, b) => a.id - b.id);
-for (const [p, salah] of [[daftar[1], 6], [daftar[2], 22]]) {
-  if (!p) continue;
-  const mulai = await panggil("POST", "/api/ppdb/ujian/mulai", { no_registrasi: p.no_registrasi, tanggal_lahir: p.tanggal_lahir.slice(0, 10) });
-  const { soal } = await panggil("GET", "/api/ppdb/ujian/soal", undefined, mulai.token);
-  for (const [i, s] of soal.entries()) {
-    await panggil("PATCH", "/api/ppdb/ujian/jawab", { soal_id: s.soal_id, jawaban: i < salah ? (kunci[s.soal_id] === "A" ? "B" : "A") : kunci[s.soal_id] }, mulai.token);
-  }
-  await panggil("POST", "/api/ppdb/ujian/selesai", undefined, mulai.token);
-}
 /* ---------- Bursa Kerja Khusus ----------
    Nama perusahaannya sengaja berawalan "Contoh" supaya tidak terbaca
    sebagai mitra sungguhan sekolah. */

@@ -24,7 +24,7 @@ import Link from "next/link";
  * ditentukan halaman yang sedang dibuka.
  */
 
-export type TahapAlur = "ketentuan" | "daftar" | "pantau" | "tes" | "hasil";
+export type TahapAlur = "ketentuan" | "daftar" | "pantau" | "hasil";
 
 interface Tahap {
   kunci: TahapAlur;
@@ -36,7 +36,6 @@ const TAHAP: Tahap[] = [
   { kunci: "ketentuan", label: "Baca ketentuan", jalur: "/ppdb" },
   { kunci: "daftar", label: "Isi formulir", jalur: "/ppdb/daftar" },
   { kunci: "pantau", label: "Verifikasi berkas", jalur: "/ppdb/cek" },
-  { kunci: "tes", label: "Tes seleksi", jalur: "/ppdb/ujian" },
   { kunci: "hasil", label: "Hasil seleksi", jalur: "/ppdb/cek" },
 ];
 
@@ -49,7 +48,7 @@ export function PenunjukAlur({
    * Bila pendaftaran tutup, tahap "Isi formulir" tidak dapat dibuka.
    *
    * WAJIB diisi, tanpa nilai bawaan. Sebelumnya bawaannya `true`, dan dua
-   * halaman lupa meneruskannya: Cek Status dan Tes Seleksi. Akibatnya tahap
+   * halaman lupa meneruskannya: Cek Status. Akibatnya tahap
    * "Isi formulir" tetap dapat diklik di sana meski pendaftarannya sudah
    * ditutup, padahal halaman tujuannya sendiri menolak. Dibuat wajib supaya
    * halaman yang lupa gagal saat disusun, bukan salah diam-diam.

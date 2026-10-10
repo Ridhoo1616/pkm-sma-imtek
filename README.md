@@ -38,7 +38,6 @@ pkm-sma-imtek/
 │   ├── validasi_identitas.go  struktur NISN dan NIK, beserta ujinya
 │   ├── unggah.go            penyimpanan dan pemeriksaan berkas
 │   ├── cetak.go             bukti pendaftaran PDF dengan Maroto
-│   ├── cetak_kartu.go       kartu peserta ujian, barcode + kode QR
 │   ├── notifikasi.go        penyusunan dan pengiriman notifikasi WhatsApp
 │   ├── handler_*.go         penangan tiap kelompok alamat API
 │   ├── handler_faq.go       tanya jawab
@@ -50,7 +49,7 @@ pkm-sma-imtek/
 │       ├── app/(publik)/    beranda; menu Profil Sekolah, Akademik, dan
 │       │                    Kesiswaan beserta halaman turunannya; berita,
 │       │                    galeri, kontak, tanya jawab; info PPDB,
-│       │                    formulir, cek status, tes seleksi
+│       │                    formulir, cek status
 │       ├── app/admin/       20 halaman panel panitia
 │       ├── komponen/        elemen tampilan bersama, termasuk jendela
 │       │                    dan kabar berbasis Radix serta gulir Lenis
@@ -78,7 +77,7 @@ frontend-nya dapat dipindah ke layanan lain tanpa menyentuh logika data.
 Dibutuhkan **Go 1.24+**, **Node.js 20+**, dan **PostgreSQL 14+**.
 
 Panduan ringkas berbentuk PDF, termasuk susunan tiga porta (situs Astro 3000,
-panel Next 3001, backend 8090) dan cara menyiapkan tes dengan 40 soal latihan:
+panel Next 3001, backend 8090).
 **[dokumentasi/panduan-menjalankan.pdf](dokumentasi/panduan-menjalankan.pdf)**.
 
 ```bash
@@ -169,8 +168,7 @@ memeriksa isinya kembali utuh.
 |---|---|---|
 | Informasi PPDB | `/ppdb` | Jadwal, empat jalur, alur, dokumen yang diminta, kuota per peminatan, rincian biaya |
 | Formulir Pendaftaran | `/ppdb/daftar` | Lima langkah pengisian + unggah enam dokumen + pernyataan kebenaran data |
-| Cek Status | `/ppdb/cek` | Pantau hasil verifikasi, nilai tes seleksi, unduh bukti pendaftaran dan kartu peserta |
-| Tes Seleksi | `/ppdb/ujian` | Kerjakan tes seleksi online, waktunya dihitung server |
+| Cek Status | `/ppdb/cek` | Pantau hasil verifikasi, unduh bukti pendaftaran dan surat |
 
 Formulirnya dibagi lima langkah dan dapat dilompati bebas. Bila server menolak
 isian, halaman otomatis kembali ke langkah yang memuat kesalahan pertama, dan
@@ -220,8 +218,6 @@ pemeriksaan formulir demo (`demo-baru/js/05-ppdb.js`).
 | Pesan Masuk | `/admin/pesan` | Pesan dari halaman kontak, tanda baca, balas lewat email/WhatsApp |
 | Pengaturan | `/admin/pengaturan` | Seluruh isi situs publik, dikelompokkan menjadi sembilan bagian |
 | Notifikasi | `/admin/notifikasi` | Pesan WhatsApp yang disusun sistem, ditinjau lalu dikirim |
-| Bank Soal | `/admin/soal` | Soal pilihan ganda untuk tes seleksi |
-| Tes Seleksi | `/admin/ujian` | Jadwal tes, durasi, nilai minimum, dan rekap hasilnya |
 | Rincian Biaya | `/admin/biaya` | Pos biaya per tahap; totalnya dihitung sistem |
 Tanya Jawab | `/admin/faq` | Kelola pertanyaan, kategori, urutan, dan penanda sorot |
 | Halaman Profil | `/admin/halaman` | Naskah halaman Kurikulum, OSIS, Pendidikan Karakter, dan halaman profil baru |
@@ -235,28 +231,12 @@ Seluruh isi situs publik berasal dari menu **Pengaturan**, sehingga sekolah
 dapat mengubah tampilan tanpa menyentuh kode. Setelah admin menyimpan,
 halaman publik disegarkan seketika.
 
-### D. Tes seleksi online, kartu peserta, dan notifikasi
+### D. Notifikasi
 
-**Tes seleksi (CBT).** Peserta masuk dengan nomor registrasi beserta tanggal
-lahir, kunci yang sama dengan Cek Status, lalu menerima token berumur pendek
-yang hanya berlaku untuk jalur ujian. Tiga hal yang menentukan bentuknya:
-
-- Batas waktu disimpan sebagai waktu mutlak saat sesi dimulai, bukan dihitung
-  ulang dari durasi pada setiap permintaan. Memuat ulang halaman tidak
-  memperpanjang waktu, dan penghitung di layar hanyalah tampilan.
-- Susunan soal dibekukan saat sesi dimulai, sehingga nomor soal tidak
-  berpindah dan jawaban yang sudah diisi tidak salah tempat.
-- Kunci jawaban tidak pernah dikirim ke peramban; penilaiannya seluruhnya di
-  server.
-
-Jawaban dikirim satu per satu begitu dipilih, jadi jaringan yang terputus di
-tengah jalan tidak menghanguskan yang sudah dijawab. Waktu habis menutup sesi
-sendiri dan tetap menilai jawaban yang ada.
-
-**Kartu peserta.** PDF dengan barcode Code 128 dan kode QR, keduanya memuat
-nomor registrasi. Barcode untuk pemindai garis yang biasa dipakai saat
-presensi ruang ujian, kode QR untuk dipindai dengan telepon. Ruang dan nomor
-kursinya diisi panitia pada halaman rincian pendaftar.
+> Tes seleksi online, bank soal, paket ujian, dan kartu peserta dihapus pada
+> 10 Oktober 2026 (migrasi `026_hapus_ujian.sql`): PPDB berhenti pada
+> pendaftaran dan keputusan Diterima, Cadangan, atau Ditolak. Catatan
+> pengujian di bawah yang menyebut tes seleksi bersifat historis.
 
 **Notifikasi WhatsApp.** Pesan disusun sistem saat status pendaftar diubah,
 lalu **menunggu ditinjau** panitia, bukan langsung terkirim; pesan yang salah
@@ -2305,7 +2285,7 @@ Seluruh warnanya lulus rasio kontras 4,5:1 terhadap tulisan putih.
 
 Yang dilindungi bukan hanya beban server. Tiga rute publik menyerahkan data
 pribadi pendaftar dengan kunci nomor registrasi ditambah tanggal lahir: cek
-status, bukti pendaftaran, dan kartu peserta. Nomor registrasinya berurutan
+status dan bukti pendaftaran. Nomor registrasinya berurutan
 dan tercetak pada bukti pendaftaran, sedangkan tanggal lahir anak seusia calon
 peserta didik SMA hanya sekitar seribu kemungkinan. Tanpa pembatas, seluruh
 kemungkinan itu dapat dicoba satu per satu sampai ketemu.
@@ -2316,8 +2296,6 @@ Pembatasnya dua lapis, dan lapis keduanya yang menutup celah itu:
 |---|---|---|
 | `POST /api/ppdb/cek` | 60 / 10 menit | 10 / jam |
 | `POST /api/ppdb/bukti` | 60 / 10 menit | 10 / jam |
-| `POST /api/ppdb/kartu` | 60 / 10 menit | 10 / jam |
-| `POST /api/ppdb/ujian/mulai` | 60 / 10 menit | 10 / jam |
 | `POST /api/ppdb/daftar` | 20 / jam | - |
 | `POST /api/pesan` | 10 / jam | - |
 | `POST /api/kunjungan` | 300 / 10 menit | - |
@@ -2709,7 +2687,7 @@ kelalaian:
 - `style-src` juga, sebab React menulis gaya sebaris pada beberapa komponen,
   misalnya pergeseran karusel berita.
 - `blob:` diizinkan pada `object-src`, `frame-src`, dan `media-src`. Bukti
-  pendaftaran, kartu peserta, dan dokumen pendaftar diminta lewat fetch
+  pendaftaran dan dokumen pendaftar diminta lewat fetch
   (alamatnya POST, atau memerlukan token petugas) lalu dibuka sebagai blob.
   Dokumen blob mewarisi CSP halaman yang membuatnya, jadi tanpa izin itu tab
   PDF-nya tampil kosong.
@@ -2752,10 +2730,6 @@ terpasang beserta petaknya, diperiksa lewat tangkapan layar.
 | `pesan` | Pesan dari formulir kontak |
 | `statistik_kunjungan` | Kunjungan per halaman per hari + sumber rujukan |
 | `biaya` | Pos rincian biaya per tahap pembayaran |
-| `soal` | Bank soal pilihan ganda |
-| `paket_ujian` | Jadwal tes seleksi beserta durasi dan nilai minimum |
-| `sesi_ujian` | Satu sesi per peserta per paket, beserta nilainya |
-| `sesi_soal` | Susunan soal yang dibekukan per sesi, beserta jawabannya |
 | `notifikasi` | Catatan pesan WhatsApp beserta keadaan pengirimannya |
 | `faq` | Tanya jawab beserta kategori dan penanda sorot |
 | `halaman` | Halaman bernaskah panjang: Kurikulum, OSIS, Pendidikan Karakter |
@@ -2980,9 +2954,7 @@ ketujuh belas halaman turunan terbuka dan berisi, jejak lokasi beserta tautan
 sekelompok bekerja, menu ponsel dapat dilipat, kelima menu panel baru memuat
 barisnya, dan sidebar panel tampil dalam lima kelompok.
 
-Pada demo, tes seleksi dijalankan di peramban pengunjung, jadi waktu dan kunci
-jawabannya tidak terlindungi seperti pada aplikasi sebenarnya. Hal yang sama
-berlaku untuk unggah gambar sekolah: pada aplikasi berkasnya disimpan server,
+Pada demo, unggah gambar sekolah: pada aplikasi berkasnya disimpan server,
 sedangkan di demo tombolnya menjelaskan bahwa berkasnya tidak dapat disimpan.
 Kedua batasan itu disebutkan, bukan disembunyikan.
 

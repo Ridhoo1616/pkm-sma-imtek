@@ -129,7 +129,7 @@ const peta = await fetch(`${ASTRO}/sitemap.xml`).then((j) => j.text());
 const jalurAstro = new Set(
   [...peta.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname.replace(DASAR, "") || "/"),
 );
-for (const j of ["/", "/ppdb/ujian", "/ppdb/cek", "/ppdb/daftar"]) jalurAstro.add(j);
+for (const j of ["/", "/ppdb/cek", "/ppdb/daftar"]) jalurAstro.add(j);
 
 let jumlah = 0;
 for (const jalur of jalurAstro) {
@@ -150,7 +150,7 @@ for (const berkas of ["robots.txt", "sitemap.xml"]) {
 const halamanAdmin = [
   "", "masuk", "sandi", "berita", "biaya", "faq", "fasilitas", "galeri", "halaman", "jurusan",
   "kalender", "kegiatan", "laporan", "notifikasi", "pendaftar", "pendaftar/baru", "pengaturan",
-  "pengguna", "pesan", "pustaka", "sekolah", "soal", "surat", "tanya-buntu", "tenaga", "ujian",
+  "pengguna", "pesan", "pustaka", "sekolah", "surat", "tanya-buntu", "tenaga",
   "bkk/lamaran", "bkk/lowongan", "bkk/mitra",
 ];
 const data = JSON.parse(await readFile(join(process.env.DATA_DEMO), "utf8"));

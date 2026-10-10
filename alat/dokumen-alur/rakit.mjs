@@ -123,17 +123,13 @@ const sistemPublik = flowchart(
     G("qc", "B", 2, "d", ["Cek status", "pendaftaran?"]),
     G("isi", "B", 3, "p", ["Mengisi nomor reg.", "dan tanggal lahir"]),
     G("qk", "B", 4, "d", ["Data cocok?"]),
-    G("lihat", "B", 5, "p", ["Melihat status,", "catatan, nilai tes"]),
-    G("qt", "B", 6, "d", ["Boleh ikut", "tes?"]),
-    G("unduh", "B", 7, "p", ["Mengunduh bukti,", "kartu, dan surat"]),
-    G("x2", "B", 8, "t", "Selesai"),
+    G("lihat", "B", 5, "p", ["Melihat status,", "catatan, pengumuman"]),
+    G("unduh", "B", 6, "p", ["Mengunduh bukti", "dan surat"]),
+    G("x2", "B", 7, "t", "Selesai"),
     G("qq", "C", 2, "d", ["Ada", "pertanyaan?"]),
     G("tanya", "C", 3, "p", ["Bertanya lewat", "\"Butuh bantuan?\""]),
     G("qj", "C", 4, "d", ["Jawaban", "ditemukan?"]),
     G("baca", "C", 5, "p", ["Membaca jawaban"]),
-    G("tes", "C", 6, "p", ["Mengerjakan", "tes seleksi"]),
-    G("qw", "C", 7, "d", ["Selesai atau", "waktu habis?"]),
-    G("nilai", "C", 8, "p", ["Sistem menghitung", "nilai otomatis"]),
     G("info", "D", 2, "p", ["Membaca profil,", "berita, galeri"]),
     G("x1", "D", 3, "t", "Selesai"),
     G("pesan", "D", 4, "p", ["Mengirim pesan", "lewat Kontak"]),
@@ -149,9 +145,7 @@ const sistemPublik = flowchart(
     E("qn", "isi", ["r", "l"], "Ya", { lewat: [[SAL.AB, 0]] }), E("qn", "simpan", ["b", "t"], "Tidak"),
     E("simpan", "bukti"), E("bukti", "tunggu"), E("tunggu", "isi", ["r", "l"], null, { lewat: [[SAL.AB, 0]] }),
     E("isi", "qk"), E("qk", "isi", ["r", "r"], "Tidak", { saluran: SAL.BC }), E("qk", "lihat", ["b", "t"], "Ya"),
-    E("lihat", "qt"), E("qt", "tes", ["r", "l"], "Ya"), E("qt", "unduh", ["b", "t"], "Tidak"), E("unduh", "x2"),
-    E("tes", "qw"), E("qw", "tes", ["r", "r"], "Tidak", { saluran: SAL.CD }), E("qw", "nilai", ["b", "t"], "Ya"),
-    E("nilai", "unduh", ["l", "r"], null, { lewat: [[SAL.BC, 0]] }),
+    E("lihat", "unduh"), E("unduh", "x2"),
     E("tanya", "qj"), E("qj", "pesan", ["r", "l"], "Tidak"), E("qj", "baca", ["b", "t"], "Ya"),
     E("pesan", "x3"), E("baca", "x3", ["r", "l"]),
   ],
@@ -169,7 +163,7 @@ const sistemAdmin = flowchart(
     G("qv", "A", 6, "d", ["Verifikasi", "pendaftar?"]),
     G("rinci", "A", 7, "p", ["Membuka rincian,", "memeriksa berkas"]),
     G("qbk", "A", 8, "d", ["Berkas", "lengkap?"]),
-    G("verif", "A", 9, "p", ["Terverifikasi,", "pendaftar ikut tes"]),
+    G("verif", "A", 9, "p", ["Berkas lengkap,", "status Terverifikasi"]),
     G("status", "A", 10, "p", ["Menetapkan status", "akhir pendaftar"]),
     G("notif", "A", 11, "p", ["Sistem menyusun", "notifikasi"]),
     G("kirim", "A", 12, "p", ["Meninjau dan", "mengirim WhatsApp"]),
@@ -189,7 +183,7 @@ const sistemAdmin = flowchart(
     G("db", "C", 9.3, "db", ["Disimpan ke", "basis data"]),
     G("tampil", "C", 10.3, "p", ["Tampil di", "situs publik"]),
     G("xc", "C", 11.3, "t", "Selesai"),
-    G("atur", "D", 5, "p", ["Mengatur PPDB, tes,", "identitas (admin)"]),
+    G("atur", "D", 5, "p", ["Mengatur PPDB dan", "identitas (admin)"]),
     G("qa", "D", 6, "d", ["Mengubah", "pengaturan?"]),
     G("keluar", "D", 7, "p", ["Keluar dari panel"]),
     G("xd", "D", 8, "t", "Selesai"),
@@ -221,22 +215,21 @@ const umum = flowchart(
     D("u2", 2, ["Ingin mendaftar", "PPDB?"]),
     P("u2t", 2, ["Membaca profil, berita,", "galeri, dan tanya jawab"], "c"),
     T("u2s", 2, "Selesai", "k"),
-    P("u3", 3, ["Mengisi formulir pendaftaran", "(Bagian 6)"]),
-    P("u4", 4, ["Panitia memverifikasi berkas", "(Bagian 9)"]),
+    P("u3", 3, ["Mengisi formulir pendaftaran", "(Bagian 7)"]),
+    P("u4", 4, ["Panitia memverifikasi berkas", "(Bagian 10)"]),
     D("u5", 5, ["Lolos", "verifikasi?"]),
     P("u5t", 5, ["Status Ditolak"], "c"),
-    P("u6", 6, ["Mengikuti tes seleksi online", "(Bagian 12)"]),
-    P("u7", 7, ["Panitia menetapkan hasil:", "Diterima, Cadangan, Ditolak"]),
-    P("u8", 8, ["Surat dan notifikasi dikirim", "(Bagian 10 dan 13)"]),
-    P("u9", 9, ["Pendaftar melihat hasil di", "Cek Status (Bagian 7)"]),
-    T("u10", 10, "Selesai"),
+    P("u7", 6, ["Panitia menetapkan hasil:", "Diterima, Cadangan, Ditolak"]),
+    P("u8", 7, ["Surat dan notifikasi dikirim", "(Bagian 11 dan 12)"]),
+    P("u9", 8, ["Pendaftar melihat hasil di", "Cek Status (Bagian 8)"]),
+    T("u10", 9, "Selesai"),
   ],
   [
     E("u0", "u1"), E("u1", "u2"),
     E("u2", "u2t", ["r", "l"], "Tidak"), E("u2t", "u2s", ["r", "l"]),
     E("u2", "u3", ["b", "t"], "Ya"), E("u3", "u4"), E("u4", "u5"),
-    E("u5", "u5t", ["r", "l"], "Tidak"), E("u5", "u6", ["b", "t"], "Ya"),
-    E("u6", "u7"), E("u7", "u8"), E("u8", "u9"), E("u9", "u10"),
+    E("u5", "u5t", ["r", "l"], "Tidak"), E("u5", "u7", ["b", "t"], "Ya"),
+    E("u7", "u8"), E("u8", "u9"), E("u9", "u10"),
     E("u5t", "u9", ["r", "r"], null, { saluran: 600 }),
   ],
 );
@@ -337,19 +330,16 @@ const cek = flowchart(
     P("k2", 2, ["Mengisi nomor registrasi", "dan tanggal lahir"]),
     D("k3", 3, ["Data cocok?"]),
     P("k3t", 3, ["Sistem menampilkan", "data tidak ditemukan"], "c"),
-    P("k4", 4, ["Sistem menampilkan status, catatan", "panitia, nilai tes, dan pengumuman"]),
+    P("k4", 4, ["Sistem menampilkan status, catatan", "panitia, dan pengumuman"]),
     DOC("k5", 5, ["Bukti pendaftaran (PDF)"]),
-    D("k6", 6, ["Berkas sudah", "diverifikasi?"]),
-    DOC("k6y", 6, ["Kartu peserta tes (PDF)"], "c"),
-    D("k7", 7.4, ["Ada surat untuk", "pendaftar?"]),
-    DOC("k7y", 7.4, ["Surat dari sekolah (PDF)"], "c"),
-    T("k8", 8.6, "Selesai"),
+    D("k7", 6, ["Ada surat untuk", "pendaftar?"]),
+    DOC("k7y", 6, ["Surat dari sekolah (PDF)"], "c"),
+    T("k8", 7.2, "Selesai"),
   ],
   [
     E("k0", "k1"), E("k1", "k2"), E("k2", "k3"),
     E("k3", "k3t", ["r", "l"], "Tidak"), E("k3t", "k2", ["t", "r"]),
-    E("k3", "k4", ["b", "t"], "Ya"), E("k4", "k5"), E("k5", "k6"),
-    E("k6", "k6y", ["r", "l"], "Ya"), E("k6", "k7", ["b", "t"], "Tidak"), E("k6y", "k7", ["b", "t"]),
+    E("k3", "k4", ["b", "t"], "Ya"), E("k4", "k5"), E("k5", "k7"),
     E("k7", "k7y", ["r", "l"], "Ya"), E("k7", "k8", ["b", "t"], "Tidak"), E("k7y", "k8", ["b", "r"]),
   ],
 );
@@ -367,16 +357,15 @@ const kelola = flowchart(
     P("l5y", 5.25, ["Sistem membuat", "nomor registrasi"], "c"),
     P("l5", 5.25, ["Panitia membuka rincian pendaftar"]),
     P("l6", 6.25, ["Memeriksa berkas unggahan"]),
-    P("l7", 7.25, ["Mengatur ruang dan kursi tes"]),
-    P("l8", 8.25, ["Mengubah status dan", "catatan pendaftar"]),
-    T("l9", 9.25, "Selesai"),
+    P("l8", 7.25, ["Mengubah status dan", "catatan pendaftar"]),
+    T("l9", 8.25, "Selesai"),
   ],
   [
     E("l0", "l1"), E("l1", "l2"), E("l2", "l3"),
     E("l3", "l3y", ["r", "l"], "Ya"), E("l3y", "l3s", ["r", "l"]),
     E("l3", "l4", ["b", "t"], "Tidak"),
     E("l4", "l4y", ["r", "l"], "Ya"), E("l4y", "l5y"), E("l5y", "l9", ["b", "r"]),
-    E("l4", "l5", ["b", "t"], "Tidak"), E("l5", "l6"), E("l6", "l7"), E("l7", "l8"), E("l8", "l9"),
+    E("l4", "l5", ["b", "t"], "Tidak"), E("l5", "l6"), E("l6", "l8"), E("l8", "l9"),
   ],
 );
 
@@ -387,26 +376,21 @@ const verifikasi = flowchart(
     D("b3", 2, ["Berkas lengkap", "dan sesuai?"]),
     P("b3t", 2, ["Status Ditolak,", "catatan untuk pendaftar"], "c"),
     P("b4", 3, ["Status Terverifikasi"]),
-    P("b5", 4, ["Pendaftar mengikuti", "tes seleksi online"]),
-    D("b6", 5, ["Nilai mencapai", "batas minimum?"]),
-    P("b6t", 5, ["Status Ditolak"], "c"),
-    D("b7", 6.25, ["Kuota peminatan", "masih tersedia?"]),
-    P("b7t", 6.25, ["Status Cadangan"], "c"),
-    P("b8", 7.25, ["Status Diterima"]),
-    P("b9", 8.25, ["Panitia menerbitkan surat", "keterangan diterima"]),
-    P("b10", 9.25, ["Sistem menyusun notifikasi", "untuk ditinjau panitia"]),
-    P("b11", 10.25, ["Pendaftar melihat hasil", "di Cek Status"]),
-    T("b12", 11.25, "Selesai"),
+    D("b7", 4, ["Kuota peminatan", "masih tersedia?"]),
+    P("b7t", 4, ["Status Cadangan"], "c"),
+    P("b8", 5, ["Status Diterima"]),
+    P("b9", 6, ["Panitia menerbitkan surat", "keterangan diterima"]),
+    P("b10", 7, ["Sistem menyusun notifikasi", "untuk ditinjau panitia"]),
+    P("b11", 8, ["Pendaftar melihat hasil", "di Cek Status"]),
+    T("b12", 9, "Selesai"),
   ],
   [
     E("b0", "b1"), E("b1", "b3"),
     E("b3", "b3t", ["r", "l"], "Tidak"), E("b3", "b4", ["b", "t"], "Ya"),
-    E("b4", "b5"), E("b5", "b6"),
-    E("b6", "b6t", ["r", "l"], "Tidak"), E("b6", "b7", ["b", "t"], "Ya"),
+    E("b4", "b7"),
     E("b7", "b7t", ["r", "l"], "Tidak"), E("b7", "b8", ["b", "t"], "Ya"),
     E("b8", "b9"), E("b9", "b10"), E("b10", "b11"), E("b11", "b12"),
     E("b3t", "b10", ["r", "r"], null, { saluran: 600 }),
-    E("b6t", "b10", ["r", "r"], null, { saluran: 600 }),
     E("b7t", "b10", ["r", "r"], null, { saluran: 600 }),
   ],
   { rh: 72 },
@@ -436,61 +420,6 @@ const notifikasi = flowchart(
     E("n5", "n6", ["b", "t"], "Tidak"),
     E("n6", "n6t", ["r", "l"], "Tidak"), E("n6", "n7", ["b", "t"], "Ya"),
     E("n7", "n8"), E("n6t", "n8", ["b", "r"]), E("n8", "n9"),
-  ],
-);
-
-const persiapanTes = flowchart(
-  [
-    T("s0", 0),
-    P("s1", 1, ["Panitia menulis soal di Bank Soal:", "pilihan A-E, kunci, pembahasan"]),
-    D("s2", 2, ["Jumlah soal aktif", "sudah cukup?"]),
-    P("s3", 3, ["Admin membuat paket tes: durasi,", "jumlah soal, nilai minimum"]),
-    P("s4", 4, ["Admin menentukan jendela", "waktu mulai dan selesai"]),
-    P("s5", 5, ["Admin menyalakan tes di Pengaturan", "dan menulis keterangan tes"]),
-    D("s6", 6, ["Hari ini dalam", "jendela waktu paket?"]),
-    P("s6t", 6, ["Tes belum dibuka", "bagi pendaftar"], "c"),
-    T("s6s", 6, "Selesai", "k"),
-    P("s7", 7, ["Halaman Tes Seleksi terbuka", "bagi pendaftar terverifikasi"]),
-    T("s8", 8, "Selesai"),
-  ],
-  [
-    E("s0", "s1"), E("s1", "s2"),
-    E("s2", "s1", ["l", "l"], "Tidak", { saluran: 50 }),
-    E("s2", "s3", ["b", "t"], "Ya"), E("s3", "s4"), E("s4", "s5"), E("s5", "s6"),
-    E("s6", "s6t", ["r", "l"], "Tidak"), E("s6t", "s6s", ["r", "l"]),
-    E("s6", "s7", ["b", "t"], "Ya"), E("s7", "s8"),
-  ],
-);
-
-const tes = flowchart(
-  [
-    T("c0", 0),
-    P("c1", 1, ["Pendaftar masuk dengan nomor", "registrasi dan tanggal lahir"]),
-    D("c2", 2, ["Data cocok?"]),
-    P("c2t", 2, ["Sistem menampilkan", "data tidak ditemukan"], "c"),
-    D("c3", 3, ["Tes dibuka dan", "sudah diverifikasi?"]),
-    P("c3t", 3, ["Sistem menampilkan", "alasannya"], "c"),
-    T("c3s", 3, "Selesai", "k"),
-    D("c4", 4, ["Sudah pernah", "menyelesaikan tes?"]),
-    P("c4y", 4, ["Sistem menampilkan", "nilai sebelumnya"], "c"),
-    T("c4s", 4, "Selesai", "k"),
-    P("c5", 5, ["Sistem membuat sesi dan", "mulai menghitung waktu"]),
-    P("c6", 6, ["Pendaftar menjawab soal;", "jawaban tersimpan tiap dipilih"]),
-    D("c7", 7, ["Selesai ditekan atau", "waktu habis?"]),
-    P("c8", 8, ["Sistem menghitung nilai dan", "menentukan lulus atau tidak"]),
-    P("c10", 9, ["Nilai tampil di Cek Status", "dan di menu Tes Seleksi"]),
-    T("c11", 10, "Selesai"),
-  ],
-  [
-    E("c0", "c1"), E("c1", "c2"),
-    E("c2", "c2t", ["r", "l"], "Tidak"), E("c2t", "c1", ["t", "r"]),
-    E("c2", "c3", ["b", "t"], "Ya"),
-    E("c3", "c3t", ["r", "l"], "Tidak"), E("c3t", "c3s", ["r", "l"]),
-    E("c3", "c4", ["b", "t"], "Ya"),
-    E("c4", "c4y", ["r", "l"], "Ya"), E("c4y", "c4s", ["r", "l"]),
-    E("c4", "c5", ["b", "t"], "Tidak"), E("c5", "c6"), E("c6", "c7"),
-    E("c7", "c6", ["l", "l"], "Tidak", { saluran: 60 }),
-    E("c7", "c8", ["b", "t"], "Ya"), E("c8", "c10"), E("c10", "c11"),
   ],
 );
 
@@ -613,12 +542,12 @@ function arsitektur() {
     garis("M380 314V346H530V380", "", 0, 0) +
     kotak(40, 12, 260, 52, "Pengunjung dan pendaftar", ["peramban komputer atau ponsel"]) +
     kotak(360, 12, 260, 52, "Panitia dan admin", ["peramban, masuk dengan akun panel"]) +
-    kotak(40, 118, 260, 68, "Situs publik (Astro)", ["porta 3000", "profil, berita, PPDB, Cek Status, tes"]) +
+    kotak(40, 118, 260, 68, "Situs publik (Astro)", ["porta 3000", "profil, berita, PPDB, Cek Status"]) +
     kotak(360, 118, 260, 68, "Panel admin (Next.js)", ["porta 3001", "verifikasi, surat, konten, pengaturan"]) +
     kotak(230, 244, 200, 70, "Backend (Go)", ["porta 8090", "API, aturan PPDB, nomor surat, PDF"], true) +
     tabung(40, 382, 180, 70, "PostgreSQL", "seluruh data sekolah") +
     kotak(240, 382, 180, 70, "Folder unggahan", ["foto dan berkas", "pendaftar"]) +
-    kotak(440, 382, 180, 70, "Pembuat PDF", ["bukti, kartu peserta,", "surat berkop"]) +
+    kotak(440, 382, 180, 70, "Pembuat PDF", ["bukti pendaftaran,", "surat berkop"]) +
     `</svg>`;
 }
 
@@ -683,8 +612,8 @@ ${gambar(arsitektur(), "Arsitektur sistem")}
 <table class="data">
 <tr><th style="width:18%">Peran</th><th style="width:40%">Dapat melakukan</th><th>Tidak dapat</th></tr>
 <tr><td>Pengunjung</td><td>Membaca profil, berita, galeri, fasilitas, dan tanya jawab; mengirim pesan</td><td>Melihat data pendaftar</td></tr>
-<tr><td>Pendaftar</td><td>Mendaftar, Cek Status, tes seleksi, mengunduh bukti, kartu peserta, dan surat</td><td>Melihat data pendaftar lain</td></tr>
-<tr><td>Panitia</td><td>Verifikasi, mengubah status, menerbitkan surat, mengelola konten, soal, pesan</td><td>Pengaturan, akun, peminatan, biaya, paket tes, jenis surat, menghapus data</td></tr>
+<tr><td>Pendaftar</td><td>Mendaftar, Cek Status, mengunduh bukti pendaftaran dan surat</td><td>Melihat data pendaftar lain</td></tr>
+<tr><td>Panitia</td><td>Verifikasi, mengubah status, menerbitkan surat, mengelola konten dan pesan</td><td>Pengaturan, akun, peminatan, biaya, jenis surat, menghapus data</td></tr>
 <tr><td>Admin</td><td>Semua tugas panitia ditambah seluruh isi kolom di sebelah kanan</td><td>-</td></tr>
 </table>
 <p style="margin-top:12pt"><b>Simbol flowchart</b> yang dipakai pada dokumen ini:</p>
@@ -726,7 +655,7 @@ ${gambar(pendaftaran, "Flowchart pendaftaran PPDB")}
 
 <section>
 <h2>7. Alur Cek Status dan Unduh Dokumen</h2>
-<p>Pendaftar memakai nomor registrasi dan tanggal lahir. Dokumen yang dapat diunduh bertambah sesuai tahap pendaftarannya.</p>
+<p>Pendaftar memakai nomor registrasi dan tanggal lahir. Pendaftar dapat mengunduh bukti pendaftaran, dan surat bila sekolah sudah menerbitkannya.</p>
 ${gambar(cek, "Flowchart cek status dan unduh dokumen")}
 </section>
 
@@ -738,7 +667,7 @@ ${gambar(kelola, "Flowchart pengelolaan data pendaftar")}
 
 <section>
 <h2>9. Alur Verifikasi dan Penetapan Hasil</h2>
-<p>Panitia memeriksa berkas, lalu menetapkan status akhir berdasarkan nilai tes dan kuota peminatan. Setiap perubahan status menyusun notifikasi untuk pendaftar.</p>
+<p>Panitia memeriksa berkas, lalu menetapkan status akhir berdasarkan kelengkapan berkas dan kuota peminatan. Setiap perubahan status menyusun notifikasi untuk pendaftar.</p>
 ${gambar(verifikasi, "Flowchart verifikasi dan penetapan hasil")}
 </section>
 
@@ -746,18 +675,6 @@ ${gambar(verifikasi, "Flowchart verifikasi dan penetapan hasil")}
 <h2>10. Alur Notifikasi WhatsApp</h2>
 <p>Pesan tidak langsung terkirim. Panitia meninjaunya lebih dulu, karena pesan WhatsApp yang salah tidak dapat ditarik kembali.</p>
 ${gambar(notifikasi, "Flowchart notifikasi WhatsApp")}
-</section>
-
-<section>
-<h2>11. Alur Persiapan Tes Seleksi</h2>
-<p>Soal disiapkan panitia, sedangkan paket tes dan jadwalnya diatur admin.</p>
-${gambar(persiapanTes, "Flowchart persiapan tes seleksi")}
-</section>
-
-<section>
-<h2>12. Alur Tes Seleksi Online</h2>
-<p>Tes dikerjakan dari perangkat pendaftar dan dinilai otomatis. Setiap pendaftar hanya mendapat satu sesi untuk setiap paket tes.</p>
-${gambar(tes, "Flowchart tes seleksi online")}
 </section>
 
 <section>

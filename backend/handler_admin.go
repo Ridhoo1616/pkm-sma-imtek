@@ -524,52 +524,6 @@ func (a *Aplikasi) tanganiUbahStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-type permintaanRuangUjian struct {
-	RuangUjian string `json:"ruang_ujian"`
-	KursiUjian string `json:"kursi_ujian"`
-}
-
-// tanganiUbahRuangUjian menyimpan ruang dan nomor kursi yang dicetak pada
-// kartu peserta.
-func (a *Aplikasi) tanganiUbahRuangUjian(w http.ResponseWriter, r *http.Request) {
-	id, ok := idJalur(w, r)
-	if !ok {
-		return
-	}
-	var p permintaanRuangUjian
-	if !bacaJSON(w, r, &p) {
-		return
-	}
-	p.RuangUjian = strings.TrimSpace(p.RuangUjian)
-	p.KursiUjian = strings.TrimSpace(p.KursiUjian)
-
-	v := validasiBaru()
-	v.panjangMaks("ruang_ujian", "Ruang ujian", p.RuangUjian, 40)
-	v.panjangMaks("kursi_ujian", "Nomor kursi", p.KursiUjian, 20)
-	if v.bermasalah() {
-		kirimGalatValidasi(w, v)
-		return
-	}
-
-	hasil, err := a.db.Exec(
-		"UPDATE pendaftar SET ruang_ujian = $1, kursi_ujian = $2 WHERE id = $3",
-		p.RuangUjian, p.KursiUjian, id)
-	if err != nil {
-		a.galatServer(w, "menyimpan ruang ujian", err)
-		return
-	}
-	if n, _ := hasil.RowsAffected(); n == 0 {
-		var ada int
-		if a.db.QueryRow("SELECT id FROM pendaftar WHERE id = $1", id).Scan(&ada) == sql.ErrNoRows {
-			kirimGalat(w, http.StatusNotFound, "Data pendaftar tidak ditemukan.")
-			return
-		}
-	}
-	kirimJSON(w, http.StatusOK, map[string]string{
-		"pesan": "Ruang dan nomor kursi disimpan.",
-	})
-}
-
 /* ================= hapus pendaftar ================= */
 
 func (a *Aplikasi) tanganiHapusPendaftar(w http.ResponseWriter, r *http.Request) {

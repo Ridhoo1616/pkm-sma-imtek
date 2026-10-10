@@ -16,8 +16,8 @@ import { Memuat } from "@/komponen/Memuat";
  */
 
 import { 
-  LayoutDashboard, Users, TrendingUp, Bell, Database, 
-  CheckSquare, Receipt, LibraryBig, School, 
+  LayoutDashboard, Users, TrendingUp, Bell,
+  Receipt, LibraryBig, School, 
   MonitorSmartphone, Briefcase, Building, 
   Calendar, Activity, Book, Newspaper, 
   Image as ImageIcon, MessageCircleQuestion, Mail, 
@@ -40,8 +40,6 @@ const KELOMPOK: {
       { jalur: "/admin/laporan", label: "Laporan Promosi", khususAdmin: false, ikon: TrendingUp },
       { jalur: "/admin/notifikasi", label: "Notifikasi", khususAdmin: false, ikon: Bell },
       { jalur: "/admin/surat", label: "Surat", khususAdmin: false, ikon: FileText },
-      { jalur: "/admin/soal", label: "Bank Soal", khususAdmin: false, ikon: Database },
-      { jalur: "/admin/ujian", label: "Tes Seleksi", khususAdmin: false, ikon: CheckSquare },
       { jalur: "/admin/biaya", label: "Rincian Biaya", khususAdmin: true, ikon: Receipt },
       { jalur: "/admin/jurusan", label: "Peminatan", khususAdmin: true, ikon: LibraryBig },
       { jalur: "/admin/sekolah", label: "Sekolah Asal", khususAdmin: false, ikon: School },

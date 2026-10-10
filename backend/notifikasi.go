@@ -67,7 +67,6 @@ type Notifikasi struct {
 // JenisNotifikasi memetakan jenis pesan ke kunci pengaturan naskahnya.
 var JenisNotifikasi = map[string]string{
 	"verifikasi":   "wa_notif_verifikasi",
-	"ujian":        "wa_notif_ujian",
 	"kelulusan":    "wa_notif_kelulusan",
 	"daftar_ulang": "wa_notif_daftar_ulang",
 }
@@ -84,7 +83,6 @@ var JenisNotifikasi = map[string]string{
 // untungnya nama yang lebih tepat.
 var PerihalEmail = map[string]string{
 	"verifikasi":   "email_subjek_verifikasi",
-	"ujian":        "email_subjek_ujian",
 	"kelulusan":    "email_subjek_kelulusan",
 	"daftar_ulang": "email_subjek_daftar_ulang",
 }
@@ -194,7 +192,6 @@ func (a *Aplikasi) buatNotifikasi(pendaftarID int, jenis string, tambahan map[st
 		"tahun_ajaran":  a.atur("ppdb_tahun"),
 		"catatan":       "",
 		"status":        "",
-		"jadwal_ujian":  "",
 	}
 	// Rincian daftar ulang dibaca dari pengaturan, bukan dituliskan di dalam
 	// naskah pesannya, supaya sekolah dapat mengubah jadwalnya tanpa

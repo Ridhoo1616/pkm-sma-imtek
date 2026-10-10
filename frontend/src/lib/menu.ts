@@ -142,11 +142,6 @@ export const MENU: MenuUtama[] = [
         keterangan: "Memantau verifikasi berkas dan melihat hasil seleksi.",
       },
       {
-        jalur: "/ppdb/ujian",
-        label: "Tes Seleksi",
-        keterangan: "Tes daring bagi pendaftar yang berkasnya sudah lolos.",
-      },
-      {
         jalur: "/faq",
         label: "Tanya Jawab",
         keterangan: "Pertanyaan yang paling sering diajukan pendaftar.",
