@@ -1091,29 +1091,33 @@
   di("GET", "/api/admin/bkk/lowongan", ({ kepala }) => (
     pengguna(kepala), { data: urutLowongan(kol("bkk-lowongan")).map(lowonganLengkap), jenis: JENIS_LOWONGAN, status: ["draf", "buka", "tutup"] }
   ));
-  const periksaLowongan = (isi) => {
+  const periksaLowongan = async (isi, badan, lama) => {
     const k = {};
     if (!mitraDari(Number(isi.mitra_id))) k.mitra_id = "Pilih perusahaan mitra yang membuka lowongan ini.";
     if (!isi.posisi) k.posisi = "Posisi wajib diisi.";
     if (isi.jenis && !JENIS_LOWONGAN.includes(isi.jenis)) k.jenis = "Jenis pekerjaan tidak valid.";
     if (isi.kuota !== "" && isi.kuota != null && !(Number(isi.kuota) >= 1 && Number(isi.kuota) <= 10000)) k.kuota = "Jumlah yang dibutuhkan harus berupa angka 1 sampai 10000.";
     if (Object.keys(k).length) galat(422, "Data yang dikirim belum benar.", k);
+    const berkas = badan instanceof FormData ? badan.get("foto") : null;
+    let foto = lama ? lama.foto || "" : "";
+    if (berkas instanceof File && berkas.size) foto = await simpanBerkas(berkas, "bkk-lowongan");
+    else if (isi.hapus_foto === "1") foto = "";
     return {
-      mitra_id: Number(isi.mitra_id), posisi: isi.posisi, jenis: isi.jenis || "Penuh Waktu", lokasi: isi.lokasi || "",
+      mitra_id: Number(isi.mitra_id), posisi: isi.posisi, foto, jenis: isi.jenis || "Penuh Waktu", lokasi: isi.lokasi || "",
       deskripsi: isi.deskripsi || "", kualifikasi: isi.kualifikasi || "", gaji: isi.gaji || "",
       kuota: isi.kuota ? Number(isi.kuota) : null, batas_lamar: isi.batas_lamar || null, status: isi.status || "draf",
     };
   };
-  di("POST", "/api/admin/bkk/lowongan", ({ kepala, badan }) => {
+  di("POST", "/api/admin/bkk/lowongan", async ({ kepala, badan }) => {
     pengguna(kepala);
-    const l = { id: idBaru(kol("bkk-lowongan")), ...periksaLowongan(isianTeks(badan)), dibuat: hariIni() };
+    const l = { id: idBaru(kol("bkk-lowongan")), ...(await periksaLowongan(isianTeks(badan), badan)), dibuat: hariIni() };
     kol("bkk-lowongan").push(l);
     return [201, { pesan: "Lowongan berhasil disimpan.", id: l.id }];
   });
-  di("PUT", "/api/admin/bkk/lowongan/{id}", ({ kepala, p, badan }) => {
+  di("PUT", "/api/admin/bkk/lowongan/{id}", async ({ kepala, p, badan }) => {
     pengguna(kepala);
     const l = kol("bkk-lowongan").find((x) => x.id === Number(p.id)) || tidakAda("Lowongan");
-    Object.assign(l, periksaLowongan(isianTeks(badan)));
+    Object.assign(l, await periksaLowongan(isianTeks(badan), badan, l));
     const m = mitraDari(l.mitra_id) || {};
     for (const s of kol("bkk-lamaran")) if (s.lowongan_id === l.id) Object.assign(s, { posisi: l.posisi, nama_mitra: m.nama || "" });
     return { pesan: "Lowongan berhasil diperbarui." };

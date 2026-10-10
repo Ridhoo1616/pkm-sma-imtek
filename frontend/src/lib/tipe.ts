@@ -435,6 +435,8 @@ export interface LowonganBkk {
   logo_mitra: string;
   bidang_mitra: string;
   posisi: string;
+  /** Berkas foto lowongan di folder bkk-lowongan; kosong bila tanpa foto. */
+  foto: string;
   jenis: string;
   lokasi: string;
   deskripsi: string;

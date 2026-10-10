@@ -1,7 +1,7 @@
 ---
 import Publik from "../../../tata/Publik.astro";
 import KepalaHalaman from "../../../komponen/KepalaHalaman.astro";
-import { gambar } from "../../../lib/gambar";
+import { gambar, srcsetGambar } from "../../../lib/gambar";
 import { data } from "../../../lib/tembolok";
 import { api, GalatApi } from "@/lib/api";
 import { keParagraf, kePoin, tanggalPanjang } from "@/lib/format";
@@ -54,6 +54,17 @@ const rincian = l
     ) : (
       <div class="wadah grid gap-8 py-12 md:py-16 lg:grid-cols-[2fr_3fr] lg:items-start">
         <aside class="space-y-6 lg:sticky lg:top-24" data-muncul>
+          {
+            l.foto && (
+              <img
+                src={gambar("bkk-lowongan", l.foto, 800)}
+                srcset={srcsetGambar("bkk-lowongan", l.foto, [480, 800, 1024])}
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                alt={`Foto lowongan ${l.posisi}`}
+                class="aspect-[16/9] w-full rounded-2xl object-cover"
+              />
+            )
+          }
           <div class="kaca p-6">
             <div class="flex items-center gap-4">
               <span class="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-biru-muda text-biru" aria-hidden="true">

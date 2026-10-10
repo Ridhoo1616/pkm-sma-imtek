@@ -42,20 +42,20 @@ const mitra1 = await formulir("/api/admin/bkk/mitra", {
 const mitra2 = await formulir("/api/admin/bkk/mitra", {
   nama: "PT Contoh Ritel Sejahtera", bidang: "Ritel", alamat: "Kabupaten Tangerang", aktif: "1",
 });
-const low1 = await panggil("POST", "/api/admin/bkk/lowongan", {
+const low1 = await formulir("/api/admin/bkk/lowongan", {
   mitra_id: mitra1.id, posisi: "Operator Produksi", jenis: "Kontrak", lokasi: "Kabupaten Tangerang",
   deskripsi: "Menjalankan mesin produksi sesuai prosedur kerja dan menjaga kebersihan area kerja.",
   kualifikasi: "Lulusan SMA/sederajat\nSehat jasmani dan rohani\nBersedia bekerja dengan sistem giliran",
   gaji: "Sesuai UMK", kuota: "5", batas_lamar: "2027-06-30", status: "buka",
-}, T);
-await panggil("POST", "/api/admin/bkk/lowongan", {
+});
+await formulir("/api/admin/bkk/lowongan", {
   mitra_id: mitra2.id, posisi: "Kasir", jenis: "Penuh Waktu", lokasi: "Kabupaten Tangerang",
   deskripsi: "Melayani transaksi pembayaran pelanggan dan merapikan laporan kas harian.",
   kualifikasi: "Lulusan SMA/sederajat\nTeliti dan ramah\nTerbiasa memakai komputer", kuota: "2", status: "buka",
-}, T);
-await panggil("POST", "/api/admin/bkk/lowongan", {
+});
+await formulir("/api/admin/bkk/lowongan", {
   mitra_id: mitra2.id, posisi: "Staf Gudang", jenis: "Magang", lokasi: "Kabupaten Tangerang", status: "tutup",
-}, T);
+});
 // Tiga lamaran pada tahap berbeda, supaya ringkasan penyaluran ada isinya.
 for (const [nama, nisn, lahir, jk] of [
   ["Contoh Lulusan Satu", "0071234598", "2007-05-12", "L"],

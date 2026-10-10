@@ -748,16 +748,16 @@ export const api = {
       jenis: string[];
       status: string[];
     }>("/api/admin/bkk/lowongan", { token: true }),
-  simpanLowonganBkk: (isi: Record<string, string | number>) =>
+  simpanLowonganBkk: (formulir: FormData) =>
     permintaan<{ pesan: string }>("/api/admin/bkk/lowongan", {
       metode: "POST",
-      isi,
+      formulir,
       token: true,
     }),
-  ubahLowonganBkk: (id: number, isi: Record<string, string | number>) =>
+  ubahLowonganBkk: (id: number, formulir: FormData) =>
     permintaan<{ pesan: string }>(`/api/admin/bkk/lowongan/${id}`, {
       metode: "PUT",
-      isi,
+      formulir,
       token: true,
     }),
   hapusLowonganBkk: (id: number) =>

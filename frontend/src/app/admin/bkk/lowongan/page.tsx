@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { api, GalatApi, segarkanHalamanPublik } from "@/lib/api";
+import { api, urlUnggahan, GalatApi, segarkanHalamanPublik } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import { useKabar } from "@/komponen/Kabar";
 import { useSesi } from "@/komponen/Sesi";
 import { KepalaPanel, Tabel, Jendela, Konfirmasi } from "@/komponen/Panel";
 import { Memuat, PesanGalat, TanpaData } from "@/komponen/Memuat";
-import { Teks, AreaTeks, Pilihan, Tombol, RingkasanGalat } from "@/komponen/Medan";
+import { Teks, AreaTeks, Berkas, Centang, Pilihan, Tombol, RingkasanGalat } from "@/komponen/Medan";
 import { Lencana } from "@/komponen/Bagian";
 import { tanggalPanjang } from "@/lib/format";
 import type { LowonganBkk } from "@/lib/tipe";
+import { BATAS_UNGGAH } from "@/lib/unggah";
 
 /**
  * Lowongan kerja dari mitra BKK.
@@ -58,6 +59,9 @@ export default function HalamanLowonganBkk() {
   const [menyimpan, setMenyimpan] = useState(false);
   const [hapusTarget, setHapusTarget] = useState<LowonganBkk | null>(null);
   const [menghapus, setMenghapus] = useState(false);
+  const [foto, setFoto] = useState<File | null>(null);
+  const [fotoLama, setFotoLama] = useState("");
+  const [hapusFoto, setHapusFoto] = useState(false);
 
   const ubah = (k: keyof typeof KOSONG) => (v: string) => setIsi((s) => ({ ...s, [k]: v }));
   const daftarMitra = mitra.data?.data ?? [];
@@ -65,6 +69,9 @@ export default function HalamanLowonganBkk() {
   function buka(l?: LowonganBkk) {
     setGalatKolom({});
     setRingkasan([]);
+    setFoto(null);
+    setHapusFoto(false);
+    setFotoLama(l?.foto ?? "");
     if (l) {
       setUbahId(l.id);
       setIsi({
@@ -91,7 +98,10 @@ export default function HalamanLowonganBkk() {
     setGalatKolom({});
     setRingkasan([]);
     setMenyimpan(true);
-    const kirim = { ...isi, mitra_id: Number(isi.mitra_id) || 0 };
+    const kirim = new FormData();
+    for (const [k, v] of Object.entries(isi)) kirim.append(k, v);
+    if (foto) kirim.append("foto", foto);
+    if (hapusFoto) kirim.append("hapus_foto", "1");
     try {
       const hasil = ubahId === null ? await api.simpanLowonganBkk(kirim) : await api.ubahLowonganBkk(ubahId, kirim);
       kabar.beri(hasil.pesan);
@@ -161,7 +171,13 @@ export default function HalamanLowonganBkk() {
             return (
               <tr key={l.id} className="hover:bg-slate-50">
                 <td className="px-4 py-3">
-                  <p className="font-medium">{l.posisi}</p>
+                  <div className="flex items-center gap-3">
+                    {l.foto && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={urlUnggahan("bkk-lowongan", l.foto)} alt="" className="h-10 w-14 shrink-0 rounded object-cover" />
+                    )}
+                    <p className="font-medium">{l.posisi}</p>
+                  </div>
                   {l.lokasi && <p className="text-xs text-samar">{l.lokasi}</p>}
                 </td>
                 <td className="px-4 py-3 text-samar">{l.nama_mitra}</td>
@@ -233,6 +249,23 @@ export default function HalamanLowonganBkk() {
             galat={galatKolom.kualifikasi}
             bantuan="Satu baris satu syarat; di situs tampil sebagai daftar."
           />
+          <Berkas
+            nama="foto"
+            label="Foto lowongan"
+            terima="image/jpeg,image/png"
+            ubah={setFoto}
+            galat={galatKolom.foto}
+            namaTerpilih={fotoLama || undefined}
+            bantuan={`Opsional. Poster lowongan atau foto suasana kerja, JPG atau PNG, maksimal ${BATAS_UNGGAH}.`}
+          />
+          {fotoLama && !foto && (
+            <div className="rounded-lg border border-garis bg-slate-50 px-5 py-4">
+              <Centang nama="hapus_foto" nilai={hapusFoto} ubah={setHapusFoto}>
+                Hapus foto yang sekarang.
+              </Centang>
+            </div>
+          )}
+
           <div className="grid gap-5 sm:grid-cols-3">
             <Teks nama="kuota" label="Jumlah dibutuhkan" tipe="number" nilai={isi.kuota} ubah={ubah("kuota")} galat={galatKolom.kuota} />
             <Teks nama="batas_lamar" label="Batas lamaran" tipe="date" nilai={isi.batas_lamar} ubah={ubah("batas_lamar")} galat={galatKolom.batas_lamar} />

@@ -37,8 +37,9 @@ var (
 )
 
 const (
-	folderCvBkk    = "bkk-cv"
-	folderMitraBkk = "bkk-mitra"
+	folderCvBkk       = "bkk-cv"
+	folderMitraBkk    = "bkk-mitra"
+	folderLowonganBkk = "bkk-lowongan"
 )
 
 type MitraBkk struct {
@@ -64,6 +65,7 @@ type LowonganBkk struct {
 	LogoMitra   string  `json:"logo_mitra"`
 	BidangMitra string  `json:"bidang_mitra"`
 	Posisi      string  `json:"posisi"`
+	Foto        string  `json:"foto"`
 	Jenis       string  `json:"jenis"`
 	Lokasi      string  `json:"lokasi"`
 	Deskripsi   string  `json:"deskripsi"`
@@ -328,7 +330,7 @@ func (a *Aplikasi) ambilLowonganBkk(hanyaDibuka bool, id int) ([]LowonganBkk, er
 		arg = append(arg, id)
 	}
 	baris, err := a.db.Query(`
-		SELECT l.id, l.mitra_id, m.nama, COALESCE(m.logo, ''), m.bidang, l.posisi, l.jenis,
+		SELECT l.id, l.mitra_id, m.nama, COALESCE(m.logo, ''), m.bidang, l.posisi, COALESCE(l.foto, ''), l.jenis,
 		       l.lokasi, l.deskripsi, l.kualifikasi, l.gaji, l.kuota,
 		       to_char(l.batas_lamar, 'YYYY-MM-DD'), l.status, `+syaratLowonganDibuka+`,
 		       (SELECT COUNT(*) FROM bkk_lamaran s WHERE s.lowongan_id = l.id),
@@ -348,7 +350,7 @@ func (a *Aplikasi) ambilLowonganBkk(hanyaDibuka bool, id int) ([]LowonganBkk, er
 		var kuota sql.NullInt64
 		var batas sql.NullString
 		if err := baris.Scan(&l.ID, &l.MitraID, &l.NamaMitra, &l.LogoMitra, &l.BidangMitra,
-			&l.Posisi, &l.Jenis, &l.Lokasi, &l.Deskripsi, &l.Kualifikasi, &l.Gaji, &kuota,
+			&l.Posisi, &l.Foto, &l.Jenis, &l.Lokasi, &l.Deskripsi, &l.Kualifikasi, &l.Gaji, &kuota,
 			&batas, &l.Status, &l.Dibuka, &l.JumlahPelamar, &l.Diterima, &l.Dibuat); err != nil {
 			return nil, err
 		}
@@ -430,16 +432,28 @@ func (a *Aplikasi) tanganiLowonganBkkAdmin(w http.ResponseWriter, r *http.Reques
 }
 
 type permintaanLowongan struct {
-	MitraID     int    `json:"mitra_id"`
-	Posisi      string `json:"posisi"`
-	Jenis       string `json:"jenis"`
-	Lokasi      string `json:"lokasi"`
-	Deskripsi   string `json:"deskripsi"`
-	Kualifikasi string `json:"kualifikasi"`
-	Gaji        string `json:"gaji"`
-	Kuota       string `json:"kuota"`
-	BatasLamar  string `json:"batas_lamar"`
-	Status      string `json:"status"`
+	MitraID     int
+	Posisi      string
+	Jenis       string
+	Lokasi      string
+	Deskripsi   string
+	Kualifikasi string
+	Gaji        string
+	Kuota       string
+	BatasLamar  string
+	Status      string
+}
+
+// bacaIsianLowongan membaca isian dari formulir multipart; fotonya ikut
+// terkirim di formulir yang sama, jadi isiannya tidak lagi berupa JSON.
+func bacaIsianLowongan(r *http.Request) permintaanLowongan {
+	ambil := func(s string) string { return strings.TrimSpace(r.FormValue(s)) }
+	mitra, _ := strconv.Atoi(ambil("mitra_id"))
+	return permintaanLowongan{
+		MitraID: mitra, Posisi: ambil("posisi"), Jenis: ambil("jenis"), Lokasi: ambil("lokasi"),
+		Deskripsi: ambil("deskripsi"), Kualifikasi: ambil("kualifikasi"), Gaji: ambil("gaji"),
+		Kuota: ambil("kuota"), BatasLamar: ambil("batas_lamar"), Status: ambil("status"),
+	}
 }
 
 func (p *permintaanLowongan) periksa(a *Aplikasi) (*int, *Validasi) {
@@ -480,21 +494,29 @@ func (p *permintaanLowongan) periksa(a *Aplikasi) (*int, *Validasi) {
 }
 
 func (a *Aplikasi) tanganiSimpanLowonganBkk(w http.ResponseWriter, r *http.Request) {
-	var p permintaanLowongan
-	if !bacaJSON(w, r, &p) {
+	if !a.bacaFormulir(w, r) {
 		return
 	}
+	defer r.MultipartForm.RemoveAll()
+
+	p := bacaIsianLowongan(r)
 	kuota, v := p.periksa(a)
+	foto, errF := a.ambilUnggahan(r.MultipartForm, "foto", folderLowonganBkk, TipeGambar)
+	if errF != nil && !errors.Is(errF, GalatTanpaBerkas) {
+		v.tambah("foto", "Foto: "+errF.Error()+".")
+	}
 	if v.bermasalah() {
+		a.hapusUnggahan(folderLowonganBkk, foto)
 		kirimGalatValidasi(w, v)
 		return
 	}
 	var id int
 	if err := a.db.QueryRow(`INSERT INTO bkk_lowongan
-	        (mitra_id, posisi, jenis, lokasi, deskripsi, kualifikasi, gaji, kuota, batas_lamar, status)
-	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+	        (mitra_id, posisi, jenis, lokasi, deskripsi, kualifikasi, gaji, kuota, batas_lamar, status, foto)
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
 		p.MitraID, p.Posisi, p.Jenis, p.Lokasi, p.Deskripsi, p.Kualifikasi, p.Gaji,
-		kuota, kosongJadiNil(p.BatasLamar), p.Status).Scan(&id); err != nil {
+		kuota, kosongJadiNil(p.BatasLamar), p.Status, kosongJadiNil(foto)).Scan(&id); err != nil {
+		a.hapusUnggahan(folderLowonganBkk, foto)
 		a.galatServer(w, "menyimpan lowongan BKK", err)
 		return
 	}
@@ -506,27 +528,50 @@ func (a *Aplikasi) tanganiUbahLowonganBkk(w http.ResponseWriter, r *http.Request
 	if !ok {
 		return
 	}
-	var p permintaanLowongan
-	if !bacaJSON(w, r, &p) {
+	if !a.bacaFormulir(w, r) {
 		return
 	}
+	defer r.MultipartForm.RemoveAll()
+
+	var fotoLama string
+	err := a.db.QueryRow("SELECT COALESCE(foto, '') FROM bkk_lowongan WHERE id = $1", id).Scan(&fotoLama)
+	if err == sql.ErrNoRows {
+		kirimGalat(w, http.StatusNotFound, "Lowongan tidak ditemukan.")
+		return
+	}
+	if err != nil {
+		a.galatServer(w, "mengambil lowongan BKK", err)
+		return
+	}
+
+	p := bacaIsianLowongan(r)
 	kuota, v := p.periksa(a)
+	fotoBaru, errF := a.ambilUnggahan(r.MultipartForm, "foto", folderLowonganBkk, TipeGambar)
+	if errF != nil && !errors.Is(errF, GalatTanpaBerkas) {
+		v.tambah("foto", "Foto: "+errF.Error()+".")
+	}
 	if v.bermasalah() {
+		a.hapusUnggahan(folderLowonganBkk, fotoBaru)
 		kirimGalatValidasi(w, v)
 		return
 	}
-	hasil, err := a.db.Exec(`UPDATE bkk_lowongan SET mitra_id = $1, posisi = $2, jenis = $3,
+	foto := fotoLama
+	if fotoBaru != "" {
+		foto = fotoBaru
+	} else if bolean(r, "hapus_foto") {
+		foto = ""
+	}
+	if _, err := a.db.Exec(`UPDATE bkk_lowongan SET mitra_id = $1, posisi = $2, jenis = $3,
 	        lokasi = $4, deskripsi = $5, kualifikasi = $6, gaji = $7, kuota = $8,
-	        batas_lamar = $9, status = $10, updated_at = now() WHERE id = $11`,
+	        batas_lamar = $9, status = $10, foto = $11, updated_at = now() WHERE id = $12`,
 		p.MitraID, p.Posisi, p.Jenis, p.Lokasi, p.Deskripsi, p.Kualifikasi, p.Gaji,
-		kuota, kosongJadiNil(p.BatasLamar), p.Status, id)
-	if err != nil {
+		kuota, kosongJadiNil(p.BatasLamar), p.Status, kosongJadiNil(foto), id); err != nil {
+		a.hapusUnggahan(folderLowonganBkk, fotoBaru)
 		a.galatServer(w, "memperbarui lowongan BKK", err)
 		return
 	}
-	if n, _ := hasil.RowsAffected(); n == 0 {
-		kirimGalat(w, http.StatusNotFound, "Lowongan tidak ditemukan.")
-		return
+	if fotoLama != "" && foto != fotoLama {
+		a.hapusUnggahan(folderLowonganBkk, fotoLama)
 	}
 	kirimJSON(w, http.StatusOK, map[string]string{"pesan": "Lowongan berhasil diperbarui."})
 }
@@ -536,20 +581,22 @@ func (a *Aplikasi) tanganiHapusLowonganBkk(w http.ResponseWriter, r *http.Reques
 	if !ok {
 		return
 	}
-	hasil, err := a.db.Exec("DELETE FROM bkk_lowongan WHERE id = $1", id)
+	var foto string
+	err := a.db.QueryRow("DELETE FROM bkk_lowongan WHERE id = $1 RETURNING COALESCE(foto, '')", id).Scan(&foto)
 	if pelanggaranAcuan(err) {
 		kirimGalat(w, http.StatusConflict,
 			"Lowongan ini sudah punya pelamar, jadi tidak dapat dihapus tanpa menghapus riwayat penyalurannya. Ubah statusnya menjadi Ditutup.")
+		return
+	}
+	if err == sql.ErrNoRows {
+		kirimGalat(w, http.StatusNotFound, "Lowongan tidak ditemukan.")
 		return
 	}
 	if err != nil {
 		a.galatServer(w, "menghapus lowongan BKK", err)
 		return
 	}
-	if n, _ := hasil.RowsAffected(); n == 0 {
-		kirimGalat(w, http.StatusNotFound, "Lowongan tidak ditemukan.")
-		return
-	}
+	a.hapusUnggahan(folderLowonganBkk, foto)
 	kirimJSON(w, http.StatusOK, map[string]string{"pesan": "Lowongan berhasil dihapus."})
 }
 
