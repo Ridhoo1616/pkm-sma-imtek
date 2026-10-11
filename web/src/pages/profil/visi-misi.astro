@@ -42,8 +42,11 @@ const { profil } = await data.profil();
 const p = profil.pengaturan;
 const misi = kePoinTerisi(p.misi);
 const adaSemboyan = !belumTerisi(p.tagline ?? "");
-const gambar =
-  "pointer-events-none -my-6 -mr-6 w-36 self-stretch object-contain object-bottom transition duration-700 group-hover:scale-[1.03] sm:w-40 md:-my-7 md:-mr-7 md:w-48 xl:w-56";
+// Pembungkusnya yang meregang setinggi kartu; gambarnya menempel mutlak di
+// dasar pembungkus. Meregangkan <img> langsung tidak andal: pada kartu yang
+// teksnya lebih pendek daripada tetangganya, gambar berhenti di atas dasar.
+const bungkus = "pointer-events-none relative -my-6 -mr-6 w-36 shrink-0 self-stretch sm:w-40 md:-my-7 md:-mr-7 md:w-48 xl:w-56";
+const gambar = "absolute bottom-0 left-0 h-auto w-full transition duration-700 group-hover:scale-[1.03]";
 ---
 
 <Publik sorotan judul="Visi & Misi" deskripsi="Arah yang dituju sekolah beserta langkah-langkah mencapainya.">
@@ -71,7 +74,9 @@ const gambar =
             )
           }
         </div>
-        <img src="/ilustrasi/visi.png" alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis" width="384" height="426" class={gambar} />
+        <div class={bungkus}>
+          <img src="/ilustrasi/visi.png" alt="Ilustrasi guru dan tiga siswa di dalam kelas, di depan papan tulis" width="384" height="426" class={gambar} />
+        </div>
       </section>
 
       <section aria-labelledby="judul-misi" class="kaca group relative flex h-full gap-4 overflow-hidden p-6 md:gap-6 md:p-7" data-muncul="0.08">
@@ -94,7 +99,9 @@ const gambar =
             )
           }
         </div>
-        <img src="/ilustrasi/misi.png" alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar" width="314" height="434" class={gambar} />
+        <div class={bungkus}>
+          <img src="/ilustrasi/misi.png" alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar" width="314" height="434" class={gambar} />
+        </div>
       </section>
     </div>
   </section>
