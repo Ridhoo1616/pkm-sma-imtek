@@ -25,10 +25,22 @@ export default async function HalamanDataSekolah() {
         { k: "Nama sekolah", v: p.nama_sekolah },
         { k: "Nama singkat", v: p.nama_singkat },
         { k: "NPSN", v: p.npsn },
+        { k: "NSS", v: p.nss },
+        { k: "NIS", v: p.nis_sekolah },
+        { k: "NSB", v: p.nsb },
         { k: "Status sekolah", v: p.status_sekolah },
-        { k: "Akreditasi", v: p.akreditasi },
         { k: "Yayasan penyelenggara", v: p.yayasan },
         { k: "Kepala sekolah", v: p.kepala_sekolah },
+      ],
+    },
+    {
+      judul: "Legalitas dan akademik",
+      butir: [
+        { k: "Akreditasi", v: p.akreditasi },
+        { k: "SK akreditasi", v: p.sk_akreditasi },
+        { k: "Penerbit SK", v: p.penerbit_sk_akreditasi },
+        { k: "Tahun berdiri", v: p.tahun_berdiri },
+        { k: "Kurikulum", v: p.kurikulum },
       ],
     },
     {
@@ -39,6 +51,18 @@ export default async function HalamanDataSekolah() {
         { k: "Kecamatan", v: p.kecamatan },
         { k: "Kabupaten/Kota", v: p.kota },
         { k: "Provinsi", v: p.provinsi },
+      ],
+    },
+    {
+      judul: "Wilayah dan bangunan",
+      butir: [
+        { k: "Daerah", v: p.daerah },
+        { k: "Kelompok sekolah", v: p.gugus },
+        { k: "Status bangunan", v: p.status_bangunan },
+        { k: "Luas bangunan", v: p.luas_bangunan },
+        { k: "Jarak ke kecamatan", v: p.jarak_kecamatan },
+        { k: "Jarak ke kabupaten", v: p.jarak_kabupaten },
+        { k: "Keanggotaan rayon", v: p.anggota_rayon },
       ],
     },
     {

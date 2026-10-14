@@ -15,13 +15,17 @@ var pengaturanPublik = []string{
 	"nama_sekolah", "nama_lengkap_sekolah", "nama_singkat", "tagline", "npsn", "akreditasi", "status_sekolah",
 	"kepala_sekolah", "sambutan_kepsek", "visi", "misi", "sejarah", "yayasan",
 	"keunggulan",
+	// Rincian papan Identitas Sekolah. Lihat migrasi 032.
+	"nss", "nis_sekolah", "nsb", "sk_akreditasi", "penerbit_sk_akreditasi",
+	"tahun_berdiri", "kurikulum", "daerah", "gugus", "status_bangunan",
+	"luas_bangunan", "jarak_kecamatan", "jarak_kabupaten", "anggota_rayon",
 	"alamat", "kelurahan", "kecamatan", "kota", "provinsi", "kode_pos",
 	"telepon", "email", "whatsapp", "instagram", "facebook", "youtube", "tiktok",
 	"jam_layanan", "logo", "foto_depan", "peta_embed", "peta_koordinat",
 	// Foto sorotan beranda yang berganti-ganti. Lihat migrasi 022.
 	"foto_depan_2", "foto_depan_3", "foto_depan_4",
 	"foto_kepsek", "struktur_organisasi", "struktur_keterangan",
-	"tautan_jadwal", "jadwal_keterangan",
+	"tautan_elearning", "tautan_jadwal", "jadwal_keterangan",
 	// Bursa Kerja Khusus. Lihat migrasi 025.
 	"bkk_keterangan", "bkk_kontak",
 	// Angka sekolah pada kartu sorotan beranda. Lihat migrasi 019.

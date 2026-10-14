@@ -154,7 +154,7 @@ memeriksa isinya kembali utuh.
 | Sarana dan Prasarana | `/fasilitas` | Sarana dan prasarana beserta gambarnya |
 | Struktur Organisasi | `/profil/struktur-organisasi` | Bagan struktur beserta unsur pimpinan |
 | Tenaga Pendidik | `/profil/tenaga-pendidik` | Guru dan tenaga kependidikan beserta angka ringkas, pencarian, dan penyaring kategori serta mata pelajaran |
-| Akademik | `/akademik` beserta turunannya | Jadwal pelajaran, kalender akademik, kurikulum |
+| Akademik | `/akademik` beserta turunannya | E-learning, jadwal pelajaran, kalender akademik, kurikulum |
 | Kesiswaan | `/kesiswaan` beserta turunannya | Ekstrakurikuler, OSIS, prestasi siswa, pendidikan karakter |
 | Halaman naskah | `/halaman/{slug}` | Halaman profil bernaskah panjang yang dapat ditambah sekolah sendiri |
 | Berita | `/berita`, `/berita/{slug}` | Berita dengan pencarian, penyaring kategori, halaman, pencacah baca, berita terkait |
@@ -378,7 +378,7 @@ satu topik satu halaman, dikelompokkan pada tiga menu bertingkat.
 | Menu | Halaman turunannya |
 |---|---|
 | Profil Sekolah | Sejarah Sekolah, Data Sekolah, Visi & Misi, Sarana dan Prasarana, Struktur Organisasi, Tenaga Pendidik dan Kependidikan |
-| Akademik | Jadwal Pelajaran, Kalender Akademik, Kurikulum |
+| Akademik | E-Learning, Jadwal Pelajaran, Kalender Akademik, Kurikulum |
 | Kesiswaan | Ekstrakurikuler, OSIS, Prestasi Siswa, Pendidikan Karakter |
 
 Empat butir di antaranya **tidak** memakai tempat penyimpanan baru, karena
@@ -768,9 +768,12 @@ menyembunyikan kelebihannya sejak lukisan pertama. Halaman berisi 16 orang
 turun dari 4.797 piksel menjadi 3.829 piksel, dan tidak ada gulir mendatar
 pada 390 maupun 1280 piksel.
 
-Jadwal Pelajaran sengaja berupa pintu masuk, bukan sistem yang dibangun
-sendiri: ia menunjuk berkas jadwalnya. Halaman E-Learning/LMS dihapus pada
-10 Oktober 2026 (migrasi `029_hapus_elearning.sql`). Perpustakaan Digital menyusul pada hari yang sama
+E-Learning dan Jadwal Pelajaran sengaja berupa pintu masuk, bukan sistem
+yang dibangun sendiri: E-Learning menunjuk kelas Google Classroom atau folder
+Google Drive sekolah, Jadwal Pelajaran menunjuk berkas jadwalnya. Halaman
+E-Learning sempat dihapus pada 10 Oktober 2026 (migrasi
+`029_hapus_elearning.sql`) lalu dihidupkan kembali pada 14 Oktober 2026
+(migrasi `031_elearning_kembali.sql`). Perpustakaan Digital menyusul pada hari yang sama
 (migrasi `030_hapus_perpustakaan.sql`).
 
 **Menu bertingkatnya dapat dipakai tanpa tetikus.** Pembukanya berupa

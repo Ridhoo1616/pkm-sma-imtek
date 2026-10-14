@@ -1,0 +1,42 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import TautanKeluar from "../../komponen/TautanKeluar.astro";
+import { data } from "../../lib/tembolok";
+import { belumTerisi } from "@/lib/format";
+import { Menunggu } from "@/komponen/Halaman";
+
+// Pintu masuk ke layanan yang sudah dipakai sekolah (Google Classroom,
+// folder Google Drive, dan sejenisnya), bukan ruang kelas daring sendiri.
+const { profil } = await data.profil();
+const isian = (profil.pengaturan.tautan_elearning ?? "").trim();
+const ada = isian !== "" && !belumTerisi(isian);
+// Alamat yang ditempel tanpa skema ("classroom.google.com/c/...") akan
+// dibaca peramban sebagai jalur di situs ini, jadi dilengkapi https://.
+const tautan = /^https?:\/\//i.test(isian) ? isian : "https://" + isian;
+---
+
+<Publik sorotan judul="E-Learning" deskripsi="Pintu masuk ke ruang belajar daring sekolah.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="E-Learning"
+    keterangan="Ruang belajar daring tempat guru membagikan materi, tugas, dan penilaian."
+    induk="/akademik"
+    jalur="/akademik/elearning"
+  />
+  <section class="wadah py-12 md:py-16">
+    <div class="max-w-2xl" data-muncul>
+      {
+        ada ? (
+          <TautanKeluar
+            tautan={tautan}
+            label="Masuk ke e-learning sekolah"
+            keterangan="Materi dan tugas berada di layanan terpisah, misalnya Google Classroom atau Google Drive. Masuk dengan akun yang diberikan sekolah atau guru kelas, bukan akun situs ini."
+          />
+        ) : (
+          <div class="kaca p-6 md:p-8"><Menunggu apa="Alamat e-learning" polos /></div>
+        )
+      }
+    </div>
+  </section>
+</Publik>

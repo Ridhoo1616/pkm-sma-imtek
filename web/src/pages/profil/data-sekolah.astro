@@ -2,56 +2,68 @@
 import Publik from "../../tata/Publik.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import { data } from "../../lib/tembolok";
+import { gambar } from "../../lib/gambar";
 import { alamatLengkap, belumTerisi } from "@/lib/format";
 import { Menunggu } from "@/komponen/Halaman";
-import { IkonBendera, IkonLokasi, IkonTelepon } from "@/komponen/Ikon";
+import { IkonFasilitas, IkonGuru, IkonKalender, IkonLokasi, IkonNaskah, IkonSurel, IkonTelepon } from "@/komponen/Ikon";
 
 const { profil } = await data.profil();
 const p = profil.pengaturan;
 
-// Butir yang masih penanda [kurung siku] tidak ditampilkan; kelompok yang
-// seluruh butirnya kosong ikut hilang.
-const kelompok = [
-  {
-    judul: "Identitas",
-    ikon: IkonBendera,
-    butir: [
-      { k: "Nama resmi", v: p.nama_lengkap_sekolah },
-      { k: "Nama sekolah", v: p.nama_sekolah },
-      { k: "Nama singkat", v: p.nama_singkat },
-      { k: "NPSN", v: p.npsn },
-      { k: "Status sekolah", v: p.status_sekolah },
-      { k: "Akreditasi", v: p.akreditasi },
-      { k: "Yayasan penyelenggara", v: p.yayasan },
-      { k: "Kepala sekolah", v: p.kepala_sekolah },
-    ],
-  },
-  {
-    judul: "Alamat",
-    ikon: IkonLokasi,
-    butir: [
-      { k: "Alamat", v: alamatLengkap(p.alamat, p.kode_pos) },
-      { k: "Kelurahan/Desa", v: p.kelurahan },
-      { k: "Kecamatan", v: p.kecamatan },
-      { k: "Kabupaten/Kota", v: p.kota },
-      { k: "Provinsi", v: p.provinsi },
-    ],
-  },
-  {
-    judul: "Kontak dan layanan",
-    ikon: IkonTelepon,
-    butir: [
-      { k: "Telepon", v: p.telepon },
-      { k: "Surel", v: p.email },
-      { k: "WhatsApp panitia", v: p.whatsapp },
-      { k: "Jam layanan", v: p.jam_layanan },
-    ],
-  },
-]
-  .map((g) => ({ ...g, butir: g.butir.filter((b) => b.v && !belumTerisi(b.v)) }))
-  .filter((g) => g.butir.length > 0);
+/** Nilai yang masih kosong atau berpenanda [kurung siku] dianggap tidak ada. */
+const isi = (v?: string) => (v && !belumTerisi(v) ? v.trim() : "");
 
-const adaPeta = Boolean(p.peta_embed && !belumTerisi(p.peta_embed));
+const namaResmi = isi(p.nama_lengkap_sekolah) || isi(p.nama_sekolah);
+const akreditasi = isi(p.akreditasi);
+const tahunBerdiri = isi(p.tahun_berdiri);
+const usia = /^\d{4}$/.test(tahunBerdiri) ? new Date().getFullYear() - Number(tahunBerdiri) : 0;
+const logo = isi(p.logo);
+const fotoKepsek = isi(p.foto_kepsek);
+const kepsek = isi(p.kepala_sekolah);
+const keteranganPita = [isi(p.status_sekolah), isi(p.kota), isi(p.provinsi)].filter(Boolean).join(" · ");
+
+// Seluruh data sengaja berada dalam SATU kartu; pembaginya garis, bukan
+// kartu-kartu terpisah.
+const angka = [
+  { label: "Tahun berdiri", nilai: tahunBerdiri, catatan: usia > 0 ? `${usia} tahun berkiprah` : "", ikon: IkonKalender },
+  { label: "Luas bangunan", nilai: isi(p.luas_bangunan), catatan: isi(p.status_bangunan), ikon: IkonFasilitas },
+  { label: "Kurikulum", nilai: isi(p.kurikulum), catatan: "", ikon: IkonNaskah },
+  { label: "Keanggotaan rayon", nilai: isi(p.anggota_rayon), catatan: isi(p.gugus), ikon: IkonGuru },
+].filter((a) => a.nilai);
+
+const kode = [
+  { label: "NPSN", nilai: isi(p.npsn) },
+  { label: "NSS", nilai: isi(p.nss) },
+  { label: "NIS", nilai: isi(p.nis_sekolah) },
+  { label: "NSB", nilai: isi(p.nsb) },
+].filter((k) => k.nilai);
+
+const rincian = [
+  { k: "Nama sekolah", v: isi(p.nama_sekolah) },
+  { k: "Nama singkat", v: isi(p.nama_singkat) },
+  { k: "Status sekolah", v: isi(p.status_sekolah) },
+  { k: "Yayasan penyelenggara", v: isi(p.yayasan) },
+].filter((r) => r.v);
+
+const wilayah = [
+  { k: "Kelurahan/Desa", v: isi(p.kelurahan) },
+  { k: "Kecamatan", v: isi(p.kecamatan) },
+  { k: "Kabupaten/Kota", v: isi(p.kota) },
+  { k: "Provinsi", v: isi(p.provinsi) },
+].filter((r) => r.v);
+
+// Rute jarak: sekolah -> pusat kecamatan -> pusat kabupaten.
+const jarakKec = isi(p.jarak_kecamatan);
+const jarakKab = isi(p.jarak_kabupaten);
+const adaRute = Boolean(jarakKec || jarakKab);
+
+const alamat = alamatLengkap(isi(p.alamat), isi(p.kode_pos));
+const telepon = isi(p.telepon);
+const surel = isi(p.email);
+const daerah = isi(p.daerah);
+const adaPeta = Boolean(isi(p.peta_embed));
+
+const adaIsi = Boolean(namaResmi || angka.length || kode.length || rincian.length || wilayah.length || alamat);
 ---
 
 <Publik sorotan judul="Data Sekolah" deskripsi="Data pokok sekolah: NPSN, status, akreditasi, penyelenggara, alamat, dan jam layanan.">
@@ -65,45 +77,208 @@ const adaPeta = Boolean(p.peta_embed && !belumTerisi(p.peta_embed));
 
   <section class="wadah py-12 md:py-16">
     {
-      kelompok.length === 0 ? (
+      !adaIsi ? (
         <div class="kaca max-w-3xl p-6 md:p-8">
           <Menunggu apa="Data pokok sekolah" polos />
         </div>
       ) : (
-        <div class={"grid gap-6 lg:items-start " + (adaPeta ? "lg:grid-cols-2" : "max-w-3xl")}>
-          <div class="space-y-6">
-            {kelompok.map((g, i) => (
-              <section class="kaca overflow-hidden" data-muncul={String(i * 0.06)}>
-                <h2 class="flex items-center gap-3 border-b border-garis/70 px-6 py-4 text-base">
-                  <span class="grid h-9 w-9 place-items-center rounded-lg bg-biru-tua text-white" aria-hidden="true">
-                    <g.ikon ukuran={18} />
+        <article class="kaca overflow-hidden" data-muncul>
+          {/* Pita identitas */}
+          <header class="relative isolate overflow-hidden bg-gradient-to-br from-biru-tua via-biru to-[#1d4f86] px-6 py-8 text-white md:px-10 md:py-10">
+            <div class="pointer-events-none absolute -top-24 -right-16 -z-10 h-72 w-72 rounded-full border border-white/10" aria-hidden="true" />
+            <div class="pointer-events-none absolute -top-10 right-20 -z-10 h-44 w-44 rounded-full border border-white/10" aria-hidden="true" />
+            <div class="pointer-events-none absolute -bottom-28 left-1/3 -z-10 h-56 w-56 rounded-full bg-emas/10 blur-3xl" aria-hidden="true" />
+
+            <div class="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+              <div class="flex items-center gap-5">
+                {logo && (
+                  <span class="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-white p-2.5 shadow-lg ring-4 ring-white/15 md:h-24 md:w-24">
+                    <img src={gambar("profil", logo, 160)} alt={`Logo ${namaResmi}`} class="h-full w-full object-contain" />
                   </span>
-                  {g.judul}
-                </h2>
-                <dl class="divide-y divide-garis/70 text-sm">
-                  {g.butir.map((b) => (
-                    <div class="grid gap-1 px-6 py-3.5 transition hover:bg-white/70 sm:grid-cols-[11rem_1fr] sm:gap-4">
-                      <dt class="text-xs font-semibold tracking-wide text-samar uppercase sm:text-sm sm:normal-case">{b.k}</dt>
-                      <dd class="font-medium text-teks">{b.v}</dd>
+                )}
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold tracking-[0.2em] text-emas uppercase">Identitas sekolah</p>
+                  <h2 class="mt-1.5 text-2xl leading-tight font-bold text-white md:text-3xl">{namaResmi}</h2>
+                  {keteranganPita && <p class="mt-2 text-sm text-white/75">{keteranganPita}</p>}
+                </div>
+              </div>
+
+              {akreditasi && (
+                <div class="flex items-center gap-4 self-start rounded-2xl bg-white/[0.07] py-3 pr-5 pl-3 ring-1 ring-white/15 md:self-auto">
+                  <span class="relative grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-amber-300 to-emas text-3xl font-black text-biru-tua shadow-[0_0_0_4px_rgba(245,158,11,0.25)]">
+                    {akreditasi}
+                  </span>
+                  <span>
+                    <span class="block text-xs font-semibold tracking-wider text-white/60 uppercase">Akreditasi</span>
+                    <span class="block text-sm font-semibold text-white">{isi(p.penerbit_sk_akreditasi) || "Terakreditasi"}</span>
+                    {isi(p.sk_akreditasi) && <span class="block font-mono text-[11px] text-white/55">{isi(p.sk_akreditasi)}</span>}
+                  </span>
+                </div>
+              )}
+            </div>
+          </header>
+
+          {/* Deretan angka */}
+          {angka.length > 0 && (
+            <dl class="grid grid-cols-2 border-b border-garis/70 bg-white/60 lg:grid-cols-4">
+              {angka.map((a, i) => (
+                <div
+                  class={
+                    "group flex flex-col items-start gap-3 px-4 py-5 transition hover:bg-white sm:flex-row sm:gap-3.5 sm:px-6 sm:py-6 md:px-8 " +
+                    (i % 2 === 1 ? "border-l border-garis/70 " : "") +
+                    (i >= 2 ? "border-t border-garis/70 lg:border-t-0 " : "") +
+                    (i === 2 ? "lg:border-l" : "")
+                  }
+                  data-muncul={String(0.05 + i * 0.05)}
+                >
+                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-biru-muda text-biru transition group-hover:scale-110 group-hover:bg-biru group-hover:text-white" aria-hidden="true">
+                    <a.ikon ukuran={19} />
+                  </span>
+                  <div class="min-w-0">
+                    <dt class="text-[11px] font-semibold tracking-wide text-samar uppercase sm:text-xs">{a.label}</dt>
+                    <dd class="mt-0.5 text-lg leading-snug font-bold whitespace-nowrap text-teks sm:text-xl md:text-2xl">{a.nilai}</dd>
+                    {a.catatan && <dd class="mt-0.5 text-xs text-samar">{a.catatan}</dd>}
+                  </div>
+                </div>
+              ))}
+            </dl>
+          )}
+
+          {/* Isi: identitas di kiri, lokasi di kanan */}
+          <div class="grid lg:grid-cols-[1.1fr_1fr]">
+            <div class="space-y-8 px-6 py-8 md:px-10 md:py-10">
+              {kepsek && (
+                <div class="flex items-center gap-4" data-muncul="0.08">
+                  {fotoKepsek ? (
+                    <img src={gambar("profil", fotoKepsek, 160)} alt={kepsek} class="h-14 w-14 shrink-0 rounded-full object-cover object-top ring-4 ring-biru-muda" />
+                  ) : (
+                    <span class="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-biru-muda text-biru" aria-hidden="true"><IkonGuru ukuran={24} /></span>
+                  )}
+                  <div>
+                    <p class="text-xs font-semibold tracking-wide text-samar uppercase">Kepala sekolah</p>
+                    <p class="text-lg font-bold text-teks">{kepsek}</p>
+                  </div>
+                </div>
+              )}
+
+              {kode.length > 0 && (
+                <div data-muncul="0.12">
+                  <h3 class="text-xs font-semibold tracking-[0.18em] text-samar uppercase">Nomor induk</h3>
+                  <dl class="mt-3 grid gap-3 sm:grid-cols-2">
+                    {kode.map((k) => (
+                      <div class="relative overflow-hidden rounded-xl bg-biru-tua px-4 py-3 text-white">
+                        <span class="pointer-events-none absolute -right-3 -bottom-5 text-6xl font-black text-white/[0.06] select-none" aria-hidden="true">{k.label}</span>
+                        <dt class="text-[11px] font-semibold tracking-[0.18em] text-emas uppercase">{k.label}</dt>
+                        <dd class="mt-0.5 font-mono text-[15px] font-semibold tracking-wide break-all">{k.nilai}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
+
+              {rincian.length > 0 && (
+                <div data-muncul="0.16">
+                  <h3 class="text-xs font-semibold tracking-[0.18em] text-samar uppercase">Rincian</h3>
+                  <dl class="mt-2 divide-y divide-garis/70 text-sm">
+                    {rincian.map((r) => (
+                      <div class="grid gap-1 py-3 sm:grid-cols-[10rem_1fr] sm:gap-4">
+                        <dt class="text-samar">{r.k}</dt>
+                        <dd class="font-semibold text-teks">{r.v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
+            </div>
+
+            <div class="space-y-8 border-t border-garis/70 bg-white/40 px-6 py-8 md:px-10 md:py-10 lg:border-t-0 lg:border-l">
+              {adaPeta && (
+                <div class="peta-sematan overflow-hidden rounded-2xl ring-1 ring-garis" data-muncul="0.1" set:html={p.peta_embed} />
+              )}
+
+              {alamat && (
+                <div class="flex gap-3" data-muncul="0.14">
+                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-biru text-white" aria-hidden="true"><IkonLokasi ukuran={18} /></span>
+                  <div>
+                    <p class="text-xs font-semibold tracking-wide text-samar uppercase">Alamat</p>
+                    <p class="mt-0.5 text-[15px] leading-relaxed font-medium text-teks">{alamat}</p>
+                    {daerah && <span class="mt-2 inline-block rounded-full bg-biru-muda px-3 py-1 text-xs font-semibold text-biru">Daerah {daerah.toLowerCase()}</span>}
+                  </div>
+                </div>
+              )}
+
+              {wilayah.length > 0 && (
+                <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm" data-muncul="0.16">
+                  {wilayah.map((w) => (
+                    <div>
+                      <dt class="text-xs text-samar">{w.k}</dt>
+                      <dd class="font-semibold text-teks">{w.v}</dd>
                     </div>
                   ))}
                 </dl>
-              </section>
-            ))}
-          </div>
+              )}
 
-          {adaPeta && (
-            <section class="kaca overflow-hidden lg:sticky lg:top-28" data-muncul="0.1">
-              <h2 class="flex items-center gap-3 border-b border-garis/70 px-6 py-4 text-base">
-                <span class="grid h-9 w-9 place-items-center rounded-lg bg-biru-tua text-white" aria-hidden="true">
-                  <IkonLokasi ukuran={18} />
-                </span>
-                Lokasi
-              </h2>
-              <div class="peta-sematan" set:html={p.peta_embed} />
-            </section>
-          )}
-        </div>
+              {adaRute && (
+                <div data-muncul="0.18">
+                  <h3 class="text-xs font-semibold tracking-[0.18em] text-samar uppercase">Jarak tempuh</h3>
+                  <ol class="mt-9 flex items-start text-center text-xs">
+                    <li class="w-16 shrink-0">
+                      <span class="mx-auto block h-4 w-4 rounded-full bg-emas ring-4 ring-emas/25" />
+                      <span class="mt-2 block font-semibold text-teks">Sekolah</span>
+                    </li>
+                    {jarakKec && (
+                      <>
+                        <li class="relative mt-1.5 min-w-10 flex-1" aria-hidden="true">
+                          <span class="block h-1 rounded-full bg-gradient-to-r from-emas to-biru" />
+                          <span class="absolute -top-6 left-1/2 -translate-x-1/2 rounded-full bg-white px-2 py-0.5 font-bold whitespace-nowrap text-biru shadow-sm ring-1 ring-garis">{jarakKec}</span>
+                        </li>
+                        <li class="w-20 shrink-0">
+                          <span class="mx-auto block h-4 w-4 rounded-full bg-biru ring-4 ring-biru/20" />
+                          <span class="mt-2 block font-semibold text-teks">Kecamatan</span>
+                          <span class="block text-samar">{isi(p.kecamatan)}</span>
+                        </li>
+                      </>
+                    )}
+                    {jarakKab && (
+                      <>
+                        <li class="relative mt-1.5 flex-[3]" aria-hidden="true">
+                          <span class="block h-1 rounded-full bg-gradient-to-r from-biru to-biru-tua" />
+                          <span class="absolute -top-6 left-1/2 -translate-x-1/2 rounded-full bg-white px-2 py-0.5 font-bold whitespace-nowrap text-biru shadow-sm ring-1 ring-garis">{jarakKab}</span>
+                        </li>
+                        <li class="w-20 shrink-0">
+                          <span class="mx-auto block h-4 w-4 rounded-full bg-biru-tua ring-4 ring-biru-tua/20" />
+                          <span class="mt-2 block font-semibold text-teks">Kabupaten</span>
+                          <span class="block text-samar">{isi(p.kota).replace(/^Kabupaten\s+/i, "")}</span>
+                        </li>
+                      </>
+                    )}
+                  </ol>
+                  <p class="sr-only">
+                    {jarakKec && `Jarak ke pusat kecamatan ${jarakKec}. `}
+                    {jarakKab && `Jarak ke pusat kabupaten ${jarakKab}.`}
+                  </p>
+                </div>
+              )}
+
+              {(telepon || surel) && (
+                <div class="flex flex-wrap gap-3" data-muncul="0.2">
+                  {telepon && (
+                    <a href={`tel:${telepon.replace(/[^\d+]/g, "")}`} class="magnet inline-flex items-center gap-2 rounded-full bg-biru-tua px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-biru">
+                      <IkonTelepon ukuran={16} />
+                      {telepon}
+                    </a>
+                  )}
+                  {surel && (
+                    <a href={`mailto:${surel}`} class="magnet inline-flex max-w-full items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-biru-tua ring-1 ring-garis transition hover:ring-biru">
+                      <IkonSurel ukuran={16} />
+                      <span class="truncate">{surel}</span>
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </article>
       )
     }
   </section>

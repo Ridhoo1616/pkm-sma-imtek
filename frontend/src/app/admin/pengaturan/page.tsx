@@ -33,6 +33,27 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
     ],
   },
   {
+    judul: "Rincian Data Sekolah",
+    keterangan:
+      "Butir papan Identitas Sekolah yang tampil di halaman Data Sekolah. Yang dibiarkan kosong tidak ditampilkan.",
+    kunci: [
+      "nss",
+      "nis_sekolah",
+      "nsb",
+      "sk_akreditasi",
+      "penerbit_sk_akreditasi",
+      "tahun_berdiri",
+      "kurikulum",
+      "daerah",
+      "gugus",
+      "status_bangunan",
+      "luas_bangunan",
+      "jarak_kecamatan",
+      "jarak_kabupaten",
+      "anggota_rayon",
+    ],
+  },
+  {
     judul: "Angka Sekolah",
     keterangan:
       "Tampil sebagai angka besar pada kartu sorotan di beranda. Ketiganya tidak dapat dihitung sistem: tidak ada tabel siswa, dan daftar tenaga pendidik hanya memuat guru yang ditampilkan di halaman profil, bukan seluruh pegawai. Isi angkanya saja, tanpa kata; yang dibiarkan berpenanda tidak ditampilkan di beranda. Jumlah ekstrakurikuler, peminatan, dan fasilitas dihitung sendiri dari datanya.",
@@ -88,8 +109,9 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
   {
     judul: "Akademik",
     keterangan:
-      "Mengisi halaman di menu Akademik. Alamat jadwal yang dibiarkan kosong membuat halamannya menjelaskan bahwa layanannya belum tersedia, bukan menampilkan tautan mati.",
+      "Mengisi halaman di menu Akademik. Alamat e-learning dan jadwal yang dibiarkan kosong membuat halamannya menjelaskan bahwa layanannya belum tersedia, bukan menampilkan tautan mati.",
     kunci: [
+      "tautan_elearning",
       "tautan_jadwal",
       "jadwal_keterangan",
     ],
@@ -198,6 +220,20 @@ const TANGGAL = ["ppdb_mulai", "ppdb_selesai", "ppdb_pengumuman"];
 function labelDari(kunci: string): string {
   const khusus: Record<string, string> = {
     npsn: "NPSN",
+    nss: "NSS (Nomor Statistik Sekolah)",
+    nis_sekolah: "NIS (Nomor Induk Sekolah)",
+    nsb: "NSB (Nomor Statistik Bangunan)",
+    sk_akreditasi: "Nomor SK akreditasi",
+    penerbit_sk_akreditasi: "Penerbit SK akreditasi",
+    tahun_berdiri: "Tahun berdiri",
+    kurikulum: "Kurikulum",
+    daerah: "Daerah (Pedesaan/Perkotaan)",
+    gugus: "Kelompok sekolah / gugus",
+    status_bangunan: "Status bangunan",
+    luas_bangunan: "Luas bangunan",
+    jarak_kecamatan: "Jarak ke pusat kecamatan",
+    jarak_kabupaten: "Jarak ke pusat kabupaten/kota",
+    anggota_rayon: "Jumlah keanggotaan rayon",
     jumlah_siswa: "Jumlah siswa",
     jumlah_guru: "Jumlah guru & tenaga kependidikan",
     jumlah_rombel: "Jumlah rombongan belajar",
@@ -227,6 +263,7 @@ function labelDari(kunci: string): string {
     struktur_organisasi: "Bagan struktur organisasi",
     keunggulan: "Keunggulan sekolah (satu baris satu poin)",
     struktur_keterangan: "Keterangan struktur organisasi",
+    tautan_elearning: "Alamat e-learning (Google Classroom / Google Drive)",
     tautan_jadwal: "Alamat atau berkas jadwal pelajaran",
     jadwal_keterangan: "Keterangan jadwal pelajaran",
   };
