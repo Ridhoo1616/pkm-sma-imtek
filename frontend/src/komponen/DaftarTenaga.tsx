@@ -324,14 +324,6 @@ function KartuOrang({
   orang: Tenaga;
   kelas?: string;
 }) {
-  const inisial = t.nama
-    .replace(/,.*$/, "")
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((k) => k.charAt(0))
-    .join("")
-    .toUpperCase();
-
   return (
     <article className={`kartu-orang kartu h-full overflow-hidden ${kelas}`}>
       <div className="overflow-hidden">
@@ -345,13 +337,20 @@ function KartuOrang({
             decoding="async"
           />
         ) : (
+          // Foto bawaan selama foto aslinya belum diunggah: siluet di bingkai
+          // yang sama, supaya deretan kartu tetap rapi dan tinggal diisi.
           <div
-            className="kartu-orang-foto grid aspect-square w-full place-items-center bg-biru-muda sm:aspect-[3/4]"
+            className="kartu-orang-foto relative aspect-square w-full overflow-hidden bg-gradient-to-b from-biru-muda to-[#d5e4f3] sm:aspect-[3/4]"
             aria-hidden
           >
-            <span className="text-2xl font-bold text-biru/45 sm:text-3xl">
-              {inisial}
-            </span>
+            <svg
+              viewBox="0 0 40 48"
+              preserveAspectRatio="xMidYMax meet"
+              className="absolute inset-x-0 bottom-0 h-[82%] w-full text-biru/25"
+            >
+              <circle cx="20" cy="17" r="8.5" fill="currentColor" />
+              <path d="M3 48c0-10.5 7.6-17 17-17s17 6.5 17 17z" fill="currentColor" />
+            </svg>
           </div>
         )}
       </div>
