@@ -1,0 +1,29 @@
+---
+import { gambar, type Lebar } from "../lib/gambar";
+
+/**
+ * Bingkai foto seseorang. Selama fotonya belum diunggah, bingkainya tetap
+ * tampil dengan siluet, supaya tata letak bagan sudah final dan cukup diisi
+ * lewat menu Tenaga Pendidik.
+ */
+interface Props {
+  foto?: string | null;
+  /** Kelas ukuran dan bentuk, misalnya "h-16 w-14 rounded-lg". */
+  class: string;
+  lebar?: Lebar;
+}
+const { foto, class: kelas, lebar = 160 } = Astro.props;
+---
+
+{
+  foto ? (
+    <img src={gambar("profil", foto, lebar)} alt="" class={`${kelas} shrink-0 object-cover object-[50%_20%]`} loading="lazy" decoding="async" />
+  ) : (
+    <span class={`${kelas} relative block shrink-0 overflow-hidden bg-gradient-to-b from-biru-muda to-[#d5e4f3]`} aria-hidden="true">
+      <svg viewBox="0 0 40 48" preserveAspectRatio="xMidYMax meet" class="absolute inset-x-0 bottom-0 h-[88%] w-full text-biru/25">
+        <circle cx="20" cy="17" r="8.5" fill="currentColor" />
+        <path d="M3 48c0-10.5 7.6-17 17-17s17 6.5 17 17z" fill="currentColor" />
+      </svg>
+    </span>
+  )
+}

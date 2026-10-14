@@ -1,14 +1,13 @@
 ---
 import { gambar, srcsetGambar } from "../../lib/gambar";
 import Publik from "../../tata/Publik.astro";
+import FotoOrang from "../../komponen/FotoOrang.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import JudulBagian from "../../komponen/JudulBagian.astro";
 import { data } from "../../lib/tembolok";
 import { urlUnggahan } from "@/lib/api";
 import { belumTerisi } from "@/lib/format";
-import { Menunggu, Naskah } from "@/komponen/Halaman";
-import { IkonGuru } from "@/komponen/Ikon";
-import { kelasKartuAkhir } from "@/komponen/Bagian";
+import { Menunggu } from "@/komponen/Halaman";
 import type { Tenaga } from "@/lib/tipe";
 
 const [{ profil }, tenaga] = await Promise.all([
@@ -18,12 +17,72 @@ const [{ profil }, tenaga] = await Promise.all([
 const p = profil.pengaturan;
 const bagan = p.struktur_organisasi ?? "";
 const adaBagan = Boolean(bagan && !belumTerisi(bagan));
-const adaKeterangan = !belumTerisi(p.struktur_keterangan ?? "");
-// Diambil dari tenaga pendidik berkategori Pimpinan, supaya cukup diperbarui
-// di satu tempat.
-const pimpinan = tenaga.filter((t) => t.kategori === "Pimpinan");
----
+const keterangan = belumTerisi(p.struktur_keterangan ?? "") ? "" : p.struktur_keterangan.trim();
 
+/*
+ * Bagan disusun dari data tenaga pendidik, jadi cukup diperbarui di satu
+ * tempat. Pohonnya digambar di atas bidang yang dimiringkan ke belakang
+ * (rotateX 16 derajat); daftar lengkap guru di bawahnya tetap tegak supaya
+ * mudah dibaca.
+ *  - puncak  = pimpinan dengan urutan terkecil (kepala sekolah),
+ *  - baris 2 = pimpinan lainnya,
+ *  - pelaksana tugas = isian jabatan selain pimpinan, dipecah per koma;
+ *    jabatan yang memuat "komite" digantung di samping puncak dengan garis
+ *    putus-putus seperti pada papan sekolah,
+ *  - wali kelas = kolom wali_kelas, dikelompokkan per tingkat.
+ */
+const peran = (t: Tenaga) => (t.jabatan ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+
+const pimpinan = tenaga.filter((t) => t.kategori === "Pimpinan");
+const [puncak, ...wakil] = pimpinan;
+
+const komite: Tenaga[] = [];
+const tugas = new Map<string, Tenaga[]>();
+for (const t of tenaga) {
+  if (t.kategori === "Pimpinan") continue;
+  for (const j of peran(t)) {
+    if (/komite/i.test(j)) komite.push(t);
+    else tugas.set(j, [...(tugas.get(j) ?? []), t]);
+  }
+}
+const daftarTugas = [...tugas.entries()];
+
+const urutTingkat = ["X", "XI", "XII"];
+const wali = new Map<string, { kelas: string; t: Tenaga }[]>();
+for (const t of tenaga) {
+  const kelas = (t.wali_kelas ?? "").trim();
+  if (!kelas) continue;
+  const tingkat = kelas.split(/[-\s]/)[0].toUpperCase();
+  wali.set(tingkat, [...(wali.get(tingkat) ?? []), { kelas, t }]);
+}
+const daftarWali = [...wali.entries()]
+  .sort(([a], [b]) => (urutTingkat.indexOf(a) + 1 || 99) - (urutTingkat.indexOf(b) + 1 || 99))
+  .map(([tingkat, isi]) => ({ tingkat, isi: isi.sort((a, b) => a.kelas.localeCompare(b.kelas, "id", { numeric: true })) }));
+
+const pendidik = tenaga.filter((t) => t.kategori !== "Kependidikan");
+const kependidikan = tenaga.filter((t) => t.kategori === "Kependidikan");
+
+// Data panel rincian. Dibaca skrip lewat textContent, jadi "<" diloloskan
+// supaya nama apa pun tidak bisa menutup tag script.
+const dataOrang = Object.fromEntries(
+  tenaga.map((t) => [
+    t.id,
+    {
+      nama: t.nama,
+      kategori: t.kategori === "Pimpinan" ? "Pimpinan sekolah" : t.kategori === "Kependidikan" ? "Tenaga kependidikan" : "Pendidik",
+      peran: peran(t),
+      mapel: (t.mata_pelajaran ?? "").trim(),
+      wali: (t.wali_kelas ?? "").trim(),
+      foto: t.foto ? gambar("profil", t.foto, 480) : "",
+    },
+  ]),
+);
+const jsonOrang = JSON.stringify(dataOrang).replace(/</g, "\\u003c");
+
+const adaBaganData = Boolean(puncak);
+// Garis datar sebuah baris berhenti tepat di tengah kotak pertama dan terakhir.
+const tepi = (n: number) => (n > 1 ? `calc(100% / ${n * 2})` : "50%");
+---
 <Publik sorotan judul="Struktur Organisasi" deskripsi="Susunan pimpinan sekolah dan pembagian tugasnya.">
   <KepalaHalaman
     pengaturan={p}
@@ -34,10 +93,222 @@ const pimpinan = tenaga.filter((t) => t.kategori === "Pimpinan");
   />
 
   <div class="wadah space-y-16 py-12 md:py-16">
-    <section data-muncul>
-      <JudulBagian atas="Bagan" judul="Bagan Struktur Organisasi" />
-      {
-        adaBagan ? (
+    {
+      adaBaganData ? (
+        <article class="kaca overflow-hidden" data-bagan data-muncul>
+          <header class="flex flex-col gap-5 bg-gradient-to-br from-biru-tua via-biru to-[#1d4f86] px-6 py-7 text-white sm:flex-row sm:items-center sm:justify-between md:px-10">
+            <div>
+              <p class="text-sm font-semibold text-emas">Bagan organisasi</p>
+              <h2 class="mt-1 text-2xl leading-tight font-bold text-white">{p.nama_lengkap_sekolah || p.nama_sekolah}</h2>
+              {keterangan && <p class="mt-1.5 text-sm text-white/70">{keterangan}</p>}
+            </div>
+            <dl class="flex shrink-0 gap-6 self-start sm:self-auto">
+              {[
+                { k: "Pendidik", v: pendidik.length },
+                { k: "Kependidikan", v: kependidikan.length },
+                { k: "Rombel", v: daftarWali.reduce((n, w) => n + w.isi.length, 0) },
+              ].map((a) => (
+                <div>
+                  <dd class="text-2xl leading-none font-bold">{a.v}</dd>
+                  <dt class="mt-1 text-xs text-white/65">{a.k}</dt>
+                </div>
+              ))}
+            </dl>
+          </header>
+
+          {/* Bidang bagan, dimiringkan ke belakang */}
+          <div class="panggung px-3 py-10 md:px-8 lg:py-6">
+            <div class="bidang">
+              {/* Puncak, dengan komite tergantung di sampingnya */}
+              <div class="grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
+                <div class="order-2 flex items-center justify-center lg:order-none lg:justify-end">
+                  {komite.length > 0 && (
+                    <>
+                      <div class="w-full max-w-60 space-y-2">
+                        {komite.map((t) => (
+                          <button type="button" data-orang={String(t.id)} class="simpul w-full border-dashed">
+                            <FotoOrang foto={t.foto} class="mb-2 h-16 w-14 rounded-lg" />
+                            <span class="simpul-jabatan">Komite Sekolah</span>
+                            <span class="simpul-nama">{t.nama}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <span class="hidden w-10 border-t-2 border-dashed border-biru/35 lg:block" aria-hidden="true" />
+                    </>
+                  )}
+                </div>
+                <button type="button" data-orang={String(puncak.id)} class="simpul-puncak order-1 mx-auto flex w-full max-w-sm items-center gap-4 rounded-2xl bg-biru-tua p-3 pr-6 text-left text-white lg:order-none">
+                  <FotoOrang foto={puncak.foto} class="h-20 w-16 rounded-xl" lebar={320} />
+                  <span class="min-w-0">
+                    <span class="block text-xs font-semibold text-emas">{peran(puncak)[0] ?? "Pimpinan"}</span>
+                    <span class="mt-0.5 block text-lg leading-snug font-bold">{puncak.nama}</span>
+                  </span>
+                </button>
+                <span class="hidden lg:block" />
+              </div>
+
+              {/* Baris pimpinan */}
+              {wakil.length > 0 && (
+                <>
+                  <span class="batang h-8" aria-hidden="true" />
+                  <div class="relative">
+                    <span class="palang" style={`left:${tepi(wakil.length)};right:${tepi(wakil.length)}`} aria-hidden="true" />
+                    <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(var(--kolom),minmax(0,1fr))]" style={`--kolom:${wakil.length}`}>
+                      {wakil.map((t) => (
+                        <li class="relative lg:pt-7">
+                          <span class="tiang" aria-hidden="true" />
+                          <button type="button" data-orang={String(t.id)} class="simpul h-full w-full border-t-[3px] border-t-biru">
+                            <FotoOrang foto={t.foto} class="mb-2 h-16 w-14 rounded-lg" />
+                            <span class="simpul-jabatan">{peran(t).join(", ") || "Pimpinan"}</span>
+                            <span class="simpul-nama">{t.nama}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+
+              {/* Pelaksana tugas */}
+              {daftarTugas.length > 0 && (
+                <>
+                  <span class="batang h-6" aria-hidden="true" />
+                  <p class="cap-batang">Pelaksana tugas</p>
+                  <span class="batang h-6" aria-hidden="true" />
+                  <div class="relative">
+                    <span class="palang" style={`left:${tepi(daftarTugas.length)};right:${tepi(daftarTugas.length)}`} aria-hidden="true" />
+                    <ul class="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-[repeat(var(--kolom),minmax(0,1fr))]" style={`--kolom:${daftarTugas.length}`}>
+                      {daftarTugas.map(([jabatan, orang]) => (
+                        <li class="relative lg:pt-7">
+                          <span class="tiang" aria-hidden="true" />
+                          <div class="simpul h-full px-2.5 py-2.5">
+                            <span class="simpul-jabatan">{jabatan}</span>
+                            {orang.map((t) => (
+                              <button type="button" data-orang={String(t.id)} class="baris-nama mt-1.5 flex flex-col items-center gap-1 rounded-md px-1 py-1 text-[13px] leading-snug font-semibold text-biru-tua">
+                                <FotoOrang foto={t.foto} class="h-10 w-10 rounded-full" />
+                                {t.nama}
+                              </button>
+                            ))}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+
+              {/* Wali kelas per tingkat */}
+              {daftarWali.length > 0 && (
+                <>
+                  <span class="batang h-6" aria-hidden="true" />
+                  <p class="cap-batang">Wali kelas</p>
+                  <span class="batang h-6" aria-hidden="true" />
+                  <div class="relative">
+                    <span class="palang" style={`left:${tepi(daftarWali.length)};right:${tepi(daftarWali.length)}`} aria-hidden="true" />
+                    <ul class="grid gap-3 md:grid-cols-[repeat(var(--kolom),minmax(0,1fr))]" style={`--kolom:${daftarWali.length}`}>
+                      {daftarWali.map((w) => (
+                        <li class="relative lg:pt-7">
+                          <span class="tiang" aria-hidden="true" />
+                          <div class="simpul h-full items-stretch justify-start p-0">
+                            <p class="rounded-t-[11px] bg-biru-tua px-3 py-2 text-center text-sm font-bold text-white">
+                              Kelas {w.tingkat} <span class="font-normal text-white/60">· {w.isi.length} rombel</span>
+                            </p>
+                            <ul class="divide-y divide-garis/70 px-1.5 py-1">
+                              {w.isi.map((x) => (
+                                <li>
+                                  <button type="button" data-orang={String(x.t.id)} class="baris-nama flex items-center gap-2.5 rounded-md px-2 py-1.5">
+                                    <span class="w-10 shrink-0 text-xs font-bold text-biru">{x.kelas}</span>
+                                    <FotoOrang foto={x.t.foto} class="h-7 w-7 rounded-full" />
+                                    <span class="text-sm text-teks">{x.t.nama}</span>
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Daftar lengkap, tegak supaya mudah dibaca */}
+          {[
+            { judul: "Staf guru", isi: pendidik, ket: (t: Tenaga) => (t.mata_pelajaran ?? "").trim() || peran(t).join(", ") },
+            { judul: "Tenaga kependidikan", isi: kependidikan, ket: (t: Tenaga) => peran(t).join(", ") },
+          ]
+            .filter((g) => g.isi.length > 0)
+            .map((g) => (
+              <section class="border-t border-garis/70 px-6 py-8 md:px-10">
+                <h3 class="text-sm font-bold text-biru-tua">
+                  {g.judul} <span class="font-normal text-samar">· {g.isi.length} orang</span>
+                </h3>
+                <ul class="mt-4 grid border-t border-garis sm:grid-cols-2 sm:gap-x-8 xl:grid-cols-3">
+                  {g.isi.map((t) => (
+                    <li class="border-b border-garis">
+                      <button type="button" data-orang={String(t.id)} class="baris-nama -mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-md px-2 py-2.5">
+                        <FotoOrang foto={t.foto} class="h-11 w-11 rounded-full" />
+                        <span class="min-w-0">
+                          <span class="block font-semibold text-teks">{t.nama}</span>
+                          <span class="block text-sm text-samar">{g.ket(t) || "—"}</span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+
+          <script type="application/json" id="data-orang" set:html={jsonOrang} />
+
+          <dialog class="rincian-orang m-auto w-[min(26rem,calc(100%-2rem))] overflow-hidden rounded-2xl bg-white p-0 text-teks shadow-2xl" aria-labelledby="rincian-nama">
+            <img alt="" class="aspect-[4/3] w-full object-cover object-[50%_22%]" data-isi="foto" hidden />
+            <div data-isi="foto-kosong" hidden>
+              <FotoOrang class="aspect-[4/3] w-full" />
+            </div>
+            <div class="px-6 pt-6">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-sm text-samar" data-isi="kategori" />
+                <button type="button" class="-mt-1.5 -mr-2 grid h-9 w-9 shrink-0 place-items-center rounded-full text-samar transition hover:bg-latar hover:text-teks" data-tutup aria-label="Tutup">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                </button>
+              </div>
+              <h2 id="rincian-nama" class="mt-1 text-2xl leading-tight font-bold tracking-tight text-biru-tua" data-isi="nama" />
+            </div>
+            <dl class="mt-5 border-t border-garis px-6 text-sm">
+              <div class="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-garis py-3" data-baris="peran">
+                <dt class="text-samar">Tugas</dt>
+                <dd class="font-semibold" data-isi="peran" />
+              </div>
+              <div class="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-garis py-3" data-baris="mapel">
+                <dt class="text-samar">Mengajar</dt>
+                <dd class="font-semibold" data-isi="mapel" />
+              </div>
+              <div class="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-garis py-3" data-baris="wali">
+                <dt class="text-samar">Wali kelas</dt>
+                <dd class="font-semibold" data-isi="wali" />
+              </div>
+            </dl>
+            <p class="px-6 py-4">
+              <a href="/profil/tenaga-pendidik" class="text-sm font-semibold text-biru underline-offset-2 hover:underline">Semua tenaga pendidik →</a>
+            </p>
+          </dialog>
+        </article>
+      ) : (
+        !adaBagan && (
+          <div class="kaca mx-auto max-w-3xl p-6 md:p-8">
+            <Menunggu apa="Struktur organisasi" dari="Tenaga Pendidik" polos />
+          </div>
+        )
+      )
+    }
+
+    {
+      adaBagan && (
+        <section data-muncul>
+          <JudulBagian atas="Bagan resmi" judul="Bagan Struktur Organisasi" />
           <figure class="kaca overflow-hidden">
             <a href={urlUnggahan("profil", bagan)} target="_blank" rel="noopener noreferrer" class="group block cursor-zoom-in bg-white">
               <img
@@ -50,60 +321,204 @@ const pimpinan = tenaga.filter((t) => t.kategori === "Pimpinan");
                 decoding="async"
               />
             </a>
-            {adaKeterangan && (
-              <figcaption class="border-t border-garis px-6 py-4 text-sm leading-relaxed text-samar">
-                {p.struktur_keterangan}
-              </figcaption>
-            )}
           </figure>
-        ) : (
-          <div class="mx-auto max-w-3xl space-y-4">
-            {/* Kerangka berukuran sama supaya tata letaknya sudah final. */}
-            <div class="kaca grid aspect-[4/3] w-full place-items-center border-dashed px-6 text-center">
-              <div>
-                <p class="text-sm font-semibold text-biru-tua">Tempat bagan struktur organisasi</p>
-                <p class="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-biru/70">
-                  Gambar mendatar, perbandingan sisi 4:3, paling tidak 1200 piksel lebarnya. Diunggah lewat menu Pengaturan di panel admin.
-                </p>
-              </div>
-            </div>
-            <div class="kaca p-6 md:p-8">
-              <Menunggu apa="Bagan struktur organisasi" polos />
-            </div>
-            {adaKeterangan && (
-              <div class="kaca p-6">
-                <Naskah isi={p.struktur_keterangan} />
-              </div>
-            )}
-          </div>
-        )
-      }
-    </section>
-
-    {
-      pimpinan.length > 0 && (
-        <section data-muncul>
-          <JudulBagian
-            atas="Pimpinan"
-            judul="Unsur Pimpinan Sekolah"
-            keterangan="Diambil dari data tenaga pendidik berkategori Pimpinan, jadi cukup diperbarui di satu tempat."
-          />
-          <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {pimpinan.map((t, i) => (
-              <div data-miring data-muncul={String((i % 3) * 0.07)} class={"kaca kartu-sorot relative flex items-center gap-4 p-5 " + kelasKartuAkhir(i, pimpinan.length)}>
-                <span class="ikon-kartu grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-biru-muda text-biru" aria-hidden="true">
-                  {t.foto ? <img src={gambar("profil", t.foto, 160)} alt="" class="h-full w-full object-cover" loading="lazy" /> : <IkonGuru ukuran={26} />}
-                </span>
-                <div class="min-w-0">
-                  <p class="font-bold text-biru-tua">{t.nama}</p>
-                  {t.jabatan && <p class="mt-0.5 text-sm text-biru">{t.jabatan}</p>}
-                  {t.nip && <p class="mt-1 text-xs text-samar tabular-nums">NIP {t.nip}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
         </section>
       )
     }
   </div>
 </Publik>
+
+<style>
+  /* Di dalam layer supaya kelas Tailwind pada elemen yang sama tetap menang
+     (aturan di luar layer mengalahkan utilitas; lihat AGENTS.md). */
+  @layer components {
+    /* Bidang bagan dimiringkan ke belakang: rotateX 16 derajat, rotateY 0.
+       Hanya di layar lebar; di ponsel pohonnya bersusun sangat tinggi dan
+       kemiringan membuatnya terlalu mengecil. Porosnya sedikit di bawah
+       tengah supaya ruang yang terbuang di atas dan di bawah seimbang. Lantai
+       biru muda di bawahnya memberi kesan kedalaman. */
+    .panggung {
+      background:
+        radial-gradient(ellipse 70% 55% at 50% 100%, rgb(232 241 250 / 0.95), transparent 70%),
+        linear-gradient(to bottom, transparent, rgb(232 241 250 / 0.5));
+    }
+    @media (min-width: 64rem) {
+      .bidang {
+        transform: perspective(2200px) rotateX(16deg) rotateY(0deg);
+        transform-origin: 50% 75%;
+      }
+    }
+
+    .simpul {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid rgb(229 231 235 / 0.9);
+      border-radius: 0.75rem;
+      background: white;
+      padding: 0.7rem 0.9rem;
+      text-align: center;
+      box-shadow:
+        0 1px 0 rgb(10 28 49 / 0.04),
+        0 14px 24px -14px rgb(10 28 49 / 0.35);
+    }
+    button.simpul,
+    .simpul-puncak,
+    .baris-nama {
+      cursor: pointer;
+    }
+    .simpul-jabatan {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--color-biru);
+    }
+    .simpul-nama {
+      display: block;
+      margin-top: 0.15rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--color-biru-tua);
+    }
+    .simpul-puncak {
+      box-shadow: 0 22px 40px -18px rgb(10 28 49 / 0.65);
+    }
+    .baris-nama {
+      display: block;
+      width: 100%;
+      text-align: left;
+    }
+    .simpul .baris-nama {
+      text-align: center;
+    }
+
+    /* Garis bagan */
+    .batang {
+      display: block;
+      margin-inline: auto;
+      width: 2px;
+      background: rgb(15 42 74 / 0.28);
+    }
+    .palang {
+      position: absolute;
+      top: 0;
+      display: none;
+      height: 2px;
+      background: rgb(15 42 74 / 0.28);
+    }
+    .tiang {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      display: none;
+      height: 1.75rem;
+      width: 2px;
+      transform: translateX(-50%);
+      background: rgb(15 42 74 / 0.28);
+    }
+    @media (min-width: 64rem) {
+      .palang,
+      .tiang {
+        display: block;
+      }
+    }
+    .cap-batang {
+      margin-inline: auto;
+      width: fit-content;
+      border-radius: 9999px;
+      background: var(--color-biru-muda);
+      padding: 0.25rem 0.85rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-biru-tua);
+    }
+
+    /* Penunjuk di atas nama: nama itu dan nama yang sama di tempat lain diberi
+       latar biru muda. Bagian lain tidak diredupkan atau dikaburkan. */
+    [data-orang] {
+      transition:
+        background-color 0.15s,
+        border-color 0.15s,
+        transform 0.15s;
+    }
+    .baris-nama:hover,
+    .baris-nama.sama,
+    button.simpul:hover,
+    button.simpul.sama {
+      background-color: var(--color-biru-muda);
+    }
+    button.simpul:hover,
+    button.simpul.sama {
+      border-color: rgb(15 42 74 / 0.3);
+    }
+    .simpul-puncak:hover,
+    .simpul-puncak.sama {
+      background-color: var(--color-biru);
+    }
+    [data-orang]:focus-visible {
+      outline: 2px solid var(--color-biru);
+      outline-offset: 2px;
+    }
+
+    .rincian-orang::backdrop {
+      background: rgb(10 28 49 / 0.55);
+    }
+  }
+</style>
+
+<script>
+  const bagan = document.querySelector<HTMLElement>("[data-bagan]");
+  const sumber = document.getElementById("data-orang");
+  const dialog = bagan?.querySelector<HTMLDialogElement>("dialog.rincian-orang");
+
+  if (bagan && sumber && dialog) {
+    type Orang = { nama: string; kategori: string; peran: string[]; mapel: string; wali: string; foto: string };
+    const orang: Record<string, Orang> = JSON.parse(sumber.textContent || "{}");
+    const simpul = [...bagan.querySelectorAll<HTMLElement>("[data-orang]")];
+    const darinya = (e: Event) => (e.target as Element).closest<HTMLElement>("[data-orang]");
+
+    // Nama yang sama di tempat lain ikut ditandai warna, tanpa meredupkan.
+    const tandai = (id: string | null) => {
+      for (const s of simpul) s.classList.toggle("sama", id !== null && s.dataset.orang === id);
+    };
+    bagan.addEventListener("pointerover", (e) => {
+      if ((e as PointerEvent).pointerType === "mouse") tandai(darinya(e)?.dataset.orang ?? null);
+    });
+    bagan.addEventListener("pointerleave", () => tandai(null));
+
+    const isi = <T extends HTMLElement = HTMLElement>(nama: string) => dialog.querySelector<T>(`[data-isi="${nama}"]`)!;
+    const baris = (nama: string, ada: boolean) => {
+      dialog.querySelector<HTMLElement>(`[data-baris="${nama}"]`)!.hidden = !ada;
+    };
+
+    bagan.addEventListener("click", (e) => {
+      const s = darinya(e);
+      const o = s && orang[s.dataset.orang ?? ""];
+      if (!s || !o) return;
+
+      isi("kategori").textContent = o.kategori;
+      isi("nama").textContent = o.nama;
+      const foto = isi<HTMLImageElement>("foto");
+      foto.hidden = !o.foto;
+      isi("foto-kosong").hidden = Boolean(o.foto);
+      if (o.foto) foto.src = o.foto;
+      else foto.removeAttribute("src");
+      isi("peran").textContent = o.peran.join(", ");
+      baris("peran", o.peran.length > 0);
+      isi("mapel").textContent = o.mapel;
+      baris("mapel", o.mapel !== "");
+      isi("wali").textContent = o.wali;
+      baris("wali", o.wali !== "");
+
+      tandai(null);
+      dialog.showModal();
+    });
+
+    dialog.addEventListener("click", (e) => {
+      // Ketuk di luar kotak (pada latar) atau tombol tutup.
+      if (e.target === dialog || (e.target as Element).closest("[data-tutup]")) dialog.close();
+    });
+  }
+</script>
