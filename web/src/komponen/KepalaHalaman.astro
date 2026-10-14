@@ -32,9 +32,11 @@ interface Props {
    */
   langkah?: TahapAlur;
   ppdbDibuka?: boolean;
+  /** Logo khusus kelompok halaman (misalnya BKK), tampil di cakram putih di kanan. */
+  lambang?: { src: string; alt: string };
 }
 
-const { pengaturan: p, judul, keterangan, induk, jalur, langkah, ppdbDibuka = false } = Astro.props;
+const { pengaturan: p, judul, keterangan, induk, jalur, langkah, ppdbDibuka = false, lambang } = Astro.props;
 const kelompok = menuDari(induk);
 const anak = kelompok?.anak ?? [];
 // "Ringkasan" hanya ditambahkan bila tidak ada anak yang menunjuk halaman
@@ -63,7 +65,7 @@ const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
   <div aria-hidden="true" class="absolute -top-40 -right-32 -z-10 h-[30rem] w-[30rem] rounded-full bg-biru opacity-60 blur-[110px]"></div>
   <Orbit nada="terang" class="-right-[18%] top-[10%] h-[22rem] w-[75%] opacity-70" miring={10} bintang={[{ x: 20, y: 70, ukuran: 14 }, { x: 78, y: 12, ukuran: 11 }]} />
 
-  <div class="wadah relative pt-10 pb-24 md:pt-14 md:pb-28">
+  <div class={"wadah relative pt-10 pb-24 md:pt-14 md:pb-28 " + (lambang ? "md:flex md:items-center md:justify-between md:gap-10" : "")}>
     <div class="masuk-bertahap max-w-3xl" data-isi-sorotan>
       <nav aria-label="Jejak lokasi" class="text-sm text-white/70">
         <ol class="flex flex-wrap items-center gap-1.5">
@@ -98,6 +100,15 @@ const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
       {/* Isi tambahan di bawah keterangan, misalnya kotak cari berita. */}
       {Astro.slots.has("default") && <div class="mt-6"><slot /></div>}
     </div>
+    {
+      lambang && (
+        <div class="mt-8 hidden shrink-0 md:mt-0 md:block">
+          <span class="grid h-44 w-44 place-items-center rounded-full bg-white p-3 shadow-[0_20px_50px_-20px_rgb(0_0_0/0.6)] ring-8 ring-white/10 lg:h-52 lg:w-52">
+            <img src={lambang.src} alt={lambang.alt} width="1480" height="1480" class="h-full w-full" />
+          </span>
+        </div>
+      )
+    }
   </div>
 </section>
 
