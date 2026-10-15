@@ -83,7 +83,7 @@ const fakta = [
               {mitra.map((m) => (
                 <li class="flex items-center gap-4 rounded-2xl bg-white px-4 py-3.5 ring-1 ring-garis">
                   {m.logo ? (
-                    <img src={gambar("bkk-mitra", m.logo, 160)} alt="" class="h-11 w-11 shrink-0 rounded-lg object-contain" loading="lazy" />
+                    <img src={gambar("bkk-mitra", m.logo, 320)} alt={`Logo ${m.nama}`} class="h-11 w-24 shrink-0 object-contain object-left" loading="lazy" />
                   ) : (
                     <span class="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-biru-muda text-base font-bold text-biru-tua" aria-hidden="true">
                       {m.nama.replace(/^(PT|CV|UPTD)\.?\s+/i, "").charAt(0)}
