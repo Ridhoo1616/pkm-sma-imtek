@@ -33,15 +33,17 @@ const paragrafSambutan = belumTerisi(p.sambutan_kepsek ?? "") ? [] : keParagraf(
     />
     <div class="wadah relative">
       <div class="kaca relative grid overflow-hidden md:grid-cols-[minmax(0,17rem)_1fr] lg:grid-cols-[minmax(0,20rem)_1fr]">
-        <div class="relative flex min-h-64 items-end justify-center bg-gradient-to-b from-biru-muda to-white/40">
+        <div class="relative flex min-h-80 items-end justify-center overflow-hidden bg-gradient-to-b from-biru-muda to-white/40 md:min-h-0">
           {
+            // Foto mengisi seluruh kolom; titik fokusnya di kepala dan bahu, sebab
+            // foto kepala sekolah tegak dengan ruang kosong lebar di atas kepala.
             adaFotoKepsek ? (
               <img
                 src={gambar("profil", p.foto_kepsek, 640)}
                 srcset={srcsetGambar("profil", p.foto_kepsek, [320, 640, 1024])}
                 sizes="(min-width: 768px) 20rem, 100vw"
                 alt={adaNamaKepsek ? `Foto ${p.kepala_sekolah}, Kepala Sekolah` : "Foto Kepala Sekolah"}
-                class="h-full max-h-96 w-full object-cover object-top transition duration-700 hover:scale-[1.04]"
+                class="absolute inset-0 h-full w-full object-cover object-[50%_30%] transition duration-700 hover:scale-[1.04]"
                 loading="lazy"
                 decoding="async"
               />
