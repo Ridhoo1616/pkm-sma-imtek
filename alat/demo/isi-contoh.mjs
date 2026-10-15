@@ -128,7 +128,7 @@ const NASKAH = {
     "## Struktur mata pelajaran",
     "Peserta didik mengikuti mata pelajaran kelompok umum di semua kelas, lalu mendalami mata pelajaran pilihan sesuai peminatan yang dipilih.",
     "## Peminatan",
-    "Sekolah membuka peminatan MIPA, IPS, dan Bahasa. Pilihan peminatan ditetapkan saat mendaftar, dan rincian kuotanya dapat dilihat di halaman PPDB.",
+    "Sekolah membuka peminatan IPA dan IPS. Pilihan peminatan ditetapkan saat mendaftar, dan rincian kuotanya dapat dilihat di halaman PPDB.",
     "## Penilaian dan rapor",
     "Penilaian dilakukan sepanjang semester lewat tugas, ulangan, dan kegiatan praktik. Hasilnya dilaporkan kepada orang tua dalam bentuk rapor.",
   ],

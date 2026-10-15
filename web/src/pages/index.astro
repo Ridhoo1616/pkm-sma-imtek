@@ -321,7 +321,8 @@ const arah = (moda: string) =>
             judul="Peminatan yang Dibuka"
             keterangan="Peminatan menentukan mata pelajaran pendalaman yang diambil siswa. Pilihannya ditetapkan saat mendaftar."
           />
-          <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Dua peminatan: kartunya dipusatkan, tidak menyisakan kolom kosong. */}
+          <div class:list={["grid gap-5 sm:grid-cols-2", jurusan.length === 2 ? "mx-auto max-w-4xl" : "lg:grid-cols-3"]}>
             {jurusan.map((j, i) => {
               const sisa = Math.max(j.kuota - j.pendaftar, 0);
               return (

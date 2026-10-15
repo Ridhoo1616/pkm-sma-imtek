@@ -208,7 +208,7 @@ export default function HalamanJurusan() {
               nilai={isi.kode}
               ubah={(v) => setIsi((s) => ({ ...s, kode: v.toUpperCase() }))}
               galat={galatKolom.kode}
-              contoh="MIPA"
+              contoh="IPA"
               bantuan="Singkatan yang tampil sebagai lencana."
             />
             <Teks
@@ -219,7 +219,7 @@ export default function HalamanJurusan() {
               nilai={isi.nama}
               ubah={(v) => setIsi((s) => ({ ...s, nama: v }))}
               galat={galatKolom.nama}
-              contoh="Peminatan MIPA"
+              contoh="Peminatan IPA"
             />
           </div>
 
