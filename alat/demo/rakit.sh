@@ -50,9 +50,6 @@ done
 log "1. Salin basis data $DB_ASAL ke $DB_DEMO"
 createdb -O "$DB_USER" "$DB_DEMO"
 pg_dump -U "$DB_USER" --no-owner "$DB_ASAL" | psql -q -U "$DB_USER" -d "$DB_DEMO" >/dev/null
-# Foto kepala sekolah di data asli bukan untuk dipamerkan di demo publik:
-# dikosongkan, sehingga sambutan tampil tanpa foto sampai sekolah memasangnya.
-psql -q -U "$DB_USER" -d "$DB_DEMO" -c "UPDATE pengaturan SET nilai = '' WHERE nama_setting = 'foto_kepsek'"
 cp -R "$REPO/backend/data/unggahan" "$SEMENTARA/unggahan"
 
 log "2. Rakit dan jalankan backend demo"
