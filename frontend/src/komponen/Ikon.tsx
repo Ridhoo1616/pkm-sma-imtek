@@ -294,7 +294,7 @@ const PETA_IKON: Record<string, React.ReactNode> = {
       <path d="M4.2 8.4c5 .5 9.6-.6 13-3.3M3.4 14.6c4.6-1.8 9.6-1 13 2.4M8.6 3.4c3 3.6 5 8.3 5.4 13.6" />
     </>
   ),
-  // Musala
+  // Masjid
   "bi-moon-stars": (
     <>
       <path d="M20.5 15.2A8.2 8.2 0 0 1 9.4 4.2a8.5 8.5 0 1 0 11.1 11Z" />
@@ -478,7 +478,7 @@ export const PILIHAN_IKON: { nilai: string; label: string }[] = [
   { nilai: "bi-eyedropper", label: "Laboratorium IPA" },
   { nilai: "bi-book", label: "Perpustakaan / buku" },
   { nilai: "bi-dribbble", label: "Olahraga" },
-  { nilai: "bi-moon-stars", label: "Musala / keagamaan" },
+  { nilai: "bi-moon-stars", label: "Masjid / keagamaan" },
   { nilai: "bi-easel", label: "Ruang kelas" },
   { nilai: "bi-heart-pulse", label: "UKS / kesehatan" },
   { nilai: "bi-shop", label: "Kantin" },
