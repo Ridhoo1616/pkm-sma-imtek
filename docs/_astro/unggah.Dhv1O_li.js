@@ -1,1 +1,0 @@
-var e=`3 MB`;export{e as t};
