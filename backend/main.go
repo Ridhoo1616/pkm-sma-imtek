@@ -129,15 +129,13 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/kegiatan-siswa", a.tanganiKegiatanPublik)
 
 	/* ---- Bursa Kerja Khusus ----
-	   Lamaran membawa CV dan data diri, jadi dibatasi seketat formulir
-	   pendaftaran. Cek lamaran mengunci per NISN, lihat bkk.go. */
+	   Penyaluran kerja berjalan lewat grup WhatsApp petugas BKK (migrasi
+	   033), jadi situs hanya menampilkan mitra. Jalur kirim dan cek lamaran
+	   (tanganiLamarBkk, tanganiCekLamaranBkk) sengaja tidak dibuka: tanpa
+	   menu lamaran di panel, CV yang masuk tidak akan pernah diperiksa. */
 	m.HandleFunc("GET /api/bkk/lowongan", a.tanganiLowonganBkkPublik)
 	m.HandleFunc("GET /api/bkk/lowongan/{id}", a.tanganiLowonganBkkDetail)
 	m.HandleFunc("GET /api/bkk/mitra", a.tanganiMitraBkkPublik)
-	m.HandleFunc("POST /api/bkk/lamar", a.batasiIP(a.batas.lamarBkkIP,
-		"Terlalu banyak lamaran dikirim dari jaringan Anda.", a.tanganiLamarBkk))
-	m.HandleFunc("POST /api/bkk/cek", a.batasiIP(a.batas.identitasIP,
-		"Terlalu banyak permintaan dari jaringan Anda.", a.tanganiCekLamaranBkk))
 
 	// Pencarian sekolah asal untuk formulir pendaftaran. Terbuka tanpa token
 	// karena yang memakainya calon pendaftar; isinya data sekolah yang memang

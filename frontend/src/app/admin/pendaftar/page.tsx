@@ -101,7 +101,7 @@ export default function HalamanPendaftar() {
         aksi={
           <div className="flex flex-wrap gap-2">
             <Tombol jenis="kedua" onClick={unduh} sedangJalan={mengunduh}>
-              {mengunduh ? "Menyiapkan..." : "Unduh CSV"}
+              {mengunduh ? "Menyiapkan..." : "Unduh Excel (CSV)"}
             </Tombol>
             {/* Untuk pendaftar yang datang langsung ke sekolah. Tetap
                 dapat dipakai meski pendaftaran online sudah ditutup. */}

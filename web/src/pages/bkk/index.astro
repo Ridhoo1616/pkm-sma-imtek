@@ -1,139 +1,134 @@
 ---
 import Publik from "../../tata/Publik.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
-import PetaAnak from "../../komponen/PetaAnak.astro";
-import KartuLowongan from "../../komponen/KartuLowongan.astro";
+import { gambar } from "../../lib/gambar";
 import { data } from "../../lib/tembolok";
 import { belumTerisi, namaLengkapSekolah, tautanWa } from "@/lib/format";
 import { Naskah } from "@/komponen/Halaman";
+import { IkonWhatsapp } from "@/komponen/Ikon";
 import { tombolEmas, tombolPutih } from "../../lib/gaya";
-import type { LowonganBkk } from "@/lib/tipe";
+import type { MitraBkk } from "@/lib/tipe";
 
 /**
- * Halaman Bursa Kerja Khusus. Angka yang tampil dihitung backend dari data
- * lowongan dan lamaran, dan disembunyikan selama nilainya nol: halaman
- * promosi tidak memamerkan angka yang belum ada.
+ * Halaman Bursa Kerja Khusus. Penyaluran kerja sekolah berjalan lewat grup
+ * WhatsApp yang dipegang petugas BKK, jadi halaman ini cukup profil singkat,
+ * daftar perusahaan mitra, dan jalan masuk ke grup itu (migrasi 033).
  */
-type HasilLowongan = { data: LowonganBkk[]; angka: { mitra: number; lowongan_dibuka: number; tersalurkan: number } };
-const [{ profil }, hasil] = await Promise.all([
+const [{ profil }, hasilMitra] = await Promise.all([
   data.profil(),
-  data.lowonganBkk().catch((): HasilLowongan => ({ data: [], angka: { mitra: 0, lowongan_dibuka: 0, tersalurkan: 0 } })),
+  data.mitraBkk().catch(() => ({ data: [] as MitraBkk[] })),
 ]);
 const p = profil.pengaturan;
-const pengantar = p.bkk_keterangan ?? "";
 const nama = namaLengkapSekolah(p);
-const wa = tautanWa(p.bkk_kontak || p.whatsapp || "", `Halo petugas BKK ${nama}, saya lulusan ${nama} ingin bertanya tentang lowongan kerja.`);
-const angka = [
-  { nilai: hasil.angka.lowongan_dibuka, label: "Lowongan dibuka" },
-  { nilai: hasil.angka.mitra, label: "Perusahaan mitra" },
-  { nilai: hasil.angka.tersalurkan, label: "Lulusan tersalurkan" },
-].filter((a) => a.nilai > 0);
-const terbaru = hasil.data.slice(0, 6);
-// Ditulis utuh supaya terpindai Tailwind; jumlah kolom mengikuti angka yang ada.
-const KOLOM_ANGKA: Record<number, string> = { 1: "", 2: "sm:grid-cols-2", 3: "sm:grid-cols-3" };
-const alur = [
-  { judul: "Pilih lowongan", isi: "Lowongan dari perusahaan mitra yang sedang dibuka, lengkap dengan kualifikasi dan batas lamarannya." },
-  { judul: "Kirim lamaran", isi: "Isi data diri, NISN, dan unggah CV langsung di halaman lowongan. Tidak perlu datang ke sekolah." },
-  { judul: "Diteruskan ke mitra", isi: "Petugas BKK memeriksa lamaran lalu meneruskannya ke perusahaan, termasuk jadwal wawancara." },
-  { judul: "Pantau hasilnya", isi: "Tahap lamaran dan catatan petugas dapat dilihat kapan saja dengan NISN dan tanggal lahir." },
-];
+const profilSingkat = p.bkk_keterangan ?? "";
+const nomorDisnaker = (p.bkk_nomor_disnaker ?? "").trim();
+const nomorAdmin = (p.bkk_kontak || p.whatsapp || "").trim();
+const chatAdmin = tautanWa(nomorAdmin, `Halo admin BKK ${nama}, saya ingin bergabung dengan grup WhatsApp BKK untuk info penyaluran kerja.`);
+// Tautan undangan grup lebih dulu; tanpa itu, tombol gabung membuka chat admin.
+const grup = /^https?:\/\//.test((p.bkk_grup_wa ?? "").trim()) ? p.bkk_grup_wa!.trim() : "";
+const gabung = grup || chatAdmin;
+const mitra = hasilMitra.data;
+
+const fakta = [
+  nomorDisnaker && { label: "Tanda daftar Disnaker", isi: nomorDisnaker },
+  { label: "Semboyan", isi: "Belajar · Berkarya · Bermanfaat" },
+  !belumTerisi(p.alamat ?? "") && { label: "Sekretariat", isi: p.alamat! },
+].filter(Boolean) as { label: string; isi: string }[];
 ---
 
-<Publik sorotan judul="Bursa Kerja Khusus" deskripsi={`Bursa Kerja Khusus ${nama}: lowongan kerja dari perusahaan mitra dan penyaluran lulusan ke dunia kerja.`}>
+<Publik sorotan judul="Bursa Kerja Khusus" deskripsi={`Bursa Kerja Khusus ${nama}: program penyaluran lulusan ke dunia kerja bersama perusahaan mitra.`}>
   <KepalaHalaman
     pengaturan={p}
     judul="Bursa Kerja Khusus"
-    keterangan="Layanan sekolah yang mempertemukan lulusan dengan perusahaan mitra: dari informasi lowongan, pengiriman lamaran, sampai penyaluran kerja."
+    keterangan="Program sekolah untuk menyalurkan lulusan ke dunia kerja bersama perusahaan mitra."
     induk="/bkk"
     lambang={{ src: "/bkk/logo-bkk.svg", alt: "Logo BKK SMAS IMTEK" }}
     jalur="/bkk"
   />
 
   <div class="wadah pt-10 pb-4">
-    {
-      angka.length > 0 && (
-        <dl class={"grid border-b border-garis " + KOLOM_ANGKA[angka.length]} data-muncul>
-          {angka.map((a, i) => (
-            <div class={"flex flex-col-reverse py-7 " + (i > 0 ? "border-t border-garis sm:border-t-0 sm:border-l sm:pl-7" : "")}>
-              <dt class="mt-2 text-sm text-samar">{a.label}</dt>
-              <dd class="text-5xl leading-none font-semibold tracking-tight text-biru-tua tabular-nums" data-hitung={a.nilai}>{a.nilai}</dd>
-            </div>
-          ))}
-        </dl>
-      )
-    }
-
-    {
-      !belumTerisi(pengantar) && (
-        <section class="bagian-polos" data-muncul>
-          <p class="label-bagian">Tentang</p>
-          <div class="max-w-[68ch]"><Naskah isi={pengantar} /></div>
-        </section>
-      )
-    }
-
     <section class="bagian-polos" data-muncul>
-      <p class="label-bagian">Alur penyaluran</p>
+      <p class="label-bagian">Profil</p>
       <div>
-        <h2 class="judul-bagian">Dari lowongan sampai diterima bekerja</h2>
-        <ol>
+        <h2 class="judul-bagian">Program penyaluran kerja</h2>
+        {
+          belumTerisi(profilSingkat) ? (
+            <p class="max-w-xl text-[15px] leading-relaxed text-samar">Profil singkat BKK sedang disiapkan sekolah.</p>
+          ) : (
+            <div class="max-w-[68ch]"><Naskah isi={profilSingkat} /></div>
+          )
+        }
+        <dl class="mt-8 grid border-t border-garis sm:grid-cols-3">
           {
-            alur.map((a, i) => (
-              <li class="grid grid-cols-[3.5rem_1fr] gap-4 border-t border-garis py-5 last:border-b">
-                <span class="text-4xl leading-none font-semibold text-emas tabular-nums" aria-hidden="true">{i + 1}</span>
-                <div>
-                  <h3 class="text-lg font-semibold text-biru-tua">{a.judul}</h3>
-                  <p class="mt-1 max-w-[60ch] text-[15px] leading-relaxed text-samar">{a.isi}</p>
-                </div>
-              </li>
+            fakta.map((f, i) => (
+              <div class={"py-5 " + (i > 0 ? "border-t border-garis sm:border-t-0 sm:border-l sm:pl-6" : "sm:pr-6")}>
+                <dt class="text-xs font-semibold tracking-wide text-samar uppercase">{f.label}</dt>
+                <dd class="mt-1.5 text-[15px] font-semibold text-biru-tua">{f.isi}</dd>
+              </div>
             ))
           }
-        </ol>
+        </dl>
       </div>
     </section>
 
     <section class="bagian-polos" data-muncul>
-      <p class="label-bagian">Lowongan terbaru</p>
+      <p class="label-bagian">Mitra</p>
       <div class="min-w-0">
-        <h2 class="judul-bagian">{terbaru.length ? "Sedang dibuka" : "Belum ada lowongan yang dibuka"}</h2>
+        <h2 class="judul-bagian">Perusahaan yang bekerja sama</h2>
         {
-          terbaru.length === 0 ? (
-            <p class="max-w-xl text-[15px] leading-relaxed text-samar">Lowongan baru diumumkan di halaman ini begitu perusahaan mitra membukanya.</p>
+          mitra.length === 0 ? (
+            <p class="max-w-xl text-[15px] leading-relaxed text-samar">Daftar mitra ditambahkan petugas BKK lewat panel admin.</p>
           ) : (
-            <>
-              <div class="grid gap-5 sm:grid-cols-2">
-                {terbaru.map((l, i) => <KartuLowongan l={l} i={i} jumlah={terbaru.length} />)}
-              </div>
-              {hasil.data.length > terbaru.length && (
-                <p class="mt-8">
-                  <a href="/bkk/lowongan" class={tombolPutih}>Lihat semua {hasil.data.length} lowongan</a>
-                </p>
+            <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {mitra.map((m) => (
+                <li class="flex items-center gap-4 rounded-2xl bg-white px-4 py-3.5 ring-1 ring-garis">
+                  {m.logo ? (
+                    <img src={gambar("bkk-mitra", m.logo, 160)} alt="" class="h-11 w-11 shrink-0 rounded-lg object-contain" loading="lazy" />
+                  ) : (
+                    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-biru-muda text-base font-bold text-biru-tua" aria-hidden="true">
+                      {m.nama.replace(/^(PT|CV|UPTD)\.?\s+/i, "").charAt(0)}
+                    </span>
+                  )}
+                  <div class="min-w-0">
+                    <p class="font-semibold leading-snug text-biru-tua">{m.nama}</p>
+                    {m.bidang && <p class="text-sm text-samar">{m.bidang}</p>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        <p class="mt-6 text-[15px] text-samar">
+          Info selengkapnya bisa join grup WhatsApp BKK.{" "}
+          {gabung && <a href={gabung} target="_blank" rel="noopener noreferrer" class="font-semibold text-biru-tua underline underline-offset-4 hover:text-biru">Gabung sekarang</a>}
+        </p>
+      </div>
+    </section>
+
+    <section class="bagian-polos !border-b-0" data-muncul>
+      <p class="label-bagian">Grup WhatsApp</p>
+      <div>
+        <h2 class="judul-bagian">Lowongan dan penyaluran lewat grup WA</h2>
+        <p class="max-w-xl text-[15px] leading-relaxed text-samar">
+          Info lowongan, jadwal seleksi, dan penyaluran kerja dibagikan di grup WhatsApp BKK yang dipegang admin sekolah.{" "}
+          {grup ? "Lulusan bisa langsung bergabung lewat tombol di bawah." : "Hubungi admin BKK untuk dimasukkan ke grup."}
+        </p>
+        {
+          gabung ? (
+            <div class="mt-5 flex flex-wrap items-center gap-3">
+              <a href={gabung} target="_blank" rel="noopener noreferrer" class={tombolEmas}>
+                <IkonWhatsapp ukuran={18} /> {grup ? "Gabung grup WhatsApp" : "Chat admin BKK"}
+              </a>
+              {grup && chatAdmin && (
+                <a href={chatAdmin} target="_blank" rel="noopener noreferrer" class={tombolPutih}>Chat admin BKK</a>
               )}
-            </>
+              {nomorAdmin && <span class="text-sm text-samar">Admin BKK: <strong class="text-teks tabular-nums">{nomorAdmin}</strong></span>}
+            </div>
+          ) : (
+            <p class="mt-4 text-[15px] text-samar">Nomor admin BKK belum diisi. Sementara, hubungi sekolah di <a href="/kontak" class="font-semibold text-biru-tua underline underline-offset-4">halaman Kontak</a>.</p>
           )
         }
       </div>
     </section>
-
-    <section class="bagian-polos" data-muncul>
-      <p class="label-bagian">Di BKK</p>
-      <div>
-        <h2 class="judul-bagian">Halaman lainnya</h2>
-        <PetaAnak induk="/bkk" />
-      </div>
-    </section>
-
-    {
-      wa && (
-        <section class="bagian-polos !border-b-0" data-muncul>
-          <p class="label-bagian">Bantuan</p>
-          <div>
-            <h2 class="judul-bagian">Ada pertanyaan tentang lowongan?</h2>
-            <p class="max-w-xl text-[15px] leading-relaxed text-samar">Petugas BKK membantu lulusan menyiapkan lamaran dan menjawab pertanyaan seputar penyaluran kerja.</p>
-            <a href={wa} target="_blank" rel="noopener noreferrer" class={tombolEmas + " mt-5"}>Hubungi petugas BKK</a>
-          </div>
-        </section>
-      )
-    }
   </div>
 </Publik>

@@ -21,7 +21,7 @@ import {
   MonitorSmartphone, Briefcase, Building, 
   Calendar, Activity, Newspaper, 
   Image as ImageIcon, MessageCircleQuestion, Mail, 
-  Settings, UserCog, GraduationCap, Handshake, ClipboardList,
+  Settings, UserCog, GraduationCap, Handshake,
   type LucideIcon 
 } from "lucide-react";
 
@@ -62,8 +62,6 @@ const KELOMPOK: {
   {
     judul: "Bursa Kerja Khusus",
     butir: [
-      { jalur: "/admin/bkk/lamaran", label: "Lamaran & Penyaluran", khususAdmin: false, ikon: ClipboardList },
-      { jalur: "/admin/bkk/lowongan", label: "Lowongan Kerja", khususAdmin: false, ikon: Briefcase },
       { jalur: "/admin/bkk/mitra", label: "Mitra BKK", khususAdmin: false, ikon: Handshake },
     ],
   },

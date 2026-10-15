@@ -5,9 +5,9 @@ import { data } from "../../lib/tembolok";
 import { tombolEmas, tombolPutih } from "../../lib/gaya";
 import { DOKUMEN } from "@/lib/dokumen";
 import { BATAS_UNGGAH } from "@/lib/unggah";
-import { angka, belumTerisi, kePoin, persen, rupiah, tanggalPanjang } from "@/lib/format";
+import { angka, belumTerisi, kePoin, persen, pesanTanyaPpdb, rupiah, tanggalPanjang, tautanWa } from "@/lib/format";
 import { kataKeadaanPpdb } from "@/lib/ppdb";
-import { IkonBendera, IkonFasilitas, IkonGuru, IkonPanahKanan, IkonSiswa } from "@/komponen/Ikon";
+import { IkonBendera, IkonFasilitas, IkonGuru, IkonPanahKanan, IkonSiswa, IkonWhatsapp } from "@/komponen/Ikon";
 import type { Jurusan } from "@/lib/tipe";
 
 /**
@@ -46,6 +46,9 @@ const [{ profil }, jurusan, biaya] = await Promise.all([
   data.biaya().catch(() => null),
 ]);
 const p = profil.pengaturan;
+// Nomor admin PPDB = pengaturan "whatsapp" (Nomor WhatsApp panitia).
+const nomorAdmin = (p.whatsapp ?? "").trim();
+const chatAdmin = tautanWa(nomorAdmin, pesanTanyaPpdb(p.nama_sekolah ?? ""));
 const ppdb = profil.ppdb;
 const kataPpdb = kataKeadaanPpdb(ppdb, p);
 const sisa = Math.max(ppdb.kuota - ppdb.terisi, 0);
@@ -321,11 +324,17 @@ const indeksBerjalan = jadwal.findIndex((t) => t.waktu && !t.waktu.lewat);
       <p class="label-bagian">Bantuan</p>
       <div>
         <h2 class="judul-bagian">Masih ada pertanyaan?</h2>
-        <p class="max-w-xl text-[15px] leading-relaxed text-samar">Jawaban seputar syarat, jadwal, dan biaya ada di Tanya Jawab. Bila belum terjawab, hubungi panitia.</p>
-        <div class="mt-5 flex flex-wrap gap-3">
+        <p class="max-w-xl text-[15px] leading-relaxed text-samar">Jawaban seputar syarat, jadwal, dan biaya ada di Tanya Jawab. Bila belum terjawab, hubungi admin PPDB.</p>
+        <div class="mt-5 flex flex-wrap items-center gap-3">
+          {chatAdmin && (
+            <a href={chatAdmin} target="_blank" rel="noopener noreferrer" class={tombolEmas}>
+              <IkonWhatsapp ukuran={18} /> Chat admin PPDB
+            </a>
+          )}
           <a href="/faq" class={tombolPutih}>Tanya Jawab PPDB</a>
           <a href="/kontak" class={tombolPutih}>Hubungi Panitia</a>
         </div>
+        {nomorAdmin && <p class="mt-4 text-sm text-samar">Admin PPDB: <strong class="text-teks tabular-nums">{nomorAdmin}</strong></p>}
       </div>
     </section>
   </div>

@@ -151,7 +151,7 @@ const halamanAdmin = [
   "", "masuk", "sandi", "berita", "biaya", "faq", "fasilitas", "galeri", "halaman", "jurusan",
   "kalender", "kegiatan", "laporan", "notifikasi", "pendaftar", "pendaftar/baru", "pengaturan",
   "pengguna", "pesan", "sekolah", "tanya-buntu", "tenaga",
-  "bkk/lamaran", "bkk/lowongan", "bkk/mitra",
+  "bkk/mitra",
 ];
 const data = JSON.parse(await readFile(join(process.env.DATA_DEMO), "utf8"));
 const idTerbesar = Math.max(0, ...data.admin["/api/admin/pendaftar"].data.map((p) => p.id));

@@ -119,8 +119,8 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
   {
     judul: "Bursa Kerja Khusus",
     keterangan:
-      "Naskah pembuka halaman BKK dan kontak petugasnya. Lowongan, mitra, dan lamaran dikelola di menu Bursa Kerja Khusus.",
-    kunci: ["bkk_keterangan", "bkk_kontak"],
+      "Profil singkat halaman BKK, nomor petugas yang memegang grup WhatsApp, dan tautan grupnya. Daftar perusahaan mitra dikelola di menu Mitra BKK.",
+    kunci: ["bkk_keterangan", "bkk_nomor_disnaker", "bkk_kontak", "bkk_grup_wa"],
   },
   {
     judul: "Notifikasi & Daftar Ulang",
@@ -252,8 +252,10 @@ function labelDari(kunci: string): string {
     nama_singkat: "Nama singkat",
     nama_sekolah: "Nama sekolah (ringkas)",
     nama_lengkap_sekolah: "Nama resmi lengkap",
-    bkk_keterangan: "Pengantar halaman BKK",
-    bkk_kontak: "Nomor WhatsApp/telepon petugas BKK",
+    bkk_keterangan: "Profil singkat BKK",
+    bkk_kontak: "Nomor WhatsApp petugas BKK (pemegang grup)",
+    bkk_nomor_disnaker: "Nomor tanda daftar Disnaker",
+    bkk_grup_wa: "Tautan undangan grup WhatsApp BKK",
     foto_depan: "Foto halaman depan",
     foto_depan_2: "Foto sorotan kedua",
     foto_depan_3: "Foto sorotan ketiga",

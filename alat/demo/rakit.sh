@@ -6,8 +6,8 @@
 # Langkahnya:
 #   1. Menyalin basis data sma_imtek ke basis data sekali pakai
 #      (sma_imtek_demo). Basis data aslinya hanya dibaca oleh pg_dump.
-#   2. Mengisi contoh yang belum ada di sana: pengguna panitia dan
-#      Bursa Kerja Khusus, serta sandi akun demo
+#   2. Mengisi contoh yang belum ada di sana: pengguna panitia, naskah
+#      contoh, dan kegiatan, serta sandi akun demo
 #      (admin/admin123, panitia/panitia123). Foto contoh yang rusak diganti
 #      gambar pengganti pada salinan folder unggahan.
 #   3. Menjalankan salinan backend, Astro, dan Next di porta lain (8190, 3100,
