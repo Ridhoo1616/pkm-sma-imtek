@@ -73,7 +73,24 @@ type dataBukti struct {
 
 func (a *Aplikasi) ambilDataBukti(kolom string, nilai ...any) (dataBukti, error) {
 	var d dataBukti
-	var berkas [6]string
+	// Kolom berkas diambil dari daftar yang sama dengan formulir, jadi bukti
+	// pendaftaran tidak pernah menyimpang dari dokumen yang memang diminta.
+	berkas := make([]string, len(berkasPendaftar))
+	kolomBerkas := make([]string, len(berkasPendaftar))
+	tujuanBerkas := make([]any, len(berkasPendaftar))
+	for i, b := range berkasPendaftar {
+		kolomBerkas[i] = "COALESCE(p." + b.Kolom + ", '')"
+		tujuanBerkas[i] = &berkas[i]
+	}
+
+	tujuan := append([]any{
+		&d.NoRegistrasi, &d.TahunAjaran, &d.Jalur, &d.NamaJurusan, &d.Status, &d.Dibuat,
+		&d.NamaLengkap, &d.NISN, &d.NIK, &d.JenisKelamin,
+		&d.TempatLahir, &d.TanggalLahir, &d.Agama,
+		&d.Alamat, &d.NoHP, &d.Email,
+		&d.AsalSekolah, &d.NilaiRata2,
+		&d.NamaAyah, &d.NamaIbu, &d.NoHPOrtu, &d.SumberInfo,
+	}, tujuanBerkas...)
 
 	err := a.db.QueryRow(`
 		SELECT p.no_registrasi, p.tahun_ajaran, p.jalur, COALESCE(j.nama, ''), p.status,
@@ -84,29 +101,20 @@ func (a *Aplikasi) ambilDataBukti(kolom string, nilai ...any) (dataBukti, error)
 		       p.asal_sekolah, p.nilai_rata2,
 		       p.nama_ayah, p.nama_ibu, COALESCE(p.no_hp_ortu, ''),
 		       COALESCE(p.sumber_informasi, ''),
-		       COALESCE(p.file_foto, ''), COALESCE(p.file_ijazah, ''), COALESCE(p.file_kk, ''),
-		       COALESCE(p.file_akta, ''), COALESCE(p.file_raport, ''), COALESCE(p.file_prestasi, '')
+		       `+strings.Join(kolomBerkas, ", ")+`
 		  FROM pendaftar p
 		  LEFT JOIN jurusan j ON j.id = p.jurusan_id
-		 WHERE `+kolom, nilai...).Scan(
-		&d.NoRegistrasi, &d.TahunAjaran, &d.Jalur, &d.NamaJurusan, &d.Status, &d.Dibuat,
-		&d.NamaLengkap, &d.NISN, &d.NIK, &d.JenisKelamin,
-		&d.TempatLahir, &d.TanggalLahir, &d.Agama,
-		&d.Alamat, &d.NoHP, &d.Email,
-		&d.AsalSekolah, &d.NilaiRata2,
-		&d.NamaAyah, &d.NamaIbu, &d.NoHPOrtu, &d.SumberInfo,
-		&berkas[0], &berkas[1], &berkas[2], &berkas[3], &berkas[4], &berkas[5])
+		 WHERE `+kolom, nilai...).Scan(tujuan...)
+
 	if err != nil {
 		return d, err
 	}
 
-	label := []string{"Foto 3x4", "Ijazah / SKL", "Kartu Keluarga",
-		"Akta Kelahiran", "Rapor", "Sertifikat Prestasi"}
 	for i, nama := range berkas {
 		if nama != "" {
-			d.BerkasLengkap = append(d.BerkasLengkap, label[i])
-		} else {
-			d.BerkasKurang = append(d.BerkasKurang, label[i])
+			d.BerkasLengkap = append(d.BerkasLengkap, berkasPendaftar[i].Label)
+		} else if berkasPendaftar[i].Wajib {
+			d.BerkasKurang = append(d.BerkasKurang, berkasPendaftar[i].Label)
 		}
 	}
 	return d, nil

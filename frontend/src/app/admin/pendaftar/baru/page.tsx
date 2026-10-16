@@ -16,7 +16,15 @@ import {
   RingkasanGalat,
 } from "@/komponen/Medan";
 import { PilihSekolah } from "@/komponen/PilihSekolah";
-import { AGAMA, JENIS_KELAMIN, PENDIDIKAN, PENGHASILAN } from "@/lib/pilihan";
+import { BagianOrangTua } from "@/komponen/BagianOrangTua";
+import {
+  AGAMA,
+  JENIS_KELAMIN,
+  PENGHASILAN,
+  UKURAN_BAJU,
+  STATUS_AYAH,
+  STATUS_IBU,
+} from "@/lib/pilihan";
 
 /**
  * Menambah pendaftar dari panel.
@@ -65,9 +73,12 @@ const KOSONG = {
   alamat_sekolah: "",
   tahun_lulus: "",
   nilai_rata2: "",
+  ukuran_baju: "",
+  status_ayah: "",
   nama_ayah: "",
   pekerjaan_ayah: "",
   pendidikan_ayah: "",
+  status_ibu: "",
   nama_ibu: "",
   pekerjaan_ibu: "",
   pendidikan_ibu: "",
@@ -159,7 +170,7 @@ export default function HalamanTambahPendaftar() {
       <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-amber-900">
         <strong>Dokumennya tidak diunggah lewat halaman ini.</strong> Pendaftar
         yang dimasukkan dari sini tidak punya foto, ijazah, kartu keluarga,
-        akta, maupun rapor di dalam sistem, jadi verifikasinya harus dicocokkan
+        akta, maupun KTP orang tua di dalam sistem, jadi verifikasinya harus dicocokkan
         dari berkas kertas yang Anda terima. Nama Anda dicatat sebagai yang
         memasukkan data ini.
         {profil && !profil.ppdb.dibuka && (
@@ -280,6 +291,15 @@ export default function HalamanTambahPendaftar() {
               nilai={isi.jumlah_saudara}
               ubah={ubah("jumlah_saudara")}
               galat={galat.jumlah_saudara}
+            />
+            <Pilihan
+              nama="ukuran_baju"
+              label="Ukuran baju"
+              wajib
+              nilai={isi.ukuran_baju}
+              ubah={ubah("ukuran_baju")}
+              galat={galat.ukuran_baju}
+              opsi={UKURAN_BAJU}
             />
           </div>
         </section>
@@ -412,56 +432,31 @@ export default function HalamanTambahPendaftar() {
 
         <section className="kartu space-y-5 p-6">
           <h2 className="text-base">Orang Tua / Wali</h2>
+          <BagianOrangTua
+            peran="ayah"
+            opsiStatus={STATUS_AYAH}
+            isi={isi}
+            ubah={(k) => ubah(k as keyof typeof KOSONG)}
+            galat={galat}
+          />
+          <BagianOrangTua
+            peran="ibu"
+            opsiStatus={STATUS_IBU}
+            isi={isi}
+            ubah={(k) => ubah(k as keyof typeof KOSONG)}
+            galat={galat}
+          />
           <div className="grid gap-5 sm:grid-cols-3">
             <Teks
-              nama="nama_ayah"
-              label="Nama ayah"
+              nama="no_hp_ortu"
+              label="No. HP orang tua / wali"
+              tipe="tel"
               wajib
-              maks={120}
-              nilai={isi.nama_ayah}
-              ubah={ubah("nama_ayah")}
-              galat={galat.nama_ayah}
-            />
-            <Teks
-              nama="pekerjaan_ayah"
-              label="Pekerjaan ayah"
-              maks={80}
-              nilai={isi.pekerjaan_ayah}
-              ubah={ubah("pekerjaan_ayah")}
-              galat={galat.pekerjaan_ayah}
-            />
-            <Pilihan
-              nama="pendidikan_ayah"
-              label="Pendidikan ayah"
-              nilai={isi.pendidikan_ayah}
-              ubah={ubah("pendidikan_ayah")}
-              galat={galat.pendidikan_ayah}
-              opsi={PENDIDIKAN}
-            />
-            <Teks
-              nama="nama_ibu"
-              label="Nama ibu"
-              wajib
-              maks={120}
-              nilai={isi.nama_ibu}
-              ubah={ubah("nama_ibu")}
-              galat={galat.nama_ibu}
-            />
-            <Teks
-              nama="pekerjaan_ibu"
-              label="Pekerjaan ibu"
-              maks={80}
-              nilai={isi.pekerjaan_ibu}
-              ubah={ubah("pekerjaan_ibu")}
-              galat={galat.pekerjaan_ibu}
-            />
-            <Pilihan
-              nama="pendidikan_ibu"
-              label="Pendidikan ibu"
-              nilai={isi.pendidikan_ibu}
-              ubah={ubah("pendidikan_ibu")}
-              galat={galat.pendidikan_ibu}
-              opsi={PENDIDIKAN}
+              maks={25}
+              nilai={isi.no_hp_ortu}
+              ubah={ubah("no_hp_ortu")}
+              galat={galat.no_hp_ortu}
+              bantuan="Dipakai lebih dulu untuk notifikasi WhatsApp."
             />
             <Pilihan
               nama="penghasilan"
@@ -472,23 +467,19 @@ export default function HalamanTambahPendaftar() {
               opsi={PENGHASILAN}
             />
             <Teks
-              nama="no_hp_ortu"
-              label="No. HP orang tua"
-              tipe="tel"
-              maks={25}
-              nilai={isi.no_hp_ortu}
-              ubah={ubah("no_hp_ortu")}
-              galat={galat.no_hp_ortu}
-              bantuan="Dipakai lebih dulu untuk notifikasi WhatsApp."
-            />
-            <Teks
               nama="nama_wali"
               label="Nama wali"
+              wajib={
+                isi.status_ayah !== "" &&
+                isi.status_ibu !== "" &&
+                isi.status_ayah !== "Ada" &&
+                isi.status_ibu !== "Ada"
+              }
               maks={120}
               nilai={isi.nama_wali}
               ubah={ubah("nama_wali")}
               galat={galat.nama_wali}
-              bantuan="Bila tidak tinggal bersama orang tua."
+              bantuan="Wajib bila ayah dan ibu tidak ada."
             />
           </div>
         </section>

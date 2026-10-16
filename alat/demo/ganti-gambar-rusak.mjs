@@ -27,8 +27,9 @@ const { token } = await fetch(API + "/api/masuk", {
 
 // Berkas pendaftar: foto dan dokumen hasil pindaian.
 const LABEL = {
-  file_foto: "Pas foto", file_ijazah: "Ijazah / SKL", file_kk: "Kartu Keluarga",
-  file_akta: "Akta Kelahiran", file_raport: "Rapor", file_prestasi: "Sertifikat prestasi",
+  file_foto: "Pas foto 3x4", file_foto_2x3: "Pas foto 2x3", file_skl: "SKL", file_ijazah: "Ijazah",
+  file_akta: "Akta Kelahiran", file_kk: "Kartu Keluarga", file_ktp_ortu: "KTP orang tua",
+  file_raport: "Rapor", file_prestasi: "Sertifikat prestasi",
 };
 const berkasPendaftar = [];
 for (const p of (await ambil("/api/admin/pendaftar?per_halaman=200", token)).data) {

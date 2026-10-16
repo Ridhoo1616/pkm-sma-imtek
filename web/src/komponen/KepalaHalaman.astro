@@ -16,6 +16,10 @@ import type { Pengaturan } from "@/lib/tipe";
  *
  * Di tepi bawahnya menumpang bilah kaca berisi halaman sekelompok, supaya
  * pengunjung dapat berpindah ke halaman sebelah tanpa kembali ke menu atas.
+ * Pil-pilnya MEMBUNGKUS ke baris berikutnya, tidak digeser mendatar: pada
+ * Profil Sekolah ada delapan pil, dan orang awam (juga di ponsel) tidak
+ * menyadari bilah yang bisa digeser, sehingga halaman di ujung kanan tidak
+ * pernah ditemukan.
  * Halaman yang sedang dibuka ditandai dan tidak dibuat tautan.
  */
 interface Props {
@@ -44,6 +48,10 @@ const anak = kelompok?.anak ?? [];
 // tanpa pemeriksaan ini bilahnya memuat dua pil menuju alamat yang sama.
 const perluRingkasan = !anak.some((a) => a.jalur === induk);
 const sekarang = anak.find((a) => a.jalur === jalur);
+// Bentuk dasar satu tombol sub menu. Tinggi dan lebarnya mengisi selnya
+// supaya deretan tombol rata, dan tulisan panjang boleh turun ke baris kedua.
+const tombolSub =
+  "flex w-full items-center justify-center rounded-xl px-3 py-2.5 text-center text-sm leading-snug font-semibold ring-1 ring-inset transition sm:w-auto sm:px-4";
 const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
 ---
 
@@ -117,20 +125,22 @@ const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
 {
   !langkah && anak.length > 0 && (
     <nav aria-label={`Halaman lain dalam ${kelompok?.label}`} class="wadah relative z-10 -mt-8">
-      <ul class="bilah-anak flex snap-x gap-1.5 overflow-x-auto rounded-2xl bg-white p-1.5 shadow-[0_14px_40px_rgb(10_28_49/0.14)] ring-1 ring-garis" data-bilah-anak>
-        {perluRingkasan && <li class="shrink-0 snap-start">
+      {/* Kisi dua kolom di ponsel, membungkus di layar lebar. Tiap tombol
+          bergaris tipis supaya batasnya jelas dan tidak tampak menumpuk. */}
+      <ul class="grid grid-cols-2 gap-2 rounded-2xl bg-white p-2.5 shadow-[0_14px_40px_rgb(10_28_49/0.14)] ring-1 ring-garis sm:flex sm:flex-wrap">
+        {perluRingkasan && <li class="flex">
           {jalur === induk ? (
-            <span aria-current="page" class="block rounded-xl bg-biru-tua px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-white">Ringkasan</span>
+            <span aria-current="page" class={tombolSub + " bg-biru-tua text-white ring-biru-tua"}>Ringkasan</span>
           ) : (
-            <a href={induk} data-magnet class="block rounded-xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-teks transition hover:bg-biru-muda hover:text-biru">Ringkasan</a>
+            <a href={induk} data-magnet class={tombolSub + " text-teks ring-garis hover:bg-biru-muda hover:text-biru hover:ring-biru/40"}>Ringkasan</a>
           )}
         </li>}
         {anak.map((a) => (
-          <li class="shrink-0 snap-start">
+          <li class="flex">
             {a.jalur === jalur ? (
-              <span aria-current="page" class="block rounded-xl bg-biru-tua px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-white">{a.label}</span>
+              <span aria-current="page" class={tombolSub + " bg-biru-tua text-white ring-biru-tua"}>{a.label}</span>
             ) : (
-              <a href={a.jalur} data-magnet class="block rounded-xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-teks transition hover:bg-biru-muda hover:text-biru">{a.label}</a>
+              <a href={a.jalur} data-magnet class={tombolSub + " text-teks ring-garis hover:bg-biru-muda hover:text-biru hover:ring-biru/40"}>{a.label}</a>
             )}
           </li>
         ))}
@@ -138,17 +148,3 @@ const adaGedung = Boolean(p.foto_depan && !belumTerisi(p.foto_depan));
     </nav>
   )
 }
-
-<script>
-  // Bilah digeser ke butir yang sedang dibuka bila butir itu berada di luar
-  // pandangan — di ponsel, "Tenaga Pendidik" ada jauh di ujung kanan.
-  const bilah = document.querySelector<HTMLElement>("[data-bilah-anak]");
-  const aktif = bilah?.querySelector<HTMLElement>("[aria-current]");
-  if (bilah && aktif) {
-    const k = bilah.getBoundingClientRect();
-    const b = aktif.getBoundingClientRect();
-    if (b.left < k.left || b.right > k.right) {
-      bilah.scrollLeft += b.left - k.left - (k.width - b.width) / 2;
-    }
-  }
-</script>

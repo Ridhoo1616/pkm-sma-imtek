@@ -109,6 +109,9 @@ type Pendaftar struct {
 	AlamatSekolah    string   `json:"alamat_sekolah"`
 	TahunLulus       string   `json:"tahun_lulus"`
 	NilaiRata2       *float64 `json:"nilai_rata2"`
+	UkuranBaju       string   `json:"ukuran_baju"`
+	StatusAyah       string   `json:"status_ayah"`
+	StatusIbu        string   `json:"status_ibu"`
 	NamaAyah         string   `json:"nama_ayah"`
 	PekerjaanAyah    string   `json:"pekerjaan_ayah"`
 	PendidikanAyah   string   `json:"pendidikan_ayah"`
@@ -119,6 +122,9 @@ type Pendaftar struct {
 	NoHPOrtu         string   `json:"no_hp_ortu"`
 	NamaWali         string   `json:"nama_wali"`
 	FileFoto         string   `json:"file_foto"`
+	FileFoto2x3      string   `json:"file_foto_2x3"`
+	FileSKL          string   `json:"file_skl"`
+	FileKTPOrtu      string   `json:"file_ktp_ortu"`
 	FileIjazah       string   `json:"file_ijazah"`
 	FileKK           string   `json:"file_kk"`
 	FileAkta         string   `json:"file_akta"`
@@ -186,6 +192,20 @@ var LabelSumberInformasi = map[string]string{
 }
 
 var JenisKelamin = []string{"L", "P"}
+
+// UkuranBaju untuk seragam. Urutannya dari kecil ke besar.
+var UkuranBaju = []string{"S", "M", "L", "XL", "2XL", "3XL"}
+
+// Status orang tua. Ayah dan ibu punya sebutan almarhum yang berbeda, jadi
+// daftarnya dipisah. "Tidak ada" untuk orang tua yang tidak diketahui atau
+// tidak dapat dicatat; yang wafat memakai pilihan almarhum(ah).
+var (
+	StatusAyah = []string{"Ada", "Almarhum", "Tidak ada"}
+	StatusIbu  = []string{"Ada", "Almarhumah", "Tidak ada"}
+)
+
+// PendidikanOrtu sama dengan daftar pada frontend/src/lib/pilihan.ts.
+var PendidikanOrtu = []string{"SD", "SMP", "SMA/SMK", "D1-D3", "S1", "S2", "S3", "Tidak Sekolah"}
 
 var Agama = []string{"Islam", "Kristen Protestan", "Katolik", "Hindu", "Buddha", "Konghucu", "Lainnya"}
 

@@ -646,6 +646,8 @@ var gambarPengaturan = map[string]string{
 	"foto_depan_4":        "Foto sorotan keempat",
 	"foto_kepsek":         "Foto kepala sekolah",
 	"struktur_organisasi": "Bagan struktur organisasi",
+	"foto_data_sekolah":   "Foto data sekolah",
+	"foto_visi_misi":      "Foto visi dan misi",
 }
 
 // tanganiUnggahGambarPengaturan menyimpan satu gambar ke folder profil dan

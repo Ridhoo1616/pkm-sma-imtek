@@ -15,12 +15,16 @@ import {
   RingkasanGalat,
 } from "@/komponen/Medan";
 import { PilihSekolah } from "@/komponen/PilihSekolah";
+import { BagianOrangTua } from "@/komponen/BagianOrangTua";
 import { KemajuanKirim } from "@/komponen/Memuat";
 import {
   AGAMA,
   JENIS_KELAMIN,
   PENDIDIKAN,
   PENGHASILAN,
+  UKURAN_BAJU,
+  STATUS_AYAH,
+  STATUS_IBU,
   LABEL_SUMBER,
   KETERANGAN_JALUR,
 } from "@/lib/pilihan";
@@ -89,9 +93,12 @@ const ISIAN_AWAL = {
   alamat_sekolah: "",
   tahun_lulus: "",
   nilai_rata2: "",
+  ukuran_baju: "",
+  status_ayah: "",
   nama_ayah: "",
   pekerjaan_ayah: "",
   pendidikan_ayah: "",
+  status_ibu: "",
   nama_ibu: "",
   pekerjaan_ibu: "",
   pendidikan_ibu: "",
@@ -105,19 +112,21 @@ const ISIAN_AWAL = {
 type Isian = typeof ISIAN_AWAL;
 type KunciBerkas =
   | "file_foto"
+  | "file_foto_2x3"
+  | "file_skl"
   | "file_ijazah"
-  | "file_kk"
   | "file_akta"
-  | "file_raport"
-  | "file_prestasi";
+  | "file_kk"
+  | "file_ktp_ortu";
 
 const BERKAS_AWAL: Record<KunciBerkas, File | null> = {
   file_foto: null,
+  file_foto_2x3: null,
+  file_skl: null,
   file_ijazah: null,
-  file_kk: null,
   file_akta: null,
-  file_raport: null,
-  file_prestasi: null,
+  file_kk: null,
+  file_ktp_ortu: null,
 };
 
 /**
@@ -141,6 +150,7 @@ const LANGKAH = [
       "agama",
       "anak_ke",
       "jumlah_saudara",
+      "ukuran_baju",
     ],
   },
   {
@@ -166,9 +176,11 @@ const LANGKAH = [
       "alamat_sekolah",
       "tahun_lulus",
       "nilai_rata2",
+      "status_ayah",
       "nama_ayah",
       "pekerjaan_ayah",
       "pendidikan_ayah",
+      "status_ibu",
       "nama_ibu",
       "pekerjaan_ibu",
       "pendidikan_ibu",
@@ -182,11 +194,12 @@ const LANGKAH = [
     ringkas: "Dokumen",
     kolom: [
       "file_foto",
+      "file_foto_2x3",
+      "file_skl",
       "file_ijazah",
-      "file_kk",
       "file_akta",
-      "file_raport",
-      "file_prestasi",
+      "file_kk",
+      "file_ktp_ortu",
     ],
   },
   {
@@ -546,6 +559,16 @@ export default function FormulirPpdb({
                         galat={galat.jumlah_saudara}
                       />
                     </div>
+                    <Pilihan
+                      nama="ukuran_baju"
+                      label="Ukuran baju"
+                      wajib
+                      nilai={isi.ukuran_baju}
+                      ubah={ubah("ukuran_baju")}
+                      opsi={UKURAN_BAJU}
+                      galat={galat.ukuran_baju}
+                      bantuan="Untuk seragam sekolah."
+                    />
                   </div>
                 </div>
               )}
@@ -683,61 +706,44 @@ export default function FormulirPpdb({
                     />
                   </div>
 
-                  <div className="space-y-5 border-t border-garis pt-7">
-                    <h3 className="text-base">Data Orang Tua / Wali</h3>
-                    <div className="grid gap-5 sm:grid-cols-3">
-                      <Teks
-                        nama="nama_ayah"
-                        label="Nama ayah"
-                        wajib
-                        maks={120}
-                        nilai={isi.nama_ayah}
-                        ubah={ubah("nama_ayah")}
-                        galat={galat.nama_ayah}
-                      />
-                      <Teks
-                        nama="pekerjaan_ayah"
-                        label="Pekerjaan ayah"
-                        maks={80}
-                        nilai={isi.pekerjaan_ayah}
-                        ubah={ubah("pekerjaan_ayah")}
-                        galat={galat.pekerjaan_ayah}
-                      />
-                      <Pilihan
-                        nama="pendidikan_ayah"
-                        label="Pendidikan ayah"
-                        nilai={isi.pendidikan_ayah}
-                        ubah={ubah("pendidikan_ayah")}
-                        opsi={PENDIDIKAN}
-                        galat={galat.pendidikan_ayah}
-                      />
-                      <Teks
-                        nama="nama_ibu"
-                        label="Nama ibu"
-                        wajib
-                        maks={120}
-                        nilai={isi.nama_ibu}
-                        ubah={ubah("nama_ibu")}
-                        galat={galat.nama_ibu}
-                      />
-                      <Teks
-                        nama="pekerjaan_ibu"
-                        label="Pekerjaan ibu"
-                        maks={80}
-                        nilai={isi.pekerjaan_ibu}
-                        ubah={ubah("pekerjaan_ibu")}
-                        galat={galat.pekerjaan_ibu}
-                      />
-                      <Pilihan
-                        nama="pendidikan_ibu"
-                        label="Pendidikan ibu"
-                        nilai={isi.pendidikan_ibu}
-                        ubah={ubah("pendidikan_ibu")}
-                        opsi={PENDIDIKAN}
-                        galat={galat.pendidikan_ibu}
-                      />
+                  <div className="space-y-6 border-t border-garis pt-7">
+                    <div>
+                      <h3 className="text-base">Data Orang Tua / Wali</h3>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Pilih status ayah dan ibu lebih dulu. Bila sudah
+                        meninggal, pilih <strong>Alm.</strong> atau{" "}
+                        <strong>Almh.</strong> dan tetap isi datanya; data ini
+                        dipakai sekolah untuk mencatat anak yatim.
+                      </p>
                     </div>
+
+                    <BagianOrangTua
+                      peran="ayah"
+                      opsiStatus={STATUS_AYAH}
+                      isi={isi}
+                      ubah={(k) => ubah(k as keyof Isian)}
+                      galat={galat}
+                    />
+                    <BagianOrangTua
+                      peran="ibu"
+                      opsiStatus={STATUS_IBU}
+                      isi={isi}
+                      ubah={(k) => ubah(k as keyof Isian)}
+                      galat={galat}
+                    />
+
                     <div className="grid gap-5 sm:grid-cols-3">
+                      <Teks
+                        nama="no_hp_ortu"
+                        label="No. HP orang tua / wali"
+                        tipe="tel"
+                        wajib
+                        maks={25}
+                        nilai={isi.no_hp_ortu}
+                        ubah={ubah("no_hp_ortu")}
+                        galat={galat.no_hp_ortu}
+                        bantuan="Nomor yang bisa dihubungi sekolah."
+                      />
                       <Pilihan
                         nama="penghasilan"
                         label="Penghasilan orang tua"
@@ -747,22 +753,19 @@ export default function FormulirPpdb({
                         galat={galat.penghasilan}
                       />
                       <Teks
-                        nama="no_hp_ortu"
-                        label="No. HP orang tua"
-                        tipe="tel"
-                        maks={25}
-                        nilai={isi.no_hp_ortu}
-                        ubah={ubah("no_hp_ortu")}
-                        galat={galat.no_hp_ortu}
-                      />
-                      <Teks
                         nama="nama_wali"
                         label="Nama wali"
+                        wajib={
+                          isi.status_ayah !== "" &&
+                          isi.status_ibu !== "" &&
+                          isi.status_ayah !== "Ada" &&
+                          isi.status_ibu !== "Ada"
+                        }
                         maks={120}
                         nilai={isi.nama_wali}
                         ubah={ubah("nama_wali")}
                         galat={galat.nama_wali}
-                        bantuan="Isi bila tidak tinggal bersama orang tua."
+                        bantuan="Wajib bila ayah dan ibu tidak ada; selain itu isi bila tidak tinggal bersama orang tua."
                       />
                     </div>
                   </div>
@@ -774,10 +777,10 @@ export default function FormulirPpdb({
                 <div className="space-y-5">
                   <p className="rounded-lg bg-biru-muda px-5 py-4 text-sm leading-relaxed text-biru-tua">
                     Setiap berkas maksimal <strong>{BATAS_UNGGAH}</strong>.
-                    Foto berupa JPG atau PNG; dokumen lain boleh JPG, PNG,
-                    atau PDF.
-                    Pastikan tulisan pada dokumen terbaca jelas agar verifikasi
-                    tidak tertunda.
+                    Foto berupa JPG atau PNG, <strong>ijazah berupa PDF</strong>
+                    , dan dokumen lain boleh JPG, PNG, atau PDF. Pastikan
+                    tulisan pada dokumen terbaca jelas agar verifikasi tidak
+                    tertunda. Ketujuh dokumen ini wajib diunggah.
                   </p>
 
                   <div className="grid gap-5 sm:grid-cols-2">
@@ -791,18 +794,29 @@ export default function FormulirPpdb({
                       bantuan="Latar belakang rapi, wajah terlihat jelas."
                     />
                     <Berkas
-                      nama="file_ijazah"
-                      label="Ijazah / Surat Keterangan Lulus"
+                      nama="file_foto_2x3"
+                      label="Foto 2x3"
                       wajib
-                      ubah={ubahBerkas("file_ijazah")}
-                      galat={galat.file_ijazah}
+                      terima="image/jpeg,image/png"
+                      ubah={ubahBerkas("file_foto_2x3")}
+                      galat={galat.file_foto_2x3}
+                      bantuan="Foto yang sama boleh, dengan ukuran 2x3."
                     />
                     <Berkas
-                      nama="file_kk"
-                      label="Kartu Keluarga"
+                      nama="file_skl"
+                      label="Surat Keterangan Lulus (SKL)"
                       wajib
-                      ubah={ubahBerkas("file_kk")}
-                      galat={galat.file_kk}
+                      ubah={ubahBerkas("file_skl")}
+                      galat={galat.file_skl}
+                    />
+                    <Berkas
+                      nama="file_ijazah"
+                      label="Ijazah (PDF)"
+                      wajib
+                      terima="application/pdf"
+                      ubah={ubahBerkas("file_ijazah")}
+                      galat={galat.file_ijazah}
+                      bantuan="Hanya berkas PDF."
                     />
                     <Berkas
                       nama="file_akta"
@@ -812,22 +826,19 @@ export default function FormulirPpdb({
                       galat={galat.file_akta}
                     />
                     <Berkas
-                      nama="file_raport"
-                      label="Rapor semester terakhir"
+                      nama="file_kk"
+                      label="Kartu Keluarga"
                       wajib
-                      ubah={ubahBerkas("file_raport")}
-                      galat={galat.file_raport}
+                      ubah={ubahBerkas("file_kk")}
+                      galat={galat.file_kk}
                     />
                     <Berkas
-                      nama="file_prestasi"
-                      label="Sertifikat prestasi"
-                      ubah={ubahBerkas("file_prestasi")}
-                      galat={galat.file_prestasi}
-                      bantuan={
-                        isi.jalur === "Prestasi"
-                          ? "Wajib karena Anda memilih jalur Prestasi."
-                          : "Isi bila memiliki sertifikat prestasi."
-                      }
+                      nama="file_ktp_ortu"
+                      label="KTP Orang Tua"
+                      wajib
+                      ubah={ubahBerkas("file_ktp_ortu")}
+                      galat={galat.file_ktp_ortu}
+                      bantuan="KTP ayah atau ibu (atau wali bila keduanya tidak ada)."
                     />
                   </div>
                 </div>

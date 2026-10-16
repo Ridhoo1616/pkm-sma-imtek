@@ -62,6 +62,15 @@ function Blok({
  * sebagai src gambar. Berkasnya diambil lewat fetch berotorisasi lalu
  * ditampilkan dari alamat objek sementara di peramban.
  */
+/**
+ * Status orang tua untuk panel. Pendaftar lama yang statusnya kosong tidak
+ * pernah ditanya, jadi tampil sebagai tanda hubung, bukan "Ada".
+ */
+function statusOrtu(status: string, panjang: string, singkat: string): string {
+  if (status === panjang) return `${singkat} (${panjang.toLowerCase()})`;
+  return status;
+}
+
 function TautanBerkas({
   label,
   subfolder,
@@ -250,6 +259,7 @@ export default function HalamanDetailPendaftar() {
               { k: "Agama", v: p.agama },
               { k: "Anak ke-", v: p.anak_ke },
               { k: "Jumlah saudara", v: p.jumlah_saudara },
+              { k: "Ukuran baju", v: p.ukuran_baju },
             ]}
           />
 
@@ -291,14 +301,16 @@ export default function HalamanDetailPendaftar() {
           <Blok
             judul="Orang Tua / Wali"
             butir={[
+              { k: "Status ayah", v: statusOrtu(p.status_ayah, "Almarhum", "Alm.") },
               { k: "Nama ayah", v: p.nama_ayah },
               { k: "Pekerjaan ayah", v: p.pekerjaan_ayah },
-              { k: "Pendidikan ayah", v: p.pendidikan_ayah },
+              { k: "Pendidikan akhir ayah", v: p.pendidikan_ayah },
+              { k: "Status ibu", v: statusOrtu(p.status_ibu, "Almarhumah", "Almh.") },
               { k: "Nama ibu", v: p.nama_ibu },
               { k: "Pekerjaan ibu", v: p.pekerjaan_ibu },
-              { k: "Pendidikan ibu", v: p.pendidikan_ibu },
+              { k: "Pendidikan akhir ibu", v: p.pendidikan_ibu },
               { k: "Penghasilan orang tua", v: p.penghasilan },
-              { k: "No. HP orang tua", v: p.no_hp_ortu },
+              { k: "No. HP orang tua / wali", v: p.no_hp_ortu },
               { k: "Nama wali", v: p.nama_wali },
             ]}
           />
@@ -386,10 +398,21 @@ export default function HalamanDetailPendaftar() {
                 ke luar panitia.
               </p>
               <TautanBerkas label="Foto 3x4" subfolder="pendaftar" nama={p.file_foto} />
+              <TautanBerkas label="Foto 2x3" subfolder="pendaftar" nama={p.file_foto_2x3} />
               <TautanBerkas
-                label="Ijazah / SKL"
+                label="Surat Keterangan Lulus (SKL)"
+                subfolder="pendaftar"
+                nama={p.file_skl}
+              />
+              <TautanBerkas
+                label="Ijazah (PDF)"
                 subfolder="pendaftar"
                 nama={p.file_ijazah}
+              />
+              <TautanBerkas
+                label="Akta Kelahiran"
+                subfolder="pendaftar"
+                nama={p.file_akta}
               />
               <TautanBerkas
                 label="Kartu Keluarga"
@@ -397,16 +420,23 @@ export default function HalamanDetailPendaftar() {
                 nama={p.file_kk}
               />
               <TautanBerkas
-                label="Akta Kelahiran"
+                label="KTP Orang Tua"
                 subfolder="pendaftar"
-                nama={p.file_akta}
+                nama={p.file_ktp_ortu}
               />
-              <TautanBerkas label="Rapor" subfolder="pendaftar" nama={p.file_raport} />
-              <TautanBerkas
-                label="Sertifikat Prestasi"
-                subfolder="pendaftar"
-                nama={p.file_prestasi}
-              />
+              {/* Rapor dan sertifikat tidak lagi diminta formulir (revisi
+                  sekolah Oktober 2026). Pendaftar lama yang sudah
+                  mengunggahnya tetap bisa dibuka di sini. */}
+              {p.file_raport && (
+                <TautanBerkas label="Rapor" subfolder="pendaftar" nama={p.file_raport} />
+              )}
+              {p.file_prestasi && (
+                <TautanBerkas
+                  label="Sertifikat Prestasi"
+                  subfolder="pendaftar"
+                  nama={p.file_prestasi}
+                />
+              )}
             </div>
           </section>
 
@@ -442,8 +472,8 @@ export default function HalamanDetailPendaftar() {
               dihapus dari basis data.
             </p>
             <p>
-              Seluruh dokumen yang diunggah, yaitu foto, ijazah, Kartu Keluarga,
-              akta kelahiran, rapor, dan sertifikat, juga akan dihapus dari
+              Seluruh dokumen yang diunggah, yaitu foto, SKL, ijazah, akta kelahiran,
+              Kartu Keluarga, dan KTP orang tua, juga akan dihapus dari
               server dan tidak dapat dipulihkan.
             </p>
             <p className="font-semibold">

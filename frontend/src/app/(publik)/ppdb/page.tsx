@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 const KETERANGAN_JALUR: Record<string, string> = {
   Reguler: "Jalur umum berdasarkan nilai rapor dan kelengkapan berkas.",
   Prestasi:
-    "Untuk calon peserta didik dengan prestasi akademik maupun non-akademik. Sertifikat wajib diunggah.",
+    "Untuk calon peserta didik dengan prestasi akademik maupun non-akademik.",
   Afirmasi:
     "Untuk calon peserta didik dari keluarga berpenghasilan rendah atau penyandang disabilitas.",
   "Perpindahan Tugas Orang Tua":

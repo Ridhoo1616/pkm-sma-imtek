@@ -1,6 +1,7 @@
 ---
 import Publik from "../../tata/Publik.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import FotoProfil from "../../komponen/FotoProfil.astro";
 import { data } from "../../lib/tembolok";
 import { gambar } from "../../lib/gambar";
 import { alamatLengkap, belumTerisi } from "@/lib/format";
@@ -19,6 +20,7 @@ const tahunBerdiri = isi(p.tahun_berdiri);
 const usia = /^\d{4}$/.test(tahunBerdiri) ? new Date().getFullYear() - Number(tahunBerdiri) : 0;
 const logo = isi(p.logo);
 const fotoKepsek = isi(p.foto_kepsek);
+const fotoDataSekolah = isi(p.foto_data_sekolah);
 const kepsek = isi(p.kepala_sekolah);
 const keteranganPita = [isi(p.status_sekolah), isi(p.kota), isi(p.provinsi)].filter(Boolean).join(" · ");
 
@@ -282,4 +284,6 @@ const adaIsi = Boolean(namaResmi || angka.length || kode.length || rincian.lengt
       )
     }
   </section>
+
+  {fotoDataSekolah && <FotoProfil foto={fotoDataSekolah} judul="Foto data sekolah" alt="Foto data sekolah" />}
 </Publik>

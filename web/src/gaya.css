@@ -349,15 +349,6 @@
   .magnet, .magnet > svg { translate: none !important; }
 }
 
-/* Bilah halaman sekelompok: dapat digeser mendatar tanpa batang gulir yang
-   menebal di bawah pil-pilnya. */
-.bilah-anak {
-  scrollbar-width: none;
-}
-.bilah-anak::-webkit-scrollbar {
-  display: none;
-}
-
 /* Lingkaran persentase kuota terisi: terisi dari nol saat halaman dibuka. */
 @keyframes isiCincin {
   from { stroke-dashoffset: var(--keliling); }

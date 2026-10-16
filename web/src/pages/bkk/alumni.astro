@@ -1,0 +1,67 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import FotoOrang from "../../komponen/FotoOrang.astro";
+import { data } from "../../lib/tembolok";
+import type { AlumniBkk } from "@/lib/tipe";
+
+/**
+ * Alumni yang sudah bekerja lewat BKK (migrasi 035). Semuanya dari tabel
+ * `bkk_alumni` yang diisi petugas dengan izin alumni; tidak ada isi contoh.
+ * Selama kosong, halaman menyatakannya terang-terangan.
+ */
+const [{ profil }, hasil] = await Promise.all([
+  data.profil(),
+  data.alumniBkk().catch(() => ({ data: [] as AlumniBkk[] })),
+]);
+const alumni = hasil.data;
+---
+
+<Publik sorotan judul="Alumni yang Sudah Kerja" deskripsi="Profil singkat alumni yang sudah bekerja lewat penyaluran Bursa Kerja Khusus.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Alumni yang Sudah Kerja"
+    keterangan="Profil singkat alumni yang sudah bekerja lewat penyaluran Bursa Kerja Khusus."
+    induk="/bkk"
+    lambang={{ src: "/bkk/logo-bkk.svg", alt: "Logo BKK SMAS IMTEK" }}
+    jalur="/bkk/alumni"
+  />
+  <div class="wadah">
+    {
+      alumni.length === 0 ? (
+        <section class="bagian-polos !border-b-0" data-muncul>
+          <p class="label-bagian">Alumni</p>
+          <div>
+            <h2 class="judul-bagian">Belum ada profil alumni</h2>
+            <p class="max-w-xl text-[15px] leading-relaxed text-samar">
+              Profil alumni yang sudah bekerja akan ditampilkan di sini setelah ditambahkan petugas BKK.
+            </p>
+          </div>
+        </section>
+      ) : (
+        <section class="bagian-polos !border-b-0" data-muncul>
+          <p class="label-bagian">{alumni.length} alumni</p>
+          <div class="min-w-0">
+            <h2 class="judul-bagian">Alumni yang sudah bekerja</h2>
+            <ul class="grid gap-3 sm:grid-cols-2">
+              {alumni.map((al) => (
+                <li class="flex gap-4 rounded-2xl bg-white p-4 ring-1 ring-garis">
+                  <FotoOrang foto={al.foto} folder="bkk-alumni" class="h-24 w-20 rounded-lg" lebar={320} />
+                  <div class="min-w-0">
+                    <p class="font-semibold leading-snug text-biru-tua">{al.nama}</p>
+                    <p class="text-sm text-teks">{al.jabatan}</p>
+                    <p class="text-sm text-samar">
+                      {al.perusahaan}
+                      {al.angkatan && ` · Lulus ${al.angkatan}`}
+                    </p>
+                    {al.kisah && <p class="mt-2 text-sm leading-relaxed text-samar">{al.kisah}</p>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Publik>

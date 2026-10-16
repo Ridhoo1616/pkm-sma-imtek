@@ -8,8 +8,16 @@ import (
 	"strings"
 )
 
+// TipePDF dipakai ijazah: sekolah meminta ijazah dalam bentuk PDF saja.
+var TipePDF = []string{"pdf"}
+
 // berkasPendaftar mendaftar kolom unggahan formulir PPDB beserta labelnya,
-// apakah wajib, dan tipe berkas yang diizinkan.
+// apakah wajib, dan tipe berkas yang diizinkan. Urutannya juga urutan di
+// formulir, bukti pendaftaran, dan detail pendaftar.
+//
+// Daftar ini mengikuti revisi sekolah (Oktober 2026). Rapor dan sertifikat
+// prestasi dilepas dari formulir; kolomnya tetap ada di basis data supaya
+// berkas pendaftar lama tidak hilang.
 var berkasPendaftar = []struct {
 	Kolom string
 	Label string
@@ -17,11 +25,12 @@ var berkasPendaftar = []struct {
 	Tipe  []string
 }{
 	{"file_foto", "Foto 3x4", true, TipeGambar},
-	{"file_ijazah", "Ijazah / SKL", true, TipeDokumen},
-	{"file_kk", "Kartu Keluarga", true, TipeDokumen},
+	{"file_foto_2x3", "Foto 2x3", true, TipeGambar},
+	{"file_skl", "Surat Keterangan Lulus (SKL)", true, TipeDokumen},
+	{"file_ijazah", "Ijazah (PDF)", true, TipePDF},
 	{"file_akta", "Akta Kelahiran", true, TipeDokumen},
-	{"file_raport", "Rapor semester akhir", true, TipeDokumen},
-	{"file_prestasi", "Sertifikat Prestasi", false, TipeDokumen},
+	{"file_kk", "Kartu Keluarga", true, TipeDokumen},
+	{"file_ktp_ortu", "KTP Orang Tua", true, TipeDokumen},
 }
 
 func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +40,7 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Batas keseluruhan: enam berkas ditambah isian teks. Memori yang dipakai
+	// Batas keseluruhan: tujuh berkas ditambah isian teks. Memori yang dipakai
 	// dibatasi 10 MB; sisanya ditulis ke berkas sementara oleh pustaka standar.
 	batasTotal := a.cfg.BatasUnggah*int64(len(berkasPendaftar)) + (1 << 20)
 	r.Body = http.MaxBytesReader(w, r.Body, batasTotal)
@@ -84,10 +93,6 @@ func (a *Aplikasi) tanganiDaftar(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		tersimpan[b.Kolom] = nama
-	}
-
-	if d.Jalur == "Prestasi" && tersimpan["file_prestasi"] == "" {
-		v.tambah("file_prestasi", "Jalur Prestasi mewajibkan unggahan sertifikat prestasi.")
 	}
 
 	if v.bermasalah() {

@@ -60,12 +60,22 @@ export const MENU: MenuUtama[] = [
         label: "Tenaga Pendidik dan Kependidikan",
         keterangan: "Guru dan tenaga kependidikan beserta bidangnya.",
       },
+      {
+        jalur: "/halaman/kurikulum",
+        label: "Kurikulum",
+        keterangan: "Kurikulum yang dipakai dan struktur mata pelajarannya.",
+      },
+      {
+        jalur: "/profil/penghargaan",
+        label: "Penghargaan",
+        keterangan: "Prestasi sekolah, OSIS, dan kegiatan di sekolah.",
+      },
     ],
   },
   {
     jalur: "/akademik",
     label: "Akademik",
-    keterangan: "Kegiatan belajar: kurikulum, jadwal, dan layanan penunjang.",
+    keterangan: "Kegiatan belajar: jadwal, kalender, dan layanan penunjang.",
     anak: [
       {
         jalur: "/akademik/elearning",
@@ -81,11 +91,6 @@ export const MENU: MenuUtama[] = [
         jalur: "/akademik/kalender",
         label: "Kalender Akademik",
         keterangan: "Tanggal kegiatan, ujian, dan hari libur sekolah.",
-      },
-      {
-        jalur: "/halaman/kurikulum",
-        label: "Kurikulum",
-        keterangan: "Kurikulum yang dipakai dan struktur mata pelajarannya.",
       },
     ],
   },
@@ -147,6 +152,23 @@ export const MENU: MenuUtama[] = [
     jalur: "/bkk",
     label: "BKK",
     keterangan: "Bursa Kerja Khusus: penyaluran lulusan ke dunia kerja.",
+    anak: [
+      {
+        jalur: "/bkk",
+        label: "Profil BKK",
+        keterangan: "Apa itu BKK, perusahaan mitra, dan cara bergabung.",
+      },
+      {
+        jalur: "/bkk/alumni",
+        label: "Alumni yang Sudah Kerja",
+        keterangan: "Profil singkat alumni yang sudah bekerja lewat BKK.",
+      },
+      {
+        jalur: "/bkk/lowongan",
+        label: "Lowongan Dibuka",
+        keterangan: "Lowongan dari perusahaan mitra yang sedang dibuka.",
+      },
+    ],
   },
   { jalur: "/berita", label: "Berita" },
   { jalur: "/galeri", label: "Galeri" },

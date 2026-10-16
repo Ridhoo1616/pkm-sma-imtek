@@ -138,6 +138,9 @@ export interface Pendaftar extends RingkasPendaftar {
   npsn_sekolah: string;
   alamat_sekolah: string;
   tahun_lulus: string;
+  ukuran_baju: string;
+  status_ayah: string;
+  status_ibu: string;
   nama_ayah: string;
   pekerjaan_ayah: string;
   pendidikan_ayah: string;
@@ -148,6 +151,9 @@ export interface Pendaftar extends RingkasPendaftar {
   no_hp_ortu: string;
   nama_wali: string;
   file_foto: string;
+  file_foto_2x3: string;
+  file_skl: string;
+  file_ktp_ortu: string;
   file_ijazah: string;
   file_kk: string;
   file_akta: string;
@@ -396,6 +402,20 @@ export interface KegiatanSiswa {
   aktif: boolean;
 }
 
+/* ---------- Penghargaan sekolah ---------- */
+
+export interface Penghargaan {
+  id: number;
+  judul: string;
+  kategori: "Prestasi Sekolah" | "OSIS" | "Kegiatan Sekolah";
+  tingkat: string;
+  tahun: string;
+  keterangan: string;
+  foto: string;
+  urutan: number;
+  aktif: boolean;
+}
+
 /* ---------- Bursa Kerja Khusus ---------- */
 
 export interface MitraBkk {
@@ -413,6 +433,19 @@ export interface MitraBkk {
   lowongan_dibuka: number;
   jumlah_lowongan: number;
   tersalurkan: number;
+}
+
+export interface AlumniBkk {
+  id: number;
+  nama: string;
+  /** Tahun lulus, mis. "2022". */
+  angkatan: string;
+  jabatan: string;
+  perusahaan: string;
+  kisah: string;
+  foto: string;
+  urutan: number;
+  aktif: boolean;
 }
 
 export interface LowonganBkk {

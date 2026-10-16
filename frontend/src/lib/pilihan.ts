@@ -29,6 +29,25 @@ export const PENDIDIKAN = [
   "Tidak Sekolah",
 ];
 
+/** Ukuran baju seragam, dari kecil ke besar. Sama dengan UkuranBaju di backend. */
+export const UKURAN_BAJU = ["S", "M", "L", "XL", "2XL", "3XL"];
+
+/**
+ * Status orang tua. Sama dengan StatusAyah/StatusIbu di backend. "Almarhum"
+ * dan "Almarhumah" ada supaya data anak yatim, piatu, dan yatim piatu
+ * tercatat; "Tidak ada" untuk orang tua yang tidak diketahui.
+ */
+export const STATUS_AYAH = [
+  { nilai: "Ada", label: "Ada" },
+  { nilai: "Almarhum", label: "Alm. (almarhum)" },
+  { nilai: "Tidak ada", label: "Tidak ada" },
+];
+export const STATUS_IBU = [
+  { nilai: "Ada", label: "Ada" },
+  { nilai: "Almarhumah", label: "Almh. (almarhumah)" },
+  { nilai: "Tidak ada", label: "Tidak ada" },
+];
+
 export const PENGHASILAN = [
   "< Rp1.000.000",
   "Rp1.000.000 - Rp2.500.000",
@@ -55,8 +74,7 @@ export const LABEL_SUMBER: Record<string, string> = {
 
 export const KETERANGAN_JALUR: Record<string, string> = {
   Reguler: "Jalur umum berdasarkan nilai rapor dan kelengkapan berkas.",
-  Prestasi:
-    "Untuk prestasi akademik maupun non-akademik. Sertifikat prestasi wajib diunggah.",
+  Prestasi: "Untuk prestasi akademik maupun non-akademik.",
   Afirmasi:
     "Untuk keluarga berpenghasilan rendah atau penyandang disabilitas.",
   "Perpindahan Tugas Orang Tua":

@@ -73,7 +73,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | `respon.go` | bentuk respons dan galat yang seragam |
 | `handler_publik.go` | halaman publik: profil, jurusan, fasilitas, berita, galeri, kontak |
 | `handler_pendaftar.go` | formulir PPDB dan cek status |
-| `handler_admin.go` | dasbor, kelola pendaftar, laporan, ekspor CSV |
+| `handler_admin.go` | dasbor, kelola pendaftar, laporan, ekspor Excel |
 | `handler_konten.go` | jurusan, berita, galeri, fasilitas |
 | `handler_pengaturan.go` | pesan masuk, pengaturan sekolah, pengguna |
 | `handler_faq.go` | tanya jawab |
@@ -114,7 +114,7 @@ hash sandinya ada di dalam repositori publik ini. Gantilah lewat
 | POST | `/api/saya/sandi` | ganti kata sandi sendiri |
 | GET | `/api/admin/dasbor` | ringkasan angka dan pendaftar terbaru |
 | GET | `/api/admin/pendaftar` | daftar pendaftar, dengan penyaring dan pencarian |
-| GET | `/api/admin/pendaftar/ekspor` | unduh CSV sesuai penyaring yang dipakai |
+| GET | `/api/admin/pendaftar/ekspor` | unduh Excel (.xlsx) sesuai penyaring yang dipakai |
 | GET | `/api/admin/pendaftar/{id}` | rincian satu pendaftar |
 | GET | `/api/admin/pendaftar/{id}/bukti` | cetak bukti pendaftaran PDF |
 | GET/POST/PUT/DELETE | `/api/admin/faq` | kelola tanya jawab |

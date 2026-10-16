@@ -11,13 +11,15 @@ interface Props {
   /** Kelas ukuran dan bentuk, misalnya "h-16 w-14 rounded-lg". */
   class: string;
   lebar?: Lebar;
+  /** Folder unggahan fotonya; bawaannya foto tenaga pendidik. */
+  folder?: string;
 }
-const { foto, class: kelas, lebar = 160 } = Astro.props;
+const { foto, class: kelas, lebar = 160, folder = "profil" } = Astro.props;
 ---
 
 {
   foto ? (
-    <img src={gambar("profil", foto, lebar)} alt="" class={`${kelas} shrink-0 object-cover object-[50%_20%]`} loading="lazy" decoding="async" />
+    <img src={gambar(folder, foto, lebar)} alt="" class={`${kelas} shrink-0 object-cover object-[50%_20%]`} loading="lazy" decoding="async" />
   ) : (
     <span class={`${kelas} relative block shrink-0 overflow-hidden bg-gradient-to-b from-biru-muda to-[#d5e4f3]`} aria-hidden="true">
       <svg viewBox="0 0 40 48" preserveAspectRatio="xMidYMax meet" class="absolute inset-x-0 bottom-0 h-[88%] w-full text-biru/25">

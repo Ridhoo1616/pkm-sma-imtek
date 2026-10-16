@@ -54,9 +54,19 @@ type isianPendaftar struct {
 	Alamat       string
 	NoHP         string
 	AsalSekolah  string
-	NamaAyah     string
-	NamaIbu      string
 	Jalur        string
+
+	// Orang tua. Nama, pekerjaan, dan pendidikan kosong bila statusnya
+	// "Tidak ada"; selain itu semuanya wajib. Lihat periksaOrangTua.
+	UkuranBaju     string
+	StatusAyah     string
+	NamaAyah       string
+	PekerjaanAyah  string
+	PendidikanAyah string
+	StatusIbu      string
+	NamaIbu        string
+	PekerjaanIbu   string
+	PendidikanIbu  string
 
 	NISN      string
 	NIK       string
@@ -100,8 +110,12 @@ func (a *Aplikasi) periksaIsianPendaftar(
 	d.Alamat = v.wajib("alamat", "Alamat tempat tinggal", isi("alamat"))
 	d.NoHP = isi("no_hp")
 	d.AsalSekolah = v.wajib("asal_sekolah", "Asal sekolah", isi("asal_sekolah"))
-	d.NamaAyah = v.wajib("nama_ayah", "Nama ayah", isi("nama_ayah"))
-	d.NamaIbu = v.wajib("nama_ibu", "Nama ibu", isi("nama_ibu"))
+	d.UkuranBaju = v.wajib("ukuran_baju", "Ukuran baju", isi("ukuran_baju"))
+	v.pilihan("ukuran_baju", "Ukuran baju", d.UkuranBaju, UkuranBaju)
+	d.StatusAyah, d.NamaAyah, d.PekerjaanAyah, d.PendidikanAyah =
+		periksaOrangTua(v, isi, "ayah", StatusAyah)
+	d.StatusIbu, d.NamaIbu, d.PekerjaanIbu, d.PendidikanIbu =
+		periksaOrangTua(v, isi, "ibu", StatusIbu)
 	d.Jalur = v.wajib("jalur", "Jalur pendaftaran", isi("jalur"))
 
 	v.pilihan("jenis_kelamin", "Jenis kelamin", d.JenisKelamin, JenisKelamin)
@@ -114,8 +128,6 @@ func (a *Aplikasi) periksaIsianPendaftar(
 	// orang tidak pernah berangka, sedangkan alamat hampir selalu berangka,
 	// jadi keduanya dibedakan lewat parameter terakhir.
 	v.teksWajar("nama_lengkap", "Nama lengkap", d.NamaLengkap, false)
-	v.teksWajar("nama_ayah", "Nama ayah", d.NamaAyah, false)
-	v.teksWajar("nama_ibu", "Nama ibu", d.NamaIbu, false)
 	v.teksWajar("tempat_lahir", "Tempat lahir", d.TempatLahir, false)
 	v.teksWajar("alamat", "Alamat tempat tinggal", d.Alamat, true)
 	v.teksWajar("asal_sekolah", "Asal sekolah", d.AsalSekolah, true)
@@ -149,7 +161,16 @@ func (a *Aplikasi) periksaIsianPendaftar(
 	v.periksaNisn(d.NISN, d.NIK, d.TanggalLahir)
 	v.periksaNik(d.NIK, d.TanggalLahir, d.JenisKelamin)
 	v.telepon("no_hp", "Nomor HP/WhatsApp", d.NoHP, true)
-	v.telepon("no_hp_ortu", "Nomor HP orang tua", isi("no_hp_ortu"), false)
+	// Wajib: sekolah perlu satu nomor orang tua atau wali yang dapat
+	// dihubungi, termasuk untuk pendaftar yatim piatu (nomor walinya).
+	v.telepon("no_hp_ortu", "Nomor HP orang tua / wali", isi("no_hp_ortu"), true)
+
+	// Tanpa ayah maupun ibu yang berstatus "Ada", harus ada wali yang dapat
+	// dihubungi dan dimintai tanda tangan.
+	if d.StatusAyah != "" && d.StatusIbu != "" &&
+		d.StatusAyah != "Ada" && d.StatusIbu != "Ada" {
+		v.wajib("nama_wali", "Nama wali (ayah dan ibu tidak ada)", isi("nama_wali"))
+	}
 	v.email("email", d.Email)
 
 	// Kode pos Indonesia selalu lima angka. Diperiksa di sini, bukan di
@@ -251,6 +272,35 @@ func (a *Aplikasi) periksaIsianPendaftar(
 }
 
 /*
+periksaOrangTua memeriksa satu orang tua (peran "ayah" atau "ibu").
+
+Statusnya wajib dipilih: Ada, almarhum(ah), atau Tidak ada. Pilihan almarhum
+ada supaya data anak yatim, piatu, dan yatim piatu tercatat jelas, sesuai
+permintaan sekolah. Nama, pekerjaan, dan pendidikan terakhir wajib untuk
+orang tua yang ada maupun yang sudah wafat; hanya "Tidak ada" yang boleh
+mengosongkannya, karena orang tua yang memang tidak diketahui tidak punya
+data untuk diisi.
+*/
+func periksaOrangTua(
+	v *Validasi, isi func(string) string, peran string, opsiStatus []string,
+) (status, nama, pekerjaan, pendidikan string) {
+	huruf := strings.ToUpper(peran[:1]) + peran[1:]
+	status = v.wajib("status_"+peran, "Status "+peran, isi("status_"+peran))
+	v.pilihan("status_"+peran, "Status "+peran, status, opsiStatus)
+	if status == "" || status == "Tidak ada" {
+		return status, "", "", ""
+	}
+	nama = v.wajib("nama_"+peran, "Nama "+peran, isi("nama_"+peran))
+	v.panjangMaks("nama_"+peran, "Nama "+peran, nama, 120)
+	v.teksWajar("nama_"+peran, "Nama "+peran, nama, false)
+	pekerjaan = v.wajib("pekerjaan_"+peran, "Pekerjaan "+peran, isi("pekerjaan_"+peran))
+	v.panjangMaks("pekerjaan_"+peran, "Pekerjaan "+peran, pekerjaan, 80)
+	pendidikan = v.wajib("pendidikan_"+peran, "Pendidikan terakhir "+peran, isi("pendidikan_"+peran))
+	v.pilihan("pendidikan_"+peran, huruf+" pendidikan terakhir", pendidikan, PendidikanOrtu)
+	return status, nama, pekerjaan, pendidikan
+}
+
+/*
 simpanPendaftar menyimpan satu pendaftar beserta nomor registrasinya.
 
 berkas boleh kosong: penambahan dari panel tidak mengunggah apa pun, sebab
@@ -283,9 +333,10 @@ func (a *Aplikasi) simpanPendaftar(
 		penghasilan, no_hp_ortu, nama_wali,
 		file_foto, file_ijazah, file_kk, file_akta, file_raport, file_prestasi,
 		sumber_informasi, catatan_sumber, ip_pendaftar, asal_sekolah_terdaftar,
-		dibuat_oleh
+		dibuat_oleh,
+		ukuran_baju, status_ayah, status_ibu, file_foto_2x3, file_skl, file_ktp_ortu
 	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26,
-	          $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46)`,
+	          $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52)`,
 		noReg, tahunAjaran, d.Jalur, d.JurusanID,
 		d.NamaLengkap, kosongJadiNil(d.NISN), kosongJadiNil(d.NIK), d.JenisKelamin,
 		d.TempatLahir, d.TanggalLahir, d.Agama,
@@ -294,14 +345,17 @@ func (a *Aplikasi) simpanPendaftar(
 		d.NoHP, kosongJadiNil(d.Email),
 		d.AsalSekolah, d.NPSNSekolah, d.AlamatSekolah,
 		d.TahunLulus, d.NilaiRata2,
-		d.NamaAyah, kosongJadiNil(isi("pekerjaan_ayah")), kosongJadiNil(isi("pendidikan_ayah")),
-		d.NamaIbu, kosongJadiNil(isi("pekerjaan_ibu")), kosongJadiNil(isi("pendidikan_ibu")),
+		d.NamaAyah, kosongJadiNil(d.PekerjaanAyah), kosongJadiNil(d.PendidikanAyah),
+		d.NamaIbu, kosongJadiNil(d.PekerjaanIbu), kosongJadiNil(d.PendidikanIbu),
 		kosongJadiNil(isi("penghasilan")), kosongJadiNil(isi("no_hp_ortu")), kosongJadiNil(isi("nama_wali")),
 		nilBerkas(berkas, "file_foto"), nilBerkas(berkas, "file_ijazah"),
 		nilBerkas(berkas, "file_kk"), nilBerkas(berkas, "file_akta"),
 		nilBerkas(berkas, "file_raport"), nilBerkas(berkas, "file_prestasi"),
 		kosongJadiNil(d.SumberInfo), kosongJadiNil(isi("catatan_sumber")),
-		kosongJadiNil(ip), d.SekolahTerdaftar, oleh)
+		kosongJadiNil(ip), d.SekolahTerdaftar, oleh,
+		d.UkuranBaju, d.StatusAyah, d.StatusIbu,
+		nilBerkas(berkas, "file_foto_2x3"), nilBerkas(berkas, "file_skl"),
+		nilBerkas(berkas, "file_ktp_ortu"))
 	if err != nil {
 		return "", err
 	}
@@ -323,7 +377,7 @@ internet dapat mendaftar.
 Tiga hal yang berbeda dari formulir publik, dan masing-masing ada sebabnya:
 
   - Tanpa unggahan berkas. Dokumennya diterima petugas dalam bentuk kertas
-    di meja pendaftaran, dan memaksa lima unggahan di situ membuat fiturnya
+    di meja pendaftaran, dan memaksa tujuh unggahan di situ membuat fiturnya
     tidak terpakai. Akibatnya diterima dengan sadar: pendaftar ini tidak
     dapat diverifikasi dari berkas yang tersimpan di sistem, dan panitia
     mencocokkannya dari kertas yang ada di tangannya.

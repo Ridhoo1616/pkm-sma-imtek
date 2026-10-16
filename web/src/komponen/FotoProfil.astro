@@ -1,0 +1,31 @@
+---
+import { gambar, srcsetGambar } from "../lib/gambar";
+
+/**
+ * Foto yang disediakan sekolah untuk halaman profil: foto papan data sekolah
+ * dan foto visi-misi (migrasi 036). Ditampilkan apa adanya, tanpa dipotong,
+ * karena isinya tulisan di papan; gelap-terangnya tidak diubah. Dirender hanya
+ * bila fotonya sudah diunggah, jadi tidak ada kerangka kosong.
+ */
+interface Props {
+  foto: string;
+  judul: string;
+  alt: string;
+}
+const { foto, judul, alt } = Astro.props;
+---
+
+<figure class="wadah pb-12 md:pb-16" data-muncul>
+  <figcaption class="text-xs font-bold tracking-[0.18em] text-biru uppercase">{judul}</figcaption>
+  <div class="mt-4 overflow-hidden rounded-2xl bg-white ring-1 ring-garis">
+    <img
+      src={gambar("profil", foto, 1280)}
+      srcset={srcsetGambar("profil", foto, [800, 1280, 1600])}
+      sizes="(min-width: 1280px) 1200px, 100vw"
+      alt={alt}
+      class="mx-auto block h-auto max-h-[85vh] w-auto max-w-full"
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+</figure>

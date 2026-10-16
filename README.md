@@ -195,11 +195,16 @@ Yang kini wajib, di luar daftar awal itu:
 | NPSN sekolah asal | delapan angka |
 | Alamat sekolah asal | — |
 | Tahun lulus | 2000–2100 |
-| Akta Kelahiran (berkas) | jpg, png, atau pdf |
-| Rapor semester akhir (berkas) | jpg, png, atau pdf |
+| Ukuran baju | S, M, L, XL, 2XL, atau 3XL |
+| Status ayah dan ibu | Ada, almarhum(ah), atau Tidak ada. Selain "Tidak ada", nama, pekerjaan, dan pendidikan terakhir wajib; bila keduanya bukan "Ada", nama wali wajib |
+| No. HP orang tua / wali | wajib |
+| Dokumen (7 berkas, semuanya wajib) | foto 3x4 dan 2x3 (jpg/png), SKL, akta, KK, KTP orang tua (jpg/png/pdf), ijazah (hanya pdf) |
 
-Sertifikat prestasi tetap opsional kecuali jalur Prestasi dipilih, dan surel
-tetap opsional karena tidak semua pendaftar memilikinya. Aturannya dipasang di
+Revisi sekolah Oktober 2026 (migrasi 034): rapor dan sertifikat prestasi
+**dilepas dari formulir**, sehingga jalur Prestasi tidak lagi mewajibkan
+sertifikat. Kolomnya tetap di basis data agar berkas pendaftar lama tidak
+hilang dan masih dapat dibuka dari panel. Surel tetap opsional karena tidak
+semua pendaftar memilikinya. Aturannya dipasang di
 **tiga tempat** supaya tidak ada yang menerima apa yang lain tolak: backend
 (`handler_pendaftar.go`), formulir di peramban (`FormulirPpdb.tsx`), dan
 pemeriksaan formulir demo (`demo-baru/js/05-ppdb.js`).
@@ -208,7 +213,7 @@ pemeriksaan formulir demo (`demo-baru/js/05-ppdb.js`).
 | Halaman | Alamat | Isi |
 |---|---|---|
 | Dasbor | `/admin` | Angka ringkas, sebaran status, kanal promosi teratas, keterisian kuota, tren 30 hari |
-| Data Pendaftar | `/admin/pendaftar` | Penyaring lima kriteria, pencarian, pengurutan, halaman, unduh CSV. Kolom status ditaruh tepat sesudah nama, karena tabelnya sebelas kolom dan selalu lebih lebar daripada jendela |
+| Data Pendaftar | `/admin/pendaftar` | Penyaring lima kriteria, pencarian, pengurutan, halaman, unduh Excel. Kolom status ditaruh tepat sesudah nama, karena tabelnya sebelas kolom dan selalu lebih lebar daripada jendela |
 | Detail Pendaftar | `/admin/pendaftar/{id}` | Seluruh isian, dokumen terlindungi token, ubah status, catatan panitia, cetak bukti PDF |
 | Laporan Promosi | `/admin/laporan` | Rekap per kanal, jalur, status, peminatan, jenis kelamin, asal sekolah, bulan |
 | Peminatan | `/admin/jurusan` | Kelola peminatan dan kuotanya |
@@ -1207,8 +1212,10 @@ Bagian inilah yang menjadi sumber data pembahasan laporan PkM:
    paling berdampak.
 5. **Porsi pendaftar yang tidak mengisi sumber informasi**, ditampilkan
    terang-terangan sebagai ukuran seberapa lengkap datanya.
-6. **Unduh CSV** yang mengikuti penyaring yang sedang dipakai, untuk lampiran
-   laporan.
+6. **Unduh Excel (.xlsx)** yang mengikuti penyaring yang sedang dipakai, untuk
+   rekap manual. Ditulis tanpa pustaka (`backend/xlsx.go`); seluruh sel berupa
+   teks sehingga NISN/NIK tidak kehilangan nol dan isian tidak terbaca sebagai
+   rumus.
 7. **Meta tag SEO dan Open Graph** yang diambil dari data sekolah, sehingga
    tautan yang dibagikan ke WhatsApp dan media sosial tampil dengan judul dan
    keterangan yang benar.
@@ -2996,3 +3003,24 @@ Backend bersih dari `go vet` dan `gofmt`; frontend bersih dari `eslint` dan
 
 Kode sumber ini dirilis di bawah [MIT License](LICENSE). Bebas dipakai,
 diubah, dan disebarkan, dengan syarat pemberitahuan hak cipta tetap disertakan.
+
+---
+
+## Revisi dari sekolah, 16 Oktober 2026
+
+Daftar revisi dari sekolah dan tempatnya di kode:
+
+| Revisi | Wujudnya |
+|---|---|
+| Biodata PPDB: ukuran baju, status orang tua (ada / almarhum / almarhumah / tidak ada), pendidikan dan pekerjaan orang tua wajib, no. telp orang tua wajib | migrasi 034, `pendaftar_isian.go` (`periksaOrangTua`), `komponen/BagianOrangTua.tsx` |
+| Dokumen: foto 2x3 dan 3x4, SKL, ijazah (PDF), akta, KK, KTP orang tua | `berkasPendaftar` di `handler_pendaftar.go`, `lib/dokumen.ts` |
+| Semua data pendaftar dapat dijadikan Excel | `backend/xlsx.go`, `tanganiEksporPendaftar` |
+| BKK: profil singkat, logo, perusahaan, kontak admin WhatsApp | sudah ada sejak migrasi 025/033 |
+| BKK: profil alumni yang sudah bekerja | migrasi 035, `bkk_alumni.go`, `/admin/bkk/alumni`, bagian Alumni di `/bkk` |
+| Profil: sejarah, foto data sekolah, foto visi-misi, sarana, struktur, guru, kurikulum, penghargaan | migrasi 036, `penghargaan.go`, `lib/menu.ts`, `/profil/penghargaan`, `komponen/FotoProfil.astro` |
+
+Hal yang **belum bisa diisi tanpa sekolah**: naskah kurikulum yang dipakai
+(menu Halaman Profil > Kurikulum), foto papan data sekolah dan foto visi-misi
+(Pengaturan), serta isi Penghargaan dan Alumni BKK. Halaman publik
+menyembunyikan atau menyatakan "belum ada" selama masih kosong; tidak ada isi
+contoh.

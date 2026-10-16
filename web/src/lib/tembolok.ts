@@ -44,6 +44,8 @@ export const data = {
   agenda: () => sekali("agenda", () => api.agenda()),
   lowonganBkk: () => sekali("lowonganBkk", () => api.lowonganBkk()),
   mitraBkk: () => sekali("mitraBkk", () => api.mitraBkk()),
+  penghargaan: () => sekali("penghargaan", () => api.penghargaan()),
+  alumniBkk: () => sekali("alumniBkk", () => api.alumniBkk()),
   galeri: () => sekali("galeri", () => api.galeri()),
   biaya: () => sekali("biaya", () => api.biaya()),
   halamanDetail: (slug: string) => sekali(`halaman:${slug}`, () => api.halamanDetail(slug)),

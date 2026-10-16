@@ -16,8 +16,8 @@
 (() => {
   "use strict";
   const DASAR = globalThis.__DASAR_DEMO || "";
-  const KUNCI = "demo_pkm_v9";
-  const KUNCI_GAMBAR = "demo_pkm_v9_gambar";
+  const KUNCI = "demo_pkm_v10";
+  const KUNCI_GAMBAR = "demo_pkm_v10_gambar";
 
   // GitHub Pages menyajikan /admin/masuk sebagai /admin/masuk/ (folder berisi
   // index.html). Aplikasinya dirender untuk jalur tanpa garis miring akhir,
@@ -60,6 +60,8 @@
       "bkk-mitra": (a["/api/admin/bkk/mitra"] || { data: [] }).data,
       "bkk-lowongan": (a["/api/admin/bkk/lowongan"] || { data: [] }).data,
       "bkk-lamaran": (a["/api/admin/bkk/lamaran"] || { data: [] }).data,
+      "bkk-alumni": (a["/api/admin/bkk/alumni"] || { data: [] }).data,
+      penghargaan: (a["/api/admin/penghargaan"] || { data: [] }).data,
     };
     const pendaftar = {};
     for (const [id, r] of Object.entries(D.detail.pendaftar)) pendaftar[id] = r.data;
@@ -360,8 +362,18 @@
   const WAJIB_DAFTAR = {
     nama_lengkap: "Nama lengkap", nisn: "NISN", jenis_kelamin: "Jenis kelamin", tempat_lahir: "Tempat lahir",
     tanggal_lahir: "Tanggal lahir", jalur: "Jalur pendaftaran", jurusan_id: "Peminatan", no_hp: "Nomor HP",
-    asal_sekolah: "Asal sekolah", nama_ayah: "Nama ayah", nama_ibu: "Nama ibu", alamat: "Alamat",
+    asal_sekolah: "Asal sekolah", alamat: "Alamat", ukuran_baju: "Ukuran baju", status_ayah: "Status ayah",
+    status_ibu: "Status ibu", no_hp_ortu: "Nomor HP orang tua / wali",
   };
+  // Sama dengan berkasPendaftar di backend/handler_pendaftar.go. Ijazah PDF saja.
+  const BERKAS_DAFTAR = [
+    ["file_foto", "Foto 3x4", /\.(jpe?g|png)$/i], ["file_foto_2x3", "Foto 2x3", /\.(jpe?g|png)$/i],
+    ["file_skl", "Surat Keterangan Lulus (SKL)", /\.(jpe?g|png|pdf)$/i], ["file_ijazah", "Ijazah (PDF)", /\.pdf$/i],
+    ["file_akta", "Akta Kelahiran", /\.(jpe?g|png|pdf)$/i], ["file_kk", "Kartu Keluarga", /\.(jpe?g|png|pdf)$/i],
+    ["file_ktp_ortu", "KTP Orang Tua", /\.(jpe?g|png|pdf)$/i],
+  ];
+  const PILIHAN_STATUS = { ayah: ["Ada", "Almarhum", "Tidak ada"], ibu: ["Ada", "Almarhumah", "Tidak ada"] };
+  const PENDIDIKAN_ORTU = ["SD", "SMP", "SMA/SMK", "D1-D3", "S1", "S2", "S3", "Tidak Sekolah"];
 
   async function buatPendaftar(isi, berkas, olehPanitia) {
     const kolom = {};
@@ -369,12 +381,26 @@
       if (!String(isi[k] ?? "").trim()) kolom[k] = `${label} wajib diisi.`;
     }
     if (isi.nisn && !/^\d{10}$/.test(isi.nisn)) kolom.nisn = "NISN terdiri dari 10 angka.";
+    if (isi.ukuran_baju && !["S", "M", "L", "XL", "2XL", "3XL"].includes(isi.ukuran_baju)) kolom.ukuran_baju = "Ukuran baju tidak valid.";
+    // Orang tua: statusnya wajib; selain "Tidak ada", nama, pekerjaan, dan
+    // pendidikan terakhir juga wajib. Sama dengan periksaOrangTua di backend.
+    for (const peran of ["ayah", "ibu"]) {
+      const st = String(isi["status_" + peran] ?? "").trim();
+      if (st && !PILIHAN_STATUS[peran].includes(st)) kolom["status_" + peran] = `Status ${peran} tidak valid.`;
+      if (!st || st === "Tidak ada") continue;
+      if (!String(isi["nama_" + peran] ?? "").trim()) kolom["nama_" + peran] = `Nama ${peran} wajib diisi.`;
+      if (!String(isi["pekerjaan_" + peran] ?? "").trim()) kolom["pekerjaan_" + peran] = `Pekerjaan ${peran} wajib diisi.`;
+      const pd = String(isi["pendidikan_" + peran] ?? "").trim();
+      if (!pd) kolom["pendidikan_" + peran] = `Pendidikan terakhir ${peran} wajib diisi.`;
+      else if (!PENDIDIKAN_ORTU.includes(pd)) kolom["pendidikan_" + peran] = `Pendidikan ${peran} tidak valid.`;
+    }
+    if (isi.status_ayah && isi.status_ibu && isi.status_ayah !== "Ada" && isi.status_ibu !== "Ada" && !String(isi.nama_wali ?? "").trim()) {
+      kolom.nama_wali = "Nama wali (ayah dan ibu tidak ada) wajib diisi.";
+    }
     if (!olehPanitia) {
-      for (const [k, label] of [["file_foto", "Foto 3x4"], ["file_ijazah", "Ijazah / SKL"], ["file_kk", "Kartu Keluarga"], ["file_akta", "Akta Kelahiran"], ["file_raport", "Rapor semester akhir"]]) {
+      for (const [k, label, pola] of BERKAS_DAFTAR) {
         if (!(berkas[k] instanceof File) || berkas[k].size === 0) kolom[k] = `${label} wajib diunggah.`;
-      }
-      if (isi.jalur === "Prestasi" && !(berkas.file_prestasi instanceof File && berkas.file_prestasi.size)) {
-        kolom.file_prestasi = "Jalur Prestasi mewajibkan unggahan sertifikat prestasi.";
+        else if (!pola.test(berkas[k].name)) kolom[k] = `${label}: tipe berkas tidak diizinkan.`;
       }
     }
     if (Object.keys(kolom).length) galat(400, "Data yang dikirim belum benar.", kolom);
@@ -739,13 +765,97 @@
     const p = await buatPendaftar(badan, {}, true);
     return [201, { pesan: "Pendaftar berhasil ditambahkan.", no_registrasi: p.no_registrasi, tahun_ajaran: p.tahun_ajaran }];
   });
+  // Rekap Excel (.xlsx) dibuat di peramban, sama bentuknya dengan backend/xlsx.go:
+  // seluruh sel teks, judul tebal, baris judul dan tiga kolom pertama membeku.
+  // Zip-nya tanpa kompresi (metode "store"), yang sah dan cukup untuk berkas kecil.
+  const TABEL_CRC = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+  const crc32 = (b) => {
+    let c = 0xffffffff;
+    for (let i = 0; i < b.length; i++) c = TABEL_CRC[(c ^ b[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  };
+  function buatZip(berkas) {
+    const enc = new TextEncoder();
+    const u16 = (v) => [v & 255, (v >> 8) & 255];
+    const u32 = (v) => [v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >>> 24) & 255];
+    const isi = [], pusat = [];
+    let pos = 0;
+    for (const f of berkas) {
+      const nama = enc.encode(f.nama), data = enc.encode(f.isi), crc = crc32(data);
+      const kepala = new Uint8Array([0x50, 0x4b, 3, 4, ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21),
+        ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(nama.length), ...u16(0)]);
+      pusat.push(new Uint8Array([0x50, 0x4b, 1, 2, ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21),
+        ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(nama.length), ...u16(0), ...u16(0), ...u16(0), ...u16(0),
+        ...u32(0), ...u32(pos)]), nama);
+      isi.push(kepala, nama, data);
+      pos += kepala.length + nama.length + data.length;
+    }
+    const ukuranPusat = pusat.reduce((n, b) => n + b.length, 0);
+    const ujung = new Uint8Array([0x50, 0x4b, 5, 6, ...u16(0), ...u16(0), ...u16(berkas.length), ...u16(berkas.length),
+      ...u32(ukuranPusat), ...u32(pos), ...u16(0)]);
+    return new Blob([...isi, ...pusat, ujung], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  }
+  const xml = (t) => String(t ?? "").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const hurufKolom = (n) => { let h = ""; for (n++; n > 0; n = Math.floor((n - 1) / 26)) h = String.fromCharCode(65 + ((n - 1) % 26)) + h; return h; };
+  const tglID = (t) => { const m = String(t || "").match(/^(\d{4})-(\d\d)-(\d\d)(?:[ T](\d\d:\d\d))?/); return m ? `${m[3]}/${m[2]}/${m[1]}${m[4] ? " " + m[4] : ""}` : ""; };
+  const KOLOM_EKSPOR = [
+    ["No. Registrasi", (p) => p.no_registrasi, 17], ["Nama Lengkap", (p) => p.nama_lengkap, 28],
+    ["Tahun Ajaran", (p) => p.tahun_ajaran, 12], ["Jalur", (p) => p.jalur, 14], ["Peminatan", (p) => p.nama_jurusan, 16],
+    ["Status", (p) => p.status, 18], ["Jenis Kelamin", (p) => (p.jenis_kelamin === "P" ? "Perempuan" : "Laki-laki"), 13],
+    ["Tempat Lahir", (p) => p.tempat_lahir, 16], ["Tanggal Lahir", (p) => tglID(p.tanggal_lahir), 13],
+    ["Alamat Saat Ini", (p) => p.alamat, 40], ["Kelurahan/Desa", (p) => p.kelurahan, 18], ["Kecamatan", (p) => p.kecamatan, 18],
+    ["Kabupaten/Kota", (p) => p.kota, 18], ["Provinsi", (p) => p.provinsi, 14], ["Kode Pos", (p) => p.kode_pos, 10],
+    ["No. Telp/WA Siswa", (p) => p.no_hp, 18], ["Ukuran Baju", (p) => p.ukuran_baju, 11], ["NISN", (p) => p.nisn, 14],
+    ["NIK", (p) => p.nik, 19], ["Agama", (p) => p.agama, 12], ["Anak Ke", (p) => p.anak_ke, 8],
+    ["Jumlah Saudara", (p) => p.jumlah_saudara, 10], ["Email", (p) => p.email, 26], ["Asal Sekolah", (p) => p.asal_sekolah, 28],
+    ["NPSN Asal Sekolah", (p) => p.npsn_sekolah, 12], ["Tahun Lulus", (p) => p.tahun_lulus, 10],
+    ["Nilai Rata-rata", (p) => (p.nilai_rata2 ? String(p.nilai_rata2).replace(".", ",") : ""), 10],
+    ["Status Ayah", (p) => p.status_ayah, 12], ["Nama Ayah", (p) => p.nama_ayah, 26],
+    ["Pendidikan Akhir Ayah", (p) => p.pendidikan_ayah, 16], ["Pekerjaan Ayah", (p) => p.pekerjaan_ayah, 20],
+    ["Status Ibu", (p) => p.status_ibu, 12], ["Nama Ibu", (p) => p.nama_ibu, 26],
+    ["Pendidikan Akhir Ibu", (p) => p.pendidikan_ibu, 16], ["Pekerjaan Ibu", (p) => p.pekerjaan_ibu, 20],
+    ["Penghasilan Orang Tua", (p) => p.penghasilan, 24], ["No. Telp Orang Tua/Wali", (p) => p.no_hp_ortu, 18],
+    ["Nama Wali", (p) => p.nama_wali, 22],
+    ...BERKAS_DAFTAR.map(([k, label]) => [label, (p) => (p[k] ? "Ada" : "Belum"), 12]),
+    ["Dokumen Terkumpul", (p) => `${BERKAS_DAFTAR.filter(([k]) => p[k]).length} dari ${BERKAS_DAFTAR.length}`, 14],
+    ["Sumber Informasi", (p) => p.sumber_informasi, 18], ["Keterangan Sumber", (p) => p.catatan_sumber, 22],
+    ["Catatan Panitia", (p) => p.catatan_admin, 30], ["Waktu Mendaftar", (p) => tglID(p.dibuat), 17],
+  ];
+  function buatXlsx(daftar) {
+    const kolom = [["No.", null, 6], ...KOLOM_EKSPOR];
+    const kepala = `<row r="1" ht="32" customHeight="1">${kolom.map((k, i) => `<c r="${hurufKolom(i)}1" s="1" t="inlineStr"><is><t>${xml(k[0])}</t></is></c>`).join("")}</row>`;
+    const baris = daftar.map((p, n) => `<row r="${n + 2}">${[String(n + 1), ...KOLOM_EKSPOR.map((k) => String(k[1](p) ?? "").trim())]
+      .map((v, i) => (v === "" ? "" : `<c r="${hurufKolom(i)}${n + 2}" t="inlineStr"><is><t xml:space="preserve">${xml(v)}</t></is></c>`)).join("")}</row>`).join("");
+    const H = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+    const NS = "http://schemas.openxmlformats.org/";
+    const lembar = H + `<worksheet xmlns="${NS}spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane xSplit="3" ySplit="1" topLeftCell="D2" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>` +
+      `<sheetFormatPr defaultRowHeight="15"/><cols>${kolom.map((k, i) => `<col min="${i + 1}" max="${i + 1}" width="${k[2]}" customWidth="1"/>`).join("")}</cols>` +
+      `<sheetData>${kepala}${baris}</sheetData>${daftar.length ? `<autoFilter ref="A1:${hurufKolom(kolom.length - 1)}${daftar.length + 1}"/>` : ""}` +
+      `<pageMargins left="0.5" right="0.5" top="0.75" bottom="0.75" header="0.3" footer="0.3"/><pageSetup orientation="landscape"/></worksheet>`;
+    return buatZip([
+      { nama: "[Content_Types].xml", isi: H + `<Types xmlns="${NS}package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>` },
+      { nama: "_rels/.rels", isi: H + `<Relationships xmlns="${NS}package/2006/relationships"><Relationship Id="rId1" Type="${NS}officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
+      { nama: "xl/workbook.xml", isi: H + `<workbook xmlns="${NS}spreadsheetml/2006/main" xmlns:r="${NS}officeDocument/2006/relationships"><sheets><sheet name="Pendaftar" sheetId="1" r:id="rId1"/></sheets></workbook>` },
+      { nama: "xl/_rels/workbook.xml.rels", isi: H + `<Relationships xmlns="${NS}package/2006/relationships"><Relationship Id="rId1" Type="${NS}officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${NS}officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>` },
+      { nama: "xl/styles.xml", isi: H + `<styleSheet xmlns="${NS}spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1E3A8A"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>` },
+      { nama: "xl/worksheets/sheet1.xml", isi: lembar },
+    ]);
+  }
   di("GET", "/api/admin/pendaftar/ekspor", ({ kepala }) => {
     pengguna(kepala);
-    const medan = ["no_registrasi", "nama_lengkap", "nisn", "jenis_kelamin", "tanggal_lahir", "jalur", "nama_jurusan", "asal_sekolah", "no_hp", "email", "nilai_rata2", "status"];
-    const sel = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-    const csv = [medan.join(","), ...semuaPendaftar().map((p) => medan.map((m) => sel(p[m])).join(","))].join("\r\n");
-    return new Response("﻿" + csv, {
-      headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="pendaftar-${hariIni()}.csv"` },
+    return new Response(buatXlsx([...semuaPendaftar()].reverse()), {
+      headers: {
+        "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "content-disposition": `attachment; filename="pendaftar-${hariIni()}.xlsx"`,
+      },
     });
   });
   const ambilPendaftar = (id) => S.pendaftar[id] || tidakAda("Pendaftar");
@@ -1085,6 +1195,68 @@
     kol("bkk-mitra").splice(i, 1);
     return { pesan: "Mitra berhasil dihapus." };
   });
+
+  /* ---------- alumni BKK dan penghargaan, sama dengan bkk_alumni.go dan penghargaan.go ---------- */
+
+  const KATEGORI_PENGHARGAAN = ["Prestasi Sekolah", "OSIS", "Kegiatan Sekolah"];
+  const urutAlumni = (d) => [...d].sort((a, b) => a.urutan - b.urutan || a.id - b.id);
+  const urutPenghargaan = (d) => [...d].sort((a, b) => String(b.tahun).localeCompare(String(a.tahun)) || a.urutan - b.urutan || a.id - b.id);
+  di("GET", "/api/bkk/alumni", () => ({ data: urutAlumni(kol("bkk-alumni").filter((x) => x.aktif)) }));
+  di("GET", "/api/penghargaan", () => ({ data: urutPenghargaan(kol("penghargaan").filter((x) => x.aktif)), kategori: KATEGORI_PENGHARGAAN }));
+  di("GET", "/api/admin/bkk/alumni", ({ kepala }) => (pengguna(kepala), { data: urutAlumni(kol("bkk-alumni")) }));
+  di("GET", "/api/admin/penghargaan", ({ kepala }) => (pengguna(kepala), { data: urutPenghargaan(kol("penghargaan")), kategori: KATEGORI_PENGHARGAAN }));
+
+  async function simpanCatatan(koleksi, folder, badan, lama, periksa, bentuk) {
+    const isi = isianTeks(badan);
+    const k = periksa(isi);
+    if (Object.keys(k).length) galat(422, "Data yang dikirim belum benar.", k);
+    const berkas = badan instanceof FormData ? badan.get("foto") : null;
+    let foto = lama ? lama.foto : "";
+    if (berkas instanceof File && berkas.size) foto = await simpanBerkas(berkas, folder);
+    else if (isi.hapus_foto === "1") foto = "";
+    return { ...bentuk(isi), foto, urutan: Number(isi.urutan) || 0, aktif: isi.aktif === "1" };
+  }
+  const periksaAlumni = (i) => {
+    const k = {};
+    if (!i.nama) k.nama = "Nama alumni wajib diisi.";
+    else if (/\d/.test(i.nama)) k.nama = "Nama alumni tidak boleh memuat angka.";
+    if (!i.jabatan) k.jabatan = "Posisi / jabatan wajib diisi.";
+    if (!i.perusahaan) k.perusahaan = "Tempat bekerja wajib diisi.";
+    return k;
+  };
+  const periksaPenghargaan = (i) => {
+    const k = {};
+    if (!i.judul) k.judul = "Nama penghargaan wajib diisi.";
+    if (!i.kategori) k.kategori = "Kategori wajib diisi.";
+    else if (!KATEGORI_PENGHARGAAN.includes(i.kategori)) k.kategori = "Kategori tidak valid.";
+    return k;
+  };
+  const bentukAlumni = (i) => ({ nama: i.nama, angkatan: i.angkatan || "", jabatan: i.jabatan, perusahaan: i.perusahaan, kisah: i.kisah || "" });
+  const bentukPenghargaan = (i) => ({ judul: i.judul, kategori: i.kategori, tingkat: i.tingkat || "", tahun: i.tahun || "", keterangan: i.keterangan || "" });
+  for (const [rute, koleksi, folder, periksa, bentuk, nama] of [
+    ["bkk/alumni", "bkk-alumni", "bkk-alumni", periksaAlumni, bentukAlumni, "Alumni"],
+    ["penghargaan", "penghargaan", "penghargaan", periksaPenghargaan, bentukPenghargaan, "Penghargaan"],
+  ]) {
+    di("POST", `/api/admin/${rute}`, async ({ kepala, badan }) => {
+      pengguna(kepala);
+      const x = { id: idBaru(kol(koleksi)), ...(await simpanCatatan(koleksi, folder, badan, null, periksa, bentuk)) };
+      kol(koleksi).push(x);
+      return [201, { pesan: `${nama} berhasil ditambahkan.`, id: x.id }];
+    });
+    di("PUT", `/api/admin/${rute}/{id}`, async ({ kepala, p, badan }) => {
+      pengguna(kepala);
+      const x = kol(koleksi).find((y) => y.id === Number(p.id)) || tidakAda(nama);
+      Object.assign(x, await simpanCatatan(koleksi, folder, badan, x, periksa, bentuk));
+      return { pesan: `${nama} berhasil diperbarui.` };
+    });
+    di("DELETE", `/api/admin/${rute}/{id}`, ({ kepala, p }) => {
+      pengguna(kepala, true);
+      const i = kol(koleksi).findIndex((y) => y.id === Number(p.id));
+      if (i < 0) tidakAda(nama);
+      kol(koleksi).splice(i, 1);
+      return { pesan: `${nama} berhasil dihapus.` };
+    });
+  }
 
   di("GET", "/api/admin/bkk/lowongan", ({ kepala }) => (
     pengguna(kepala), { data: urutLowongan(kol("bkk-lowongan")).map(lowonganLengkap), jenis: JENIS_LOWONGAN, status: ["draf", "buka", "tutup"] }

@@ -367,6 +367,14 @@ export const api = {
     permintaan<{ data: import("./tipe").MitraBkk[] }>("/api/bkk/mitra", {
       segarkanSetiap: CACHE_PUBLIK,
     }),
+  penghargaan: () =>
+    permintaan<{ data: import("./tipe").Penghargaan[]; kategori: string[] }>("/api/penghargaan", {
+      segarkanSetiap: CACHE_PUBLIK,
+    }),
+  alumniBkk: () =>
+    permintaan<{ data: import("./tipe").AlumniBkk[] }>("/api/bkk/alumni", {
+      segarkanSetiap: CACHE_PUBLIK,
+    }),
   lamarBkk: (formulir: FormData) =>
     permintaan<{ pesan: string; kode: string }>("/api/bkk/lamar", {
       metode: "POST",
@@ -714,6 +722,48 @@ export const api = {
       metode: "DELETE",
       token: true,
     }),
+  penghargaanAdmin: () =>
+    permintaan<{ data: import("./tipe").Penghargaan[]; kategori: string[] }>("/api/admin/penghargaan", {
+      token: true,
+    }),
+  simpanPenghargaan: (formulir: FormData) =>
+    permintaan<{ pesan: string }>("/api/admin/penghargaan", {
+      metode: "POST",
+      formulir,
+      token: true,
+    }),
+  ubahPenghargaan: (id: number, formulir: FormData) =>
+    permintaan<{ pesan: string }>(`/api/admin/penghargaan/${id}`, {
+      metode: "PUT",
+      formulir,
+      token: true,
+    }),
+  hapusPenghargaan: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/penghargaan/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
+  alumniBkkAdmin: () =>
+    permintaan<{ data: import("./tipe").AlumniBkk[] }>("/api/admin/bkk/alumni", {
+      token: true,
+    }),
+  simpanAlumniBkk: (formulir: FormData) =>
+    permintaan<{ pesan: string }>("/api/admin/bkk/alumni", {
+      metode: "POST",
+      formulir,
+      token: true,
+    }),
+  ubahAlumniBkk: (id: number, formulir: FormData) =>
+    permintaan<{ pesan: string }>(`/api/admin/bkk/alumni/${id}`, {
+      metode: "PUT",
+      formulir,
+      token: true,
+    }),
+  hapusAlumniBkk: (id: number) =>
+    permintaan<{ pesan: string }>(`/api/admin/bkk/alumni/${id}`, {
+      metode: "DELETE",
+      token: true,
+    }),
   lowonganBkkAdmin: () =>
     permintaan<{
       data: import("./tipe").LowonganBkk[];
@@ -974,8 +1024,8 @@ export async function segarkanHalamanPublik(): Promise<void> {
   }
 }
 
-/** Alamat unduh CSV; dibuka lewat fetch supaya token bisa disertakan. */
-export async function unduhCsv(
+/** Unduh rekap pendaftar (.xlsx); lewat fetch supaya token bisa disertakan. */
+export async function unduhExcel(
   kueri = "",
 ): Promise<{ nama: string; blob: Blob }> {
   const t = ambilToken();
@@ -987,9 +1037,9 @@ export async function unduhCsv(
     },
   );
   if (!jawaban.ok) {
-    throw new GalatApi(jawaban.status, { pesan: "Berkas CSV gagal dibuat." });
+    throw new GalatApi(jawaban.status, { pesan: "Berkas Excel gagal dibuat." });
   }
   const pemilik = jawaban.headers.get("content-disposition") ?? "";
   const cocok = pemilik.match(/filename="([^"]+)"/);
-  return { nama: cocok?.[1] ?? "pendaftar.csv", blob: await jawaban.blob() };
+  return { nama: cocok?.[1] ?? "pendaftar.xlsx", blob: await jawaban.blob() };
 }

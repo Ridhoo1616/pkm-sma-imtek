@@ -197,6 +197,18 @@ const KUNCI_GAMBAR: { kunci: string; label: string; bantuan: string }[] = [
     bantuan:
       "Gambar mendatar, perbandingan sisi 4:3, paling tidak 1200 piksel lebarnya.",
   },
+  {
+    kunci: "foto_data_sekolah",
+    label: "Foto data sekolah",
+    bantuan:
+      "Foto papan atau lembar data sekolah. Tampil di halaman Data Sekolah. Foto mendatar atau tegak, paling tidak 1200 piksel sisi terpanjangnya; pastikan tulisannya terbaca.",
+  },
+  {
+    kunci: "foto_visi_misi",
+    label: "Foto visi dan misi",
+    bantuan:
+      "Foto papan visi dan misi sekolah. Tampil di halaman Visi & Misi. Paling tidak 1200 piksel sisi terpanjangnya; pastikan tulisannya terbaca.",
+  },
 ];
 
 /** Kunci yang lebih pantas ditulis pada kotak beberapa baris. */
@@ -263,6 +275,8 @@ function labelDari(kunci: string): string {
     whatsapp: "Nomor WhatsApp panitia",
     foto_kepsek: "Foto kepala sekolah",
     struktur_organisasi: "Bagan struktur organisasi",
+    foto_data_sekolah: "Foto data sekolah",
+    foto_visi_misi: "Foto visi dan misi",
     keunggulan: "Keunggulan sekolah (satu baris satu poin)",
     struktur_keterangan: "Keterangan struktur organisasi",
     tautan_elearning: "Alamat e-learning (Google Classroom / Google Drive)",

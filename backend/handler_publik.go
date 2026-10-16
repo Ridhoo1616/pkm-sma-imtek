@@ -25,6 +25,8 @@ var pengaturanPublik = []string{
 	// Foto sorotan beranda yang berganti-ganti. Lihat migrasi 022.
 	"foto_depan_2", "foto_depan_3", "foto_depan_4",
 	"foto_kepsek", "struktur_organisasi", "struktur_keterangan",
+	// Foto papan data sekolah dan visi misi. Lihat migrasi 036.
+	"foto_data_sekolah", "foto_visi_misi",
 	"tautan_elearning", "tautan_jadwal", "jadwal_keterangan",
 	// Bursa Kerja Khusus. Lihat migrasi 025 dan 033.
 	"bkk_keterangan", "bkk_kontak", "bkk_nomor_disnaker", "bkk_grup_wa",

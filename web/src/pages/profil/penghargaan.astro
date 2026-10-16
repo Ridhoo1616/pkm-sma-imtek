@@ -1,0 +1,83 @@
+---
+import Publik from "../../tata/Publik.astro";
+import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
+import { data } from "../../lib/tembolok";
+import { gambar, srcsetGambar } from "../../lib/gambar";
+import { IkonBendera } from "@/komponen/Ikon";
+import type { Penghargaan } from "@/lib/tipe";
+
+/**
+ * Penghargaan sekolah: prestasi sekolah, OSIS, dan kegiatan di sekolah
+ * (migrasi 036). Semuanya dari tabel `penghargaan` yang diisi sekolah lewat
+ * panel; tidak ada penghargaan contoh. Kategori yang kosong tidak tampil.
+ */
+const [{ profil }, hasil] = await Promise.all([
+  data.profil(),
+  data.penghargaan().catch(() => ({ data: [] as Penghargaan[], kategori: [] as string[] })),
+]);
+const KATEGORI: { nama: Penghargaan["kategori"]; judul: string; pengantar: string }[] = [
+  { nama: "Prestasi Sekolah", judul: "Prestasi sekolah", pengantar: "Capaian sekolah sebagai lembaga." },
+  { nama: "OSIS", judul: "OSIS", pengantar: "Penghargaan dan capaian Organisasi Siswa Intra Sekolah." },
+  { nama: "Kegiatan Sekolah", judul: "Kegiatan di sekolah", pengantar: "Kegiatan sekolah yang mendapat penghargaan atau pengakuan." },
+];
+const kelompok = KATEGORI.map((k) => ({ ...k, butir: hasil.data.filter((p) => p.kategori === k.nama) })).filter((k) => k.butir.length > 0);
+---
+
+<Publik sorotan judul="Penghargaan" deskripsi="Penghargaan sekolah: prestasi sekolah, OSIS, dan kegiatan di sekolah.">
+  <KepalaHalaman
+    pengaturan={profil.pengaturan}
+    judul="Penghargaan"
+    keterangan="Prestasi sekolah, OSIS, dan kegiatan di sekolah yang mendapat penghargaan."
+    induk="/profil"
+    jalur="/profil/penghargaan"
+  />
+
+  <div class="wadah pt-10 pb-4">
+    {
+      kelompok.length === 0 ? (
+        <div class="kaca mx-auto my-6 max-w-2xl px-6 py-14 text-center" data-muncul>
+          <p class="text-lg font-semibold text-biru-tua">Belum ada penghargaan yang dimuat</p>
+          <p class="mx-auto mt-2 max-w-xl text-sm text-samar">Penghargaan sekolah ditambahkan petugas lewat menu Penghargaan di panel admin.</p>
+        </div>
+      ) : (
+        kelompok.map((k, n) => (
+          <section class={"bagian-polos" + (n === kelompok.length - 1 ? " !border-b-0" : "")} data-muncul>
+            <p class="label-bagian">Penghargaan</p>
+            <div class="min-w-0">
+              <h2 class="judul-bagian">{k.judul}</h2>
+              <p class="-mt-2 mb-6 text-[15px] text-samar">{k.pengantar}</p>
+              <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {k.butir.map((p) => (
+                  <li class="flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-garis">
+                    <div class="relative h-44 overflow-hidden bg-gradient-to-br from-biru-tua to-biru">
+                      {p.foto ? (
+                        <img
+                          src={gambar("penghargaan", p.foto, 640)}
+                          srcset={srcsetGambar("penghargaan", p.foto, [480, 640, 800])}
+                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                          alt={p.judul}
+                          class="h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <div class="grid h-full place-items-center text-white/85" aria-hidden="true"><IkonBendera ukuran={34} /></div>
+                      )}
+                    </div>
+                    <div class="flex flex-1 flex-col p-5">
+                      {(p.tahun || p.tingkat) && (
+                        <p class="text-xs font-semibold text-samar">{[p.tingkat, p.tahun].filter(Boolean).join(" · ")}</p>
+                      )}
+                      <h3 class="mt-1 text-lg leading-snug text-biru-tua">{p.judul}</h3>
+                      {p.keterangan && <p class="mt-2 text-sm leading-relaxed text-samar">{p.keterangan}</p>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ))
+      )
+    }
+  </div>
+</Publik>

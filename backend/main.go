@@ -136,6 +136,8 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("GET /api/bkk/lowongan", a.tanganiLowonganBkkPublik)
 	m.HandleFunc("GET /api/bkk/lowongan/{id}", a.tanganiLowonganBkkDetail)
 	m.HandleFunc("GET /api/bkk/mitra", a.tanganiMitraBkkPublik)
+	m.HandleFunc("GET /api/bkk/alumni", a.tanganiAlumniBkkPublik)
+	m.HandleFunc("GET /api/penghargaan", a.tanganiPenghargaanPublik)
 
 	// Pencarian sekolah asal untuk formulir pendaftaran. Terbuka tanpa token
 	// karena yang memakainya calon pendaftar; isinya data sekolah yang memang
@@ -261,6 +263,14 @@ func (a *Aplikasi) rute() http.Handler {
 	m.HandleFunc("POST /api/admin/bkk/mitra", a.wajibMasuk(a.tanganiSimpanMitraBkk))
 	m.HandleFunc("PUT /api/admin/bkk/mitra/{id}", a.wajibMasuk(a.tanganiUbahMitraBkk))
 	m.HandleFunc("DELETE /api/admin/bkk/mitra/{id}", a.wajibAdmin(a.tanganiHapusMitraBkk))
+	m.HandleFunc("GET /api/admin/penghargaan", a.wajibMasuk(a.tanganiPenghargaanAdmin))
+	m.HandleFunc("POST /api/admin/penghargaan", a.wajibMasuk(a.tanganiSimpanPenghargaan))
+	m.HandleFunc("PUT /api/admin/penghargaan/{id}", a.wajibMasuk(a.tanganiUbahPenghargaan))
+	m.HandleFunc("DELETE /api/admin/penghargaan/{id}", a.wajibAdmin(a.tanganiHapusPenghargaan))
+	m.HandleFunc("GET /api/admin/bkk/alumni", a.wajibMasuk(a.tanganiAlumniBkkAdmin))
+	m.HandleFunc("POST /api/admin/bkk/alumni", a.wajibMasuk(a.tanganiSimpanAlumniBkk))
+	m.HandleFunc("PUT /api/admin/bkk/alumni/{id}", a.wajibMasuk(a.tanganiUbahAlumniBkk))
+	m.HandleFunc("DELETE /api/admin/bkk/alumni/{id}", a.wajibAdmin(a.tanganiHapusAlumniBkk))
 	m.HandleFunc("GET /api/admin/bkk/lowongan", a.wajibMasuk(a.tanganiLowonganBkkAdmin))
 	m.HandleFunc("POST /api/admin/bkk/lowongan", a.wajibMasuk(a.tanganiSimpanLowonganBkk))
 	m.HandleFunc("PUT /api/admin/bkk/lowongan/{id}", a.wajibMasuk(a.tanganiUbahLowonganBkk))

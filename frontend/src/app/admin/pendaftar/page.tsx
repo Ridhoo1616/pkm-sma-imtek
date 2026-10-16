@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { api, unduhCsv, GalatApi } from "@/lib/api";
+import { api, unduhExcel, GalatApi } from "@/lib/api";
 import { useMuat } from "@/lib/muat";
 import {
   angka,
@@ -73,7 +73,7 @@ export default function HalamanPendaftar() {
     setGalatUnduh("");
     setMengunduh(true);
     try {
-      const { nama, blob } = await unduhCsv(kueriDari({ ...saring, halaman: 1 }));
+      const { nama, blob } = await unduhExcel(kueriDari({ ...saring, halaman: 1 }));
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -82,7 +82,7 @@ export default function HalamanPendaftar() {
       URL.revokeObjectURL(url);
     } catch (e) {
       setGalatUnduh(
-        e instanceof GalatApi ? e.message : "Berkas CSV gagal diunduh.",
+        e instanceof GalatApi ? e.message : "Berkas Excel gagal diunduh.",
       );
     } finally {
       setMengunduh(false);
@@ -101,7 +101,7 @@ export default function HalamanPendaftar() {
         aksi={
           <div className="flex flex-wrap gap-2">
             <Tombol jenis="kedua" onClick={unduh} sedangJalan={mengunduh}>
-              {mengunduh ? "Menyiapkan..." : "Unduh Excel (CSV)"}
+              {mengunduh ? "Menyiapkan..." : "Unduh Excel (.xlsx)"}
             </Tombol>
             {/* Untuk pendaftar yang datang langsung ke sekolah. Tetap
                 dapat dipakai meski pendaftaran online sudah ditutup. */}

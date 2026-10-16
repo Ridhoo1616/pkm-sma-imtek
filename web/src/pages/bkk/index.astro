@@ -12,7 +12,8 @@ import type { MitraBkk } from "@/lib/tipe";
 /**
  * Halaman Bursa Kerja Khusus. Penyaluran kerja sekolah berjalan lewat grup
  * WhatsApp yang dipegang petugas BKK, jadi halaman ini cukup profil singkat,
- * daftar perusahaan mitra, dan jalan masuk ke grup itu (migrasi 033).
+ * daftar perusahaan mitra, dan jalan masuk ke grup itu (migrasi 033). Alumni
+ * dan lowongan punya halaman sendiri di sub menu BKK.
  */
 const [{ profil }, hasilMitra] = await Promise.all([
   data.profil(),
@@ -93,6 +94,10 @@ const fakta = [
                   <div class="min-w-0">
                     <p class="font-semibold leading-snug text-biru-tua">{m.nama}</p>
                     {m.bidang && <p class="text-sm text-samar">{m.bidang}</p>}
+                    {m.alamat && <p class="mt-1.5 text-sm leading-snug text-samar">{m.alamat}</p>}
+                    {/^https?:\/\//.test(m.situs) && (
+                      <a href={m.situs} target="_blank" rel="noopener noreferrer" class="mt-2 inline-block text-sm font-semibold text-biru-tua underline underline-offset-4 hover:text-biru">Situs perusahaan</a>
+                    )}
                   </div>
                 </li>
               ))}

@@ -2,6 +2,7 @@
 import Publik from "../../tata/Publik.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import Orbit from "../../komponen/Orbit.astro";
+import FotoProfil from "../../komponen/FotoProfil.astro";
 import { data } from "../../lib/tembolok";
 import { belumTerisi, kePoinTerisi } from "@/lib/format";
 import { Menunggu } from "@/komponen/Halaman";
@@ -42,6 +43,7 @@ const { profil } = await data.profil();
 const p = profil.pengaturan;
 const misi = kePoinTerisi(p.misi);
 const adaSemboyan = !belumTerisi(p.tagline ?? "");
+const fotoVisiMisi = (p.foto_visi_misi ?? "").trim();
 // Pembungkusnya yang meregang setinggi kartu; gambarnya menempel mutlak di
 // dasar pembungkus. Meregangkan <img> langsung tidak andal: pada kartu yang
 // teksnya lebih pendek daripada tetangganya, gambar berhenti di atas dasar.
@@ -131,4 +133,6 @@ const gambar = "absolute bottom-0 left-0 h-auto w-full transition duration-700 g
       )
     }
   </section>
+
+  {fotoVisiMisi && <FotoProfil foto={fotoVisiMisi} judul="Foto visi dan misi" alt="Foto visi dan misi sekolah" />}
 </Publik>

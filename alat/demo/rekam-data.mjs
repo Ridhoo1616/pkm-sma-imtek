@@ -42,6 +42,7 @@ for (const j of [
   "/api/admin/tenaga-pendidik", "/api/admin/agenda", "/api/admin/kegiatan-siswa",
   "/api/admin/pengaturan", "/api/admin/pengguna",
   "/api/admin/bkk/mitra", "/api/admin/bkk/lowongan", "/api/admin/bkk/lamaran",
+  "/api/admin/bkk/alumni", "/api/admin/penghargaan",
 ]) admin[j.replace(/\?.*/, "")] = await json(j, T);
 
 // Rincian yang hanya ada per butir.

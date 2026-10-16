@@ -29,7 +29,7 @@ const indeksAktif = TAHAP.findIndex((t) => t.kunci === aktif);
 ---
 
 <nav aria-label="Alur pendaftaran" class="wadah tanpa-cetak relative z-10 -mt-9">
-  <ol class="bilah-anak flex snap-x items-stretch overflow-x-auto rounded-2xl bg-white p-2 shadow-[0_14px_40px_rgb(10_28_49/0.14)] ring-1 ring-garis" data-bilah-anak>
+  <ol class="grid grid-cols-2 gap-1 rounded-2xl bg-white p-2 shadow-[0_14px_40px_rgb(10_28_49/0.14)] ring-1 ring-garis sm:flex sm:items-stretch">
     {
       TAHAP.map((t, i) => {
         const sekarang = i === indeksAktif;
@@ -52,17 +52,17 @@ const indeksAktif = TAHAP.findIndex((t) => t.kunci === aktif);
             </span>
             <span class="flex flex-col leading-tight">
               <span class="text-[10px] font-bold tracking-[0.12em] text-samar uppercase">Langkah {i + 1}</span>
-              <span class={"text-sm font-semibold whitespace-nowrap " + (sekarang ? "text-biru-tua" : bisa ? "text-teks" : "text-slate-400")}>
+              <span class={"text-sm font-semibold sm:whitespace-nowrap " + (sekarang ? "text-biru-tua" : bisa ? "text-teks" : "text-slate-400")}>
                 {t.label}
               </span>
             </span>
           </>
         );
         const gaya =
-          "group flex snap-start items-center gap-2.5 rounded-xl px-3 py-2.5 transition " +
+          "group flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 transition " +
           (sekarang ? "bg-biru-muda" : bisa ? "hover:bg-biru-muda/60" : "cursor-not-allowed");
         return (
-          <li class="flex shrink-0 items-center">
+          <li class="flex items-center sm:shrink-0">
             {bisa && !sekarang ? (
               <a href={t.jalur} class={gaya} data-magnet>{isi}</a>
             ) : (
@@ -76,7 +76,7 @@ const indeksAktif = TAHAP.findIndex((t) => t.kunci === aktif);
               </span>
             )}
             {i < TAHAP.length - 1 && (
-              <span aria-hidden="true" class={"mx-1 h-0.5 w-6 shrink-0 rounded-full lg:w-10 " + (i < indeksAktif ? "bg-emas" : "bg-garis")} />
+              <span aria-hidden="true" class={"mx-1 hidden h-0.5 w-6 shrink-0 rounded-full sm:block lg:w-10 " + (i < indeksAktif ? "bg-emas" : "bg-garis")} />
             )}
           </li>
         );
