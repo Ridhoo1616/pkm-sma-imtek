@@ -114,11 +114,6 @@ export const MENU: MenuUtama[] = [
         label: "Prestasi Siswa",
         keterangan: "Capaian siswa pada lomba dan kegiatan di luar sekolah.",
       },
-      {
-        jalur: "/halaman/pendidikan-karakter",
-        label: "Pendidikan Karakter",
-        keterangan: "Pembinaan karakter dan kedisiplinan peserta didik.",
-      },
     ],
   },
   {
@@ -170,7 +165,6 @@ export const MENU: MenuUtama[] = [
       },
     ],
   },
-  { jalur: "/berita", label: "Berita" },
   { jalur: "/galeri", label: "Galeri" },
   { jalur: "/kontak", label: "Kontak" },
 ];

@@ -468,51 +468,6 @@ const arah = (moda: string) =>
     )
   }
 
-  <!-- ======================= Berita ======================= -->
-  {
-    berita.length > 0 && (
-      <section class="wadah py-16 md:py-24" aria-labelledby="judul-berita" data-muncul>
-        <JudulBagian id="judul-berita" atas="Kabar Sekolah" judul="Berita & Kegiatan Terbaru" />
-        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {berita.map((b, i) => (
-            <a href={`/berita/${b.slug}`} data-miring class="kaca kartu-sorot group relative flex flex-col overflow-hidden" data-muncul={String(i * 0.08)}>
-              <div class="aspect-[16/10] overflow-hidden bg-biru-muda">
-                {b.gambar ? (
-                  <img
-                    src={gambar("berita", b.gambar, 640)} srcset={srcsetGambar("berita", b.gambar, [480, 640, 800])} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    alt=""
-                    class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <div class="grid h-full place-items-center text-biru/30">
-                    <IkonNaskah ukuran={40} />
-                  </div>
-                )}
-              </div>
-              <div class="flex flex-1 flex-col p-5">
-                <p class="text-xs font-semibold text-samar">
-                  <span class="text-biru">{b.kategori}</span> · {tanggalPanjang(b.dibuat)}
-                </p>
-                <h3 class="mt-2 line-clamp-2 text-base leading-snug">{b.judul}</h3>
-                {b.ringkasan && <p class="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-samar">{b.ringkasan}</p>}
-                <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-emas">
-                  Baca selengkapnya <IkonPanahKanan ukuran={14} />
-                </span>
-              </div>
-            </a>
-          ))}
-        </div>
-        <p class="mt-8 text-center">
-          <a href="/berita" class="inline-flex items-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-biru-tua ring-1 ring-garis transition hover:ring-biru">
-            Semua berita
-          </a>
-        </p>
-      </section>
-    )
-  }
-
   <!-- ======================= Lokasi ======================= -->
   <section class="wadah pb-16 md:pb-24" aria-labelledby="judul-peta" data-muncul>
     <div class="kaca grid gap-6 p-4 sm:p-6 lg:grid-cols-[1.1fr_1fr] lg:gap-10">

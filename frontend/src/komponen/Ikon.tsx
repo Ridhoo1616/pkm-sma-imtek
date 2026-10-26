@@ -280,6 +280,13 @@ const PETA_IKON: Record<string, React.ReactNode> = {
       <path d="m12.8 9.2 2 2M14.5 4.9l4.6 4.6a2 2 0 0 1 0 2.8l-1.4 1.4-7.4-7.4 1.4-1.4a2 2 0 0 1 2.8 0Z" />
     </>
   ),
+  // Wifi
+  "bi-wifi": (
+    <>
+      <path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0" />
+      <circle cx="12" cy="19.5" r="1" />
+    </>
+  ),
   // Perpustakaan
   "bi-book": (
     <>
@@ -491,6 +498,7 @@ export function IkonPanahKanan(p: Props) {
 export const PILIHAN_IKON: { nilai: string; label: string }[] = [
   { nilai: "bi-pc-display", label: "Komputer / lab komputer" },
   { nilai: "bi-eyedropper", label: "Laboratorium IPA" },
+  { nilai: "bi-wifi", label: "Wifi / internet" },
   { nilai: "bi-book", label: "Perpustakaan / buku" },
   { nilai: "bi-dribbble", label: "Olahraga" },
   { nilai: "bi-moon-stars", label: "Masjid / keagamaan" },

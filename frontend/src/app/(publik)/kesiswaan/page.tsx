@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Kesiswaan",
   description:
-    "Ekstrakurikuler, OSIS, prestasi siswa, dan pendidikan karakter di sekolah.",
+    "Ekstrakurikuler, OSIS, dan prestasi siswa di sekolah.",
 };
 
 export default function HalamanKesiswaan() {

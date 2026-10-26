@@ -44,7 +44,7 @@ const KHUSUS: Record<string, TemplatHalaman> = {
 
 ## Peminatan
 
-[Jelaskan peminatan yang dibuka (IPA dan IPS), mata pelajaran pilihan tiap peminatan, dan kapan siswa memilihnya.]
+[Jelaskan peminatan yang dibuka, mata pelajaran pilihan tiap peminatan, dan kapan siswa memilihnya.]
 
 ## Jam belajar
 
