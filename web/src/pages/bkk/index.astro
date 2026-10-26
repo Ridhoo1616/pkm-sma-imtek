@@ -85,7 +85,7 @@ const fakta = [
                 <li class="flex flex-col gap-3 rounded-2xl bg-white p-4 ring-1 ring-garis">
                   {/* Logo mitra umumnya memanjang, jadi diberi selebar kartu; tanpa logo, huruf awal. */}
                   {m.logo ? (
-                    <img src={gambar("bkk-mitra", m.logo, 480)} alt={`Logo ${m.nama}`} class="h-12 w-full max-w-[13rem] object-contain object-left" loading="lazy" />
+                    <img src={gambar("bkk-mitra", m.logo, 480)} alt={`Logo ${m.nama}`} class="h-20 w-full max-w-[13rem] object-contain object-left" loading="lazy" />
                   ) : (
                     <span class="grid h-12 w-12 place-items-center rounded-lg bg-biru-muda text-base font-bold text-biru-tua" aria-hidden="true">
                       {m.nama.replace(/^(PT|CV|UPTD)\.?\s+/i, "").charAt(0)}

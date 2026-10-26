@@ -3,24 +3,39 @@ import Publik from "../../tata/Publik.astro";
 import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import { data } from "../../lib/tembolok";
 import { gambar, srcsetGambar } from "../../lib/gambar";
-import { IkonBendera } from "@/komponen/Ikon";
+import { IkonPiala } from "@/komponen/Ikon";
 import type { Penghargaan } from "@/lib/tipe";
 
 /**
  * Penghargaan sekolah: prestasi sekolah, OSIS, dan kegiatan di sekolah
  * (migrasi 036). Semuanya dari tabel `penghargaan` yang diisi sekolah lewat
- * panel; tidak ada penghargaan contoh. Kategori yang kosong tidak tampil.
+ * panel; tidak ada penghargaan contoh, dan seluruh angka di halaman ini
+ * dihitung dari data itu.
+ *
+ * Susunannya: ringkasan angka, penyaring kategori, satu penghargaan terbaru
+ * yang diperbesar, lalu kisi kartu. Tanpa JavaScript semua kartu tetap
+ * tampil; penyaringnya hanya menyembunyikan yang tidak dipilih.
  */
 const [{ profil }, hasil] = await Promise.all([
   data.profil(),
   data.penghargaan().catch(() => ({ data: [] as Penghargaan[], kategori: [] as string[] })),
 ]);
-const KATEGORI: { nama: Penghargaan["kategori"]; judul: string; pengantar: string }[] = [
-  { nama: "Prestasi Sekolah", judul: "Prestasi sekolah", pengantar: "Capaian sekolah sebagai lembaga." },
-  { nama: "OSIS", judul: "OSIS", pengantar: "Penghargaan dan capaian Organisasi Siswa Intra Sekolah." },
-  { nama: "Kegiatan Sekolah", judul: "Kegiatan di sekolah", pengantar: "Kegiatan sekolah yang mendapat penghargaan atau pengakuan." },
+
+// Warna lencana kategori: isian padat, tanpa transparan.
+const KATEGORI: { nama: Penghargaan["kategori"]; judul: string; lencana: string }[] = [
+  { nama: "Prestasi Sekolah", judul: "Prestasi sekolah", lencana: "bg-emas text-biru-tua" },
+  { nama: "OSIS", judul: "OSIS", lencana: "bg-sky-700 text-white" },
+  { nama: "Kegiatan Sekolah", judul: "Kegiatan sekolah", lencana: "bg-green-700 text-white" },
 ];
-const kelompok = KATEGORI.map((k) => ({ ...k, butir: hasil.data.filter((p) => p.kategori === k.nama) })).filter((k) => k.butir.length > 0);
+const lencana = (k: string) => KATEGORI.find((x) => x.nama === k)?.lencana ?? "bg-slate-600 text-white";
+
+const semua = hasil.data; // sudah terurut: tahun terbaru lebih dulu
+const hitung = KATEGORI.map((k) => ({ ...k, jumlah: semua.filter((p) => p.kategori === k.nama).length })).filter((k) => k.jumlah > 0);
+const tahunTerlama = semua.map((p) => p.tahun).filter((t) => /^\d{4}/.test(t)).sort()[0] ?? "";
+const unggulan = semua[0];
+const lain = semua.slice(1);
+const ada = semua.length > 0;
+const keterangan = (p: Penghargaan) => [p.tingkat, p.tahun].filter(Boolean).join(" · ");
 ---
 
 <Publik sorotan judul="Penghargaan" deskripsi="Penghargaan sekolah: prestasi sekolah, OSIS, dan kegiatan di sekolah.">
@@ -32,52 +47,147 @@ const kelompok = KATEGORI.map((k) => ({ ...k, butir: hasil.data.filter((p) => p.
     jalur="/profil/penghargaan"
   />
 
-  <div class="wadah pt-10 pb-4">
+  <div class="wadah py-12 md:py-16">
     {
-      kelompok.length === 0 ? (
-        <div class="kaca mx-auto my-6 max-w-2xl px-6 py-14 text-center" data-muncul>
-          <p class="text-lg font-semibold text-biru-tua">Belum ada penghargaan yang dimuat</p>
+      !ada ? (
+        <div class="kaca mx-auto max-w-2xl px-6 py-14 text-center" data-muncul>
+          <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-biru-muda text-biru" aria-hidden="true"><IkonPiala ukuran={28} /></span>
+          <p class="mt-4 text-lg font-semibold text-biru-tua">Belum ada penghargaan yang dimuat</p>
           <p class="mx-auto mt-2 max-w-xl text-sm text-samar">Penghargaan sekolah ditambahkan petugas lewat menu Penghargaan di panel admin.</p>
         </div>
       ) : (
-        kelompok.map((k, n) => (
-          <section class={"bagian-polos" + (n === kelompok.length - 1 ? " !border-b-0" : "")} data-muncul>
-            <p class="label-bagian">Penghargaan</p>
-            <div class="min-w-0">
-              <h2 class="judul-bagian">{k.judul}</h2>
-              <p class="-mt-2 mb-6 text-[15px] text-samar">{k.pengantar}</p>
-              <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {k.butir.map((p) => (
-                  <li class="flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-garis">
-                    <div class="relative h-44 overflow-hidden bg-gradient-to-br from-biru-tua to-biru">
-                      {p.foto ? (
-                        <img
-                          src={gambar("penghargaan", p.foto, 640)}
-                          srcset={srcsetGambar("penghargaan", p.foto, [480, 640, 800])}
-                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                          alt={p.judul}
-                          class="h-full w-full object-cover"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <div class="grid h-full place-items-center text-white/85" aria-hidden="true"><IkonBendera ukuran={34} /></div>
-                      )}
-                    </div>
-                    <div class="flex flex-1 flex-col p-5">
-                      {(p.tahun || p.tingkat) && (
-                        <p class="text-xs font-semibold text-samar">{[p.tingkat, p.tahun].filter(Boolean).join(" · ")}</p>
-                      )}
-                      <h3 class="mt-1 text-lg leading-snug text-biru-tua">{p.judul}</h3>
-                      {p.keterangan && <p class="mt-2 text-sm leading-relaxed text-samar">{p.keterangan}</p>}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+        <>
+          {/* Ringkasan: angka dihitung dari data, bukan ditulis tangan. */}
+          <dl class="grid grid-cols-2 gap-x-4 border-y border-garis sm:flex sm:gap-x-0" data-muncul>
+            <div class="py-5 sm:flex-1 sm:pr-6">
+              <dt class="text-xs font-semibold tracking-wide text-samar uppercase">Seluruhnya</dt>
+              <dd class="mt-1 text-4xl font-extrabold text-biru-tua tabular-nums">{semua.length}</dd>
+              {tahunTerlama && <p class="mt-0.5 text-xs text-samar">sejak {tahunTerlama}</p>}
             </div>
-          </section>
-        ))
+            {hitung.map((k, i) => (
+              <div class={"border-garis py-5 sm:flex-1 sm:border-l sm:border-t-0 sm:px-6 " + (i >= 1 ? "border-t" : "")}>
+                <dt class="text-xs font-semibold tracking-wide text-samar uppercase">{k.judul}</dt>
+                <dd class="mt-1 text-4xl font-extrabold text-biru-tua tabular-nums">{k.jumlah}</dd>
+              </div>
+            ))}
+          </dl>
+
+          {/* Penyaring kategori. */}
+          {hitung.length > 1 && (
+            <div class="mt-8 flex flex-wrap gap-2" role="group" aria-label="Saring menurut kategori" data-saring-penghargaan>
+              <button type="button" data-kat="" aria-pressed="true" class="saring-pil">Semua ({semua.length})</button>
+              {hitung.map((k) => (
+                <button type="button" data-kat={k.nama} aria-pressed="false" class="saring-pil">{k.judul} ({k.jumlah})</button>
+              ))}
+            </div>
+          )}
+
+          {/* Penghargaan terbaru, diperbesar. */}
+          <article class="kaca mt-8 grid overflow-hidden md:grid-cols-5" data-muncul data-penghargaan data-kat={unggulan.kategori}>
+            <div class="relative min-h-56 bg-gradient-to-br from-biru-tua to-biru md:col-span-2">
+              {unggulan.foto ? (
+                <img
+                  src={gambar("penghargaan", unggulan.foto, 800)}
+                  srcset={srcsetGambar("penghargaan", unggulan.foto, [480, 800, 1024])}
+                  sizes="(min-width: 768px) 40vw, 100vw"
+                  alt={unggulan.judul}
+                  class="absolute inset-0 h-full w-full object-cover"
+                  loading="eager"
+                />
+              ) : (
+                <div class="absolute inset-0 grid place-items-center text-white/80" aria-hidden="true"><IkonPiala ukuran={64} /></div>
+              )}
+            </div>
+            <div class="flex flex-col justify-center border-l-4 !border-l-emas p-6 md:col-span-3 md:p-9">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="rounded-md bg-emas px-2.5 py-1.5 text-[11px] leading-none font-bold tracking-[0.06em] text-biru-tua uppercase">Terbaru</span>
+                <span class={"rounded-md px-2.5 py-1.5 text-[11px] leading-none font-bold tracking-[0.06em] uppercase " + lencana(unggulan.kategori)}>{unggulan.kategori}</span>
+              </div>
+              <h2 class="mt-4 text-2xl leading-snug text-biru-tua md:text-3xl">{unggulan.judul}</h2>
+              {keterangan(unggulan) && <p class="mt-2 text-sm font-semibold text-samar">{keterangan(unggulan)}</p>}
+              {unggulan.keterangan && <p class="mt-4 max-w-prose text-[15px] leading-relaxed text-teks">{unggulan.keterangan}</p>}
+            </div>
+          </article>
+
+          {/* Kisi penghargaan lainnya. */}
+          {lain.length > 0 && (
+            <ul class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {lain.map((p, i) => (
+                <li data-muncul={String((i % 3) * 0.06)} data-penghargaan data-kat={p.kategori} class="flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-garis">
+                  <div class="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-biru-tua to-biru">
+                    {p.foto ? (
+                      <img
+                        src={gambar("penghargaan", p.foto, 640)}
+                        srcset={srcsetGambar("penghargaan", p.foto, [480, 640, 800])}
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        alt={p.judul}
+                        class="h-full w-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      <div class="grid h-full place-items-center text-white/75" aria-hidden="true"><IkonPiala ukuran={44} /></div>
+                    )}
+                    <span class={"absolute top-3 left-3 rounded-md px-2.5 py-1.5 text-[10px] leading-none font-bold tracking-[0.06em] uppercase " + lencana(p.kategori)}>{p.kategori}</span>
+                    {p.tahun && <span class="absolute top-3 right-3 rounded-md bg-white px-2.5 py-1.5 text-[11px] leading-none font-bold text-biru-tua tabular-nums">{p.tahun}</span>}
+                  </div>
+                  <div class="flex flex-1 flex-col p-5">
+                    {p.tingkat && <p class="text-xs font-semibold tracking-wide text-samar uppercase">{p.tingkat}</p>}
+                    <h3 class="mt-1 text-lg leading-snug text-biru-tua">{p.judul}</h3>
+                    {p.keterangan && <p class="mt-2 text-sm leading-relaxed text-samar">{p.keterangan}</p>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p class="mt-8 hidden text-center text-sm text-samar" data-kosong-penghargaan>Tidak ada penghargaan pada kategori ini.</p>
+        </>
       )
     }
   </div>
 </Publik>
+
+<style is:global>
+  .saring-pil {
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-teks, #0f172a);
+    background: #fff;
+    box-shadow: inset 0 0 0 1px var(--color-garis, #e2e8f0);
+    transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+  }
+  .saring-pil:hover {
+    background: var(--color-biru-muda, #eaf1fb);
+  }
+  .saring-pil[aria-pressed="true"] {
+    background: var(--color-biru-tua, #0f2a4a);
+    color: #fff;
+    box-shadow: none;
+  }
+</style>
+
+<script>
+  // Penyaring kategori: menyembunyikan kartu yang tidak cocok. Tanpa skrip,
+  // semua kartu tetap tampil.
+  const grup = document.querySelector<HTMLElement>("[data-saring-penghargaan]");
+  if (grup) {
+    const tombol = [...grup.querySelectorAll<HTMLButtonElement>("button")];
+    const kartu = [...document.querySelectorAll<HTMLElement>("[data-penghargaan]")];
+    const kosong = document.querySelector<HTMLElement>("[data-kosong-penghargaan]");
+    grup.addEventListener("click", (e) => {
+      const b = (e.target as HTMLElement).closest("button");
+      if (!b) return;
+      const kat = b.dataset.kat ?? "";
+      tombol.forEach((t) => t.setAttribute("aria-pressed", String(t === b)));
+      let terlihat = 0;
+      for (const k of kartu) {
+        const cocok = !kat || k.dataset.kat === kat;
+        k.hidden = !cocok;
+        if (cocok) terlihat++;
+      }
+      kosong?.classList.toggle("hidden", terlihat > 0);
+    });
+  }
+</script>

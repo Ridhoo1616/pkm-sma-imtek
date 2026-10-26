@@ -191,7 +191,7 @@ const indeksBerjalan = jadwal.findIndex((t) => t.waktu && !t.waktu.lewat);
                 <p class="font-medium text-teks">{d.nama}</p>
                 <p class="text-sm text-samar">{d.tipe}, maksimal {BATAS_UNGGAH}.{d.catatan ? ` ${d.catatan}` : ""}</p>
               </div>
-              <span class={"text-xs font-semibold tracking-[0.08em] uppercase " + (d.wajib ? "text-biru-tua" : "text-samar")}>{d.wajib ? "Wajib" : "Opsional"}</span>
+              <span class={"inline-flex shrink-0 items-center justify-center rounded-md px-2.5 py-1.5 text-[11px] leading-none font-bold tracking-[0.06em] text-white uppercase " + (d.wajib ? "bg-red-700" : "bg-slate-600")}>{d.wajib ? "Wajib" : "Opsional"}</span>
             </li>
           ))}
         </ul>
