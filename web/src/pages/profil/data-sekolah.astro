@@ -138,7 +138,7 @@ const adaIsi = Boolean(namaResmi || angka.length || kode.length || rincian.lengt
                   </span>
                   <div class="min-w-0">
                     <dt class="text-[11px] font-semibold tracking-wide text-samar uppercase sm:text-xs">{a.label}</dt>
-                    <dd class="mt-0.5 text-lg leading-snug font-bold whitespace-nowrap text-teks sm:text-xl md:text-2xl">{a.nilai}</dd>
+                    <dd class:list={["mt-0.5 leading-snug font-bold break-words text-teks", a.nilai.length > 14 ? "text-base sm:text-lg md:text-xl" : "text-lg sm:text-xl md:text-2xl"]}>{a.nilai}</dd>
                     {a.catatan && <dd class="mt-0.5 text-xs text-samar">{a.catatan}</dd>}
                   </div>
                 </div>
