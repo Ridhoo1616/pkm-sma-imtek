@@ -13,6 +13,8 @@
  *  - baris "Label: nilai" di bawah judul yang menyebut seragam menjadi
  *    kartu bergambar baju dan celana sewarna kainnya;
  *  - baris "Label: nilai" lainnya menjadi kartu-kartu kecil;
+ *  - tiga baris atau lebih yang masing-masing kalimat utuh (berakhir titik),
+ *    seperti poin tujuan sekolah, menjadi daftar poin bertanda centang;
  *  - selain itu tetap paragraf biasa.
  *
  * Paragraf yang hanya sebagian barisnya cocok tetap ditampilkan sebagai
@@ -51,6 +53,9 @@ export default function ParagrafNaskah({ teks, judul = "", className }: Props) {
     if (butir.every((b) => POLA_JAM.test(b.nilai))) return <GarisWaktu butir={butir} />;
     if (/seragam/i.test(judul)) return <KartuSeragam butir={butir} />;
     return <KartuLabel butir={butir} />;
+  }
+  if (baris.length >= 3 && baris.every((b) => b.length > 30 && /[.!]$/.test(b))) {
+    return <DaftarPoin baris={baris} />;
   }
   return (
     <p className={className ?? "text-[15px] leading-relaxed whitespace-pre-line text-teks"}>
@@ -304,6 +309,31 @@ function KartuSeragam({ butir }: { butir: { label: string; nilai: string }[] }) 
           </li>
         );
       })}
+    </ul>
+  );
+}
+
+/* ---------------- poin kalimat ---------------- */
+
+function DaftarPoin({ baris }: { baris: string[] }) {
+  return (
+    <ul className="not-prose grid gap-3 md:grid-cols-2">
+      {baris.map((b, i) => (
+        <li
+          key={i}
+          className="muncul-gulir flex gap-3 rounded-xl border border-garis bg-white/70 p-4 transition duration-300 hover:-translate-y-0.5 hover:border-biru/30 hover:bg-white hover:shadow-md"
+        >
+          <span
+            aria-hidden
+            className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emas text-biru-tua"
+          >
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12.5l4.5 4.5L19 7.5" />
+            </svg>
+          </span>
+          <span className="text-[15px] leading-relaxed text-teks">{b}</span>
+        </li>
+      ))}
     </ul>
   );
 }

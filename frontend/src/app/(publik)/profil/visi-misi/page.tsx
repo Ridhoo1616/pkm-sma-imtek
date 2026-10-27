@@ -61,10 +61,11 @@ export default async function HalamanVisiMisi() {
       <div className="wadah py-14">
         <JejakMenu induk="/profil" jalur="/profil/visi-misi" />
 
-        {/* Kedua kartu setinggi sama (auto-rows-fr), sehingga pita bawah
-            tempat ilustrasinya duduk sama tinggi pada keduanya. Tanpa itu
-            ilustrasi kartu yang isinya lebih pendek akan menggantung. */}
-        <div className="mt-10 grid auto-rows-fr gap-8 lg:grid-cols-2 lg:gap-10">
+        {/* Visi selebar penuh di atas, misi selebar penuh di bawahnya dengan
+            poin dua kolom. Dulu keduanya berdampingan setinggi sama: dengan
+            13 poin misi, kolom misi menjadi menara teks sempit dan kartu
+            visi tersisa kosong setinggi itu pula. */}
+        <div className="mt-10 space-y-8 lg:space-y-10">
           {/* Judulnya DI DALAM kartu, bukan melintang di atasnya.
               Sebelumnya "Arah / Visi" berdiri di luar kartu, dan itu
               menggagalkan dua hal sekaligus: judul setinggi seratus piksel
@@ -77,9 +78,9 @@ export default async function HalamanVisiMisi() {
           <MunculNaik>
             <section
               aria-labelledby="judul-visi"
-              className="kartu relative flex h-full gap-4 overflow-hidden border-l-4 border-l-emas p-6 md:gap-6 md:p-7"
+              className="kartu relative flex min-h-[15rem] gap-4 overflow-hidden border-l-4 border-l-emas p-6 md:min-h-[17rem] md:gap-6 md:p-8"
             >
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 self-center">
                 <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
                   Arah
                 </p>
@@ -95,7 +96,13 @@ export default async function HalamanVisiMisi() {
                     <Menunggu apa="Rumusan visi" polos />
                   </div>
                 ) : (
-                  <p className="mt-5 text-lg leading-relaxed font-semibold text-biru-tua">
+                  <p className="mt-5 max-w-3xl text-xl leading-relaxed font-semibold text-biru-tua md:text-2xl">
+                    <span
+                      aria-hidden
+                      className="mr-1 font-serif text-4xl leading-none text-emas"
+                    >
+                      “
+                    </span>
                     {p.visi}
                   </p>
                 )}
@@ -157,46 +164,48 @@ export default async function HalamanVisiMisi() {
           <MunculNaik jeda={0.08}>
             <section
               aria-labelledby="judul-misi"
-              className="kartu relative flex h-full gap-4 overflow-hidden p-6 md:gap-6 md:p-7"
+              className="kartu relative p-6 md:p-8"
             >
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
-                  Langkah
-                </p>
-                <h2 id="judul-misi" className="mt-1.5 text-2xl font-bold">
-                  Misi
-                </h2>
-                <span
-                  aria-hidden
-                  className="mt-3 block h-1 w-12 rounded-full bg-emas"
-                />
-                {misi.length === 0 ? (
-                  <div className="mt-5">
-                    <Menunggu apa="Rumusan misi" polos />
-                  </div>
-                ) : (
-                  <ol className="mt-4 divide-y divide-garis">
-                    {misi.map((m, i) => (
-                      <li key={i} className="flex gap-3 py-3.5">
-                        <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-biru-muda text-xs font-bold text-biru tabular-nums">
-                          {i + 1}
-                        </span>
-                        <span className="text-[15px] leading-relaxed text-teks">
-                          {m}
-                        </span>
-                      </li>
-                    ))}
-                  </ol>
+              <div className="flex items-end justify-between gap-6">
+                <div>
+                  <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
+                    Langkah
+                  </p>
+                  <h2 id="judul-misi" className="mt-1.5 text-2xl font-bold">
+                    Misi
+                  </h2>
+                  <span
+                    aria-hidden
+                    className="mt-3 block h-1 w-12 rounded-full bg-emas"
+                  />
+                </div>
+                {misi.length > 0 && (
+                  <p className="rounded-full bg-biru-muda px-3 py-1 text-xs font-bold text-biru tabular-nums">
+                    {misi.length} poin
+                  </p>
                 )}
               </div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/ilustrasi/misi.png"
-                alt="Ilustrasi guru dan dua siswa bekerja bersama di meja belajar"
-                width={314}
-                height={434}
-                className="pointer-events-none -my-6 -mr-6 w-36 self-stretch object-contain object-bottom sm:w-40 md:-my-7 md:-mr-7 md:w-48 xl:w-56"
-              />
+              {misi.length === 0 ? (
+                <div className="mt-5">
+                  <Menunggu apa="Rumusan misi" polos />
+                </div>
+              ) : (
+                <ol className="mt-6 grid gap-3 md:grid-cols-2">
+                  {misi.map((m, i) => (
+                    <li
+                      key={i}
+                      className="muncul-gulir flex gap-3 rounded-xl border border-garis bg-white/70 p-4 transition duration-300 hover:-translate-y-0.5 hover:border-biru/30 hover:bg-white hover:shadow-md"
+                    >
+                      <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-biru-tua text-xs font-bold text-white tabular-nums">
+                        {i + 1}
+                      </span>
+                      <span className="text-[15px] leading-relaxed text-teks">
+                        {m}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
             </section>
           </MunculNaik>
         </div>

@@ -187,18 +187,40 @@ const induk = h ? INDUK[h.kelompok] : undefined;
     const judul = butir.map((li) => document.getElementById(li.dataset.isi ?? ""));
     const batang = nav.querySelector<HTMLElement>("[data-kemajuan]");
     let menunggu = false;
+    // Butir yang baru diklik dipertahankan selama guliran menuju judulnya,
+    // supaya tandanya tidak melompat-lompat melewati bagian di antaranya.
+    let dipilih = -1;
+    let lepas = 0;
+    const tandai = (aktif: number) => butir.forEach((li, i) => li.toggleAttribute("data-aktif", i === aktif));
     const segarkan = () => {
       menunggu = false;
-      const garis = window.innerHeight * 0.35;
+      // Patokannya tempat judul berhenti sesudah diklik (scroll-mt-28 = 112
+      // piksel) ditambah sedikit kelonggaran. Patokan sepertiga layar keliru
+      // pada naskah yang bagiannya pendek: judul berikutnya ikut terlewati.
+      const garis = 150;
       let aktif = 0;
       judul.forEach((h, i) => {
-        if (h && h.getBoundingClientRect().top < garis) aktif = i;
+        if (h && h.getBoundingClientRect().top <= garis) aktif = i;
       });
-      butir.forEach((li, i) => li.toggleAttribute("data-aktif", i === aktif));
+      // Bagian terakhir yang pendek tidak pernah mencapai garis; di dasar
+      // halaman, dialah yang sedang dibaca.
+      const dasar = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
+      if (dasar && dipilih < 0) aktif = butir.length - 1;
+      tandai(dipilih >= 0 ? dipilih : aktif);
       const r = artikel.getBoundingClientRect();
-      const kemajuan = Math.min(1, Math.max(0, (garis - r.top) / Math.max(1, r.height - garis)));
+      const kemajuan = dasar ? 1 : Math.min(1, Math.max(0, (garis - r.top) / Math.max(1, r.height - garis)));
       if (batang) batang.style.transform = `scaleX(${kemajuan})`;
     };
+    butir.forEach((li, i) =>
+      li.querySelector("a")?.addEventListener("click", () => {
+        dipilih = i;
+        tandai(i);
+        clearTimeout(lepas);
+        lepas = window.setTimeout(() => {
+          dipilih = -1;
+        }, 1200);
+      }),
+    );
     addEventListener("scroll", () => {
       if (!menunggu) requestAnimationFrame(segarkan);
       menunggu = true;
