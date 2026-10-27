@@ -68,8 +68,7 @@ export default function Footer({ pengaturan }: { pengaturan: Pengaturan }) {
   // "Masuk Petugas" sempat ikut di sini dan dihapus atas permintaan user.
   // Daftar ini memang untuk pengunjung — calon siswa beserta orang tuanya —
   // sedangkan pintu masuk panitia bukan bagian dari alur mereka. Pintunya
-  // tidak hilang: tetap ada di bilah paling atas halaman, tempat panitia
-  // mencarinya.
+  // tidak hilang: panitia membuka /admin langsung lewat alamatnya.
   const tautanPintar = [
     ...anakMenu("/ppdb"),
     { jalur: "/berita", label: "Berita & Pengumuman" },

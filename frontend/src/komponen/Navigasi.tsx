@@ -140,9 +140,6 @@ export default function Navigasi({
                 WhatsApp Panitia
               </a>
             )}
-            <Link href="/admin" className="opacity-85 hover:text-emas hover:opacity-100">
-              Masuk Petugas
-            </Link>
           </div>
         </div>
       </div>

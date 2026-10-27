@@ -120,13 +120,8 @@ const pil = (terpilih: boolean) =>
       >
         {ppdbDibuka ? "Daftar PPDB" : "Info PPDB"}
       </a>
-      <a
-        href="/admin"
-        data-magnet
-        class="hidden rounded-full px-4 py-2 text-[13px] font-bold tracking-wide text-white ring-1 ring-white/60 transition hover:bg-white hover:text-biru-tua md:inline-block"
-      >
-        Masuk
-      </a>
+      {/* Tidak ada tombol masuk petugas: panitia membuka /admin langsung
+          lewat alamatnya (permintaan user, Oktober 2026). */}
 
       <button
         type="button"
