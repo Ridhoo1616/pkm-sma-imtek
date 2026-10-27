@@ -2,7 +2,7 @@ import { muatProfil } from "@/lib/profil";
 import { belumTerisi, kePoinTerisi } from "@/lib/format";
 import { KepalaHalaman } from "@/komponen/Bagian";
 import { MunculNaik } from "@/komponen/Gerak";
-import { Menunggu } from "@/komponen/Halaman";
+import { Menunggu, Naskah } from "@/komponen/Halaman";
 import { JejakMenu } from "@/komponen/JejakMenu";
 import { IkonGuru, IkonSiswa, IkonBersama } from "@/komponen/Ikon";
 import { kelasKartuAkhir } from "@/komponen/Bagian";
@@ -49,6 +49,8 @@ export default async function HalamanVisiMisi() {
   // sekaligus membuang baris yang masih berupa penanda [kurung siku].
   const misi = kePoinTerisi(p.misi);
   const adaSemboyan = !belumTerisi(p.tagline ?? "");
+  // Tujuan dari SK visi misi (migrasi 043); tidak tampil selama masih penanda.
+  const adaTujuan = !belumTerisi(p.tujuan ?? "");
 
   return (
     <>
@@ -198,6 +200,29 @@ export default async function HalamanVisiMisi() {
             </section>
           </MunculNaik>
         </div>
+
+        {adaTujuan && (
+          <MunculNaik>
+            <section
+              className="kartu mt-10 p-6 md:p-7"
+              aria-labelledby="judul-tujuan"
+            >
+              <p className="text-xs font-bold tracking-[0.18em] text-biru uppercase">
+                Sasaran
+              </p>
+              <h2 id="judul-tujuan" className="mt-1.5 text-2xl font-bold">
+                Tujuan
+              </h2>
+              <span
+                aria-hidden
+                className="mt-3 block h-1 w-12 rounded-full bg-emas"
+              />
+              <div className="mt-5">
+                <Naskah isi={p.tujuan} />
+              </div>
+            </section>
+          </MunculNaik>
+        )}
 
         {/* Rincian tiga peran, SESUDAH rumusannya. Gambar di atas sudah
             menyampaikan maksudnya tanpa kata — orang-orangnya memegang kedua

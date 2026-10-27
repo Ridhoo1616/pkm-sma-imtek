@@ -62,8 +62,8 @@ const KELOMPOK: { judul: string; keterangan: string; kunci: string[] }[] = [
   {
     judul: "Naskah Profil",
     keterangan:
-      "Isi halaman Profil. Untuk misi dan keunggulan, tulis satu poin per baris. Untuk sambutan dan sejarah, pisahkan paragraf dengan baris kosong. Keunggulan tampil di beranda sebagai alasan memilih sekolah ini; selama masih bertanda [kurung siku], bagiannya tidak tampil ke pengunjung.",
-    kunci: ["visi", "misi", "keunggulan", "sambutan_kepsek", "sejarah"],
+      "Isi halaman Profil. Untuk misi dan keunggulan, tulis satu poin per baris. Untuk tujuan, awali judul kelompok dengan “## ” lalu satu poin per baris. Untuk sambutan dan sejarah, pisahkan paragraf dengan baris kosong. Keunggulan tampil di beranda sebagai alasan memilih sekolah ini; selama masih bertanda [kurung siku], bagiannya tidak tampil ke pengunjung.",
+    kunci: ["visi", "misi", "tujuan", "keunggulan", "sambutan_kepsek", "sejarah"],
   },
   {
     judul: "Alamat & Kontak",
@@ -215,6 +215,7 @@ const KUNCI_GAMBAR: { kunci: string; label: string; bantuan: string }[] = [
 const AREA_TEKS = [
   "visi",
   "misi",
+  "tujuan",
   "keunggulan",
   "sambutan_kepsek",
   "sejarah",
@@ -277,6 +278,7 @@ function labelDari(kunci: string): string {
     struktur_organisasi: "Bagan struktur organisasi",
     foto_data_sekolah: "Foto data sekolah",
     foto_visi_misi: "Foto visi dan misi",
+    tujuan: "Tujuan sekolah",
     keunggulan: "Keunggulan sekolah (satu baris satu poin)",
     struktur_keterangan: "Keterangan struktur organisasi",
     tautan_elearning: "Alamat e-learning (Google Classroom / Google Drive)",

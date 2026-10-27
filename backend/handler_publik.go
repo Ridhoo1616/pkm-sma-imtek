@@ -13,7 +13,7 @@ import (
 // bersifat izin-eksplisit, bukan larangan-eksplisit.
 var pengaturanPublik = []string{
 	"nama_sekolah", "nama_lengkap_sekolah", "nama_singkat", "tagline", "npsn", "akreditasi", "status_sekolah",
-	"kepala_sekolah", "sambutan_kepsek", "visi", "misi", "sejarah", "yayasan",
+	"kepala_sekolah", "sambutan_kepsek", "visi", "misi", "tujuan", "sejarah", "yayasan",
 	"keunggulan",
 	// Rincian papan Identitas Sekolah. Lihat migrasi 032.
 	"nss", "nis_sekolah", "nsb", "sk_akreditasi", "penerbit_sk_akreditasi",
