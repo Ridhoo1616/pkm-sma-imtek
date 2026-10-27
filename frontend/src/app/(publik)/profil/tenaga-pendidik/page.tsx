@@ -103,7 +103,7 @@ export default async function HalamanTenaga() {
           {hasil.data.length === 0 ? (
             <TanpaData
               judul="Data tenaga pendidik belum tersedia"
-              keterangan="Daftarnya diisi lewat menu Tenaga Pendidik di panel admin. Nama, jabatan, mata pelajaran, dan kelas yang diampu hanya boleh berasal dari data sekolah."
+              keterangan="Daftar guru dan tenaga kependidikan sedang disiapkan sekolah."
             />
           ) : (
             <DaftarTenaga daftar={hasil.data} />

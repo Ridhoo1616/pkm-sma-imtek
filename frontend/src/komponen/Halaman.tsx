@@ -33,7 +33,6 @@ import ParagrafNaskah from "@/komponen/ParagrafNaskah";
  */
 export function Menunggu({
   apa,
-  dari,
   polos,
 }: {
   apa: string;
@@ -42,9 +41,8 @@ export function Menunggu({
 }) {
   const keterangan = (
     <p className="text-[15px] leading-relaxed text-samar italic">
-      {apa} belum tersedia. Bagian ini akan terisi setelah pihak sekolah
-      mengirimkan naskahnya, dan dapat diisi lewat menu {dari ?? "Pengaturan"}{" "}
-      di panel admin.
+      {apa} belum tersedia. Informasinya sedang disiapkan sekolah dan akan
+      ditampilkan di sini.
     </p>
   );
 

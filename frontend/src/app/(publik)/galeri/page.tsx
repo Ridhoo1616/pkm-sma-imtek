@@ -24,7 +24,7 @@ export default async function HalamanGaleri() {
         {hasil.data.length === 0 ? (
           <TanpaData
             judul="Belum ada foto di galeri"
-            keterangan="Foto dapat ditambahkan lewat menu Galeri di panel admin."
+            keterangan="Foto kegiatan sekolah akan ditampilkan di sini."
           />
         ) : (
           <PetakGaleri foto={hasil.data} kategori={hasil.kategori} />

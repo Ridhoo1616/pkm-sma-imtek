@@ -49,7 +49,7 @@ export default async function HalamanPrestasi() {
           <div className="mt-8">
             <TanpaData
               judul="Belum ada prestasi yang dimuat"
-              keterangan="Prestasi ditulis sebagai berita berkategori Prestasi lewat menu Berita di panel admin, sehingga langsung tampil di halaman ini dan di halaman berita."
+              keterangan="Prestasi siswa akan ditampilkan di sini dan di halaman Berita."
             />
           </div>
         ) : (

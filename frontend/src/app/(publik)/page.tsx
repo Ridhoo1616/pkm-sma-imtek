@@ -299,24 +299,6 @@ export default async function Beranda() {
             </dl>
           </MunculLangsung>
 
-          {/* Petunjuk bagi panitia selama fotonya belum ada.
-
-              Sebelumnya berupa kotak besar bertuliskan "Tempat foto gedung
-              sekolah" — jelas bagi panitia, tetapi juga terbaca setiap
-              pengunjung dan membuat halaman depan tampak belum jadi. Di
-              sini keterangannya tetap ada supaya panitia tahu apa yang
-              kurang beserta ukuran yang diminta, tetapi ukurannya satu
-              baris, dan hilang sendiri begitu fotonya diunggah. */}
-          {!adaGedung && (
-            <p className="max-w-2xl rounded-xl bg-biru-tua/60 px-4 py-3 text-xs leading-relaxed text-white/85 ring-1 ring-white/15">
-              Latar ini akan memakai foto gedung sekolah begitu diunggah sebagai{" "}
-              <span className="font-semibold text-white">
-                Foto halaman depan
-              </span>{" "}
-              lewat menu Pengaturan di panel admin. Foto mendatar, paling tidak
-              1600 piksel lebarnya.
-            </p>
-          )}
         </div>
       </section>
 

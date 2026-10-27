@@ -45,7 +45,7 @@ export default async function HalamanFasilitas() {
           {fasilitas.length === 0 ? (
             <TanpaData
               judul="Data fasilitas belum tersedia"
-              keterangan="Daftar fasilitas dapat ditambahkan lewat menu Fasilitas di panel admin."
+              keterangan="Daftar sarana dan prasarana sedang disiapkan sekolah."
             />
           ) : (
             <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">

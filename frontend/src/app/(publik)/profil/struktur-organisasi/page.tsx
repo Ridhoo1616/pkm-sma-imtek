@@ -64,9 +64,7 @@ export default async function HalamanStruktur() {
                         Tempat bagan struktur organisasi
                       </p>
                       <p className="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-biru/70">
-                        Gambar mendatar, perbandingan sisi 4:3, paling tidak
-                        1200 piksel lebarnya. Diunggah lewat menu Pengaturan di
-                        panel admin.
+                        Bagan struktur organisasi sedang disiapkan sekolah.
                       </p>
                     </div>
                   </div>

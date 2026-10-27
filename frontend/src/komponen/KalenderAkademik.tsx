@@ -431,9 +431,7 @@ export default function KalenderAkademik({ agenda }: { agenda: Agenda[] }) {
 
             {terpakai.length === 0 ? (
               <p className="mt-6 rounded-lg border border-dashed border-garis px-5 py-6 text-center text-sm leading-relaxed text-samar">
-                Belum ada kegiatan yang tercatat untuk pilihan ini. Tanggalnya
-                diisi lewat menu Kalender Akademik di panel admin, dan hanya
-                boleh berasal dari keputusan sekolah.
+                Belum ada kegiatan yang tercatat untuk pilihan ini.
               </p>
             ) : (
               <>

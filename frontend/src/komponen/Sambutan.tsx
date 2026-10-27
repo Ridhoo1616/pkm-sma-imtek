@@ -70,11 +70,7 @@ export function Sambutan({ pengaturan }: { pengaturan: Pengaturan }) {
             ) : (
               <div className="flex h-full items-end justify-center bg-gradient-to-b from-white to-biru-muda pb-4">
                 <p className="px-6 text-center text-[11px] leading-relaxed text-biru/70">
-                  Tempat foto gedung sekolah. Foto mendatar, paling tidak 1600
-                  piksel lebarnya, diunggah sebagai
-                  <span className="font-semibold"> Foto halaman depan </span>
-                  lewat menu Pengaturan. Di sini fotonya ditampilkan pudar
-                  sebagai latar.
+                  Foto gedung sekolah akan ditampilkan di sini.
                 </p>
               </div>
             )}
@@ -118,11 +114,10 @@ export function Sambutan({ pengaturan }: { pengaturan: Pengaturan }) {
                     ☐
                   </span>
                   <p className="mt-2.5 text-xs font-semibold text-biru-tua">
-                    Tempat foto kepala sekolah
+                    Foto kepala sekolah
                   </p>
                   <p className="mt-1 text-[11px] leading-relaxed text-biru/70">
-                    Potret, perbandingan sisi 3:4, paling tidak 900×1200
-                    piksel. Diunggah lewat menu Pengaturan.
+                    Fotonya akan ditampilkan di sini.
                   </p>
                 </div>
               </div>
@@ -200,9 +195,7 @@ export function Sambutan({ pengaturan }: { pengaturan: Pengaturan }) {
                 </p>
               ) : (
                 <p className="max-w-[17rem] rounded-lg bg-white/80 px-3 py-2 text-right text-[11px] leading-relaxed text-biru/70">
-                  Semboyan sekolah ditulis di sini dengan huruf tulisan tangan.
-                  Diisi lewat pengaturan{" "}
-                  <span className="font-semibold">Tagline</span>.
+                  Semboyan sekolah akan ditampilkan di sini.
                 </p>
               )}
             </div>

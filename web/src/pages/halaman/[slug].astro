@@ -163,8 +163,8 @@ const induk = h ? INDUK[h.kelompok] : undefined;
                   <h2 id="judul-dokumentasi" class="judul-bagian">Foto kegiatan {h.judul}</h2>
                   {foto.length === 0 ? (
                     <p class="max-w-xl text-[15px] leading-relaxed text-samar">
-                      Belum ada foto dokumentasi. Fotonya diunggah lewat menu Galeri di panel admin dengan kategori
-                      <span class="font-semibold text-teks"> {kategoriGaleri}</span>.
+                      Foto kegiatan {h.judul} akan ditampilkan di sini. Sementara itu, dokumentasi kegiatan sekolah lainnya dapat dilihat di
+                      halaman <a href="/galeri" class="font-semibold text-biru underline-offset-4 hover:underline">Galeri</a>.
                     </p>
                   ) : (
                     <PetakGaleri client:visible foto={foto} kategori={[]} />

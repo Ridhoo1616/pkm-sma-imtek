@@ -43,7 +43,7 @@ export default async function HalamanEkstrakurikuler() {
           <div className="mt-8">
             <TanpaData
               judul="Daftar kegiatan belum diisi"
-              keterangan="Kegiatan ditambahkan lewat menu Kegiatan Siswa di panel admin, beserta nama pembina dan jadwalnya."
+              keterangan="Daftar ekstrakurikuler beserta pembina dan jadwalnya akan ditampilkan di sini."
             />
           </div>
         ) : (

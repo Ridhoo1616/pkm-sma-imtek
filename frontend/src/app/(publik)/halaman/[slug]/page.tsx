@@ -401,12 +401,16 @@ export default async function HalamanNaskah(
             <div className="mt-5">
               {fotoDokumentasi.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-garis px-5 py-6 text-center text-sm leading-relaxed text-samar">
-                  Belum ada foto dokumentasi. Fotonya diunggah lewat menu Galeri
-                  di panel admin, dengan kategori{" "}
-                  <span className="font-semibold text-teks">
-                    {kategoriGaleri}
-                  </span>
-                  . Foto yang diunggah di sana juga tampil di halaman Galeri.
+                  Foto kegiatan {h.judul} akan ditampilkan di sini. Sementara
+                  itu, dokumentasi kegiatan sekolah lainnya dapat dilihat di
+                  halaman{" "}
+                  <Link
+                    href="/galeri"
+                    className="font-semibold text-biru underline-offset-4 hover:underline"
+                  >
+                    Galeri
+                  </Link>
+                  .
                 </p>
               ) : (
                 <PetakGaleri foto={fotoDokumentasi} kategori={[]} />

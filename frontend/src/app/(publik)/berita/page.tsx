@@ -117,7 +117,7 @@ export default async function HalamanBeritaPublik(
             keterangan={
               cari
                 ? "Coba kata kunci lain, atau lihat seluruh berita."
-                : "Berita akan muncul di sini setelah ditambahkan lewat panel admin."
+                : "Berita akan muncul di sini setelah diterbitkan sekolah."
             }
           />
         ) : (
