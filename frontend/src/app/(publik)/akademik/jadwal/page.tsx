@@ -28,13 +28,14 @@ export default async function HalamanJadwal() {
         <JejakMenu induk="/akademik" jalur="/akademik/jadwal" />
 
         <MunculNaik>
-          <div className="mt-8 max-w-2xl space-y-6">
-            {adaKeterangan && (
-              <div className="kartu p-6">
-                <Naskah isi={p.jadwal_keterangan} />
-              </div>
-            )}
-
+          {/* Jam sekolah dan seragam butuh lebar penuh untuk kartu per hari;
+              tautan dan penanda jadwal tetap di kolom sempit. */}
+          {adaKeterangan && (
+            <div className="kartu mt-8 p-6 md:p-8">
+              <Naskah isi={p.jadwal_keterangan} />
+            </div>
+          )}
+          <div className="mt-6 max-w-2xl space-y-6">
             {adaTautan ? (
               <TautanKeluar
                 tautan={tautan}

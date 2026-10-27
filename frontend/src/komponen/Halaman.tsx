@@ -3,6 +3,7 @@ import { bagianNaskah } from "@/lib/format";
 import { anakMenu } from "@/lib/menu";
 import { MunculNaik, KartuGerak } from "@/komponen/Gerak";
 import { kelasKartuAkhir } from "@/komponen/Bagian";
+import ParagrafNaskah from "@/komponen/ParagrafNaskah";
 
 /**
  * Bagian yang dipakai berulang oleh halaman Profil Sekolah, Akademik, dan
@@ -62,10 +63,10 @@ export function Menunggu({
 export function Naskah({ isi }: { isi: string }) {
   const { pembuka, bagian } = bagianNaskah(isi);
 
-  const Paragraf = ({ teks }: { teks: string }) => (
-    <p className="text-[15px] leading-relaxed whitespace-pre-line text-teks">
-      {teks}
-    </p>
+  // Daftar "Label: nilai" di dalam naskah ditampilkan sebagai kartu atau
+  // daftar, bukan tembok teks; lihat ParagrafNaskah.
+  const Paragraf = ({ teks, judul }: { teks: string; judul?: string }) => (
+    <ParagrafNaskah teks={teks} judul={judul} />
   );
 
   return (
@@ -85,7 +86,7 @@ export function Naskah({ isi }: { isi: string }) {
             {b.judul}
           </h2>
           {b.paragraf.map((p, i) => (
-            <Paragraf key={i} teks={p} />
+            <Paragraf key={i} teks={p} judul={b.judul} />
           ))}
         </section>
       ))}

@@ -22,8 +22,10 @@ const adaKeterangan = !belumTerisi(p.jadwal_keterangan ?? "");
     jalur="/akademik/jadwal"
   />
   <section class="wadah py-12 md:py-16">
+    {/* Jam sekolah dan seragam butuh lebar penuh untuk kartu per hari; tautan
+        dan penanda jadwal tetap di kolom sempit. */}
+    {adaKeterangan && <div class="kaca mb-6 p-6 md:p-8" data-muncul><Naskah isi={p.jadwal_keterangan} /></div>}
     <div class="max-w-2xl space-y-6" data-muncul>
-      {adaKeterangan && <div class="kaca p-6"><Naskah isi={p.jadwal_keterangan} /></div>}
       {
         adaTautan ? (
           <TautanKeluar

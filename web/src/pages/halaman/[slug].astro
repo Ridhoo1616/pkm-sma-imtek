@@ -5,6 +5,7 @@ import KepalaHalaman from "../../komponen/KepalaHalaman.astro";
 import { data } from "../../lib/tembolok";
 import { bagianNaskah, belumTerisi, kePoinTerisi } from "@/lib/format";
 import PetakGaleri from "@/komponen/Galeri";
+import ParagrafNaskah from "@/komponen/ParagrafNaskah";
 import { tombolGelap } from "../../lib/gaya";
 import type { Galeri, Halaman } from "@/lib/tipe";
 
@@ -93,7 +94,7 @@ const induk = h ? INDUK[h.kelompok] : undefined;
                     <section class="mt-12 border-t border-garis pt-8 first:mt-0 first:border-0 first:pt-0">
                       <h2 id={b.id} class="scroll-mt-28 text-2xl leading-tight font-bold tracking-tight text-biru-tua">{b.judul}</h2>
                       <div class="mt-4 max-w-[68ch] space-y-4">
-                        {b.paragraf.map((p) => <p class="whitespace-pre-line text-[17px] leading-relaxed text-teks">{p}</p>)}
+                        {b.paragraf.map((p) => <ParagrafNaskah teks={p} judul={b.judul} className="whitespace-pre-line text-[17px] leading-relaxed text-teks" />)}
                       </div>
                     </section>
                   ))}
