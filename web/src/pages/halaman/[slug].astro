@@ -68,20 +68,26 @@ const induk = h ? INDUK[h.kelompok] : undefined;
               <div class="grid gap-8 pb-14 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-16" data-muncul>
                 <aside>
                   {bagian.length > 1 && (
-                    <nav aria-label={`Bagian halaman ${h.judul}`} class="lg:sticky lg:top-28">
+                    <nav aria-label={`Bagian halaman ${h.judul}`} class="lg:sticky lg:top-28" data-daftar-isi>
                       <p class="label-bagian !pt-0">Di halaman ini</p>
-                      <ol class="mt-3 space-y-2 text-[15px]">
+                      {/* Garis kemajuan baca; diisi skrip di bawah, kosong tanpa skrip. */}
+                      <div class="mt-3 h-1 overflow-hidden rounded-full bg-garis" aria-hidden="true">
+                        <span class="block h-full origin-left scale-x-0 rounded-full bg-emas transition-transform duration-200" data-kemajuan></span>
+                      </div>
+                      <ol class="mt-4 space-y-1 text-[15px]">
                         {bagian.map((b, i) => (
-                          <li class="flex gap-3">
-                            <span class="w-5 shrink-0 font-semibold text-emas tabular-nums" aria-hidden="true">{i + 1}</span>
-                            <a href={`#${b.id}`} class="leading-snug text-teks underline-offset-4 hover:text-biru hover:underline">{b.judul}</a>
+                          <li class="group" data-isi={b.id}>
+                            <a href={`#${b.id}`} class="flex items-center gap-3 rounded-lg px-2 py-1.5 leading-snug text-teks transition-colors hover:bg-biru-muda/70 hover:text-biru group-data-[aktif]:bg-biru-muda group-data-[aktif]:font-semibold group-data-[aktif]:text-biru-tua">
+                              <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold text-emas tabular-nums ring-1 ring-emas/50 transition-colors group-data-[aktif]:bg-emas group-data-[aktif]:text-biru-tua group-data-[aktif]:ring-emas" aria-hidden="true">{i + 1}</span>
+                              <span>{b.judul}</span>
+                            </a>
                           </li>
                         ))}
                       </ol>
                     </nav>
                   )}
                 </aside>
-                <article class="min-w-0">
+                <article class="min-w-0" data-artikel>
                   {h.gambar && (
                     <img src={gambarUnggahan("profil", h.gambar, 1280)} srcset={srcsetGambar("profil", h.gambar, [800, 1280, 1920])} sizes="(min-width: 1200px) 900px, 100vw" alt={h.judul} class="mb-10 aspect-video w-full rounded-2xl bg-biru-muda object-cover" loading="lazy" decoding="async" />
                   )}
@@ -171,4 +177,33 @@ const induk = h ? INDUK[h.kelompok] : undefined;
       </>
     )
   }
+<script>
+  // Daftar isi menandai bagian yang sedang dibaca dan mengisi garis kemajuan
+  // baca. Tanpa skrip, daftar isinya tetap berupa tautan biasa.
+  const nav = document.querySelector<HTMLElement>("[data-daftar-isi]");
+  const artikel = document.querySelector<HTMLElement>("[data-artikel]");
+  if (nav && artikel) {
+    const butir = [...nav.querySelectorAll<HTMLElement>("[data-isi]")];
+    const judul = butir.map((li) => document.getElementById(li.dataset.isi ?? ""));
+    const batang = nav.querySelector<HTMLElement>("[data-kemajuan]");
+    let menunggu = false;
+    const segarkan = () => {
+      menunggu = false;
+      const garis = window.innerHeight * 0.35;
+      let aktif = 0;
+      judul.forEach((h, i) => {
+        if (h && h.getBoundingClientRect().top < garis) aktif = i;
+      });
+      butir.forEach((li, i) => li.toggleAttribute("data-aktif", i === aktif));
+      const r = artikel.getBoundingClientRect();
+      const kemajuan = Math.min(1, Math.max(0, (garis - r.top) / Math.max(1, r.height - garis)));
+      if (batang) batang.style.transform = `scaleX(${kemajuan})`;
+    };
+    addEventListener("scroll", () => {
+      if (!menunggu) requestAnimationFrame(segarkan);
+      menunggu = true;
+    }, { passive: true });
+    segarkan();
+  }
+</script>
 </Publik>
